@@ -1,0 +1,244 @@
+﻿@model Lvy.Visa.Models.CountryConsularDistrictQModel
+@{
+    ViewData["Title"] = "签证国家&领区管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">产品列表</h3>
+            <div class="card-tools">
+                <div class="input-group input-group-sm" style="width: 300px;">
+                    <select name="CountryCode" id="CountryCode" class="form-control float-right"></select>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default" id="btnSearch"><i class="fas fa-search"></i></button>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal-default">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body " id="divCountry">
+            @Html.Partial("/Views/Visa/District/PagedList.cshtml", Model)
+        </div>
+        <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+
+</section>
+<!-- /.content -->
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">问题内容</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- form start -->
+                <form class="form-horizontal">
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label">国家</label>
+                        <div class="col-sm-10">
+                            <select type="text" class="form-control" id="CountryCodeStr" placeholder="Email" onkeyup="funCheckCountryCode(this)">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputPassword3" class="col-sm-2 col-form-label">国家国旗</label>
+                        <div class="col-sm-10">
+                            <img style="width: 100px; height: 50px;" id="img_pimg" name="img_pimg" />
+                            <input type="hidden" id="CountryImgPath" />
+                            <input type="button" class="btn_2" style="font-weight: lighter;" value="选择图片" onclick="funSelectImage()" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">领区详解</label>
+                        <div class="col-sm-10">
+                            <textarea id="ConsularDistrictNotes" class="form-control" rows="5" placeholder="Enter ..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="SaveCountryInfo">保存</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<script type="text/javascript">
+    var pageIndex = 0;
+
+    $(function () {
+        $('#CountryCode').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetCountrySelect2';
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList
+                    };
+                },
+                cache: true
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+        $('#CountryCodeStr').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetCountrySelect2';
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList
+                    };
+                },
+                cache: true
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        ///搜索
+        $("#btnSearch").click(function () {
+            index = 0;
+            funGetConsularDistrict();
+        });
+
+        ///保存国家信息
+        $("#SaveCountryInfo").click(function () {
+            if ($("#CountryCodeStr").val() == "") {
+                alert("请先添加签证国家！！");
+                $("#CountryCode").focus();
+                return;
+            }
+            if ($("#CountryImgPath").val() == "") {
+                alert("请选择国家国旗！！");
+                return;
+            }
+            if ($("#ConsularDistrictNotes").val() == "") {
+                alert("请填写领区详解！！");
+                $("#ConsularDistrictNotes").focus();
+                return;
+            }
+            var param = {
+                "CountryCode": $("#CountryCodeStr").val(),
+                "CountryImgPath": $("#CountryImgPath").val(),
+                "ConsularDistrictNotes": $("#ConsularDistrictNotes").val(),
+            };
+            $.post("/District/CheckCountry", param, function (datacheck) {
+                if (datacheck == "1") {
+                    alert("国家已经存在！！请重新选择！");
+                    $("#CountryCode").val("中文/拼音");
+                    $("#CountryCodeStr").val("");
+                    $("#CountryCode").focus();
+                }
+                else {
+                    $.post("/District/SaveCountryInfo", param, function (data) {
+                        // 页面重新加载
+                        index = 0;
+                        funGetConsularDistrict();
+                    });
+                }
+            });
+        });
+    });
+
+    function funCheckCountryCode(obj) {
+        if ($(obj).val() == "") {
+            $('#countrCodeStr').val("");
+        }
+        else {
+            // alert(" not null");
+        }
+    }
+    function funGetConsularDistrict() {
+        var route = '/District/SearchCountry';
+        var param = {
+            'CountryCode': $('#CountryCode').val(),
+            'countryPagedList.PageIndex': 1,
+            'countryPagedList.PageSize': 10
+        }
+        $.post(route, param, function (data) {
+            $('#divCountry').html(data);
+        });
+    }
+    ///编辑
+    function funModifyCountryDis(countryCode) {
+        window.location = '/District/ModifyDistrict/?visacountryCode=' + countryCode;
+    }
+    //选择图片
+    function funSelectImage() {
+        var parentStr = $("#CountryCodeStr").val();
+        var url = "/District/ShowSelectImg/?VisaCountryParentStr=" + $.trim(parentStr) + "&Rnd=" + Math.random();
+
+        layer.open({
+            type: 2,
+            title: '选择图片',
+            maxmin: true,
+            shadeClose: true, //点击遮罩关闭层
+            area: ['900px', '400px'],
+            content: url
+        });
+    }
+    function funSelectImageReturn(photourl) {
+        $('#CountryImgPath').val(photourl);
+        $("#img_pimg").attr("src", photourl);
+    }
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+
+</script>

@@ -1,0 +1,335 @@
+﻿@model CartModel
+@using TopWeb.Model
+@using TopWeb.Models
+@using TopWeb.DAL.Model
+@{
+    Layout = null;
+    MemberModel cuser = (MemberModel)HttpContext.Current.Session["WeixinUser"];
+    MemberAddress adr = cuser.AddressList.Where(t => t.IsDefault == 1).FirstOrDefault();
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>购物车</title>
+    @Styles.Render("~/Content/adminlte/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <link href="@CDNServerUrl/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="/Scripts/html5.js"></script>
+      <script src="/Scripts/respond.min.js"></script>
+    <![endif]-->
+    <link href="~/Content/wan-spinner/wan-spinner.css" rel="stylesheet" />
+    <script src="~/Content/wan-spinner/wan-spinner.js"></script>
+    <link href="~/Content/jQuery-faloading/jquery.faloading.css" rel="stylesheet" />
+    <script src="~/Content/jQuery-faloading/jquery.faloading.js"></script>
+    <link href="~/Content/iCheck/all.css" rel="stylesheet" />
+    <script src="~/Content/iCheck/icheck.min.js"></script>
+    <style>
+        .wrapper { padding-bottom: 40px; }
+        .btn-app { border-radius: 0px; margin: 0px; padding: 10px 5px; min-width: 65px; height: 47px; background-color: #fff; border: none; }
+        .product-list-in-box > .item { display: list-item; }
+        .products-list .product-info { margin-left: 0; }
+        .products-list .product-title { margin-left: 60px; }
+    </style>
+</head>
+<body class="skin-blue">
+
+    @using (Html.BeginForm("CartSubmit", "Line", FormMethod.Post, new { id = "theForm" }))
+    {
+        <div class="wrapper">
+            <div class="content-wrapper">
+                @*<section class="content-header">
+                        <h1>购物车</h1>
+                    </section>*@
+
+                <section class="content" style="padding-top:0;">
+                    <div class="row">
+                        <div class="col-md-3 no-padding">
+                            <div class="box box-widget no-padding">
+                                <div class="box-header">
+                                    <h3 class="box-title">购物车</h3>
+                                    <div class="box-tools">
+                                        <div class="input-group input-group-sm" style="width: 50px;">
+                                            <div class="input-group-btn">
+                                                <button id="btn-del" type="button" class="btn btn-default">删除</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="box-body ">
+                                    <input id="ProductItem" name="ProductItem" type="hidden" value="" />
+                                    <input id="Payment" name="Payment" type="hidden" />
+                                    <ul class="products-list product-list-in-box">
+                                        @foreach (var item in Model.items)
+                                        {
+                                            <li class="item">
+                                                <div class="checkbox">
+                                                    <input id="ckb_@item.ItemID" type="checkbox" checked="checked" style="margin-left : 0;">
+                                                </div>
+                                                <div class="product-img"><img src="@item.ImageMain" /></div>
+                                                <div class="product-info">
+                                                    <input id="ItemID_@item.ItemID" name="ItemID" type="hidden" value="@item.ItemID" />
+                                                    <input id="Price_@item.ItemID" type="hidden" value="@(cuser.Approved == 1 ?item.TradePrice: item.Price)" />
+                                                    <h4 class="product-title">@item.ProductTitle</h4>
+                                                    <div class="product-description">
+                                                        <span class="label-warning ">@string.Format("￥{0}", (cuser.Approved == 1 ? item.TradePrice : item.Price))</span>
+                                                        <div class="form-group wan-spinner wan-spinner-1 pull-right">
+                                                            <a href="javascript:void(0)" class="minus">-</a>
+                                                            <input id="Num_@item.ItemID" name="Num" type="text" class="form-control" value="@item.Num">
+                                                            <a href="javascript:void(0)" class="btn plus">+</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input name="NeedInvoice" type="checkbox" value="true"> 是否索要发票
+                                                </label>
+                                                <input type="hidden" value="false" name="NeedInvoice" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>发票抬头</label>
+                                        <input type="text" class="form-control" name="InvoiceTitle">
+                                    </div>
+                                    <strong>备注</strong>
+                                    <textarea rows="3" name="Remarks" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="box box-success box-widget ">
+                                <div class="box-header">
+                                    <h3 class="box-title">收货人地址</h3>
+                                </div>
+                                <div class="box-body ">
+                                    <div class="label label-info">* 以下地址为签证结果出来后护照的寄回地址</div>
+                                    <strong>收货人姓名</strong>
+                                    <input type="text" id="ReceiverName" name="ReceiverName" class="form-control" value="@(adr != null? adr.ConsigneeName: "")" />
+                                    <strong>收货人电话号码</strong>
+                                    <input type="text" id="ReceiverPhone" name="ReceiverPhone" class="form-control" value="@(adr != null? adr.ConsigneeMobile: "")" />
+                                    <strong>收货人地址（含省、市详细地址）</strong>
+                                    <input type="text" id="ReceiverAddress" name="ReceiverAddress" class="form-control" value="@(adr != null? adr.ConsigneeAddress: "")"/>
+                                </div>
+                            </div>
+
+                            @if (cuser.WxCardList.Count() > 0)
+                            {
+                                <div class="box box-widget box-success">
+                                    <div class="box-header">
+                                        <h3 class="box-title">我的卡券</h3>
+                                    </div>
+                                    <div class="box-body box-profile" id="card-list">
+                                        @foreach (var card in cuser.WxCardList)
+                                        {
+                                            <label>
+                                                <input type="checkbox" class="minimal" id="@("code_" +card.code)" value="@card.code" data-content="@card.cardInfo.LeastCost" data-bind="@card.cardInfo.ReduceCost">
+                                                @card.cardInfo.Title
+                                            </label>
+                                        }
+                                        <input type="hidden" value="" name="WeixinCardCode" id="WeixinCardCode" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @Html.Partial("_ChatPartial")
+                </section>
+            </div>
+
+            <footer class="main-footer" style="position:fixed;bottom:0;width:100%;padding:2px;">
+                <a class="btn btn-app btn-primary" href="/Line/List"><i class="fa fa-home"></i>首页</a>
+                <a id="btn-chat1" class="btn btn-app btn-default"><i class="fa fa-comments-o"></i>客服</a>
+                <div class="pull-right">
+                    <strong style="font-size:20px;">合计：<span id="amount">0</span></strong>
+                    <button id="btn-submit" type="submit" class="btn btn-app bg-maroon"><i class="fa fa-check"></i>提交订单</button>
+                </div>
+            </footer>
+        </div>
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var options = {
+                maxValue: 2000,
+                minValue: 1,
+                step: 1,
+                inputWidth: 60,
+                start: -2,
+                plusClick: function (val) {
+                    //console.log(val);
+                },
+                minusClick: function (val) {
+                    //console.log(val);
+                },
+                exceptionFun: function (val) {
+                    //console.log("excep: " + val);
+                },
+                valueChanged: function (val) {
+                    ReNum();
+                }
+            }
+            $(".wan-spinner-1").WanSpinner(options);
+
+            ReNum();
+
+            // 选择改变重新计算
+            //$(':checkbox').change(function () {
+            //    ReNum();
+            //});
+            $(".products-list input[type='checkbox']").change(function () {
+                ReNum();
+            });
+
+            $("#btn-del").click(function () {
+                var row = 0;
+                $(".products-list input[type='checkbox']").each(function () {
+                    //var itemname = $(this).attr('id');
+                    //var itemid = itemname.substring(4);
+                    //console.log('ItemID: ' + itemid);
+                    if ($(this).prop('checked') == true) {
+                        //console.log('Num_: ' + $("#Num_" + itemid).val());
+                        //console.log('Price_: ' + $("#Price_" + itemid).val());
+                        row = row + 1;
+                    }
+                });
+                if (row > 0) {
+                    if ((confirm("确认删除。") == true)) {
+                        var items = "";
+                        // 显示删除
+                        $(".products-list input[type='checkbox']").each(function () {
+                            if ($(this).prop('checked') == true) {
+                                $(this).parent().parent().remove();
+
+                                var itemname = $(this).attr('id');
+                                var itemid = itemname.substring(4);
+                                items = items + itemid  + ",";
+                            }
+                        });
+
+                        $.post("/Line/RemoveCart", { "MemberID": '@cuser.MemberID', "items": items }, function (data) {
+                            //
+                        });
+                    }
+                    ReNum();  // 重新计算金额
+                } else {
+                    Utils.alert("请选择购物车中的商品。");
+                }
+            });
+
+            //$("#btn-submit").click(function () {
+            //    $("body").faLoading('fa-cog');
+            //    setTimeout(function () { $("body").faLoading(false);}, 30000);
+            //});
+            $("#theForm").submit(function () {
+                if (!CheckControls()) {
+                    return false;
+                }
+                $("body").faLoading('fa-cog');
+                setTimeout(function () { $("body").faLoading(false); }, 30000);
+            });
+
+            //iCheck for checkbox and radio inputs
+            $('input[type="checkbox"].minimal').iCheck({
+                checkboxClass: 'icheckbox_minimal-blue'
+            });
+            $('input[type="checkbox"].minimal').on('ifChanged', function (event) {
+                if ($(this).prop('checked') == true) {
+                    var iid = $(this).attr('id');
+                    // 取消其他的选中
+                    $("#card-list input[type='checkbox']").each(function () {
+                        var iiid = $(this).attr('id');
+                        if (iid != iiid)
+                            $(this).iCheck('uncheck');
+                    });
+                } else {
+                    // $(this).iCheck('check');//如果没选择，可以用iCheck美化选择
+                }
+                ReNum();
+            });
+        });
+
+        function ReNum() {
+            var amount = 0;
+            var str = "";
+
+            $(".products-list input[type='checkbox']").each(function () {
+                var itemname = $(this).attr('id');
+                var itemid = itemname.substring(4);
+                //console.log('ItemID: ' + itemid);
+                if ($(this).prop('checked') == true) {
+                    //console.log('Num_: ' + $("#Num_" + itemid).val());
+                    //console.log('Price_: ' + $("#Price_" + itemid).val());
+
+                    amount = amount + Number($("#Num_" + itemid).val()) * Number($("#Price_" + itemid).val());
+                    str += '' + itemid + ',' + $("#Num_" + itemid).val() + ',' + $("#Price_" + itemid).val() + ';';
+                }
+            });
+
+            // 卡券
+            $("#WeixinCardCode").val("");
+            $("#card-list input[type='checkbox']").each(function () {
+
+                var leastCost = Number($(this).attr("data-content"));
+                var reduceCost = Number($(this).attr("data-bind"));
+
+                if (leastCost > amount) {
+                    $(this).iCheck('disable');
+                    $(this).iCheck('uncheck');
+                }
+                else {
+                    $(this).iCheck('enable');
+                }
+
+
+                if ($(this).prop('checked') == true) {
+                    amount = amount - reduceCost;
+
+                    // 记录保存
+                    var itemname = $(this).attr('id');
+                    $("#WeixinCardCode").val(itemname.substring(5));
+                }
+            });
+
+            $("#ProductItem").val(str);
+            $("#amount").html(amount);
+            $("#Payment").val(amount);
+        }
+
+        function MyTrim(str) {
+            return str.replace(/(^\s*)|(\s*$)/g, "");
+        };
+
+        //验证用户输入
+        function CheckControls() {
+            if (MyTrim($("#ReceiverName").val()) == "") {
+                Utils.alert("收货人姓名不得为空！");
+                $("#ReceiverName").focus().select();
+                return false;
+            }
+            if (MyTrim($("#ReceiverPhone").val()) == "") {
+                Utils.alert("收货人电话号码不得为空！");
+                $("#ReceiverPhone").focus().select();
+                return false;
+            }
+            if (MyTrim($("#ReceiverAddress").val()) == "") {
+                Utils.alert("收货人地址不得为空！");
+                $("#ReceiverAddress").focus().select();
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.SelectBusPointVModel
+@{
+    Layout = null;
+    ViewBag.Title = "选择上车点";
+}
+@using (Html.BeginForm("SaveBusPoint", "LineAdmin", FormMethod.Post, new { id = "theForm" }))
+{
+    <input type="hidden" name="TpLine.LineId" value="@Model.Line.LineId" />
+    <input type="hidden" id="LineId" name="LineId" value="@Model.Line.LineId" />
+    <div class="card card-info card-outline">
+        <div id="bpSearchContainer" class="card-header">
+            <div class="card-tools">
+                <div class="input-group input-group-sm" style="width: 400px;">
+                    @Html.TextBoxFor(m => m.BusPointName, new { @class = "form-control", placeholder = "上车点" })
+                    @Html.DropDownListFor(m => m.GroupId, Model.GroupItems.ToSelectListFor(Model.GroupId ?? ""), new { id = "conditionGroup", @class = "form-control" })
+
+                    <div class="input-group-append">
+                        <buttn class="btn btn-info" id="searchBtn" type="button" value="搜索"><i class="fas fa-search"></i></buttn>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="bpListContainer" class="card-body">
+            @Html.Partial("BusPoint/UCBusPointList", Model)
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(function () {
+        $('#bpSearchContainer').keydown(function () {
+            if (event.keyCode == 13) {
+                $('#searchBtn').click();
+            }
+        });
+
+        //Timepicker
+        $('.datetimepicker').datetimepicker({
+            format: 'LT'
+        })
+
+        $('#searchBtn').click(function () {
+            var load_iii = Utils.layerLoad();
+            var params = {
+                LineId: $('#LineId').val(),
+                BusPointName: $("#BusPointName").val(),
+                GroupId: $('#conditionGroup option:selected').val()
+            };
+            $.ajax({
+                type: "POST",
+                cache: false,
+                url: '@Url.Action("UCBusPointList", "LineAdmin")',
+                data: params,
+                success: function (data) {
+                    $('#bpListContainer').children().remove();
+                    $('#bpListContainer').html(data);
+                    hoverChangeStyle();
+                    Utils.layerClose(load_iii);
+                }
+            });
+        });
+
+        $('#backBtn').click(function () {
+            window.location = "/LineAdmin/SearchLine";
+        });
+    });
+
+
+</script>

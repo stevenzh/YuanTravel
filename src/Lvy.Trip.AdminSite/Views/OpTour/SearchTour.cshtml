@@ -1,0 +1,152 @@
+﻿@model Lvy.VModels.Op.TourVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "团队信息查询";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <form id="theForm" method="POST" action="@Url.Action("ExportJSExcel")">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">
+                    团队信息查询
+                </h4>
+                <table class="table table-sm table-borderless mt-5">
+                    <tr>
+                        <td>产品部门：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.Condition.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "form-control form-control-sm" })
+                        </td>
+                        <td>线路名称：</td>
+                        <td>@Html.TextBoxFor(a => a.Condition.LineName, new { @Class = "form-control form-control-sm" })</td>
+                        <td>出发日期：</td>
+                        <td><input type="text" name="Condition.OutDateRange" id="OutDateRange" class="form-control form-control-sm" /></td>
+                    </tr>
+                    <tr>
+                        <td>团号：</td>
+                        <td>@Html.TextBoxFor(a => a.Condition.TourNo, new { @Class = "form-control form-control-sm" })</td>
+                        <td>是否成团：</td>
+                        <td>
+                            @Html.HiddenFor(a => a.Condition.IsTourOk, new { @id = "IsTourOk", @value = "" })
+                            @Html.RadioGroup("IsTourOk", ViewBag.IsToured as IEnumerable<KeyValueBean>)
+                        </td>
+                        <td>团队状态：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.Condition.TourAuditState, DictionaryTools.GetEnumsBy(Enums.AuditStateEnum).ToSelectListFor(Model.Condition.TourAuditState), new { @class= "form-control form-control-sm" })
+                        </td>
+                        <td>团队性质：</td>
+                        <td>
+                            @Html.DropDownListFor(m => m.Condition.TourType, DictionaryTools.GetEnumsBy(Enums.TourTypeEnum).ToSelectListFor(Model.Condition.TourType.ToString()), new { @class = "form-control form-control-sm" })
+                        </td>
+                        @*<td class="label">推荐方式：</td>
+                <td>
+                    @Html.DropDownListFor(a => a.Condition.RecommendType, ViewBag.RecommendType as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                </td>*@
+                    </tr>
+                </table>
+
+                <div class="btn-group">
+                    <button class="btn btn-m btn-default" id="btnSearch" type="button">搜索</button>
+                    @*@if (Model.TourList.Items.Count < 1)
+                    {
+                        <input type="button" disabled="disabled" class="btn btn1" value="导出接送单" style="margin: 0px; width: 90px;" />
+                    }
+                    else
+                    {
+                        <input type="button" id="btnExportJSExcel" class="btn btn1" value="导出接送单" style="margin: 0px; width: 90px;" />
+                        <input type="submit" id="btnExportJieSongExcel" style="margin: 0px; display: none;" />
+                    }*@
+                </div>
+            </div>
+
+            <div id="TourListContainer" class="card-body">
+                @Html.Partial("UCTourList", Model)
+            </div>
+        </div>
+
+    </form>
+</section>
+
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#OutDateRange').daterangepicker({
+                autoUpdateInput: true,
+                ranges: {
+                    '今天': [moment(), moment()],
+                    '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '本周': [moment().startOf('week'), moment()],
+                    '上周': [moment().subtract(6, 'days'), moment()],
+                    '本月': [moment().startOf('month'), moment().endOf('month')],
+                    '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: "YYYY/MM/DD", //设置显示格式
+                    applyLabel: '确定', //确定按钮文本
+                    cancelLabel: '清空', //取消按钮文本
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    customRangeLabel: "自定义",
+                    firstDay: 1
+                }
+            }, function (start, end) {
+                $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+            });
+            $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+                //do something, like clearing an input
+                $('#OutDateRange').val('');
+            });
+
+            // 初始
+            $('#OutDateRange').val('');
+
+            //搜索是否成团
+            $("input:radio[name=IsTourOk]").click(function () {
+                var isTourOk = $("input:radio[name=IsTourOk]:checked").first().val();
+                $("#IsTourOk").val(isTourOk);
+            });
+            //搜索
+            $("#btnSearch").click(function () {
+                pageselectCallback(0);
+            });
+
+            //重置
+            $("#btnReset").click(function () {
+                $(".sotable td input[type='text']").val("");
+                $(".sotable td select").each(function () {
+                    $(this).children('option:first').attr('selected', 'selected');
+                });
+            });
+
+        });
+    </script>
+}

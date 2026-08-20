@@ -1,0 +1,13 @@
+﻿@model Lvy.VModels.Crm.RoleVModel
+@{
+    ViewBag.Title = "查询角色";
+}
+
+<div id="divEditRole">
+    @Html.Partial("Role/UCEditRole", Model.Role)
+</div>
+
+<div id="divRoles">
+    @Html.Partial("Role/UCRoles", Model)
+</div>
+

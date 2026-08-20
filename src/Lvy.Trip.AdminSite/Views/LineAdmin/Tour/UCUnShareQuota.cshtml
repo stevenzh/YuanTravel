@@ -1,0 +1,31 @@
+﻿@model Lvy.VModels.Product.EditTourVModel
+<div name="UnShareRow" class="form-group row">
+    <label class="col-md-2">
+        总库存：
+        @Html.HiddenFor(m => m.Quota.Id)
+    </label>
+    <div class="col-md-2">
+        <input type="hidden" id="initPlanQuota" value="@Model.Quota.PlanQuota" />
+        @Html.TextBoxFor(m => m.Quota.PlanQuota, new { id = "unSharePlanQuota", @class = "form-control form-control-sm", @onkeyup = "$('#unShareUseQuota').text(Number($(this).val())-Number($('#unShareHoldQuota').val())-Number($('#unShareUsedQuota').text()));", contentlimit = "number" })
+        @*@if (Model.Line.TrafficType == 1)
+            {
+                <input type="button" id="showBusSeat" value="显示车位" onclick="BindShowBusSeat();" />
+            }*@
+    </div>
+
+    <label class="col-md-2" style="display:none;">预留库存：</label>
+    <div class="col-md-2" style="display:none;">
+        <input type="hidden" id="initHoldQuota" value="@Model.Quota.HoldQuota" />
+        @Html.TextBoxFor(m => m.Quota.HoldQuota, new { id = "unShareHoldQuota", @class = "form-control form-control-sm", @onkeyup = "$('#unShareUseQuota').text(Number($('#unSharePlanQuota').val())-Number($(this).val())-Number($('#unShareUsedQuota').text()));", contentlimit = "number" })
+    </div>
+
+    <label class="col-md-2">已用库存：</label>
+    <div class="col-md-2">
+        <span id="unShareUsedQuota">@Model.Quota.UsedQuota</span>
+    </div>
+
+    <label class="col-md-2">剩余库存：</label>
+    <div class="col-md-2">
+        <span id="unShareUseQuota">@Model.Quota.UseQuota</span>
+    </div>
+</div>

@@ -1,0 +1,266 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Ticket.SearchTicketVModel
+
+<div class="card-body p-0">
+    <table class="table table-sm" id="listtbl">
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>部门</th>
+                <th>商品名称</th>
+                <th>目的地</th>
+                <th>购买方式</th>
+                <th>库存</th>
+                <th>价格模式</th>
+                <th>商品类型</th>
+                <th>供应商</th>
+                <th style="width: 140px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PagedTickets.Items == null || Model.PagedTickets.Items.Count == 0)
+            {
+                <tr style="text-align: center; color: #FF0000;">
+                    <td colspan="9">
+                        无数据
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.PagedTickets.Items)
+                {
+                    var customer = DictionaryTools.GetCachedCustomer(item.SupplierCode);
+                    <tr>
+                        <td>
+                            @item.ProductId
+                        </td>
+                        <td>
+                            @DictionaryTools.GetCachedTeam(item.TeamID).TeamName
+                        </td>
+                        <td title="@item.ProductName">
+                            @item.ProductName.TrimWithElipsis(20)
+                        </td>
+                        <td>
+                            @DictionaryTools.GetDestNameStr(item.ArriveDest)
+                        </td>
+                        <td>
+                            @DictionaryTools.GetEnumValue(Enums.TktTypeEnum, item.TktType.ToString(CultureInfo.InvariantCulture))
+                        </td>
+                        <td>
+                            @if (item.TuiJianType == 2)
+                            {
+                                @item.PlanQuota
+                            }
+                            else
+                            {
+                                @DictionaryTools.GetEnumValue(Enums.TktTuiJianTypeEnum, item.TuiJianType.ToString(CultureInfo.InvariantCulture))
+                            }
+                        </td>
+                        <td>
+                            @(item.PriceMode == 2?"日期价格":"固定价格")
+                        </td>
+                        <td>
+                            @DictionaryTools.GetEnumValue(Enums.ProductAllTypeEnum, item.ProductType.ToString(CultureInfo.InvariantCulture))
+                        </td>
+                        <td title="@customer.FastCode-@customer.Name">
+                            @customer.Name.TrimWithElipsis(7)
+                        </td>
+                        <td>
+                            @if (item.Admins != null && item.Admins.Count > 0)
+                            {
+                                <a href="javascript:void(0);" class="audit1" title="编辑专管员" TicketId="@item.ProductId"><i class="fa fa-user"></i></a>
+                            }
+                            else
+                            {
+                                <a href="javascript:void(0);" class="audit2" title="添加专管员" TicketId="@item.ProductId"><i class="fa fa-user"></i></a>
+                            }
+                            @if (item.ProductState == 2)
+                            {
+                                //当前下线
+                                <a data-id="@item.ProductId" state="offline" name="changelineState" title="上线" href="javascript:void(0);"><i class="fa fa-arrow-up"></i></a>
+                            }
+                            else if (item.ProductState == 3)
+                            {
+                                //当前上线
+                                <a data-id="@item.ProductId" state="online" name="changelineState" title="下线" href="javascript:void(0);"><i class="fa fa-arrow-down"></i></a>
+                            }
+                            <a productId="@item.ProductId" title="编辑" class="edit" href="javascript:void(0);"><i class="fa fa-edit"></i></a>
+                            <a title="复制" class="copy" href="@Url.Action("CopyTicket", new { productId = item.ProductId })"><i class="fa fa-copy"></i></a>
+                            <a productId="@item.ProductId" title="删除" class="delete" href="javascript:void(0);"><i class="fa fa-trash"></i></a>
+                            <a href="/ProductAdmin/EditPrice?productId=@item.ProductId" title="报价设置"><i class="fa fa-calendar"></i></a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+</div>
+<div class="card-footer">
+    @Html.HiddenFor(m => m.PagedTickets.PageIndex, new { id = "hiddenIndex" })
+    <div id="divPagination" class="digg">
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    //分页回调函数
+    function pageselectCallback(pageId) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchTicket")', params, function (data) {
+            if (data == "no") {
+                Utils.alert('权限不足！');
+                Utils.layerClose(load_iii);
+            } else {
+                $('#ticketContainer').html(data);
+                Utils.layerClose(load_iii);
+                hoverChangeStyle();
+            }
+        });
+    }
+
+    //初始化编辑专管员弹窗
+    function rengerEditTicketAdmin() {
+        var $checkboxs = $('#ticketAdminForm').find(':checkbox[name="IsChecked"]');
+        $checkboxs.click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $this.prev().val(1);
+            } else {
+                $this.prev().val(0);
+                if($checkboxs.filter(':checked').length==0) {
+                    Utils.alert('请至少选择一位专管员。');
+                    $this.prop('checked', true);
+                }
+            }
+        });
+    }
+
+    function initailList() {
+	    //更改上线、下线状态
+        $("a[name=changelineState]").click(function () {
+		    var load_iii = Utils.layerLoad();
+		    var $link = $(this);
+		    var param = { productId : $link.attr('data-id') };
+		    $.post('@Url.Action("ChangeOnlineState")', param, function (data) {
+                var state = $link.attr("state");
+                if (state == 'online') {
+                    $link.attr("state", "offline");
+                    $link.attr("title", "上线");
+                    var $i = $($link).find("i");
+                    $i.removeClass();
+                    $i.addClass('fa fa-arrow-up');
+
+                } else if (state == 'offline') {
+                    $link.attr("state", "online");
+                    $link.attr("title", "下线");
+                    var $i = $($link).find("i");
+                    $i.removeClass();
+                    $i.addClass('fa fa-arrow-down');
+			    } else {
+				    Utils.alert('该产品已删除。');
+				    window.location.reload();
+			    }
+			    Utils.layerClose(load_iii);
+		    });
+	    });
+	    //编辑
+	    $('a.edit').click(function () {
+		    var load_iii = Utils.layerLoad();
+		    var $link = $(this);
+		    var param = {
+			    productId : $link.attr('productId')
+		    };
+		    $.post('@Url.Action("GetState")', param, function (data) {
+			    if (data == '3') {   // 上线
+				    //$.post('/TktManage/CheckeOrdered', param,function(result) {
+                        //if(data&&Number(result)==1) {
+                        //    Utils.alert('该产品已产生订单，无法编辑！');
+                        //    Utils.layerClose(load_iii);
+                        //}
+                        //else if(data&&Number(result)==0) {
+                            window.location = '@Url.Action("EditTicket")' + '?productId=' + $link.attr('productId');
+                        //}
+                        //else {
+                        //    //请求错误
+                        //}
+                    //});
+			        //Utils.layerClose(load_iii);
+			    } else if (data == '2') {   // 下线
+				    window.location = '@Url.Action("EditTicket")' + '?productId=' + $link.attr('productId');
+			    }
+			    Utils.layerClose(load_iii);
+		    });
+	    });
+	    //删除
+	    $('a.delete').click(function () {
+		    var load_iii = Utils.layerLoad();
+		    var $link = $(this);
+		    var param = {
+			    productId : $link.attr('productId')
+		    };
+		    $.post('@Url.Action("GetState")', param, function (data) {
+			    if (data == '4') {
+				    Utils.alert('该产品已上线。');
+			    } else if (data == '3') {
+				    if (confirm('确认需要删除吗？')) {
+					    window.location = '@Url.Action("DeleteTicket")' + '?productId=' + $link.attr('productId');
+				    }
+			    }
+			    Utils.layerClose(load_iii);
+		    });
+	    });
+
+        $('#listtbl a.audit1,a.audit2').click(function() {
+            var load_iii = Utils.layerLoad();
+            var param = { ticketId: $(this).attr('TicketId') };
+            $.post('@Url.Action("EditTicketAdmin")',param, function (data) {
+                Utils.layerClose(load_iii);
+
+                layer.open({
+                    type: 1, title: '编辑专管员', maxmin: false,
+                    shadeClose: false, area: ['300px', '500px'],
+                    content: data,
+                    success: function (layero, index) {
+                        rengerEditTicketAdmin();
+                    },
+                    btn: ["保存", "关闭"],
+                    yes: function (index, layero) {
+                        var $form = $('#ticketAdminForm');
+                        var action = $form.attr('action');
+                        var params = $form.formSerialize();
+                        $.post(action, params, function (result) {
+                            if (result && result == 'success') {
+                                Utils.alert('保存成功。');
+                                layer.close(index);
+                            }
+                            else {
+                                Utils.alert('保存失败。');
+                            }
+                        });
+                    },
+                    btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+
+            });
+        });
+    }
+
+    $(function () {
+    	// 创建分页
+    	$("#divPagination").pagination(Number('@Model.PagedTickets.TotalCount'), {
+    		callback : pageselectCallback,
+    		items_per_page : ( @Model.PagedTickets.PageSize),
+    		num_display_entries : 5,
+    		num_edge_entries : 2,
+    		current_page : ( @Model.PagedTickets.PageIndex - 1)
+    	});
+
+        initailList();
+    });
+</script>

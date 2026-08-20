@@ -1,0 +1,19 @@
+﻿@model List<Lvy.VModels.Online.OrderFlowVModel>
+<p class="left_title">
+    最新预定情况
+</p>
+<ul class="left_ul_list">
+    @foreach (var item in Model)
+    {
+        <li>
+            <p>
+                <span class="tran_title_1"><a href="@Url.Action("TourRouteDetail", "Online", new { tourId = item.TourId })" target="_blank" title="@item.LineName">@item.LineName.TrimWithElipsis(15)</a></span>
+            </p>
+            <p>
+                <span class="tran_title_2">@item.OutDateFormat </span><span class="tran_title_1">
+                    @item.NearTime
+            </span>
+        </p>
+    </li>
+}
+</ul>

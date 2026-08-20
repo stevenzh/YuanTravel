@@ -1,0 +1,30 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+
+@*<form id="theForm" method="POST">*@
+<div class="xbox clear">
+    <div align="center" class="xboxcontent clear">
+        <div class="sotable_tit">
+            联系人查询
+        </div>
+        <table style="width:90%" class="sotable" align="center">
+            <tr>
+                <td class="label">姓名：</td>
+                <td>
+                    @Html.HiddenFor(a => a.Account.CustomerCode)
+                    @Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })
+                </td>
+                <td class="label">手机号码：</td>
+                <td>
+                    @Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })
+                </td>
+                <td align="center">
+                    <input class="btn btn1" id="btnSearch" type="submit" value="搜索" />
+                    <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+@*</form>*@

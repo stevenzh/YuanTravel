@@ -1,0 +1,190 @@
+﻿@using Arch.Common
+@model Lvy.VModels.Ticket.ConfirmOrderVModel
+@{
+    ViewData["Title"] = "订单详情";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/TktOrder/Search">订单列表</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">订单信息【@Model.Order.MasterOrderCode】</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">日期</th>
+                                <th style="width: 200px; text-align: center;">门票</th>
+                                <th style="text-align: center;">价格</th>
+                                <th style="text-align: center;">人数</th>
+                                <th style="text-align: center;">购票类型</th>
+                                <th style="text-align: center;">应收</th>
+                                <th style="text-align: center;">返利</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                decimal totalFanLi = 0;
+                                decimal totalCash = 0;
+                                decimal totalBill = 0;
+                            }
+                            @foreach (var item in Model.Order.OrderDetails)
+                            {
+                                <tr style="text-align: center;">
+                                    <td>
+                                        @item.OutDate.ToDateFormat()
+                                    </td>
+                                    <td>
+                                        @item.ProductName
+                                    </td>
+                                    <td>
+                                        @if (item.TktType == 1 || item.TktType == 2)
+                                        {
+                                            <span>@item.SysPrice&nbsp;/&nbsp;@item.PriceType</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@item.SettlePrice&nbsp;/&nbsp;@item.PriceType</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @item.PeopleNum<span>人</span>
+                                    </td>
+                                    <td>
+                                        @switch (item.TktType)
+                                        {
+                                            case 1:
+                                                <span>固定签单</span>
+                                                break;
+                                            case 2:
+                                                <span>特殊签单</span>
+                                                break;
+                                            case 3:
+                                                <span>任务单</span>
+                                                break;
+                                            case 4:
+                                                <span>特殊任务单</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.TktType == 1 || item.TktType == 2)
+                                        {
+                                            totalBill += @item.YsPrice;
+                                            @Html.Raw(item.YsPrice);
+                                        }
+                                        else
+                                        {
+                                            totalCash += item.SettlePrice * item.PeopleNum;
+                                            @(0)
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.TktType == 3 || item.TktType == 4)
+                                        {
+                                            totalFanLi += item.SysPrice * item.PeopleNum;
+                                            @item.SysPrice
+                                        }
+                                        else
+                                        {
+                                            <span>0</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            <tr>
+                                <td style="text-align: center;">
+                                    <b>总计</b>
+                                </td>
+                                <td colspan="6">
+                                    <b>景区现付：@totalCash</b><br />
+                                    <b>返利：@totalFanLi</b><br />
+                                    <b>签单：@totalBill</b>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><b>组团社：</b></td>
+                            <td>@Model.PlatCustomer.Name</td>
+                        </tr>
+                        @if (Model.TicketAdmins != null && Model.TicketAdmins.Count > 0)
+                        {
+                            foreach (var admin in Model.TicketAdmins)
+                            {
+                                <tr>
+                                    <td><b>专管员：</b></td>
+                                    <td>@admin.Name <span>&nbsp;[@admin.Phone]</span></td>
+                                </tr>
+                            }
+                        }
+
+                        <tr>
+                            <td><b>分销商：</b></td>
+                            <td>@Model.ReceiveCustomer.Name</td>
+                        </tr>
+                        <tr>
+                            <td><b>联系人：</b></td>
+                            <td>@Model.Order.ContactName [@Model.Order.ContactPhone]</td>
+                        </tr>
+                        <tr>
+                            <td><b>电话：</b></td>
+                            <td>@Model.ReceiveCustomer.Phone</td>
+                        </tr>
+                        <tr>
+                            <td><b>预定日期：</b></td>
+                            <td>@Model.Order.CreatedTime.ToString("yyyy-MM-dd hh:mm:ss")</td>
+                        </tr>
+                        <tr>
+                            <td><b>导游</b></td>
+                            <td>@Model.Order.GuideName &nbsp;&nbsp;@Model.Order.GuidePhone</td>
+                        </tr>
+                        <tr>
+                            <td><b>备注</b></td>
+                            <td>@Model.Order.Remarks</td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-info" href="/TktOrder/Search">返回列表</a>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+    window.onload = function () {
+
+        $('#closeBtn').click(function () {
+            window.close();
+        });
+    };
+
+</script>

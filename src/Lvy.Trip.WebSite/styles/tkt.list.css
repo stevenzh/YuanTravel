@@ -1,0 +1,10 @@
+﻿.main { width: 1190px; margin: auto; }
+
+.line_list { margin-top: 10px; width: 741px; border: 1px solid #CEDFF3; }
+.line_list_title { border-bottom: 2px solid #38A8E7; }
+    .line_list_title th { color: #676769; }
+    .line_list_title tr { height: 35px; }
+
+.line_list_border { border: 1px dotted #ccc; }
+/*now_position*/
+.now_position { color: #BABABA; width: 100% }

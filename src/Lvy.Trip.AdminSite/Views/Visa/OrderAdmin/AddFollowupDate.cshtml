@@ -1,0 +1,38 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@{
+    Layout = null;
+}
+<script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+<link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+<script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+
+<table style="font-size:12px; margin-top:20px; padding-top:20px; margin-left:20px;">
+    <tr style="height:30px;">
+        <td>跟进日期：</td>
+        <td>
+            <input name="followdt" id="followdt" class="text150" type="text" value='@Model.OrderModel.FollowupDate' onclick="WdatePicker()" />
+        </td>
+    </tr>
+    <tr align="center" style="height:40;">
+        <td colspan="2"><input type="button" class="btn_1" value="保存" onclick="funSaveFollowUpDate()" /> </td>
+    </tr>
+</table>
+<script type="text/javascript">
+    function funSaveFollowUpDate() {
+        var code = '<@Model.OrderModel.OrderCode';
+        var param = {
+            "code": code,
+            "followdt": $("#followdt").val()
+        };
+        $.post("/FitVisaOrder/SaveFollowData", param, function (data) {
+            if (data == "1") {
+                alert("保存成功！！");
+                var api = frameElement.api, W = api.opener;
+                W.window.location.reload();
+                // var funcode = "funConfirmVisaOrder()";
+                // W.window.funConfirmVisaOrder();
+                api.close();
+            }
+        });
+    }
+</script>

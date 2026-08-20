@@ -1,0 +1,167 @@
+﻿@model Lvy.VModels.Finance.FinanceVModel
+<div class="xbox">
+    <div class="xboxcontent clear">
+        <table width="100%" class="edittbl" style="border-bottom: 0px;">
+            <tr>
+                <td style="text-align: right;">收客人数：</td>
+                <td style="color: red;">@Model.SumTravellerCount.ToString() 人</td>
+                <td style="text-align: right;">销售总额：</td>
+                <td>￥@Model.SumPriceCount</td>
+                <td style="text-align: right;">返利总额：</td>
+                <td>￥ Model.SumFanLiCount</td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">实收总额：</td>
+                <td>￥@Model.SumTolPaid</td>
+                <td style="text-align: right;">剩余总额：</td>
+                <td>￥@Model.ShengYuCount</td>
+                <td colspan="2" style="text-align: center;"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="xbox clear">
+    <div class="btnlist">
+        <div class="fl">
+            <input type="button" value="导出预订单" id="downLoadBookOrder" class="btn btn1" style="margin: 0px;width: 90px;" />
+            <input type="button" value="导出客户账单" id="exportCustomerZhangdan" class="btn btn2" />
+        </div>
+    </div>
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                <td align="left">
+                    <label for="chkAll">订单号</label>
+                </td>
+                <td align="center">产品名称</td>
+                <td align="center">出发日期</td>
+                <td align="center">分销商</td>
+                <td align="center">分销商联系人</td>
+                <td align="center">销售员</td>
+                @*<td align="center">客人名称</td>*@
+                <td align="center">人数</td>
+                <td align="center">应收款</td>
+                <td align="center">已收款</td>
+                <td align="center">订单<br />状态</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.OrderModels.Items.Count > 0)
+            {
+                foreach (var item in Model.OrderModels.Items)
+                {
+                    <tr>
+                        <td align="center">
+                            @item.OrderCode
+                        </td>
+                        <td align="center">
+                            <span title="@item.LineName">
+                                @item.LineName.TrimWithElipsis(25)
+                            </span>
+                        </td>
+                        <td align="center">
+                            @item.OutDate.ToString("MM-dd")
+                        </td>
+                        @{
+                            string customerName = "";
+                            if (!string.IsNullOrEmpty(item.BookingCustomer))
+                            {
+                                var customer = DictionaryTools.GetCachedCustomer(item.BookingCustomer);
+
+                                customerName = customer.Name;
+                            }
+                        }
+                        <td align="center" title="@customerName">@customerName</td>
+                        <td align="center">@item.Managers</td>
+                        <td align="center">@item.SalerName</td>
+                        @*<td align="center">@item.LinkMan</td>*@
+                        <td align="center">@item.TravellerCount</td>
+                        <td align="center">@item.TolYsPrice</td>
+                        <td align="center">@item.TolPaid</td>
+                        <td align="center">
+                            @*@Common.DisplayState(item.OrderState)*@
+                            @if (item.IsCancel == 0)
+                            {
+                                @Common.DisplayState(item.OrderState)
+                            }
+                            else
+                            {
+                                <span>取消</span>
+                                @DictionaryTools.GetEnumValue(Enums.OrderCancelStateEnum, item.CancelState.ToString())
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="11" align="center" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(m => m.OrderModels.PageIndex, new { id = "hiddenIndex" })
+    @Html.HiddenFor(m => m.OrderModels.PageSize)
+    <div id="divPagination" class="digg">
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+        isChkAllDisabled();
+        //分页控件 begin
+        $("#divPagination").pagination(
+            Number('@Model.OrderModels.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: (@Model.OrderModels.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.OrderModels.PageIndex - 1)
+            });
+
+            //导出预订单
+        $('#downLoadBookOrder').click(function() {
+            var params = $('#theForm').formSerialize();
+            $.fileDownload('/Finance/DownloadBookingOrder', { httpMethod: "POST", data: params });
+        });
+
+        $("#exportCustomerZhangdan").click(function () {
+            if ($("#Condition_BookingCustomer").val()=="") {
+                Utils.alert("必须选择分销商！");
+                return;
+            }
+            var params = $('#theForm').formSerialize();
+            $.fileDownload('/Finance/ExportCustomerZhangdan', { httpMethod: "POST", data: params });
+        });
+    });
+
+     //分页
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchBookAccount")',params,function (data) {
+                $('#divFinanceList').html(data);
+                hoverChangeStyle();
+                Utils.layerClose(load_iii);
+            });
+    }
+
+    //验证全选单选框是否可用
+    function isChkAllDisabled() {
+        var selectedItems = new Array();
+        var chkCount =Number( $("input[name='chkSingle']").length);
+        $("input[name='chkSingle']:disabled").each(function () {
+            selectedItems.push($(this).val());
+        });
+        if(chkCount==selectedItems.length)
+            $("#chkAll").attr("disabled",true);
+        else
+            $("#chkAll").attr("disabled",false);
+    }
+
+
+</script>

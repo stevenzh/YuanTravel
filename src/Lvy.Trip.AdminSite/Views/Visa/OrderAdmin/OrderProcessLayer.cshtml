@@ -1,0 +1,28 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@if (Model.MasterOrder.IsCancel == 0)
+{
+    <!--订单处理进度-->
+    <table class="table table-sm">
+        <tr style="text-align:center;">
+            <td class='@(Model.OrderModel.TraceState >= 1 ? "bgo01" : "bgo02")'>已预定</td>
+            <td class='@(Model.OrderModel.TraceState >= 2 ? "bgo01" : "bgo02")'>已确认</td>
+            <td class='@(Model.OrderModel.TraceState >= 3 ? "bgo01" : "bgo02")'>材料收取中</td>
+            <td class='@(Model.OrderModel.TraceState >= 4 ? "bgo01" : "bgo02")'>材料已收齐</td>
+            <td class='@(Model.OrderModel.TraceState >= 5 ? "bgo01" : "bgo02")'>已送签</td>
+            <td class='@(Model.OrderModel.TraceState >= 6 ? "bgo01" : "bgo02")'>材料已审核</td>
+            <td class='@(Model.OrderModel.TraceState >= 7 ? "bgo01" : "bgo02")'>已签出</td>
+        </tr>
+    </table>
+}
+else
+{
+    <!--订单已取消-->
+    <table class="table table-sm">
+        <tr>
+            <td style="text-align:left; background-color:#FFFFc8; border:2px solid #FF0000;">
+                <b>已取消</b>：[取消原因]
+            </td>
+        </tr>
+    </table>
+}
+

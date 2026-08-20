@@ -1,0 +1,156 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Tour.TourBalanceVModel
+
+<div class="card-header">
+    <h4 class="card-title"><i class="ion ion-clipboard mr-1"></i>成本项目</h4>
+    <div class="card-tools">
+        <button id="addItem2" type="button" class="btn btn-success"><i class="fa fa-plus"></i> 添加成本项目</button>
+    </div>
+</div>
+<div class="card-body">
+    <table class="table table-sm" id="costtable">
+        <thead>
+            <tr>
+                <th>项目</th>
+                <th>供应商</th>
+                <th style="width:90px">单价</th>
+                <th style="width:80px">份数</th>
+                <th style="width:100px">币种</th>
+                <th style="width:80px">汇率</th>
+                <th style="width:100px">成本合计</th>
+                <th>备注</th>
+                <th style="width:100px">付款方式</th>
+                <th style="width:100px">状态</th>
+                <th style="width:100px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.CostList.Count(); i++)
+            {
+                @Html.HiddenFor(a => a.CostList[i].Id)
+                <tr>
+                    <td>
+                        @Html.DropDownListFor(a => a.CostList[i].Item, DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor(Model.CostList[i].Item), new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        @{
+                            var SuppliersList = DictionaryTools.GetCachedSuppliser(Model.CostList[i].SupplierId);
+                        }
+                        <select name="CostList[@i].SupplierId" class="form-control form-control-sm">
+                            <option value="0" payment="" paymentType="0">-- 请选择 --</option>
+                            <option value="@SuppliersList.Code" payment="@SuppliersList.PaymentType" paymentType="" selected="selected"> @SuppliersList.Name</option>
+                        </select>
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.CostList[i].Cost, new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.CostList[i].Num, new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        <select name="CostList[@i].Currency" class="form-control form-control-sm">
+                            <option value="0">-- 请选择 --</option>
+                            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.CurrencyEnum))
+                            {
+                                if (item.Key == Model.CostList[i].Currency)
+                                {
+                                    <option value="@item.Key" selected="selected"> @item.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Key"> @item.Value</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.CostList[i].ROE, new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.CostList[i].ItemCost, new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.CostList[i].Remark, new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        <select name="CostList[@i].PaymentType" class="form-control form-control-sm">
+                            <option value="">-- 请选择 --</option>
+                            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.PaymentTypeEnum))
+                            {
+                                if (item.Key == Model.CostList[i].PaymentType.ToString())
+                                {
+                                    <option value="@item.Key" selected="selected"> @item.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Key"> @item.Value</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td>@Model.CostList[i].Status</td>
+                    <td>
+                        <input type="hidden" name="CostList[@i].IsValid" value="1" />
+                        <button name="lnkDel" type="button" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> 删除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8" style="text-align: right; padding-right: 15px">
+                    现结： <span name="xianjie">@Model.SumCost.XianShou</span>
+                    签单：  <span name="qiandan">@Model.SumCost.Qiandan</span>
+                    总计：<span name="zongji">@Model.SumCost.SumTolCost</span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<div class="card-footer">
+    <div class="btnlist">
+        <label>附件</label>
+    </div>
+    <div id="addTourFileContainer" style="margin: 0px; padding: 0px; border: 0px">
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '@Url.Action("TourFile")',
+            type: 'post',
+            data: { orderCode: '@Model.Balance.MasterOrderCode '},
+            success: function (data) {
+                $("#addTourFileContainer").html(data);
+            }
+        });
+
+        $("select[name$='.SupplierId']").select2({
+            ajax: {
+                url: function (params) {
+                    return '/Customer/GetSupplierSelect2?keyword=' + params.term;
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+        });
+    })
+
+</script>

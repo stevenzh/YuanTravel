@@ -1,0 +1,230 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@{
+    ViewBag.Title = "编辑联系人";
+    int pageIndex = (ViewData["PageIndex"] == null ? 0 : (int)ViewData["PageIndex"]);
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("Update", "Contact")" method="POST" onsubmit="return CheckControls();">
+    <div class="station"> @ViewBag.Title</div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:50%;float:left;">
+                <tr style="display:none;">
+                    <td class="label"><span class="point">*</span>密码：</td>
+                    <td>
+                        @Html.HiddenFor(a => a.Account.Pwd)
+                        <input type="button" class="btn btn1" value="重置密码" id="resetPwdBtn" />
+                        <span style="color: gray">&nbsp;&nbsp; 重置后密码默认为：888888 </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>姓名：</td>
+                    <td>@Model.Account.Name</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>性别：</td>
+                    <td>@Model.Account.Sex.ToString()</td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point"></span>微信是否绑定：
+                    </td>
+                    <td>@(string.IsNullOrEmpty(Model.Account.OpenID) ? "未绑定" : "已绑定")</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>联系手机：</td>
+                    <td>@Model.Account.Mobile</td>
+                </tr>
+                <tr>
+                    <td class="label">电子信箱：</td>
+                    <td>@Model.Account.Email</td>
+                </tr>
+                <tr>
+                    <td class="label">联系电话：</td>
+                    <td>@Model.Account.Phone</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>所属客户：</td>
+                    <td>@DictionaryTools.GetCachedCustomer(Model.Account.CustomerCode).Name</td>
+                </tr>
+                <tr>
+                    <td class="label">销售组：</td>
+                    <td>@DictionaryTools.GetCachedTeam(Model.Account.TeamID).TeamName</td>
+                </tr>
+                <tr>
+                    <td class="label">对应销售：</td>
+                    <td>@DictionaryTools.GetCachedAccount(Model.Account.SalerCode).Name</td>
+                </tr>
+                <tr>
+                    <td class="label">备注说明：</td>
+                    <td>@Model.Account.Remarks</td>
+                </tr>
+                <tr>
+                    <td class="label">审核状态：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.CustomerStateEnum, Model.Account.SalerState.ToString(), false)</td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="center">
+                        @if (Model.Account.SalerState == 0)
+                        {
+                            if (Model.Account.SalerCode == GlobalContext.Current.UserInfo.Code)
+                            {
+                                <input class="btn btn1" id="btnAudit" type="button" value="申请审核" />
+                            }
+
+                            if (GlobalContext.Current.LoginUserRoles.Any(t => t.Name == "销售组长")
+                                && GlobalContext.Current.LoginUserTeams.Any(t => t.TeamID == Model.Account.TeamID))
+                            {
+                                <input class="btn btn1" id="btnAudit1" type="button" value="审核通过" />
+                                <input class="btn btn1" id="btnAudit2" type="button" value="审核不通过" />
+                            }
+                        }
+                        <a class="btn btn1" href="/Contact/Search">返回列表</a>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="edittbl" style="width:50%;float:right;">
+                <tr>
+                    <td class="label">客户名称：</td>
+                    <td>@Model.Customer.Name</td>
+                </tr>
+                <tr>
+                    <td class="label">渠道来源：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.CustomerChannelEnum, Model.Customer.ChannelType.ToString())</td>
+                </tr>
+                <tr>
+                    <td class="label">父公司：</td>
+                    <td>@Model.Customer.ParentName</td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">公司电话：</td>
+                    <td>@Model.Customer.Phone</td>
+                </tr>
+                <tr>
+                    <td class="label">地址：</td>
+                    <td>
+                        @DictionaryTools.GetDestName(Model.Customer.Province) -
+                        @DictionaryTools.GetDestName(Model.Customer.City) -
+                        @DictionaryTools.GetDestName(Model.Customer.County)
+
+                        @Model.Customer.Address
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"> 税号：</td>
+                    <td>@Model.Customer.TaxNumber</td>
+                </tr>
+                <tr>
+                    <td class="label">信用额度：</td>
+                    <td>@Model.Customer.CreditLine</td>
+                </tr>
+                <tr>
+                    <td class="label">结算方式：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.PaymentTypeEnum, Model.Customer.PaymentType.ToString())</td>
+                </tr>
+                <tr>
+                    <td class="label">销售组：</td>
+                    <td>@(Model.Customer.TeamID.IsNullOrEmpty() ? "" : DictionaryTools.GetCachedTeam(Model.Customer.TeamID).TeamName)</td>
+                </tr>
+                <tr>
+                    <td class="label">对应销售：</td>
+                    <td>@DictionaryTools.GetCachedAccount(Model.Customer.SalerCode).Name</td>
+                </tr>
+                <tr>
+                    <td class="label">备注：</td>
+                    <td>@Model.Customer.Remarks</td>
+                </tr>
+                <tr>
+                    <td class="label">审核状态：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.CustomerStateEnum, Model.Customer.CustomerState.ToString(), false)</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @Html.HiddenFor(a => a.Account.Code)
+</form>
+
+
+<div id="modal-no" style="display:none;">
+    <table width="100%" class="edittbl">
+        <tr>
+            <td class="label">选择原因</td>
+            <td>
+                <select id="remark">
+                    <option value="信息不全" selected="selected">信息不全</option>
+                    <option value="客户重复">客户重复</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button type="button" class="btn btn-secondary pull-left" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-success" id="btnAudit2">提交</button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#resetPwdBtn").click(function () {
+            var params = {
+                accountCode: Utils.Trim($("#Account_Code").val())
+            };
+            $.post("@Url.Action("ResetPwd")", params, function (flag) {
+
+                if (flag > 0) {
+                    Utils.alert("重置密码成功");
+                } else {
+                    Utils.alert("重置密码失败！");
+                }
+            });
+        });
+
+        $("#btnAudit").click(function () {
+            var load_iii = Utils.layerLoad();
+            $.post("/Contact/SendAuditMsg", { "code": $("#Account_Code").val() },
+                function (data) {
+                    if (data == "yes") {
+                        Utils.alert("已发送申请.");
+                    }
+                    else {
+                        Utils.alert(data);
+                    }
+                    Utils.layerClose(load_iii);
+                });
+        });
+
+        $("#btnAudit1").click(function () {
+            if (!confirm("确定此客户通过审核？")) {
+                return;
+            }
+
+            var url = "@Url.Action("AuditContact")";
+            $.get(url, { code: $("#Account_Code").val(), state: 1 }, function (data) {
+                if (data.Code > 0) {
+                    location.href = '@Url.Action("Search")';
+                } else {
+                    Utils.alert("审核失败！");
+                }
+            });
+        });
+
+        $("#btnAudit2").click(function () {
+            var url = "@Url.Action("AuditContact")";
+            $.get(url, { code: $("#Account_Code").val(), state:2, remark:$("#remark").val()}, function (data) {
+                if (data.Code > 0) {
+                    location.href = '@Url.Action("Search")';
+                } else {
+                    Utils.alert("客户审核设置失败！");
+                }
+            });
+
+            $('#modal-no').modal('hide')
+        })
+    });
+
+</script>

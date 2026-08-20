@@ -1,0 +1,146 @@
+﻿@model Lvy.VModels.Saler.OrderStatisticVModel
+
+<table class="table table-sm">
+    <tr>
+        <td style="text-align: right;">收客人数：</td>
+        <td style="color: red;">@Model.SumTravellerCount.ToString() 人</td>
+        <td style="text-align: right;">销售总额：</td>
+        <td>￥@Model.SumPriceCount</td>
+        <td style="text-align: right;">返利总额：</td>
+        <td>￥@Model.SumFanLiCount</td>
+    </tr>
+    <tr>
+        <td style="text-align: right;">实收总额：</td>
+        <td>￥@Model.SumTolPaid</td>
+        <td style="text-align: right;">剩余总额：</td>
+        <td>￥@Model.ShengYuCount</td>
+        <td colspan="2" style="text-align: center;"></td>
+    </tr>
+</table>
+
+<div class="xbox clear">
+    <div class="btnlist">
+        <div class="fl">
+            <input type="button" value="导出预订单" id="downLoadBookOrder" class="btn btn-info" />
+        </div>
+    </div>
+    <table class="table table-sm table-bordered">
+        <thead>
+            <tr style="text-align: center;">
+                <th>订单号</th>
+                <th>产品名称</th>
+                <th>出发日期</th>
+                <th>联系人</th>
+                <th>客人名称</th>
+                <th>人数</th>
+                <th>应收款</th>
+                <th>订单状态</th>
+                <th style="width: 100px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.OrderModels.Items.Count > 0)
+            {
+                foreach (var item in Model.OrderModels.Items)
+                {
+                    var customer = DictionaryTools.GetCachedCustomer(item.BookingCustomer);
+                    <tr style="text-align: center;">
+                        <td><a href="@Url.Action("ReviewOrder", "Order", new { orderCode = item.OrderCode })">@item.OrderCode</a></td>
+                        <td style="text-align: left;">@item.LineName.TrimWithElipsis(17)</td>
+                        <td>@item.OutDate.ToDateFormat()</td>
+                        <td>@item.Managers</td>
+                        <td>@item.LinkMan</td>
+                        <td>@item.TravellerCount</td>
+                        <td style="text-align:right;">@item.TolYsPrice</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.OrderStateEnum, item.OrderState.ToString())</td>
+                        <td align="left">
+                            @if (GlobalContext.Current.UserInfo.CustomerCode == item.BookingCustomer)
+                            {
+                                if (item.OrderState == 1 && item.TraceState == 10)  //已结算的场合没有编辑和取消功能
+                                {
+                                    @Html.EditActionLink("EditOrder", "Order", new { orderCode = item.OrderCode })
+                                    <a href="javascript:void(0);" class="delete" orderCode="@item.OrderCode">取消</a>
+                                }
+                                if (item.BillFile != null)
+                                {
+                                    <a title="下载账单" href="@Url.Action("DownLoadFile", "Order", new { id = item.BillFile.Id })">下载账单</a>
+                                }
+
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr style="text-align: center;">
+                    <td colspan="11" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(m => m.OrderModels.PageIndex, new { id = "hiddenIndex" })
+    @Html.HiddenFor(m => m.OrderModels.PageSize)
+    <div id="divPagination" class="digg">
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+    	//分页控件
+    	$("#divPagination").pagination(
+    		Number('@Model.OrderModels.TotalCount'), {
+    		callback : pageselectCallback,
+    		items_per_page : ( @Model.OrderModels.PageSize),
+    		num_display_entries : 5,
+    		num_edge_entries : 2,
+    		current_page : ( @Model.OrderModels.PageIndex - 1)
+    	});
+
+    	//导出预订单
+    	$('#downLoadBookOrder').click(function () {
+    		var params = $('#theForm').formSerialize();
+    		$.fileDownload('/Seller/DownloadBookingOrder', {
+    			httpMethod : "POST",
+    			data : params
+    		});
+    	});
+
+              //删除订单
+//            $(".listtbl .delete").click(function () {
+//                //订单编号
+//                if (!confirm("确定取消该订单吗？")) {
+//                    return;
+//                }
+//                var params = {orderCode: $(this).attr("orderCode") };
+//                     $.post('@Url.Action("CancelOrder","Order")',params,function (data) {
+//                            if (data=="no") {
+//                                    Utils.alert('权限不足！');
+//                                }  else if(  data >= 1) {
+//                                pageselectCallback(@Model.OrderModels.PageIndex - 1);
+//                                } else {
+//                                        Utils.alert('删除失败！');
+//
+//                            }
+//                        });
+//            });
+
+    });
+
+    //分页
+    function pageselectCallback(pageId, jq) {
+    	var load_iii = Utils.layerLoad();
+    	$("#hiddenIndex").val(pageId + 1);
+    	var params = $("#theForm").formSerialize();
+    	$.post(
+    		'@Url.Action("OrderSearch")',
+    		params,
+    		function (data) {
+    		$('#listContent').html(data);
+    		hoverChangeStyle();
+    		Utils.layerClose(load_iii);
+    	});
+    }
+</script>

@@ -1,0 +1,65 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Base.ArticleVModel
+
+@if (Model.ArticlePageList.Items.Count > 0)
+{
+    foreach (var item in Model.ArticlePageList.Items)
+    {
+        <div class="content">
+            <img src="@item.ImgUrl" alt="">
+            <a href="/blog/details/@item.Id"><h4>@item.Title</h4></a>
+            <p class="date"><i class="fa fa-calendar"></i>@item.CreatedTime.ToShortDateString()</p>
+            <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit Officia vero consequatur nobis
+                recusandae. Quo facere corrupti possimus provident odio eos fuga dignissimos id dicta ipsam amet
+            </p>
+        </div>
+    }
+}
+else
+{
+    <div>
+        当前没有数据！
+    </div>
+}
+
+@Html.HiddenFor(a => a.ArticlePageList.PageIndex)
+<div id="Pagination" class="digg"></div>
+<div class="pagination">
+    <ul>
+        <li class="active">1</li>
+        <li><a href="">2</a></li>
+        <li><a href="">3</a></li>
+        <li><a href="">4</a></li>
+        <li><a href="">5</a></li>
+    </ul>
+</div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function() {
+        $("#Pagination").pagination(
+            Number('@Model.ArticlePageList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.ArticlePageList.PageSize'),
+                current_page: @Model.ArticlePageList.PageIndex-1
+            });
+    });
+
+    //回调方法
+     function pageselectCallback(page_id, jq) {
+         var load_iii = Utils.layerLoad();
+         $("#ArticlePageList_PageIndex").val(page_id + 1);
+         var params = $("#theForm").formSerialize();
+
+         $.post('@Url.Action("Search")', params, function(data) {
+             if (data.length<1) {
+                 Utils.alert("查询出错，请稍后查询！");
+                 return false;
+             }
+             $('#divNotices').html(data);
+             Utils.layerClose(load_iii);
+         });
+     }
+
+</script>

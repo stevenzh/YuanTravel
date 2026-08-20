@@ -1,0 +1,296 @@
+﻿@model Lvy.Visa.Models.VisaInformationModel
+@using Arch.Common
+@{
+    Layout = null;
+    string pictureUrl = AppSetting.Get("UploadFileRoot");
+}
+@if (!Model.InformationCode.IsNullOrEmpty())
+{
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">产品编码：</label>
+        <div class="col-sm-10">@Model.InformationCode</div>
+    </div>
+}
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 部门：</label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(m => m.TeamID, ViewBag.TeamList as IEnumerable<SelectListItem>, new { @Class = "form-control form-control-sm" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 类型：</label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(a => a.VType, ViewData["VTypeList"] as IEnumerable<SelectListItem>, new { @id = "VType", @class = "form-control", @onchange = "funChangeVType()" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">
+        <span class="text-danger">*</span>产品名称：<input type='hidden' id="hidPruductCode" value='@Model.InformationCode' />
+    </label>
+    <div class="col-sm-10">
+        @Html.TextBoxFor(a => a.InformationName, new { @class = "form-control", @id = "InformationName", @onchange = "funcheckNameIsExits(this)" })
+        <span id="spanPname"></span>
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 面销类型：</label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(a => a.InterviewType, ViewData["InterviewTypeList"] as IEnumerable<SelectListItem>, new { @id = "InterviewType", @class = "form-control" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 版块：</label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(a => a.Continent, ViewData["ContinentList"] as IEnumerable<SelectListItem>, new { @id = "Continent", @class = "form-control" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 签证国家或地区：</label>
+    <div class="col-sm-10">
+        <select id="VisaCountryParentStr" name="VisaCountryParentStr" class="form-control">
+            <option value="@Model.VisaCountryParentStr" selected="selected">@Model.VisaCountry</option>
+        </select>
+        @Html.HiddenFor(a => a.VisaCountry)
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 所属领区：</label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(a => a.VisaArea, ViewData["VisaAreaList"] as IEnumerable<SelectListItem>, new { @id = "VisaArea", @class = "form-control" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 签发地：</label>
+    <div class="col-sm-10">
+        <select id="VisaIssuePlace" name="VisaIssuePlace" class="form-control">
+            <option value="@Model.VisaIssuePlace" selected="selected">@DictionaryTools.GetDestNameStr(Model.VisaIssuePlace)</option>
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 办理时长：</label>
+    <div class="col-sm-10">
+        @Html.TextBoxFor(a => a.AcceptedTime, new { @class = "form-control", @id = "AcceptedTime" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 签证有效期：</label>
+    <div class="col-sm-10">
+        @Html.TextBoxFor(a => a.VisaExpiryDate, new { @class = "form-control", @id = "IsValidTime" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">
+        <span class="text-danger">*</span> 最长停留时间：
+    </label>
+    <div class="col-sm-10">
+        @Html.TextBoxFor(a => a.StayDays, new { @class = "form-control", @id = "StayDays" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">
+        <span class="text-danger">*</span> 入境次数：
+    </label>
+    <div class="col-sm-10">
+        @Html.TextBoxFor(a => a.EnterCount, new { @class = "form-control", @id = "EnterCount" })
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">
+        <span class="text-danger">*</span>  是否需要担保：
+    </label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(a => a.IsDanBao, ViewData["IsDanBaoList"] as IEnumerable<SelectListItem>, new { @id = "IsDanBao", @class = "form-control" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">是否可以加急办理</label>
+    <div class="col-sm-10">
+        @Html.DropDownListFor(a => a.IsHurry, ViewData["IsHurryList"] as IEnumerable<SelectListItem>, new { @id = "IsHurry", @class = "form-control" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span> 受理范围：</label>
+    <div class="col-sm-10">
+        @Html.TextAreaFor(a => a.AcceptedRange, new { @class = "form-control", @id = "AcceptedRange" })
+    </div>
+</div>
+
+
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label"><span class="text-danger">*</span>  图片：</label>
+    <div class="col-sm-10">
+        @if (Model.ImgUrl != null && Model.ImgUrl != "")
+        {
+            <img src="@(pictureUrl +Model.ImgUrl)" style="width: 100px; height: 50px;" id="img_pimg" name="img_pimg" onclick="funOpenVisaImg(this)" />
+        }
+        else
+        {
+            <img style="width: 100px; height: 50px; display: none;" id="img_pimg" name="img_pimg" src="@(pictureUrl +Model.ImgUrl)" onclick="funOpenVisaImg(this)" />
+        }
+        @Html.HiddenFor(a => a.ImgUrl, new { @id = "ImgUrl" })
+        <button type="button" class="btn btn-info btn-sm" onclick="funSelectImage()">选择图片</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#VisaCountryParentStr').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+        $('#VisaCountryParentStr').on("change", function (e) {
+            $("#VisaCountry").val($(this).select2('data')[0].text);
+        })
+
+
+        $('#VisaIssuePlace').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2?inChina=true';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $('#LivePassportArea').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2?inChina=true';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+
+    });
+    //产品名称验证
+    function funcheckNameIsExits(obj) {
+        var name = $(obj).val();
+        var param = { "InformationName": $('#InformationName').val(), "InformationCode": $('#hidPruductCodeTeam').val() };
+        $.post("/VisaProduct/CheckProductNameIsExists/", param, function (data) {
+            if (data == "Y") {
+                $("#spanPname").html("产品名称已存在！！");
+                alert("产品名称已存在! !");
+                $('#InformationName').focus();
+                $("#spanPname").css("color", "red");
+            }
+        });
+    }
+
+    //选择图片
+    function funSelectImage() {
+        var parentStr = $("#VisaCountryParentStr").val();
+        var url = "/District/ShowSelectImg/?VisaCountryParentStr=" + $.trim(parentStr) + "&Rnd=" + Math.random();
+
+        layer.open({
+            type: 2,
+            title: '选择图片',
+            maxmin: true,
+            shadeClose: true, //点击遮罩关闭层
+            area: ['900px', '400px'],
+            content: url
+        });
+    }
+
+    function funSelectImageReturn(url) {
+        $("#img_pimg").attr("src", url);
+        $("#ImgUrl").val(url);
+    }
+
+    //签证类型选择
+    function funChangeVTypeTeam() {
+        var vtype = $("#VType").val();
+        if (vtype == "1") {
+            var productCode = $("#hidPruductCodeTeam").val();
+            if (productCode != null && productCode != "") {
+                window.location.href = '/VisaProduct/ShowTabModifyProduct?InformationCode=' + productCode + "&&CurrentTabNum=0&&VTypeS=1";
+            }
+            else {
+                window.location.href = '/VisaProduct/AddProduct/';
+            }
+        }
+    }
+    function funOpenVisaImg(imgObj) {
+        var srcVal = $(imgObj).attr("src");
+        $.dialog({
+            id: 'visaImgs',
+            title: '照片',
+            lock: true,
+            min: false,
+            fixed: true,
+            content: '<img src="' + srcVal + '" />',
+            padding: 0
+        });
+    }
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+</script>
+

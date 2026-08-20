@@ -1,0 +1,20 @@
+﻿@model Lvy.VModels.Product.SearchShareQuotaVModel
+<div align="center" class="xboxcontent clear">
+    <div class="sotable_tit">
+        共享库存查询
+    </div>
+    <table class="sotable" style="width:100%;">
+        <tr>
+            <td class="label">共享编号：</td>
+            <td>
+                @Html.TextBoxFor(m => m.ShareId, new { @class = "text150" })
+            </td>
+            <td class="label">共享名称：</td>
+            <td>
+                @Html.TextBoxFor(m => m.ShareName, new { @class = "text150" })
+            </td>
+        </tr>
+    </table>
+    <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+    <input class="btn btn1" id="btnClear" type="button" value="清空" />
+</div>

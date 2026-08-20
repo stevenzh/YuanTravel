@@ -1,0 +1,273 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.TpLineVModel
+
+<table class="table table-sm projects listtbl">
+    <thead>
+        <tr style="text-align: center;">
+            <th>线路名称</th>
+            <th>行程天数</th>
+            <th>出发-目的地</th>
+            <th>类型</th>
+            <th>状态</th>
+            <th style="width: 160px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.LineList.Items)
+        {
+            <tr style="text-align:center;">
+                <td title="@item.LineName" style="text-align:left;">
+                    @item.LineName.TrimWithElipsis(35)<br />
+                    <small>
+                        @DictionaryTools.GetEnumValue(Enums.LineTypeEnum, item.LineType.ToString(CultureInfo.InvariantCulture))  @item.LineId
+                    </small>
+                </td>
+                <td>@item.Night 晚 @item.TravelDays 天</td>
+                <td>
+                    @(string.IsNullOrEmpty(item.DepartDest)?"多地": DictionaryTools.GetEnumValue(Enums.OutCityEnum, item.DepartDest)) -
+                    @DictionaryTools.GetDestNameStr(item.ArriveDest)
+                </td>
+                <td>
+                    @DictionaryTools.GetEnumValue(Enums.LineScopeEnum, item.LineScope.ToString(), false)
+                    - @DictionaryTools.GetEnumValue(Enums.LineTypeEnum, item.LineType.ToString(), false)
+                </td>
+                <td>
+                    @if (item.ImportState == 0)
+                    {
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                初始
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                <a class="dropdown-item" href="#">提交审核</a>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        var state = DictionaryTools.GetEnumValue(Enums.ImportStateEnum, item.ImportState.ToString(), false);
+
+                        switch (item.ImportState)
+                        {
+                            case 0:
+                                @:<span class="badge badge-secondary">@state</span>
+                                break;
+                            case 1:
+                                @:<span class="badge badge-info">@state</span>
+                                break;
+                            case 2:
+                                @:<span class="badge badge-warning">@state</span>
+                                break;
+                            default:
+                                @:<span class="badge badge-success">@state</span>
+                                break;
+                        }
+                    }
+                </td>
+                <td class="project-actions">
+                    @if (item.LineState == 2)
+                    {
+                        <a name="changelineState" class="btn btn-sm btn-info mt-1" url="/LineAdmin/ChangeOnline/@item.LineId" state="offline" data-id="@item.LineId" deleteState="@item.IsValid" href="javascript:void(0);"><i class="fa fa-arrow-up"></i>上架</a>
+                    }
+                    else
+                    {
+                        <a name="changelineState" class="btn btn-sm btn-info mt-1" url="/LineAdmin/ChangeOffline/@item.LineId" state="online" data-id="@item.LineId" deleteState="@item.IsValid" href="javascript:void(0);"><i class="fa fa-arrow-down"></i>下架</a>
+                    }
+                    <a class="btn btn-sm btn-primary mt-1 edit" href="javascript:void(0);" check-url="@Url.Action("CheckOrdered", new { lineId = item.LineId })" edit-url="@Url.Action("AddLineInfo", new { lineId = item.LineId })"><i class="fa fa-edit"></i>编辑</a>
+                    <br />
+                    <a class="btn btn-sm btn-default mt-1" href="@Url.Action("CopyLine", new { id = item.LineId })"><i class="fa fa-copy"></i>复制</a>
+
+                    <a class="btn btn-sm btn-success mt-1" href="@Url.Action("UCTourStore", new { lineId = item.LineId }) "><i class="fa fa-calendar"></i> 库存</a>
+
+                    @*<a href="@Url.Action("BatchEditTour", new { lineId = item.LineId })" title="批量修改团计划"><i class="fa fa-th"></i></a>*@
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(m => m.LineList.PageIndex, new { id = "hiddenIndex" })
+@Html.HiddenFor(m => m.LineList.PageSize)
+<div id="divPagination" class="digg"></div>
+
+<script type="text/javascript">
+    //分页回调函数
+    function pageselectCallback(pageId) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchLine")',params,function (data) {
+
+            if (data=="no") {
+                Utils.alert('权限不足！');
+
+            } else {
+                $('#lineListContent').html(data);
+                hoverChangeStyle();
+            }
+
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    $(function () {
+        // 创建分页
+        $("#divPagination").pagination(Number('@Model.LineList.TotalCount'), {
+            callback : pageselectCallback,
+            items_per_page : ( @Model.LineList.PageSize),
+            num_display_entries : 5,
+            num_edge_entries : 2,
+            current_page : ( @Model.LineList.PageIndex - 1)
+        });
+
+        //更改上线、下线状态
+        $("a[name=changelineState]").click(function () {
+            if(Number($(this).attr('deleteState'))==0) {
+                Utils.alert('该线路已被删除！');
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            var $link = $(this);
+            $.post( $link.attr("url"),function (data) {
+                if (data=="no") {
+                    Utils.alert('权限不足！');
+                }
+                else if (Number(data) > 0) {
+                    var state = $link.attr("state");
+                    if (state == "online") {
+                        $link.attr("state", "offline");
+                        $link.attr("title", "上线");
+                        $link.attr("url", "/LineAdmin/ChangeOnline/" + $link.attr("data-id"));
+                        $link.html("<i class='fa fa-arrow-up'></i>上线");
+                    } else {
+                        $link.attr("state", "online");
+                        $link.attr("title", "下线");
+                        $link.html("<i class='fa fa-arrow-down'></i>下线");
+                        $link.attr("url", "/LineAdmin/ChangeOffline/" + $link.attr("data-id"));
+                    }
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+        // 编辑线路
+        $('.listtbl a.edit').click(function(){
+            var $this = $(this);
+            var lineState=$this.prev().attr('state');
+            if(lineState=='online'){
+                //var load_iii = Utils.layerLoad();
+                //$.post($this.attr('check-url'), function(data) {
+                //    if(data&&Number(data)==1) {
+                //        Utils.alert('该线路已产生订单，无法编辑！');
+                //    }
+                //    else if(data&&Number(data)==0) {
+                        window.location = $this.attr('edit-url');
+                    //}
+                    //else {
+                    //    //请求错误
+                    //}
+                    //Utils.layerClose(load_iii);
+                //});
+            }
+            else {
+                window.location = $this.attr('edit-url');
+            }
+            return false;
+        });
+
+        // 删除线路
+        $('.listtbl a.delete').click(function(){
+            var $this = $(this);
+            var load_iii = Utils.layerLoad();
+            $.post($this.attr('check-url'), function(data) {
+                if(data&&Number(data)==1) {
+                    Utils.alert('该线路已产生订单，无法删除！');
+                }
+                else if(data&&Number(data)==0) {
+                    if(confirm('确定删除吗？')) {
+                        window.location = $this.attr('delete-url');
+                    }
+                }
+                else {
+                    Utils.alert('删除发生异常。');
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        $('.listtbl a.audit1,a.audit2').click(function() {
+            var load_iii = Utils.layerLoad();
+            var param = { lineId: $(this).attr('lineId'), teamId: $(this).attr('data-teamId') };
+            $.post('@Url.Action("EditLineAdmin")',param, function (data) {
+                Utils.layerClose(load_iii);
+
+                layer.open({
+                    type: 1, title: '编辑专管员', maxmin: false
+                    , shadeClose: false, area: ['400px', '550px']
+                    , content: data
+                    , success: function (layero, index) {
+                        rengerEditLineAdmin();
+                    }
+                    , btn: ["保存", "关闭"]
+                    , yes: function (index, layero) {
+                        var $form = $('#lineAdminForm');
+                        var action = $form.attr('action');
+                        var params = $form.formSerialize();
+                        $.post(action, params, function (result) {
+                            if (result && result == 'success') {
+                                layer.msg('保存成功。');
+                                layer.close(index);
+                            }
+                            else {
+                                layer.msg('保存失败。');
+                            }
+                        });
+                    }
+                    , btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+            });
+        });
+    });
+
+    function rengerEditLineAdmin() {
+        $('#lineAdminForm').find(':checkbox[name="Check4Customer"]').click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $this.prev().val(1);
+            } else {
+                $this.prev().val(0);
+            }
+        });
+        $('#lineAdminForm').find(':checkbox[name="Check4Plat"]').click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $this.prev().val(1);
+            } else {
+                $this.prev().val(0);
+            }
+        });
+        var $radioCustomer = $('#lineAdminForm').find(':radio[name="Primary4Customer"]');
+        $radioCustomer.click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $radioCustomer.each(function () {
+                    $(this).parent().prev().val(0);
+                });
+                $this.parent().prev().val(1);
+            }
+        });
+        var $radioPlat = $('#lineAdminForm').find(':radio[name="Primary4Plat"]');
+        $radioPlat.click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $radioPlat.each(function () {
+                    $(this).parent().prev().val(0);
+                });
+                $this.parent().prev().val(1);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,200 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@using Arch.Common
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">订单信息</h3>
+    </div>
+    <div id="divShowOrderBaseInfo" class="card-body">
+        <table id="tabOrderBaseInfo" class="table table-sm">
+            <tr>
+                <td><strong>订单编号：</strong> </td>
+                <td>@Model.OrderModel.OrderCode</td>
+            </tr>
+            <tr>
+                <td><strong>订单状态：</strong></td>
+                <td>@DictionaryTools.GetEnumValue(Enums.VisaOrderStatusEnum, Model.OrderModel.TraceState.ToString())</td>
+
+            </tr>
+            <tr>
+                <td><strong>订单来源：</strong></td>
+                <td style="color: blue;">@Model.MasterOrder.OrderSourceValue</td>
+            </tr>
+            <tr>
+                <td><strong>人数：</strong></td>
+                <td>@Model.MasterOrder.AuditPax 成人 @Model.MasterOrder.ChildPax 儿童</td>
+            </tr>
+            <tr>
+                <td><strong>订单金额：</strong></td>
+                <td><span style="color: #f60;">￥@(Model.MasterOrder.YingShou.ToString("0.##"))</span></td>
+            </tr>
+            <tr>
+                <td><strong>支付状态：</strong></td>
+                <td style="color: Red;">@DictionaryTools.GetEnumValue(Enums.PayStatusEnum, Model.MasterOrder.PaymentStatus.ToString())</td>
+            </tr>
+            <tr>
+                <td><strong>预定人：</strong></td>
+                <td>@DictionaryTools.GetCachedAccount(Model.MasterOrder.CreatedBy).Name</td>
+            </tr>
+            <tr>
+                <td><strong>预定日期：</strong></td>
+                <td>@Model.MasterOrder.CreatedTime.ToString()</td>
+            </tr>
+            <tr>
+                <td><strong>团号：</strong></td>
+                <td>@Model.MasterOrder.TourNo</td>
+            </tr>
+            <tr>
+                <td><strong>预约出行日期：</strong></td>
+                <td>
+                    <div class="input-group">
+                        @Html.TextBox("readydate", (Model.MasterOrder.OutDate == null ? "" : Model.MasterOrder.OutDate.Value.ToString("yyyy-MM-dd")), new { @class = "form-control form-control-sm Wdate", onclick = @"WdatePicker()" })
+                        <input type="button" class="btn btn-sm btn-info" value="修改" onclick="funUpdateReadyDate(this)" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>材料截止收取日期：</strong></td>
+                <td>
+                    <div class="input-group">
+                        @Html.TextBox("materialDeadline", (Model.OrderModel.MaterialDeadline == null ? "" : Model.OrderModel.MaterialDeadline.Value.ToString("yyyy-MM-dd")), new { @class = "form-control form-control-sm Wdate", onclick = @"WdatePicker()" })
+                        <input type="button" class="btn btn-sm btn-info" value="修改" onclick="funSaveMaterialDeadline(this)" />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>操作员：</strong></td>
+                <td>
+                    <div class="input-group">
+                        @Html.TextBoxFor(a => a.OrderModel.OperateName, new { @class = "form-control form-control-sm", @id = "operatename" })
+                        <input type="button" class="btn btn-sm btn-info" value="修改" onclick="funSaveOperateName(this)" />
+                    </div>
+                </td>
+            </tr>
+            @if (Model.ProductModel != null && (Model.ProductModel.InterviewType == 1 || Model.ProductModel.InterviewType == 3))
+            {
+                <tr>
+                    <td><strong>面试通知书是否已上传：</strong></td>
+                    <td><strong>面试日期：</strong></td>
+                    <td>
+                        <div class="input-group">
+                            @Html.TextBox("interviewdate", (Model.OrderModel.InterviewDate == null ? "" : Model.OrderModel.InterviewDate.Value.ToString("yyyy-MM-dd")), new { @class = "form-control form-control-sm Wdate", onclick = @"WdatePicker()" })
+                            <input type="button" class="btn btn-sm btn-info" value="修改" onclick="funSaveInterViewDate(this)" />
+                        </div>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td><strong>送签日期：</strong></td>
+                <td>@(Model.OrderModel.SendVisaDate == null ? "" : Model.OrderModel.SendVisaDate.Value.ToString("yyyy-MM-dd"))</td>
+            </tr>
+            <tr>
+                <td><strong>签出日期：</strong></td>
+                <td>@(Model.OrderModel.FinishVisaDate == null ? "" : Model.OrderModel.FinishVisaDate.Value.ToString("yyyy-MM-dd"))</td>
+            </tr>
+            <tr>
+                <td><strong>付款申请：</strong></td>
+                <td>
+                    <input type="checkbox" checked="checked" disabled="disabled" onclick="funSaveIsPayment(this)" />
+                    <input type="button" class="btn btn-sm btn-info" value="收款" onclick="funShoukuan()" />
+                    <span id="spanshowkuan" style="color: Red;">(临时用)</span>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>特殊要求：</strong></td>
+                <td>@Model.OrderModel.Note</td>
+
+                @*<td><strong>跟进日期：</strong></td>
+                    <td>
+                        <div class="input-group">
+                            @Html.TextBox("FollowupDate", Model.OrderModel.FollowupDate != null ? Model.OrderModel.FollowupDate.Value.ToString("yyyy-MM-dd") : "", new { @id = "txtGjDate", @class = "form-control form-control-sm Wdate", onclick = @"WdatePicker({dateFmt:'yyyy-MM-dd'})" })
+                            <input type="button" class="btn btn-sm btn-info" value="修改" onclick="funModifyFollowupDate()" />
+                        </div>
+                    </td>*@
+            </tr>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+    //修改（自助游，团队游）预约出行日期
+    function funUpdateReadyDate(obj) {
+        $(obj).attr("disabled", true);
+        var _readydate = $("input[name=readydate]").val();
+        if ($.trim(_readydate) == "") {
+            alert("请选择预约出发日期！");
+            $("input[name=readydate]").focus();
+            $(obj).removeAttr("disabled");
+        }
+        else {
+            $.post("/OrderAdmin/SaveOrderReadyDate/", { "MasterOrderCode": orderCode, "OutDate": _readydate }, function () {
+                alert("修改成功！");
+                $(obj).removeAttr("disabled");
+            });
+        }
+    }
+    //保存材料截止收取日期
+    function funSaveMaterialDeadline(obj) {
+        $(obj).attr("disabled", true);
+        var _materialDeadline = $("input[name=materialDeadline]").val();
+        if ($.trim(_materialDeadline) == "") {
+            alert("请选择材料截止收取日期！");
+            $("input[name=materialDeadline]").focus();
+            $(obj).removeAttr("disabled");
+        }
+        else {
+            $.post("/OrderAdmin/SaveMaterialDeadline/", { "OrderCode": orderCode, "MaterialDeadline": _materialDeadline }, function () {
+                alert("修改成功！");
+                $(obj).removeAttr("disabled");
+            });
+        }
+    }
+    //保存操作人
+    function funSaveOperateName(obj) {
+        $(obj).attr("disabled", true);
+        var _operatename = $("#operatename").val();
+        if ($.trim(_operatename) == "") {
+            alert("请输入操作人姓名！");
+            $("#operatename").focus();
+            $(obj).removeAttr("disabled");
+        } else {
+            $.post("/OrderAdmin/SaveOperateName/", { "OrderCode": orderCode, "OperateName": _operatename }, function () {
+                alert("修改成功！");
+                $(obj).removeAttr("disabled");
+            });
+        }
+    }
+    //付款（临时用）
+    function funShoukuan() {
+        $.post("/OrderAdmin/UpdatePayState/", { "MasterOrderCode": orderCode }, function () {
+            alert("收款成功！");
+        });
+    }
+    function funModifyFollowupDate() {
+        var tempGjDate = $.trim($("#txtGjDate").val());
+        if (tempGjDate == "") {
+            alert("请输入跟进日期！！");
+            $("#txtGjDate").focus();
+            return false;
+        }
+        var regex = /^\d{4}[\/\-](0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])$/;
+        if (!regex.test(tempGjDate)) {
+            alert("跟进日期格式错误，请输入yyyy-MM-dd格式的日期！！");
+            $("#txtGjDate").focus();
+            return false;
+        }
+
+        var gjDateArray = tempGjDate.split('-');
+        var now = new Date();
+        var d1 = new Date(gjDateArray[0], gjDateArray[1], gjDateArray[2]);
+        var d2 = new Date(now.getFullYear(), parseInt(now.getMonth() + 1), now.getDate());
+
+        if (d1.getTime() < d2.getTime()) {
+            alert("跟进日期必须大于等于当前日期，请重新输入！！");
+            $("#txtGjDate").focus();
+            return false;
+        }
+        $.post("/OrderAdmin/UpdateFollowupDate/", { "OrderCode": orderCode, "FollowupDate": tempGjDate }, function () {
+            alert("已修改！！");
+        });
+    }
+</script>

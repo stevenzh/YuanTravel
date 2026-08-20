@@ -1,0 +1,33 @@
+﻿@model Lvy.VModels.Base.BrandVModel
+@{
+    ViewBag.Title = "品牌管理";
+}
+
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+    <div id="divEditRole">
+        <div class="station">
+            品牌管理
+        </div>
+        <div class="inform">
+            <table style="width:100%;">
+                <tr>
+                    <td class="label"><span class="point">*</span>品牌名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.BrandModel.Name, new { @class = "text150" })
+                    </td>
+                    <td class="label">部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.BrandModel.TeamID, (List<SelectListItem>)ViewBag.TeamBeans)
+                    </td>
+                    <td>
+                        <input class="btn btn1" id="btnSearch" type="button" value="查询" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="divRoles">
+        @Html.Partial("List", Model)
+    </div>
+</form>

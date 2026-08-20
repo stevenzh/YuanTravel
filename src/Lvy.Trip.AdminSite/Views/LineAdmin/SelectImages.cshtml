@@ -1,0 +1,83 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <script type="text/javascript">
+        imageIndex = 0;
+    </script>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">图片列表</h3>
+        <div class="card-tools">
+            <div class="input-group input-group-sm" style="width: 200px;">
+                <select id="selectArriveCityName" class="form-control ">
+                    <option value="@Model.CountryCode" selected="selected">@Model.CountryName</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div id="select_city_img_lists" class="card-body table-responsive p-0">
+        @if (!string.IsNullOrEmpty(Model.CountryCode))
+        {@Html.Partial("ImageList")}
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+@section PageScripts
+{
+    <script type="text/javascript">
+        $(function () {
+            $("#selectArriveCityName").on("change", function (e) {
+                imageIndex = 0;
+                var index = layer.load(1);
+                $.post("/LineAdmin/SearchImages/", { "ParentStr": $('#selectArriveCityName').val(), "ImagePagedIndex": 1 }, function (data) {
+                    if (data != null && data != "") {
+                        $("#select_city_img_lists").html(data);
+                        layer.close(index);
+                    }
+                });
+            });
+
+            $('#selectArriveCityName').select2({
+                ajax: {
+                    url: function (params) {
+                        return ApiServerUrl + '/Dest/GetDestSelect2';
+                    },
+                    dataType: 'json',
+                    processResults: function (data) {
+                        var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                        var arr = data.items
+                        for (item in arr) {
+                            itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                        }
+                        return {
+                            results: itemList
+                        };
+                    },
+                    cache: true
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                templateResult: formatState
+            });
+
+        });
+
+        function formatState(state) {
+            if (!state.id) { return state.text; }
+            var $state = $(
+                '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+            );
+            return $state;
+        };
+
+    </script>
+}
+
+

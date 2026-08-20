@@ -1,0 +1,109 @@
+﻿@model  Lvy.VModels.Base.AirlineVModel
+<style>
+    .listtbl tbody td { text-align: center; }
+</style>
+<div class="btnlist">
+    <div class="fr">
+        <input type="button" class="btn btn1" id="btnAdd" value="新 增" />
+    </div>
+</div>
+@if (Model.AirelinePageList.Items.Count > 0)
+{
+    <table class="listtbl" style="width:100%;">
+        <thead>
+            <tr>
+                <td>编码</td>
+                <td>名称</td>
+                <td>全称</td>
+                @*<td>联系人</td>
+                    <td>联系电话</td>*@
+                <td align="center" style="width: 70px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.AirelinePageList.Items)
+            {
+                <tr>
+                    <td>@item.Code</td>
+                    <td>@item.ShortName</td>
+                    <td>@item.FullName</td>
+                    @*<td>@item.ContactName</td>
+                        <td>@item.ContactPhone</td>*@
+                    <td>
+                        <a href="javascript:void(0)" class="edit" name="editAirline" title="编辑" bindId="@item.Id">编辑</a>
+                        <a href="javascript:void(0)" class="edit" name="deleteAirline" title="删除" bindId="@item.Id">删除</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @Html.HiddenFor(a => a.AirelinePageList.PageIndex)
+    <div id="Pagination" class="digg"></div>
+}
+else
+{
+    <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+        <br />
+        对不起，没有查找到数据！请重新输入查询条件 ！
+    </div>
+}
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+
+        $("#Pagination").pagination(
+            Number('@Model.AirelinePageList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.AirelinePageList.PageSize'),
+                current_page: @Model.AirelinePageList.PageIndex-1
+            });
+
+        $("#btnAdd").click(function () {
+            layer.open({ type: 2, title: '添加航空公司', maxmin: true, shadeClose: false, area: ['600px', '240px'], content: '@Url.Action("AddAirline", "Airline")' });
+        });
+
+        $("a[name='editAirline']").each(function () {
+            $(this).click(function () {
+                var url = "/Airline/EditAirline/" + $(this).attr("bindId");
+                layer.open({ type: 2, title: '编辑航空公司', maxmin: true, shadeClose: false, area: ['600px', '240px'], content: url });
+            });
+        });
+
+        $("a[name='deleteAirline']").each(function () {
+            $(this).click(function () {
+                if (!confirm("确定删除？")) {
+                    return;
+                }
+                var load_iii = Utils.layerLoad();
+                var url = "/Airline/DeleteAirline";
+                $.get(url, { Id: $(this).attr("bindId") }, function (data) {
+                    if (data.code =="0") {
+                        pageselectCallback(0);
+                    }
+                    Utils.layerClose(load_iii);
+                });
+            });
+        });
+
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#AirelinePageList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchAirline")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+</script>

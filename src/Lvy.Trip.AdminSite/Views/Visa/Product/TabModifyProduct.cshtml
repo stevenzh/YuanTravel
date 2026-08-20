@@ -1,0 +1,175 @@
+﻿@model Lvy.Visa.VModels.VisaInformationQModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <script src="~/Scripts/Validation.js"></script>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>修改签证信息</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/ProductAdmin/Index">签证管理</a></li>
+                    <li class="breadcrumb-item active">@Model.Info.InformationName</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+    <div class="card">
+        <div class="card-header">
+            <div id="menDiv-2">
+                <div class="btn-group">
+                    <a class="btn btn-info" href="/VisaProduct/ShowTabModifyProduct?InformationCode=@Model.InformationCode&CurrentTabNum=0">基本信息</a>
+                    <a class="btn btn-default" href="/VisaProduct/ShowTabModifyProduct?InformationCode=@Model.InformationCode&CurrentTabNum=1">签证材料</a>
+                    <a class="btn btn-default" href="/VisaProduct/ShowTabModifyProduct?InformationCode=@Model.InformationCode&CurrentTabNum=2">操作历史</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <input type="hidden" id="hid_e_information_code" value='@Model.InformationCode' />
+            <div id="main-2" class="tab-pane fade show active">
+            </div>
+
+            <div id="showProductRemarkDiv" style="position: absolute; top: 6%; z-index: 999;">
+                <div style="position: fixed; display: none;" onmouseleave='$("#divShowPCurrenRemarks").hide();' onmouseenter='$("#divShowPCurrenRemarks").show();' id="showRemarksDiv">
+                    <div id="divShowPCurrenRemarks" style="width: 500px; height: 260px; float: left; padding-right: -30px; background: #fff; border: 1px #6da4cb solid; display: none; padding: 5px 2px 2px 2px; overflow: auto;" class="remark_table">
+                        <table width="99%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <th style="white-space: nowrap; background-color: #f6f6f6;">序号</th>
+                                <th style="white-space: nowrap; background-color: #f6f6f6;">备注</th>
+                                <th style="white-space: nowrap; background-color: #f6f6f6;">提交人</th>
+                                <th style="white-space: nowrap; background-color: #f6f6f6;">提交时间</th>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <div style="float: left; width: 30px;">
+                        <button>查看</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+    $(function () {
+        setModifyPTab(@Model.CurrentTabNum);
+    });
+
+    /*更换显示样式*/
+    function setModifyPTab(n) {
+        $("#menDiv-2 a").each(function (x) {
+            if (x == n) {
+                $(this).removeClass().addClass("btn btn-info");
+            } else {
+                $(this).removeClass().addClass("btn btn-default");
+            }
+        });
+        funGetTabInfo(n);
+    }
+    //获取tab标签的内容
+    function funGetTabInfo(n) {
+        var route = '';
+        var param = {
+            "InformationCode": $("#hid_e_information_code").val(),
+            "CurrentTabNum": n,
+            "VTypeS": '@Model.VTypeS'
+        }
+        if (n == 1) {
+            // route='/VisaData/VisaDataAdd';
+            route = '/VisaData/VisaDataPartial'
+        } else if (n == 2) {
+            route = '/OperateHistory/SearchInforOperateHistorys';
+        } else {
+            route = '/VisaProduct/ModifyProduct/';
+        }
+        var layer_ii = layer.load(1);
+        $.post(route, param, function (data) {
+            $('#main-2').html(data);
+            layer.close(layer_ii);
+        });
+    }
+    //修改产品状态
+    function UpdateProductState(pcode, state) {
+        var param = { "InformationCode": pcode, "State": state };
+        $.post("/VisaProduct/SearchProductData/", param, function (data) {
+            if (data != "产品录入完整!!") {
+                alert("数据录入不完整，请先将产品数据录入完整");
+                Utils.alert(data);
+            }
+            else {
+                $.post("/VisaProduct/UpdateProductState/", param, function (data) {
+                    if (data.Code == "1") {
+                        Utils.alert("设置成功。");
+                        history.go(0);
+                    }
+                });
+            }
+        });
+    }
+    //审核/测试不通过
+    function funNoPassRemark(pcode, state) {
+        layer.prompt({ title: '不通过原因', formType: 2 },
+            function (text, index) {
+                var param = { "InformationCode": pcode, "State": state, "Remarks": text };
+                $.post("/VisaProduct/UpdateProductState/", param, function (data) {
+                    if (data.Code == "1") {
+                        Utils.alert("设置成功。");
+                        history.go(0);
+                    }
+                });
+                layer.close(index);
+            }
+        );
+    }
+    //检测数据
+    function FunSearchProductData(pcode) {
+        var param = { "InformationCode": pcode };
+        $.post("/VisaProduct/SearchProductData/", param, function (data) {
+            Utils.alert(data);
+        });
+    }
+
+    //关闭数据检测结果
+    function Funclose() {
+        $("#searchProduteDataResult").hide();
+    }
+    //下线备注
+    function funOffLineRemark(pcode, state) {
+        layer.prompt({ title: '下线原因', formType: 2 },
+            function (text, index) {
+                var param = { "InformationCode": pcode, "State": state, "Remarks": text };
+                $.post("/VisaProduct/SaveProductOffLineRemarks/", param, function (data) {
+                    if (data.Code == "1") {
+                        Utils.alert("设置成功。");
+                        history.go(0);
+                    }
+                });
+                layer.close(index);
+            });
+    }
+    //产品管理
+    function funProductManagement() {
+        window.location.href = "/ProductAdmin/Index";
+    }
+    function funShowAddRemark() {
+        $("#div_Add_P_Remark").show();
+        $("#pRemarkTitle").hide();
+    }
+</script>
+
+

@@ -1,0 +1,25 @@
+﻿@model  Lvy.VModels.Order.OrderEditVModel
+
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+    部分操作日志
+</div>
+<table class="listtbl" style="width:100%;">
+    <thead>
+        <tr style="text-align: center;">
+            <td>事件</td>
+            <td>操作人</td>
+            <td>操作时间</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.LogList)
+        {
+            <tr style="text-align: center;">
+                <td>@item.Event</td>
+                <td>@DictionaryTools.GetCachedAccount(item.ModifiedBy).Name</td>
+                <td>@item.ModifiedTime.ToString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

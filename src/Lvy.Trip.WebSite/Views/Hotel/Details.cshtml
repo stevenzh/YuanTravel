@@ -1,0 +1,105 @@
+﻿@model Lvy.Models.HotelDB.HotelModel
+@{
+    ViewBag.Title = "签证_各国旅游签证";
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+@section AdditionalResources {
+    <link href="~/lib/slick-1.8.0/slick.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="@CDNServerUrl/jquery-ui/jquery-ui.min.css" />
+}
+
+<!-- Shop -->
+<div class="deals_featured">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <!-- Shop Sidebar -->
+                <div class="shop_sidebar">
+                    @*@{Html.RenderAction("HotVisaCountry"); }
+                    @Html.Partial("VisaFAQ")*@
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <a href="javascript:void(0);" title="">
+                            <img src="@(picroot+ Model.LogoPath)" style="height:120px;" />
+                        </a>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>&lt;@Model.CityCode 送签&gt;@Model.HotelName</h3>
+                            </div>
+
+                            <div class="card-body">
+                                起价：<span class="f18">¥ @Model.SalePrice</span>
+                                <ul class="clear ovf">
+                                    <li class="ovf">入住时间：@Model.InTimeBegin</li>
+                                    <li class="ovf">退房时间：@Model.OutTimeEnd</li>
+                                    <li class="ovf">交通：</li>
+                                    <li class="ovf">设施：@Model.Facility</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <a class="btn btn-info" href="/hotel/booking?hotelCode=@Model.HotelCode">立即预订</a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card card-primary card-outline">
+                    <div class="card-header p-0 border-bottom-0">
+                        <h4 class="card-title">酒店房型</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            @for (int i = 0; i < Model.RoomList.Count; i++)
+                            {
+                                var categoryModel = Model.RoomList[i];
+                              
+                                <div class="tab-pane fade @(i==0?"show active":"")" role="tabpanel">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th width="128">需提交材料</th>
+                                                <th>详细说明</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var dataModel in categoryModel.BedList)
+                                            {
+                                               <tr>
+                                                    <td class="b" valign="top">@dataModel.BedName</td>
+                                                    <td valign="top">
+                                                        <div>@Html.Raw(dataModel.BedType)</div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                            }
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+
+                <form id="frmOrder" method="post" action="/booking/visaorder">
+                    <input type="hidden" value="@Model.HotelCode" id="ProductCode" name="ProductCode" />
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+

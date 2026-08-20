@@ -1,0 +1,276 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+@using Lvy.Models.ProductDB
+@*长线游客信息,可选证件类型*@
+
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+    游客信息(NoBusTravellers)
+</div>
+<div style="overflow-x:scroll; padding-bottom:50px; max-width:100%">
+    <table id="tbTrallers" class="listtbl" style="width:1650px;">
+        <thead>
+            <tr>
+                <td>姓名</td>
+                <td>性别</td>
+                <td>英文名</td>
+                <td>出生日期</td>
+                <td>出生地</td>
+                <td>证件类型</td>
+                <td>证件号码</td>
+                <td>签发时间</td>
+                <td>签发地</td>
+                <td>证件有效期</td>
+                <td>电话</td>
+                <td>报价类型</td>
+                <td>价格调整</td>
+                <td>
+                    <label for="chkAllTax">
+                        <input id="chkAllTax" name="chkAllTax" type="checkbox" />税
+                    </label>
+                </td>
+                <td>
+                    <label for="chkAllVisaPrice">
+                        <input id="chkAllVisaPrice" name="chkAllVisaPrice" type="checkbox" />签证费
+                    </label>
+                </td>
+                <td>
+                    <label for="chkAllZiFei">
+                        <input id="chkAllZiFei" name="chkAllZiFei" type="checkbox" />保证自费
+                    </label>
+                </td>
+                <td>
+                    <label for="chkAllSingleRoom">
+                        <input id="chkAllSingleRoom" name="chkAllSingleRoom" type="checkbox" />房差
+                    </label>
+                </td>
+                <td>小费</td>
+                <td>应收款</td>
+                @{
+                    //判断是否有取消游客的权限
+                    var IsCancel = GlobalContext.Current.FunctionList.Where(a => a.FuncType == 5 && a.Name.Contains("取消游客")).FirstOrDefault() == null ? false : true;
+                }
+                <td style="width:30px;">操作</td>
+            </tr>
+        </thead>
+        <tbody id="tbTravellers">
+            @if (Model.Order.TravellerModels.Count > 0)
+            {
+                //有效游客信息的 状态2
+                var cnt = Model.Travellers2.Count();
+                for (int i = 0; i < cnt; i++)
+                {
+                    <tr name="travellerTr">
+                        <td align="center">
+                            <input type="hidden" value="@Model.Travellers2[i].Id" name="Travellers2[@i].Id" />
+                            <input type="text" value="@Model.Travellers2[i].Name" class="text50" name="Travellers2[@i].Name" />
+                        </td>
+                        <td align="left">
+                            @Html.DropDownList("Travellers2[" + i + "].Sex", ViewBag.Sex as IEnumerable<SelectListItem>, new { @class = "text70" })
+                            <input type="hidden" value="@Model.Travellers2[i].Sex" class="clsSex" />
+                        </td>
+                        <td align="left">
+                            <input type="text" value="@Model.Travellers2[i].PinYin" class="text70" name="Travellers2[@i].PinYin" />
+                        </td>
+                        <td align="left">
+                            <input type="text" name="Travellers2[@i].DateOfBirth" value="@(Model.Travellers2[i].DateOfBirth==null?"":Model.Travellers2[i].DateOfBirth.Value.ToString("yyyy-MM-dd"))" class="Wdate text100" onfocus="WdatePicker({isShowClear:false})" />
+                        </td>
+                        <td align="left">
+                            <input type="text" value="@Model.Travellers2[i].PlaceOfBirth" class="text70" name="Travellers2[@i].PlaceOfBirth" />
+                        </td>
+                        <td align="left">
+                            @Html.DropDownList("Travellers2[" + i + "].PassType", ViewBag.PassTypes as IEnumerable<SelectListItem>)
+                            <input type="hidden" value="@Model.Travellers2[i].PassType" class="clsPassType" />
+                        </td>
+                        <td align="left">
+                            <input type="text" value="@Model.Travellers2[i].PassNo" class="text70" name="Travellers2[@i].PassNo" />
+                        </td>
+                        <td align="left">
+                            <input type="text" name="Travellers2[@i].DateOfIssue" value="@(Model.Travellers2[i].DateOfIssue==null?"":Model.Travellers2[i].DateOfIssue.Value.ToString("yyyy-MM-dd"))" class="Wdate text100" onfocus="WdatePicker({isShowClear:false})" />
+                        </td>
+                        <td align="left">
+                            <input type="text" value="@Model.Travellers2[i].PlaceOfIssue" class="text70" name="Travellers2[@i].PlaceOfIssue" />
+                        </td>
+                        <td align="left">
+                            <input type="text" name="Travellers2[@i].DateOfExpiry" value="@(Model.Travellers2[i].DateOfExpiry==null?"":Model.Travellers2[i].DateOfExpiry.Value.ToString("yyyy-MM-dd"))" class="Wdate text100" onfocus="WdatePicker({isShowClear:false})" />
+                        </td>
+                        <td align="left">
+                            <input type="text" value="@Model.Travellers2[i].Phone" class="text100" name="Travellers2[@i].Phone" />
+                        </td>
+                        <td align="left" title="@Model.Travellers2[i].PriceContent" name="gpOtherPrice">
+                            <select name="Travellers2[@i].PriceId" class="text150" onchange="PriceTypeChange(this)">
+                                <option value="0" price="0" payment="0">-- 请选择 --</option>
+                                @foreach (var item in ViewBag.PricesList as List<TpPriceModel>)
+                                {
+                                    if (item.Id == Model.Travellers2[i].PriceId)
+                                    {
+                                        <option value="@item.Id" price="@item.SettlePrice" tejia="@item.TeJiaFanLi" selected="selected"> @(item.PriceTypeName + "-" + (item.SettlePrice - item.TeJiaFanLi).ToInt())</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" price="@item.SettlePrice" tejia="@item.TeJiaFanLi">@(item.PriceTypeName + "" + item.SettlePrice.ToInt()) </option>
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" value="@Model.Travellers2[i].PriceId" class="clsPriceId" />
+                            <input type="hidden" value="@Model.Travellers2[i].Price" class="price" name="Travellers2[@i].Price" />
+                            <input type="hidden" value="@Model.Travellers2[i].ZiFei" name="Travellers2[@i].ZiFei" />
+                            <input type="hidden" value="@Model.Travellers2[i].SingleRoom" name="Travellers2[@i].SingleRoom" />
+                            <input type="hidden" value="@Model.Travellers2[i].TeJiaFanLi" name="Travellers2[@i].TeJiaFanLi" />
+                            <input type="hidden" value="@Model.Travellers2[i].JiePrice" name="Travellers2[@i].JiePrice" />
+                            <input type="hidden" value="@Model.Travellers2[i].SongPrice" name="Travellers2[@i].SongPrice" />
+                            <input type="hidden" value="@Model.Travellers2[i].Tax" name="Travellers2[@i].Tax" />
+                            <input type="hidden" value="@Model.Travellers2[i].VisaPrice" name="Travellers2[@i].VisaPrice" />
+                        </td>
+                        <td align="left" name="gpOtherPrice">
+                            <input type="text" value="@Model.Travellers2[i].FanLi" class="text50 fanli" name="Travellers2[@i].FanLi" onkeypress="InputLimitMoney();" />
+                        </td>
+                        <td align="center" name="Tax">
+                            <label>
+                                @if (Model.Travellers2[i].Tax > 0)
+                                {
+                                    <input name="chkTax" checked="checked" type="checkbox" />
+                                }
+                                else
+                                {
+                                    <input name="chkTax" type="checkbox" />
+                                }
+                                @Model.TourPlan.Tax.ToInteger()
+                            </label>
+                        </td>
+                        <td align="center" name="VisaPrice">
+                            <label>
+                                @if (Model.Travellers2[i].VisaPrice > 0)
+                                {
+                                    <input name="chkVisaPrice" checked="checked" type="checkbox" />
+                                }
+                                else
+                                {
+                                    <input name="chkVisaPrice" type="checkbox" />
+                                }
+                                @Model.TourPlan.VisaPrice.ToInteger()
+                            </label>
+                        </td>
+                        <td align="center" name="ZiFei">
+                            <label>
+                                @if (Model.Travellers2[i].ZiFei > 0)
+                                {
+                                    <input name="chkZiFei" checked="checked" type="checkbox" />
+                                }
+                                else
+                                {
+                                    <input name="chkZiFei" type="checkbox" />
+                                }
+                                @Model.TourPlan.ZiFei.ToInteger()
+                            </label>
+                        </td>
+                        <td align="center" name="SingleRoom">
+                            <label>
+                                @if (Model.Travellers2[i].SingleRoom > 0)
+                                {
+                                    <input name="chkSingleRoom" checked="checked" type="checkbox" />
+                                }
+                                else
+                                {
+                                    <input name="chkSingleRoom" type="checkbox" />
+                                }
+                                @Model.TourPlan.SingleRoom.ToInteger()
+                            </label>
+                        </td>
+                        <td></td>
+                        <td align="center" name="YsPrice">
+                            <input type="text" value="@Model.Travellers2[i].YsPrice" data-cancel="false" data-id="@Model.Travellers2[i].Id" name="Travellers2[@i].YsPrice" class="text70" onblur="SetYsPrice(this);" />
+                        </td>
+                        <td align="center">
+                            @if (IsCancel == true)
+                            {
+                                <a href="javascript:void(0);" onclick="cancel_click(@Model.Travellers2[i].Id)">取消</a>
+                            }
+                        </td>
+                    </tr>
+                }
+
+                //已取消或已退团游客信息 状态1或0
+                var cnt2 = Model.Travellers10.Count();
+                for (int i = 0; i < cnt2; i++)
+                {
+                    <tr name="travellerTr">
+                        <td align="center">@Model.Travellers10[i].Name</td>
+                        <td align="center">@(Model.Travellers10[i].Sex == "1" ? "男" : "女")</td>
+                        <td align="left">@Model.Travellers10[i].PinYin</td>
+                        <td align="left">@(Model.Travellers10[i].DateOfBirth == null ? "" : Model.Travellers10[i].DateOfBirth.Value.ToString("yyyy-MM-dd"))</td>
+                        <td align="left">@Model.Travellers10[i].PlaceOfBirth</td>
+                        <td align="left">@DictionaryTools.GetEnumValue(Enums.PassTypeEnum, Model.Travellers10[i].PassType.ToString(), false)</td>
+                        <td align="left">@Model.Travellers10[i].PassNo</td>
+                        <td align="left">
+                            @(Model.Travellers10[i].DateOfIssue == null ? "" : Model.Travellers10[i].DateOfBirth.Value.ToString("yyyy-MM-dd"))
+                        </td>
+                        <td align="left">@Model.Travellers10[i].PlaceOfIssue</td>
+                        <td align="left">
+                            @(Model.Travellers10[i].DateOfExpiry == null ? "" : Model.Travellers10[i].DateOfExpiry.Value.ToString("yyyy-MM-dd"))
+                        </td>
+                        <td align="left">@Model.Travellers10[i].Phone</td>
+                        <td align="left" title="@Model.Travellers10[i].PriceContent" name="gpOtherPrice">
+                            @Model.Travellers10[i].PriceContent.TrimWithElipsis(8)
+                        </td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center" name="YsPrice">
+                            @Model.Travellers10[i].YsPrice
+                            <input type="hidden" value="@Model.Travellers10[i].YsPrice" data-cancel="true" data-id="@Model.Travellers10[i].Id" name="Travellers10[@i].YsPrice" class="text50" />
+                        </td>
+                        <td align="center">
+                            @if (Model.Travellers10[i].State == 0)
+                            {
+                                <a href="javascript:void(0);" onclick="restore_click(@Model.Travellers10[i].Id)">恢复</a>
+                            }
+                            else
+                            {
+                                <label style="color: red;">已退团</label>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr id="trNodata">
+                    <td colspan="9" align="center" style="color: red;">当前没有数据！</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    $(function () {
+        loadSelect();
+
+        $("input[name$='Name']").on("keyup keydown change blur", function () {
+            var obj = $(this).parent("td").parent("tr");
+            obj.find("input[name$='PinYin']").val($(this).toPinyin());
+        });
+    });
+
+    function loadSelect() {
+        //加载身份证类型
+        $(".clsPassType").each(function () {
+            // hidden 的值赋值到 select
+            $(this).prev().val($(this).val());
+        });
+
+        // 加载性别
+        $(".clsSex").each(function () {
+            // hidden 的值赋值到 select
+            $(this).prev().val($(this).val());
+        });
+
+        //加载报价类型
+        $(".clsPriceId").each(function () {
+            // hidden 的值赋值到 select
+            $(this).prev().val($(this).val());
+        });
+    };
+
+</script>

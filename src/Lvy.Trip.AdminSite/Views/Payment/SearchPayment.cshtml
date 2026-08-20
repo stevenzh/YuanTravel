@@ -1,0 +1,118 @@
+﻿@model Lvy.VModels.Finance.PaymentVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "账务收款";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+<form id="theForm" method="POST" action="@Url.Action("ExportExcel")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                账务付款查询
+            </div>
+            <table id="searchTable" class="edittbl" style="border-bottom: 0px;width:100%;">
+                <tr>
+                    <td class="label">产品部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.LineTeam, ViewBag.ProductTeams as IEnumerable<SelectListItem>, new { @class = "text220" })
+                    </td>
+                    <td class="label">出发日期：</td>
+                    <td colspan="3">
+                        <input type="text" name="Condition.StartOutDate" id="d4311" class="Wdate" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4312\')||\'2020-10-01\'}'})" />
+                        &nbsp;--&nbsp;
+                        <input type="text" name="Condition.EndOutDate" id="d4312" class="Wdate" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4311\')}'})" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">产品名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.ProductName, new { @class = "text220" })
+                    </td>
+                    <td class="label">付款日期：</td>
+                    <td colspan="3">
+                        <input type="text" name="Condition.StartPayInTime" id="d4313" class="Wdate" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4314\')||\'2020-10-01\'}'})" />
+                        &nbsp;--&nbsp;
+                        <input type="text" name="Condition.EndPayInTime" id="d4314" class="Wdate" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4313\')}'})" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">供应商：</td>
+                    <td>
+                        <select id="mySelect1" name="Condition.CostSupplier" class="text220">
+                            <option value=""></option>
+                        </select>
+                    </td>
+                    <td class="label">团号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.TourNo, new { @class = "text150" })
+                    </td>
+                    <td class="label">结算状态：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.CostStatus, ViewBag.CostStatus as IEnumerable<SelectListItem>)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: center;">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="resetBtn" type="button" value="重置" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divFinanceList">
+        @Html.Partial("UCSearch", Model)
+    </div>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#mySelect1').select2({
+                ajax: {
+                    url: function (params) {
+                        return '/Customer/GetSupplierSelect2?keyword=' + params.term;
+                    },
+                    dataType: 'json',
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                        var arr = data.items
+                        for (item in arr) {
+                            itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                        }
+                        return {
+                            results: itemList,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                allowClear: true,
+                //templateResult: formatState
+            });
+
+            //搜索
+            $("#btnSearch").click(function () {
+                pageselectCallback(0);
+            });
+
+            //重置
+            $("#resetBtn").click(function () {
+                $("#searchTable td input[type=text]").val("");
+                $("#searchTable td input[type=hidden]").val("");
+            });
+        });
+
+    </script>
+</form>
+<form style="display:none;" id="uploadForm" method="POST" action="@Url.Action("ImportDuiZhangDan")" enctype="multipart/form-data">
+    <div>
+        <input type="file" id="file" name="file" />
+    </div>
+</form>

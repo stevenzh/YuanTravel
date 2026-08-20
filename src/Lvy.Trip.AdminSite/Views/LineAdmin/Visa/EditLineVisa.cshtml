@@ -1,0 +1,140 @@
+﻿@model Lvy.Models.ProductDB.TpLineVisaModel
+
+<style>
+    .listtbl tr td { text-align: center; }
+    .label { width: 100px }
+</style>
+
+<form id="theForm" action="" method="post" enctype="multipart/form-data">
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(a => a.LineId)
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:95%">
+                <tr>
+                    <td class="label"><span class="point">*</span>签证类型：</td>
+                    <td>
+                        <select id="qzTypeSel" style="width:150px">
+                            <option value="0"></option>
+                            <option value='2' @(Model.VType == 2 ? "selected" : "")>团队签证</option>
+                            <option value='1' @(Model.VType == 1 ? "selected" : "")>个人签证</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>国家：</td>
+                    <td>
+                        @Html.DropDownListFor(m => m.Country, ViewData["CountryList"] as List<SelectListItem>, new { @class = "text220" })
+                        @Html.HiddenFor(a => a.CountryName)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>签证产品：</td>
+                    <td>
+                        @Html.DropDownListFor(m => m.ProductCode, ViewData["ProductList"] as List<SelectListItem>, new { @class = "text220" })
+                        @Html.HiddenFor(a => a.ProductName)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">成本：</td>
+                    <td>@Html.TextBoxFor(a => a.Cost, new { @class = "text220" }) </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align: center;">
+            <input type="button" class="btn btn1" id="btnSaveLineVisa" value="保  存" />
+            <input type="button" class="btn btn1" id="btnCancel" value="取 消" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSaveLineVisa").click(function () {
+
+            if ($("#qzTypeSel").val() == "0") {
+
+                Utils.alert("请选择签证类型！");
+                return;
+            }
+            if ($("#Country").val() == "") {
+                Utils.alert("请选择国家！");
+                return;
+            }
+            if ($("#ProductCode").val() == "") {
+                Utils.alert("请选择签证产品！");
+                return;
+            }
+            $("#CountryName").val($("#Country").find("option:selected").text());
+            $("#ProductName").val($("#ProductCode").find("option:selected").text());
+
+            //保存数据的操作.
+            $.ajax({
+                url: '@Url.Action("SaveLineVisa")',
+                data: $("#theForm").serialize(),
+                type: 'post',
+                success: function (d) {
+                    if (d.Code == 1) {
+                        Utils.alert("保存成功！");
+                        parent.ReloadUcLineVisa();
+                        // 弹出框关闭
+                        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(index); 
+                    } else {
+                        Utils.alert("保存失败！");
+                    }
+                }
+            });
+        });
+
+        $("#btnCancel").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index); 
+        });
+
+        $("#qzTypeSel").change(function () {
+            $("#Country").empty();
+            $("#ProductCode").empty();
+            $.ajax({
+                type: "POST",
+                data: { vtype: $(this).val() },
+                url: "/LineAdmin/GetVisaCountry",
+                success: function (data) {
+                    $("#Country").empty();
+                    $("#Country").append("<option value=''></option>");
+                    $(data.list).each(function (i, item) {
+                        $("#Country").append("<option value='" + item.VisaCountryParentStr + "'>" + item.VisaCountry + "</option>");
+                    });
+                },
+                error: function (request, error) {
+                    // This callback function will trigger on unsuccessful action
+                    console.log(error);
+                }
+            });
+        });
+
+        $("#Country").change(function () {
+            $("#ProductCode").empty();
+            $.ajax({
+                type: "POST",
+                data: { vtype: $("#qzTypeSel").val(), country: $(this).val() },
+                url: "/LineAdmin/GetVisaProduct",
+                success: function (data) {
+                    $("#ProductCode").empty();
+                    $("#ProductCode").append("<option value=''></option>");
+                    $(data.list).each(function (i, item) {
+                        $("#ProductCode").append("<option value='" + item.InformationCode + "'>" + item.InformationName + "</option>");
+                    });
+                },
+                error: function (request, error) {
+                    // This callback function will trigger on unsuccessful action
+                    console.log(error);
+                }
+            });
+        });
+
+    })
+
+</script>

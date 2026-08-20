@@ -1,0 +1,208 @@
+﻿@model Lvy.Models.WeixinDB.Member
+@{
+    ViewBag.Title = "微信用户";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    MemberQR qr = ViewData["MyQR"] as MemberQR;
+
+    var send = false;
+    if (Model.LastMessageTime != null)
+    {
+        if (Model.LastMessageTime.Value.AddDays(2) > DateTime.Now)
+        {
+            send = true;
+        }
+    }
+}
+@using Lvy.Models.WeixinDB;
+
+<h2>@ViewBag.Title.</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>用户信息.</h4>
+        @Html.HiddenFor(model => model.OpenID)
+        <table class="table table-bordered table-striped">
+            <tr>
+                <td>真实姓名</td>
+                <td>@Model.RealName</td>
+            </tr>
+            <tr>
+                <td>电话号码</td>
+                <td>@Model.PhoneNumber</td>
+            </tr>
+            <tr>
+                <td>公司名称</td>
+                <td>@Model.CustomerName</td>
+            </tr>
+            <tr>
+                <td>对应销售</td>
+                <td>@Model.Sales</td>
+            </tr>
+            <tr>
+                <td>是否绑定</td>
+                <td>@Model.Binding</td>
+            </tr>
+            <tr>
+                <td>是否审核</td>
+                <td id="tdapp">
+                    @if (Model.Approved == 0)
+                    {
+                        <input class="btn btn-info" id="btnapp" type="button" value="同业审核">
+                    }
+                    else
+                    {
+                        <p class="bg-success">已审核同业</p>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td>分享是是否显示姓名</td>
+                <td>@Model.HideShared</td>
+            </tr>
+            <tr>
+                <td>用户头像</td>
+                <td><img src="@Model.LogoUrl" style="width:120px;" /></td>
+            </tr>
+            @if (qr != null)
+            {
+                <tr>
+                    <td>我的二维码</td>
+                    <td><img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=@qr.Ticket" style="width:180px;" /> </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h4>微信用户信息</h4>
+        <table class="table table-bordered table-striped">
+            <tr class="form-group">
+                <td>昵称</td>
+                <td class="col-md-10">@Model.NickName</td>
+            </tr>
+            <tr class="form-group">
+                <td>性别</td>
+                <td class="col-md-10">@Model.Sex</td>
+            </tr>
+            <tr class="form-group">
+                <td>国家</td>
+                <td class="col-md-10">@Model.Country</td>
+            </tr>
+            <tr class="form-group">
+                <td>省份</td>
+                <td class="col-md-10">@Model.Province</td>
+            </tr>
+            <tr class="form-group">
+                <td>城市</td>
+                <td class="col-md-10">@Model.City</td>
+            </tr>
+            <tr class="form-group">
+                <td>头像</td>
+                <td class="col-md-10"><img style="width:120px;" src="@Model.HeadImgUrl" /></td>
+            </tr>
+            <tr class="form-group">
+                <td>是否关注</td>
+                <td class="col-md-10">@Model.Subscribe</td>
+            </tr>
+            <tr class="form-group">
+                <td>关注时间</td>
+                <td class="col-md-10">@Model.SubscribeTime</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h4>微信用户信息</h4>
+        @if (send)
+        {
+            <button id="btn_sendmessage" class="btn btn-sm btn-default"><i class="fa fa-search"></i>发消息</button>
+        }
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>来源</th>
+                <th>内容</th>
+                <th>客服</th>
+                <th>时间</th>
+            </tr>
+
+            @foreach (var item in Model.Messages)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.InOut)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Content)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedBy)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedDate)
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>
+
+<div id="exampleModal" class="modal fade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">发送微信消息</h4>
+            </div>
+            <div class="modal-body">
+                <textarea id="sendContent" rows="4" class="form-control"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-default" id="btn_send">发送</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<script>
+    $(function () {
+        $("#btnapp").click(function(){
+            var param = {id:@Model.MemberID };
+            $.post('/MemberAdmin/Approved/', param, function (data) {
+                if(data != '0')
+                    $("#tdapp").html("1");
+            });
+        });
+
+        $("#btn_sendmessage").click(function () {
+            $("#exampleModal").modal('show')
+        });
+
+
+        $("#btn_send").click(function () {
+            $("#exampleModal").modal('hide');
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                data: {
+                    OpenID: $("#OpenID").val(),
+                    Content: $("#sendContent").val()
+                },
+                url: "/Member/SendMessage",
+                success: function (data) {
+                    if (data == "ok") {
+
+                    } else {
+                        // 显示结果
+                        Utils.alert("发送失败");
+                    }
+                }
+            });
+        });
+    });
+</script>
+<div>
+    @Html.ActionLink("返回列表", "Index")
+</div>

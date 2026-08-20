@@ -1,0 +1,212 @@
+﻿@{
+    ViewBag.Title = "旅游签证办理";
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    var hotList = ViewData["HotVisaList"] as IList<Lvy.Visa.VModels.VisaProductQModel>;
+    var jiajiList = ViewData["UrgentVisaList"] as IList<Lvy.Visa.VModels.VisaProductQModel>;
+}
+@section AdditionalResources {
+    <link href="~/lib/slick-1.8.0/slick.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="@CDNServerUrl/jquery-ui/jquery-ui.min.css" />
+    <style>
+        .product_panel { margin-left: 0; }
+    </style>
+}
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="~/Theme2/images/shop_background.jpg"></div>
+    <div class="home_overlay"></div>
+    <div class="home_content d-flex flex-column align-items-center justify-content-center">
+        <h2 class="home_title">@ViewBag.Title</h2>
+    </div>
+</div>
+
+<!-- Characteristics -->
+<div class="characteristics">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-2 col-md-6 char_col">
+                <div class="char_item d-flex flex-row align-items-center justify-content-start">
+                    <h3>办理流程</h3>
+                </div>
+            </div>
+
+            <!-- Char. Item -->
+            <div class="col-lg-2 col-md-6 char_col">
+                <div class="char_item d-flex flex-row align-items-center justify-content-start">
+                    <div class="char_icon"><img src="~/images/char_1.png" alt=""></div>
+                    <div class="char_content">
+                        <div class="char_title">第一步</div>
+                        <div class="char_subtitle">网上提交订单</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Char. Item -->
+            <div class="col-lg-2 col-md-6 char_col">
+                <div class="char_item d-flex flex-row align-items-center justify-content-start">
+                    <div class="char_icon"><img src="~/images/char_2.png" alt=""></div>
+                    <div class="char_content">
+                        <div class="char_title">第二步</div>
+                        <div class="char_subtitle">递交材料</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Char. Item -->
+            <div class="col-lg-2 col-md-6 char_col">
+                <div class="char_item d-flex flex-row align-items-center justify-content-start">
+                    <div class="char_icon"><img src="~/images/char_3.png" alt=""></div>
+                    <div class="char_content">
+                        <div class="char_title">第三步</div>
+                        <div class="char_subtitle">接受、审核材料</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Char. Item -->
+            <div class="col-lg-2 col-md-6 char_col">
+                <div class="char_item d-flex flex-row align-items-center justify-content-start">
+                    <div class="char_icon"><img src="~/images/char_4.png" alt=""></div>
+                    <div class="char_content">
+                        <div class="char_title">第四步</div>
+                        <div class="char_subtitle">送签</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Char. Item -->
+            <div class="col-lg-2 col-md-6 char_col">
+                <div class="char_item d-flex flex-row align-items-center justify-content-start">
+                    <div class="char_icon"><img src="~/images/char_4.png" alt=""></div>
+                    <div class="char_content">
+                        <div class="char_title">第五步</div>
+                        <div class="char_subtitle">出签</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deals of the week -->
+<div class="deals_featured">
+    <div class="container">
+        <div class="row">
+            <div class="col d-flex flex-lg-row flex-column align-items-top justify-content-start">
+
+                <!-- Deals -->
+                <div class="deals">
+                    @{Html.RenderAction("HotVisaCountry"); }
+                    @*@Html.Partial("VisaFAQ")*@
+                </div>
+
+                <!-- Featured -->
+                <div class="featured">
+
+                    <!-- Product Panel -->
+                    <div class="product_panel panel active">
+                        <h3>热门签证办理</h3>
+                        <div class="featured_slider slider">
+                            @foreach (var tempProduct in hotList)
+                            {
+                                <!-- Slider Item -->
+                                <div class="featured_slider_item">
+                                    <div class="border_active"></div>
+                                    <div class="product_item discount d-flex flex-column align-items-center justify-content-center text-center">
+                                        <div class="product_image d-flex flex-column align-items-center justify-content-center"><img src="@(picroot + tempProduct.CountryImgUrl)" style="width:115px;" alt=""></div>
+                                        <div class="product_content">
+                                            <div class="product_price">¥ @Math.Round(tempProduct.SalePrice, 0)</div>
+                                            <div class="product_name"><div><a href="@("/visa/details/" + tempProduct.ProductCode.ToLower())">@tempProduct.ProductName.TrimWithElipsis(7)（@tempProduct.VisaIssuePlace.Trim()送签）</a></div></div>
+                                            <div class="product_extras">
+                                                @* <div class="product_color">
+                                                        <input type="radio" checked name="product_color" style="background:#b19c83">
+                                                        <input type="radio" name="product_color" style="background:#000000">
+                                                        <input type="radio" name="product_color" style="background:#999999">
+                                                    </div>*@
+                                                <a href="/Visa/Booking?ProductCode=@tempProduct.ProductCode" ><button class="product_cart_button">立即预订</button>  </a>
+                                            </div>
+                                        </div>
+                                        <div class="product_fav"><i class="fas fa-heart"></i></div>
+                                        <ul class="product_marks">
+                                            <li class="product_mark product_discount">-25%</li>
+                                            <li class="product_mark product_new">new</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="featured_slider_dots_cover"></div>
+                    </div>
+
+                    <!-- Product Panel -->
+                    <div class="product_panel panel active">
+                        <h3>加急签证办理</h3>
+                        <div class="featured_slider slider">
+                            @foreach (var tempProduct in jiajiList)
+                            {
+                                <!-- Slider Item -->
+                                <div class="featured_slider_item">
+                                    <div class="border_active"></div>
+                                    <div class="product_item d-flex flex-column align-items-center justify-content-center text-center">
+                                        <div class="product_image d-flex flex-column align-items-center justify-content-center"><img src="@(picroot + tempProduct.CountryImgUrl)" style="width:115px;" alt=""></div>
+                                        <div class="product_content">
+                                            <div class="product_price">¥ @Math.Round(tempProduct.SalePrice, 0)</div>
+                                            <div class="product_name"><div><a href="@("/visa/details/" + tempProduct.ProductCode.ToLower())">@tempProduct.ProductName.TrimWithElipsis(7) （@tempProduct.VisaIssuePlace.Trim()送签）</a></div></div>
+                                            <div class="product_extras">
+                                                @*
+                                                    <div class="product_color">
+                                                        <input type="radio" checked name="product_color" style="background:#b19c83">
+                                                        <input type="radio" name="product_color" style="background:#000000">
+                                                        <input type="radio" name="product_color" style="background:#999999">
+                                                    </div>>*@
+                                                <button class="product_cart_button">立即预订</button>
+                                            </div>
+                                        </div>
+                                        <div class="product_fav"><i class="fas fa-heart"></i></div>
+                                        <ul class="product_marks">
+                                            <li class="product_mark product_discount"></li>
+                                            <li class="product_mark product_new">new</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="featured_slider_dots_cover"></div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Visa -->
+<div class="shop">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                @Html.Partial("VisaAttentions")
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@Html.Partial("RecentlyViewed")
+
+@section PageScripts {
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/slick-1.8.0/slick.js"></script>
+    <script src="~/js/home.js"></script>
+    <script>
+        $(document).ready(function () {
+
+        });
+    </script>
+}
+
+

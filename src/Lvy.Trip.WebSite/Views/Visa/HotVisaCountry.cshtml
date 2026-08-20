@@ -1,0 +1,21 @@
+﻿@{
+    Layout = null;
+    var tempBkList = ViewData["HotCountryList"] as IList<Lvy.Visa.VModels.BanKuaiQModel>;
+}
+<div class="sidebar_section">
+    <div class="sidebar_title">热门国家签证</div>
+    @foreach (var bkModel in tempBkList)
+    {
+        <ul class="sidebar_categories">
+            <li>
+                <a href="javascript:void(0);">@bkModel.BanKuaiValue</a>
+                <ul class="side_items">
+                    @foreach (var countryModel in bkModel.CountryList)
+                    {
+                        <li><a href="search-country-@countryModel.AreaId-0.html" title="" target="_self">@countryModel.CountryName</a></li>
+                    }
+                </ul>
+            </li>
+        </ul>
+    }
+</div>

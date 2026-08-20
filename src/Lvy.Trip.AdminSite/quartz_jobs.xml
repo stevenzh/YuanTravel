@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<job-scheduling-data xmlns="http://quartznet.sourceforge.net/JobSchedulingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+
+  <processing-directives>
+    <overwrite-existing-data>true</overwrite-existing-data>
+  </processing-directives>
+
+  <schedule>
+
+    <job>
+      <name>hourJob</name>
+      <group>myGroup</group>
+      <description>Sample job for Quartz Server</description>
+      <job-type>Lvy.Trip.Job.HourJob, Lvy.Trip.AdminSite</job-type>
+      <durable>true</durable>
+      <recover>false</recover>
+    </job>
+    <job>
+      <name>dayJob</name>
+      <group>myGroup</group>
+      <description>Sample job for Quartz Server</description>
+      <job-type>Lvy.Trip.Job.DayJob, Lvy.Trip.AdminSite</job-type>
+      <durable>true</durable>
+      <recover>false</recover>
+    </job>
+    <job>
+      <name>myJob</name>
+      <group>myGroup</group>
+      <description>Sample job for Quartz Server</description>
+      <job-type>Lvy.Trip.Job.MyJob, Lvy.Trip.AdminSite</job-type>
+      <durable>true</durable>
+      <recover>false</recover>
+    </job>
+
+    <trigger>
+      <cron>
+        <name>hourTrigger</name>
+        <group>sampleGroup</group>
+        <job-name>hourJob</job-name>
+        <job-group>myGroup</job-group>
+        <cron-expression>0 0 */1 * * ?</cron-expression>
+      </cron>
+    </trigger>
+    <trigger>
+      <cron>
+        <name>dayTrigger</name>
+        <group>sampleGroup</group>
+        <job-name>dayJob</job-name>
+        <job-group>myGroup</job-group>
+        <cron-expression>0 0 9 * * ?</cron-expression>
+      </cron>
+    </trigger>
+    <trigger>
+      <cron>
+        <name>myTrigger</name>
+        <group>sampleGroup</group>
+        <job-name>myJob</job-name>
+        <job-group>myGroup</job-group>
+        <cron-expression>0 */5 * * * ?</cron-expression>
+      </cron>
+    </trigger>
+  </schedule>
+</job-scheduling-data>

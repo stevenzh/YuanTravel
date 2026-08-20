@@ -1,0 +1,81 @@
+﻿@model Lvy.VModels.Base.BrandVModel
+    <div class="xbox">
+        <div class="btnlist">
+            <div class="fr">
+                <input type="button" class="btn btn1" id="btnAdd" value="新 增" />
+            </div>
+        </div>
+        <table class="listtbl" width="100%">
+            <thead>
+                <tr>
+                    <td>编号</td>
+                    <td>品牌名称</td>
+                    <td>部门</td>
+                    <td>是否有效</td>
+                    <td align="center" width="50px;">操作</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.BrandList.Items)
+                {
+                    <tr>
+                        <td style="text-align:center;">@item.Code</td>
+                        <td style="text-align:center;">@item.Name</td>
+                        <td style="text-align:center;">@DictionaryTools.GetCachedTeam(item.TeamID.ToString()).TeamName</td>
+                        <td style="text-align:center;">@(item.IsValid == 1 ? "有效" : "无效")</td>
+                        <td style="text-align:center;">
+                            <a href="#" class="edit" name="editRole" title="编辑" bindId="@item.ID"><i class="fa fa-edit"></i></a>
+                            @Html.IconDeleteActionLink("SetValid", "Brand", item.IsValid, new { id = item.ID })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.HiddenFor(a => a.BrandList.PageIndex)
+        <div id="Pagination" class="digg"></div>
+    </div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+
+        $("#btnSearch").click(function () {
+            $("#BrandList_PageIndex").val("1");
+            $("#theForm").submit();
+        });
+
+        $("#Pagination").pagination(
+            Number('@Model.BrandList.TotalCount'), {
+            callback: pageselectCallback,
+            items_per_page: Number('@Model.BrandList.PageSize'),
+            current_page: @Model.BrandList.PageIndex-1
+        });
+
+        $("#btnAdd").click(function () {
+            layer.open({ type: 2, title: '添加品牌', maxmin: true, shadeClose: false, area: ['600px', '220px'], content: '@Url.Action("AddBrand")' });
+        });
+
+        $("a[name='editRole']").each(function () {
+            $(this).click(function () {
+                var url = "/Brand/Edit/" + $(this).attr("bindId");
+                layer.open({ type: 2, title: '编辑品牌', maxmin: true, shadeClose: false, area: ['600px', '220px'], content: url });
+            });
+        });
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#BrandList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divRoles').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

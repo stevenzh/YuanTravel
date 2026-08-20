@@ -1,0 +1,156 @@
+﻿@using TopWeb.Model
+@using TopWeb.DAL.Model
+@{
+    Layout = null;
+    OrderModel product = (OrderModel)ViewData["order"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>订单详情 - 支付</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=GBK" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    @Styles.Render("~/Content/adminlte/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script language="javascript" type="text/javascript">
+        function auto_remove(img) {
+            div = img.parentNode.parentNode; div.parentNode.removeChild(div);
+            img.onerror = "";
+            return true;
+        }
+
+        function changefont(fontsize) {
+            if (fontsize < 1 || fontsize > 4) return;
+            $('#content').removeClass().addClass('fontSize' + fontsize);
+        }
+
+        // 当微信内置浏览器完成内部初始化后会触发WeixinJSBridgeReady事件。
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            //公众号支付
+            jQuery('a#getBrandWCPayRequest').click(function (e) {
+                WeixinJSBridge.invoke('getBrandWCPayRequest', {
+                    "appId": "@ViewData["appId"]", //公众号名称，由商户传入
+                    "timeStamp": "@ViewData["timeStamp"]", //时间戳
+                    "nonceStr": "@ViewData["nonceStr"]", //随机串
+                    "package": "@Html.Raw(ViewData["package"])",//扩展包
+                    "signType": "MD5", //微信签名方式:MD5
+                    "paySign": "@ViewData["paySign"]" //微信签名
+                }, function (res) {
+
+                    if (res.err_msg == "get_brand_wcpay_request:ok") {
+                        jQuery("#pagelink").show();
+                        jQuery("#getBrandWCPayRequest").hide();
+
+                        // 更新订单状态
+                        jQuery.post("/Line/OrderPayResult/@product.Tid", { payTime: "@ViewData["PayTime"]" },
+                            function (result) {
+                                //alert("状态更新");
+                            }
+                        );
+                    } else {
+                        Utils.alert(res.err_msg);
+                    }
+                    // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
+                    // 因此微信团队建议，当收到ok返回时，向商户后台询问是否收到交易成功的通知，若收到通知，前端展示交易成功的界面；若此时未收到通知，商户后台主动调用查询订单接口，查询订单的当前状态，并反馈给前端展示相应的界面。
+                });
+            });
+
+            WeixinJSBridge.log('yo~ ready.');
+
+        }, false);
+        if (jQuery) {
+            jQuery(function () {
+
+                var width = jQuery('body').width() * 0.87;
+                jQuery('img').error(function () {
+                    var self = jQuery(this);
+                    var org = self.attr('data-original1');
+                    self.attr("src", org);
+                    self.error(function () {
+                        auto_remove(this);
+                    });
+                });
+                jQuery('img').each(function () {
+                    var self = jQuery(this);
+                    var w = self.css('width');
+                    var h = self.css('height');
+                    w = w.replace('px', '');
+                    h = h.replace('px', '');
+                    if (w <= width) {
+                        return;
+                    }
+                    var new_w = width;
+                    var new_h = Math.round(h * width / w);
+                    self.css({ 'width': new_w + 'px', 'height': new_h + 'px' });
+                    self.parents('div.pic').css({ 'width': new_w + 'px', 'height': new_h + 'px' });
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-widget">
+                    <div class="box-body box-profile">
+                        <ul class="products-list product-list-in-box">
+                            @foreach (var item in product.SubOrders)
+                            {
+                                <li class="item">
+                                    <div class="product-info">
+                                        <div class="product-title">
+                                            @item.Title
+                                        </div>
+                                        <span class="product-description">￥ @item.Price</span>
+                                        <span class="label pull-right">数量 @item.Num</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                        <ul class="list-group list-group-unbordered">
+                            <li class="list-group-item">
+                                <b>订单号</b> <div class="pull-right">@product.Tid</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>订单创建日期</b> <div class="pull-right">@product.Created</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>收货人姓名</b> <div class="pull-right">@product.ReceiverName</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>收货人电话</b> <div class="pull-right">@product.ReceiverPhone</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>收货人地址</b> <div class="pull-right">@product.ReceiverAddress</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>交易金额</b> <div class="pull-right">@product.Payment</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>发票抬头</b> <div class="pull-right">@product.InvoiceTitle</div>
+                            </li>
+                            <li class="list-group-item">
+                                <b>客户备注</b> <div class="pull-right">@product.BuyerMessage</div>
+                            </li>
+                         </ul>
+                            <a id="getBrandWCPayRequest" class="btn btn-success btn-block" href="javascript:void(0);"><b>微信支付</b></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pagelink" class="col-md-3" style="display:none;">
+                    <div class="box box-primary">
+                        <div class="box-body box-profile">
+                            <div class="alert Utils.alert-info Utils.alert-dismissible">
+                                <h4><i class="icon fa fa-info"></i> 提示!</h4>
+                                付款操作完成，客服人员接单及时和您联系.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>

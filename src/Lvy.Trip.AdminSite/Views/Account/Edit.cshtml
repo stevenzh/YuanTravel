@@ -1,0 +1,241 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@{
+    ViewBag.Title = "编辑账号";
+}
+@section AdditionalResources{
+}
+<form id="theForm" action="@Url.Action("Update", "Account")" method="post">
+    <div class="station"> 编辑账号</div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label" width="90px">
+                        <span class="point">*</span>登陆名：
+                    </td>
+                    <td>
+                        @Model.Account.LoginName
+                        @Html.HiddenFor(a => a.Account.LoginName)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>密码：
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.Account.Pwd)
+                        <input type="button" class="btn btn1" value="重置密码" id="resetPwdBtn" />
+                        <span style="color: gray">&nbsp;&nbsp; 重置后密码默认为：888888 </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>姓名：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>性别：
+                    </td>
+                    <td>
+                        @Html.RadioGroup("Account.Sex", Model.SexBeans, Model.Account.Sex.ToString())
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point"></span>微信绑定：
+                    </td>
+                    <td>@(string.IsNullOrEmpty(Model.Account.OpenID) ? "未绑定" : "已绑定")</td>
+                </tr>
+                <tr>
+                    <td class="label">联系手机：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Email：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Email, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">座机：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Phone, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">QQ：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.QQ, new { @class = "text150" })
+                    </td>
+                </tr>
+                @*<tr>
+                        <td class="label">职能：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.Account.DepartCode, Model.DepartBeans.ToSelectListFor(), new { @class = "text150" })
+                        </td>
+                    </tr>*@
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>部门：
+                    </td>
+                    <td>
+                        <select id="SelectedTeamIds" name="SelectedTeamIds" multiple="multiple" class="form-control" style="width:90%">
+                            @foreach (var item in Model.AccountTeamBeans)
+                            {
+                                <option value="@item.Key">@item.Value</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">对应角色：</td>
+                    <td>
+                        <select id="SelectedRoleIds" name="SelectedRoleIds" multiple="multiple" class="form-control" style="width:90%">
+                            @foreach (var item in Model.RoleBeans)
+                            {
+                                <option value="@item.Key">@item.Value</option>
+                            }
+                        </select>
+                        @*@Html.CheckboxGroup("SelectedRoleIds", Model.RoleBeans, Model.SelectedRoleIds)*@
+                    </td>
+                </tr>
+                @*@if (GlobalContext.Current.UserInfo.CustomerCode == GlobalContext.Current.OwnerCode)
+                    {
+                        <tr>
+                            <td class="label">目的地：</td>
+                            <td>
+                                @Html.CheckboxGroup("SelectedDestIds", Model.DestinationBeans, Model.SelectedDestIds)
+                            </td>
+                        </tr>
+                    }*@
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                        <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @Html.HiddenFor(a => a.Account.Code)
+    @Html.HiddenFor(m => m.AsyncCustomer)
+    @Html.HiddenFor(m => m.SalesTeam)
+    <input id="hTeam" type="hidden" value="@ViewBag.SelectTeamItem" />
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        //多选
+        $("#SelectedTeamIds").select2({
+            tags: true,
+            allowClear: true, //是否允许清空选中
+            placeholder: "请选择", //
+            closeOnSelect: false, // 选择后下拉框不会关闭（单选-不建议使用）
+            language: "zh-CN"
+        });
+        // 赋值 - 多选
+        $("#SelectedTeamIds").val([@Html.Raw(ViewBag.SelectTeamItem)]).trigger("change");
+
+        //角色下拉框
+        $("#SelectedRoleIds").select2({
+            tags: true,
+            allowClear: true, //是否允许清空选中
+            placeholder: "请选择", //
+            closeOnSelect: false, // 选择后下拉框不会关闭（单选-不建议使用）
+            language: "zh-CN"
+        });
+
+        // 赋值 - 多选
+        $("#SelectedRoleIds").val([@Html.Raw(ViewBag.SelectRoleItem)]).trigger("change");
+
+        $("#resetPwdBtn").click(function () {
+            var params = {
+                accountCode: Utils.Trim($("#Account_Code").val())
+            };
+            $.post("@Url.Action("ResetPwd")", params, function (flag) {
+                if (flag > 0) {
+                    Utils.alert("重置密码成功");
+                } else {
+                    Utils.alert("重置密码失败！");
+                }
+            });
+        });
+
+        $("#theForm").submit(function () {
+            if (!checkControls()) {
+                return false;
+            }
+            return true;
+        });
+
+
+        function checkControls() {
+
+            if (Utils.Trim($("#Account_Name").val()) == "") {
+                Utils.alert("姓名不能为空！");
+                $("#Account_Name").select().focus();
+                return false;
+            }
+
+
+            if (Utils.Trim($("#Account_Mobile").val()) != "") {
+                if ($.isMobile($("#Account_Mobile").val())== false) {
+                    Utils.alert("手机号格式有误！");
+                    $("#Account_Mobile").select().focus();
+                    return false;
+                }
+            }
+            if (Utils.Trim($("#Account_Email").val()) != "") {
+                if ($.isMail($("#Account_Email").val()) == false) {
+                    Utils.alert("Emmail格式有误！");
+                    $("#Account_Email").select().focus();
+                    return false;
+                }
+            }
+
+            var isLssued = true;
+
+            if ($("#SelectedTeamIds").val() == null || Utils.Trim($("#SelectedTeamIds").val()) == "") {
+                Utils.alert("部门不能为空！");
+                $("#SelectedTeamIds").select().focus();
+                return false;
+
+            } else {
+
+                // 检查是否部门调换
+                $.ajax({
+                    url: '@Url.Action("CheckSalesTeam")',
+                    data: {  accountCode: $("#Account_Code").val(), teamId: $("#SelectedTeamIds").val() },
+                    type: 'post',
+                    async: false,
+                    success: function (data) {
+                        if (data.Code == "0") {
+                            Utils.alert("没有客户调整");
+                        } else if (data.Code == "1") {
+                            if (confirm("原部门客户是否一并迁移？迁移选择‘确定’，不迁移选择‘取消’")==true){
+                                $("#AsyncCustomer").val("1");
+                                $("#SalesTeam").val(data.TeamId);
+                            }
+                            isLssued = true;
+                        } else {
+                            Utils.alert("部门中不包含销售部门或两个销售部！");
+                            isLssued = false;
+                        }
+                    }
+                });
+                if (isLssued == false) return false;
+            }
+
+            return true;
+        }
+    });
+
+</script>

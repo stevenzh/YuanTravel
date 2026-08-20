@@ -1,0 +1,81 @@
+﻿@model Lvy.VModels.Base.TagVModel
+    <div class="xbox">
+        <div class="btnlist">
+            <div class="fr">
+                <input type="button" class="btn btn1" id="btnAdd" value="新 增" />
+            </div>
+        </div>
+        <table class="listtbl" width="100%">
+            <thead>
+                <tr>
+                    <td>标签名称</td>
+                    <td>类型</td>
+                    <td>点击量</td>
+                    <td>是否有效</td>
+                    <td style="width:80px; text-align:center;">操作</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.TagPagedList.Items)
+                {
+                <tr>
+                    <td style="text-align:center;">@item.TagName</td>
+                    <td style="text-align:center;">@item.ProductType</td>
+                    <td style="text-align:center;">@item.ClickCnt</td>
+                    <td style="text-align:center;">@(item.IsValid == 1 ? "有效" : "无效")</td>
+                    <td style="text-align:center;">
+                        <a href="#" class="edit" name="editTag" title="编辑" bindId="@item.Id"><i class="fa fa-edit"></i></a>
+                        @Html.IconDeleteActionLink("SetValid", "Tag", item.IsValid, new { id = item.Id })
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        @Html.HiddenFor(a => a.TagPagedList.PageIndex)
+        <div id="Pagination" class="digg"></div>
+    </div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+
+        $("#btnSearch").click(function () {
+            $("#TagPagedList_PageIndex").val("1");
+            $("#theForm").submit();
+        });
+
+        $("#Pagination").pagination(
+            Number('@Model.TagPagedList.TotalCount'), {
+            callback: pageselectCallback,
+            items_per_page: Number('@Model.TagPagedList.PageSize'),
+            current_page: @Model.TagPagedList.PageIndex-1
+        });
+
+        $("#btnAdd").click(function () {
+            layer.open({ type: 2, title: '添加标签', maxmin: true, shadeClose: false, area: ['600px', '200px'], content: '@Url.Action("AddTag")' });
+        });
+
+        $("a[name='editTag']").each(function () {
+            $(this).click(function () {
+                var url = "/Tag/Edit/" + $(this).attr("bindId");
+                layer.open({ type: 2, title: '编辑标签', maxmin: true, shadeClose: false, area: ['600px', '200px'], content: url });
+            });
+        });
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#TagPagedList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divRoles').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

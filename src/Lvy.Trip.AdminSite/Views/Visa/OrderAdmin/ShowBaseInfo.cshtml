@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Lvy.Models.OrderDB.TpChildOrderModel>
+@{
+    Layout = null;
+}
+<div>
+    <table class="table">
+        <tr>
+            <td>产品编号</td>
+            <td>总订单编号</td>
+            <td>产品类别</td>
+            <td>备注</td>
+            <td>应收金额</td>
+        </tr>
+        @{
+            decimal total = 0;
+            if (Model != null)
+            {
+                foreach (var item in Model)
+                {
+                    <tr align="center">
+                        <td>@item.ProductID</td>
+                        <td>@item.OrderCode</td>
+                        <td>@item.ProductType </td>
+                        <td>@item.Remark</td>
+                        <td>@Math.Round(item.Amount, 2)</td>
+                    </tr>
+                    total = total + item.Amount;
+                }
+            }
+            <tr class="table_title">
+                <td colspan="6" style="text-align: right; color: #FF0000; background-color:#e4e4e4;">
+                    子订单合计：@Math.Round(total, 2)&nbsp;元&nbsp;&nbsp;
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+

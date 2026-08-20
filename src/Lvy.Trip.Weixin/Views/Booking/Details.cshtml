@@ -1,0 +1,619 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+@{
+    ViewBag.Title = "订单详情";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var JSApi = ViewBag.JsApi as Senparc.Weixin.MP.Helpers.JsSdkUiPackage;
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    var roles = GlobalContext.Current.LoginUserRoles;
+}
+@section HeaderContent {
+
+    <link href="@CDNServerUrl/select2/css/select2.min.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/select2/js/select2.min.js"></script>
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+
+    <link href="~/Content/DateBox/css/jtsage-datebox.css" rel="stylesheet" />
+    <script src="~/Content/DateBox/js/jtsage-datebox.min.js"></script>
+    <script src="~/Content/DateBox/js/cn.js"></script>
+
+    <script src="@CDNServerUrl/inputmask/jquery.inputmask.js"></script>
+
+    <link href="@CDNServerUrl/jQuery-iviewer/jquery.iviewer.css" rel="stylesheet" />
+    <link href="@CDNServerUrl/jQuery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <script src="@CDNServerUrl/jQuery-iviewer/jquery.iviewer.min.js"></script>
+
+    <script src="~/Scripts/jQuery.Hz2Py-min.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/Booking/Index">后台订单</a></li>
+                    <li class="breadcrumb-item active">@(ViewBag.Title + "/" + Model.Order.OrderCode)</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">订单信息</h3>
+                    @Html.HiddenFor(m => m.Order.OrderCode)
+                    @Html.HiddenFor(m => m.Order.TraceState)
+                </div>
+                <div class="card-body" id="divOrderInfo">
+                    @Html.Partial("OrderInfo", Model)
+                </div>
+                <div class="card-footer">
+                    @if (GlobalContext.Current.UserInfo.Code == Model.Order.SalerCode && Model.Order.OrderState == 1)
+                    {
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modal-order">修改订单</button>
+                    }
+
+                    @if (roles.Any(t => t.Name == "计调") && Model.Order.OrderState == 1)
+                    {
+                        <button type="button" class="btn btn-info" id="btnHold">确认占位</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h3 class="card-title">游客信息</h3>
+                </div>
+                <div class="card-body" id="touristList">
+                    @Html.Partial("TouristList", Model)
+                </div>
+                <div class="card-footer">
+                    @if (roles.Any(t => t.Name == "销售") && Model.Order.IsCancel == 0 && Model.Order.TraceState == 10)
+                    {
+                        <button type="button" class="btn btn-success" id="btnUpdateStatus">游客资料录入完成</button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">付款记录 </h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>缴款单号</th>
+                                <th>提交时间</th>
+                                <th>结算方式</th>
+                                <th>缴款总金额</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ListTourPayInModel)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.CreatedTime.ToString("yyyy-MM-dd")</td>
+                                    <td>@item.Amount</td>
+                                    <td>@item.PaymentType</td>
+                                    <td>@item.Remark</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h3 class="card-title">附件文件 </h3>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>类型</th>
+                                <th>上传时间</th>
+                                <th>文件名(点击查看)</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.FileList)
+                            {
+                                <tr>
+                                    <td>@DictionaryTools.GetEnumValue("FileBusinessEnum", item.SourceType)</td>
+                                    <td>@item.CreatedTime.ToString("MM-dd HH:mm")</td>
+                                    <td>
+                                        @if (item.MediaType == "image")
+                                        {
+                                            <a class="go" href="@(picroot + item.FilePath)" rel="gallery">
+                                                <img alt="@item.FileName" style="width:60px;" src="@(picroot + item.FilePath)">
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="/Booking/DownLoadFile/@item.Id"> @item.FileName</a>
+                                        }
+                                    </td>
+                                    <td>@item.Remark</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <h4>上传新的图片</h4>
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="fileRemarks" class="col-sm-2 control-label">图片说明</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="fileRemarks" placeholder="图片说明">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="fileRemarks" class="col-sm-2 control-label">图片类型</label>
+                            <div class="col-sm-10">
+                                @Html.DropDownList("filebusiness", (List<SelectListItem>)ViewBag.FileEnum, new { @id = "filebusiness", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="fileRemarks" class="col-sm-2 control-label">关联ID</label>
+                            <div class="col-sm-10">
+                                @Html.DropDownList("filebusiness", (List<SelectListItem>)ViewBag.FileEnum, new { @id = "filebusiness", @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                    <a href="####" class="ui green button" id="chooseImage">上传图片</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-order">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">编辑订单信息</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form role="form" class="form-horizontal">
+                        <div class="card-body " style="padding:0;">
+                            <div class="form-group row">
+                                <label class="col-3">分销商</label>
+                                <div class="col-9">
+                                    @Html.DropDownListFor(m => m.Order.BookingCustomer, (List<SelectListItem>)ViewBag.CustomerList, new { @id = "BookingCustomer", @class = "form-control form-control-sm select2", @style = "width:100%;" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3" for="SettleType">结算方式</label>
+                                <div class="col-9">
+                                    @Html.DropDownListFor(m => m.Order.SettlePlatForm, (List<SelectListItem>)ViewBag.SettleSelect, new { @id = "SettleType", @class = "form-control form-control-sm" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3" for="SettleCustomer">结算客户</label>
+                                <div class="col-9">
+                                    @Html.DropDownListFor(m => m.Order.SettleCustomer, (List<SelectListItem>)ViewBag.SettleList, new { @id = "SettleCustomer", @class = "form-control form-control-sm" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3" for="ContactCode">联系人</label>
+                                <div class="col-9">
+                                    @Html.DropDownListFor(m => m.Order.ContactCode, (List<SelectListItem>)ViewBag.ContactList, new { @id = "ContactCode", @class = "form-control form-control-sm" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3" for="LinkPhone">联系电话</label>
+                                <div class="col-9">
+                                    <input type="text" class="form-control form-control-sm" id="ManagerPhone" value="@Model.Order.ManagerPhone" placeholder="联系电话">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3" for="LinkPhone">游客联系人</label>
+                                <div class="col-9">
+                                    <input type="text" class="form-control form-control-sm" id="Linkman" value="@Model.Order.LinkMan" placeholder="游客联系人">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3" for="LinkPhone">游客联系电话</label>
+                                <div class="col-9">
+                                    <input type="text" class="form-control form-control-sm" id="LinkPhone" value="@Model.Order.LinkPhone" placeholder="游客联系电话">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">备注</label>
+                                <div class="col-9">
+                                    <textarea class="form-control form-control-sm" rows="3" id="Remark" placeholder="备注">@Model.Order.Remark</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pull-left" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveOrder">提交</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+    <div class="modal fade" id="modal-tourist">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">编辑游客信息</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pull-left" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveTourist">提交</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+</section>
+
+<div id="iviewer">
+    <div class="loader"></div>
+    <div class="viewer"></div>
+    <ul class="controls">
+        <li class="close"></li>
+        <li class="zoomin"></li>
+        <li class="zoomout"></li>
+        <li class="rotate_left"></li>
+        <li class="rotate_right"></li>
+    </ul>
+    <div class="info">
+        <a href="#" id="prevLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_prev.png" /></a>
+        <p id="imageCount"></p>
+        <a href="#" id="nextLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_next.png" /></a>
+    </div>
+</div>
+<script src="@CDNServerUrl/jQuery-iviewer/lightbox-gallery/main.js"></script>
+
+@if (JSApi != null)
+{
+    <script>
+
+     wx.config({
+         debug: false,
+        appId: '@JSApi.AppId',
+        timestamp: @JSApi.Timestamp ,
+        nonceStr: '@JSApi.NonceStr',
+        signature: '@JSApi.Signature',
+        jsApiList: [
+          'checkJsApi',
+          'onMenuShareTimeline',
+          'onMenuShareAppMessage',
+          'onMenuShareQQ',
+          'onMenuShareWeibo',
+          'hideMenuItems',
+          'showMenuItems',
+          'chooseImage',
+          'uploadImage'
+        ]
+     });
+
+    wx.ready(function(){
+        var images = {
+            localId: [],
+            serverId: []
+        };
+        document.querySelector('#chooseImage').onclick = function () {
+            wx.chooseImage({
+                sizeType: ['original'],
+                success: function (res) {
+                    images.localId = res.localIds;
+                    // Utils.alert('已选择 ' + res.localIds.length + ' 张图片');
+
+                    // uploadImage
+                    if (images.localId.length == 0) {
+                        // Utils.alert('请先使用 chooseImage 接口选择图片');
+                        return;
+                    }
+                    var i = 0, length = images.localId.length;
+                    images.serverId = [];
+                    function upload() {
+                        wx.uploadImage({
+                            localId: images.localId[i],
+                            success: function (res) {
+                                i++;
+                                // Utils.alert('已上传：' + i + '/' + length);
+                                images.serverId.push(res.serverId);
+                                upview(res.serverId);
+                                if (i < length) {
+                                    upload();
+                                }
+                            },
+                            fail: function (res) {
+                                Utils.alert(JSON.stringify(res));
+                            }
+                        });
+                    }
+                    upload();
+                }
+            });
+        };
+
+        function upview(serverId) {
+            var param = { id: serverId, orderCode: $("#Order_OrderCode").val(), remarks: $("#fileRemarks").val(), sourceType: $("#filebusiness").val(),KeyId:0 };
+            $.getJSON('/Booking/GetMedia/', param, function (data) {
+                if (data.Success == 'ok') {
+                    // 成功
+                    Utils.alert("图片上传成功");
+                } else {
+                    Utils.alert(data.Message);
+                }
+            })
+        }
+    });
+    </script>
+}
+<script>
+
+    $(function () {
+
+        //Initialize Select2 Elements
+        $('#BookingCustomer').select2({ language: "zh-CN"})
+
+        $('#BookingCustomer').on("select2:select", function (evt) {
+            //console.log(evt.params.data);
+
+            var code = evt.params.data.id;
+            var name = evt.params.data.text;
+            if (code != "") {
+                //$("#SettleType").val("@Model.Order.SettlePlatForm");
+                $("#SettleType").change();
+                //$("#SettleCustomer").val("@Model.Order.SettleCustomer");
+
+                $("#ContactCode").empty();
+                // 获取联系人
+                 $.ajax({
+                    type: 'post',
+                    url: '/Booking/GetContactList',
+                    data: { custcode: code },
+                    async: false,
+                    success: function (data) {
+                        $("#ContactCode").append("<option value='' Phone=''></option>");
+                        $(data.contacts).each(function (index, item) {
+                            $("#ContactCode").append("<option value='" + item.Code + "' mobile='" + item.Mobile + "'>" + item.Name + "</option>");
+                        });
+                    }
+                });
+            }
+        });
+
+        // 付款单位修改
+        $("#SettleType").change(function () {
+            var selectVal = $(this).val();
+            if (selectVal == "1") {
+                $("#SettleCustomer").empty();
+                var BookingName = $("#BookingCustomer").select2("data")[0].id;
+                var text = $("#BookingCustomer").select2("data")[0].text;
+                $("#SettleCustomer").append("<option selected='selected' value='" + BookingName + "'>" + text + "</option>");
+            }
+            else if (selectVal == "2") {
+                //平台
+                $("#SettleCustomer").empty();
+                $.ajax({
+                    type: 'post',
+                    url: '@Url.Action("GetPlatforms")',
+                    data: '',
+                    async:false,
+                    success: function (data) {
+                        $("#SettleCustomer").append("<option value=''></option>");
+                        $(data).each(function (index, item) {
+                            $("#SettleCustomer").append("<option value='" + item.Code + "'>" + item.Name + "</option>");
+                        });
+                    }
+                });
+            } else if (selectVal == "3") {
+                //父公司
+                $("#SettleCustomer").empty();
+                $("#SettleCustomer").append("<option value=''></option>");
+                $.ajax({
+                    type: 'post',
+                    url: '@Url.Action("GetParentCompany")',
+                    data: { custCode: $("#BookingCustomer").val() },
+                    success: function (data) {
+                        if (data!=null) {
+                            $("#SettleCustomer").append("<option value='" + data.ParentCode + "'>" + data.ParentName + "</option>");
+                        }
+                    }
+                });
+
+            }else {
+                $("#SettleCustomer").empty();
+            }
+        });
+
+        $("#ContactCode").change(function () {
+            var option = $("#ContactCode").find("option:selected");
+            $("#ManagerPhone").val($(option).attr("mobile"));
+        });
+
+        $("#btnUpdateStatus").click(function () {
+
+            //询问框
+            layer.open({
+                content: '您确定游客资料输入完成？'
+                , btn: ['确定', '取消']
+                , yes: function (index) {
+
+                    $.ajax({
+                        type: "POST",
+                        data: { orderCode: $("#Order_OrderCode").val(), newStatus: "20", statusText: "游客资料输入完成" },
+                        url: "/Booking/UpdateOrderStatus",
+                        success: function (data) {
+                            if (data == "ok") {
+                                Utils.alert("保存成功");
+
+                                location.reload();
+                                layer.close(index);
+                            } else {
+                                // 显示结果
+                                Utils.alert("保存失败");
+                            }
+                        },
+                        error: function () {
+                            Utils.alert("保存失败！");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btnSaveTourist").click(function () {
+            // 取得据
+            var touristId = $("#touristId").val();
+            var name = $("#name").val();
+            var pinyin = $("#PinYin").val();
+            var placeOfBirth = $("#placeOfBirth").val();
+            var birthdate = $("#dateOfBirth").val();
+            var passType = $("#passType").val();
+            var passNo = $("#passNo").val();
+            var dateOfIssue = $("#dateOfIssue").val();
+            var placeOfIssue = $("#placeOfIssue").val();
+            var dateOfExpiry = $("#dateOfExpiry").val();
+            var orderCode = $("#Order_OrderCode").val();
+            // 检查数据
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: touristId,
+                    name: name, pinyin: pinyin, dateOfBirth: birthdate,
+                    passType: passType, passNo: passNo, dateOfIssue: dateOfIssue,
+                    placeOfIssue: placeOfIssue, dateOfExpiry: dateOfExpiry,
+                    orderCode: orderCode, placeOfBirth: placeOfBirth
+                },
+                url: "/Booking/SaveTourist",
+                success: function (data) {
+                    if (data == "ok") {
+                        Utils.alert("保存成功");
+                        $("#modal-tourist").modal('hide');
+                        loadTourist();
+                    } else {
+                        // 显示结果
+                        Utils.alert("保存失败");
+                    }
+                },
+                error: function () {
+                    Utils.alert("保存失败！");
+                }
+            });
+        });
+
+        // 保存订单信息
+        $("#btnSaveOrder").click(function () {
+            // 取得据
+            var BookingCustomer = $("#BookingCustomer").val();
+            var SettleType = $("#SettleType").val();
+            var SettleCustomer = $("#SettleCustomer").val();
+            var ContactCode = $("#ContactCode").val();
+            var Managers = $("#ContactCode").find("option:selected").text();
+            var ContactPhone = $("#ManagerPhone").val();
+            var LinkMan = $("#Linkman").val();
+            var LinkPhone = $("#LinkPhone").val();
+            var Remark = $("#Remark").val();
+
+            // 检查数据
+            $.ajax({
+                type: "POST",
+                data: {
+                    OrderCode: $("#Order_OrderCode").val(),
+                    BookingCustomer: BookingCustomer,
+                    SettlePlatForm: SettleType,
+                    SettleCustomer: SettleCustomer,
+                    ContactCode: ContactCode,
+                    Managers: Managers,
+                    ManagerPhone: ContactPhone,
+                    LinkMan: LinkMan,
+                    LinkPhone: LinkPhone,
+                    Remark: Remark
+                },
+                url: "/Booking/SaveOrder",
+                success: function (data) {
+                    if (data == "ok") {
+                        Utils.alert("保存成功");
+                        $("#modal-order").modal('hide');
+                        //loadOrderInfo();
+                        history.go(0);
+                    } else {
+                        // 显示结果
+                        Utils.alert("保存失败");
+                    }
+                },
+                error: function () {
+                    Utils.alert("保存失败！");
+                }
+            });
+        });
+
+        $("#btnHold").click(function () {
+            if (confirm("确认占位？")) {
+                $.post('@Url.Action("OrdersMakeSure")', { OrderCode: @Model.Order.OrderCode }, function (data) {
+                    if (data.Code != "1") {
+                        Utils.alert('权限不足！');
+                    } else {
+                        Utils.alert('占位成功！');
+                         document.location.href = '@Url.Action("Index")';
+                    }
+                });
+            }
+        });
+
+        // 编辑客人资料
+        $('#touristList').on('click', '[data-toggle="modal"]', function () {
+            $($(this).data("target") + ' .modal-body').load($(this).data("remote"));
+        });  
+    });
+
+    function loadTourist() {
+        var params = { id: $("#Order_OrderCode").val() };
+        // 重新加载游客列表
+        $.post('@Url.Action("TouristList")', params, function (data) {
+           $('#touristList').html(data);
+        });
+    }
+
+   function loadOrderInfo() {
+        var params = { id: $("#Order_OrderCode").val() };
+        // 重新加载游客列表
+        $.post('@Url.Action("OrderInfo")', params, function (data) {
+            $('#divOrderInfo').html(data);
+        });
+    }
+</script>

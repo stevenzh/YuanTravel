@@ -1,0 +1,153 @@
+﻿@model Lvy.Models.OrderDB.TpChildOrderModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <script src="~/Scripts/Validation.js" type="text/javascript"></script>
+    <link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+}
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        @Html.HiddenFor(m => m.OrderCode)
+                        @Html.HiddenFor(m => m.Id, new { id = "childID" })
+                        <div class="form-group row">
+                            <label class="col-3"><span class="text-danger">*</span>商品选择：</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(a => a.ProductID, ViewBag.ProductList as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">商品名称：</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(m => m.ProductName, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">订单类别：</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(m => m.ProductType, ViewData["DDLB"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm", @onchange = "ChangeData(this.value);" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">单价：</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(m => m.UnitPrice, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">数量：</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">金额：</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(m => m.Amount, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">供应商：</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(a => a.SupplierCode, ViewData["supplierList"] as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3">备注：</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(m => m.Remark, new { @rows = "3", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" id="detailadd" class="btn btn-success">保存</button>
+                        <button type="button" id="colsebtn" class="btn btn-secondary">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#colsebtn").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+
+        $("#detailadd").click(function () {
+
+            if ($.trim($("input[name='ProductName']").val()) == "") {
+                Utils.alert("商品名称不能为空！");
+                return;
+            }
+            if ($.trim($("select[name='ProductType']").val()) == "") {
+                Utils.alert("请选择产品类型！");
+                return;
+            }
+            if ($.trim($("input[name='UnitPrice']").val()) == "") {
+                Utils.alert("请输入单价！");
+                return;
+            }
+            if ($.trim($("input[name='Quantity']").val()) == "") {
+                Utils.alert("请输入份数！");
+                return;
+            }
+            if ($.trim($("select[name='SupplierCode']").val()) == "") {
+                Utils.alert("请选择供应商！");
+                return;
+            }
+
+            var param = {
+                "ID": $("#childID").val(),
+                "ProductID": $("#ProductID").val(),
+                "ProductType": $("#ProductType").val(),
+                "ProductName": $("#ProductName").val(),
+                "UnitPrice": $("#UnitPrice").val(),
+                "Quantity": $("#Quantity").val(),
+                "Amount": $("#Amount").val(),
+                "Remark": $("#Remark").val(),
+                "OrderCode": $("#OrderCode").val(),
+                "SupplierCode": $("#SupplierCode").val()
+            };
+
+            $.post("/OrderAdmin/SaveChildOrderInfo/", param, function (data) {
+                alert(data);
+
+                // 弹出框关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            });
+        });
+
+
+        $("#ProductID").change(function () {
+            $.ajax({
+                url: '/SubProduct/GetSubProductInfo',
+                data: { productId: $(this).val() },
+                type: 'post',
+                success: function (data) {
+                    if (data.code == '0') {
+                        $("#ProductName").val(data.info.ProductName);
+                        $("#ProductType").val(data.info.ProductType);
+                        $("#UnitPrice").val(data.info.UnitPrice);
+                        $("#SupplierCode").val(data.info.SupplierCode);
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+

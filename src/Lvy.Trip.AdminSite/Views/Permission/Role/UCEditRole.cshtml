@@ -1,0 +1,96 @@
+﻿@model Lvy.Models.CrmDB.SysRoleModel
+<form id="theForm">
+    <div class="station">
+        角色管理
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            @Html.HiddenFor(a => a.Id)
+            <table style="width:100%;">
+                <tr>
+                    <td class="label"><span class="point">*</span>角色名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Name, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">角色描述：</td>
+                    <td>
+                        @Html.TextAreaFor(a => a.Description, new { @class = "textarea440" })
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div align="center">
+            <input class="btn btn1" id="btnSave" type="button" value="保存" />
+            <input class="btn btn1" id="btnReset" type="button" value="清空" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSave").click(function () {
+            if (!checkControls()) {
+                return;
+            }
+            var load_iii = Utils.layerLoad();
+            var params = $("#theForm").formSerialize();
+
+            var id = $("#Id").val();
+            var url = "";
+            if (id > 0)
+                url = "/Permission/UpdateRole";
+            else
+                url = "/Permission/AddRole";
+
+            $.post(url, params, function (data) {
+
+                if (data.length > 0) {
+                    $("input:hidden").val("");
+                    $("#theForm").clearForm();
+                    $("#divRoles").html(data);
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        $("#btnReset").click(function () {
+            $("input:hidden").val("");
+            $("#theForm").clearForm();
+        });
+
+        // 焦点移出的场合，验证角色名称是否存在。
+        $("#Name").focusout(function () {
+            ajaxCheckRoleName();
+        });
+    });
+
+    // 验证控件
+    function checkControls() {
+        if ($("#Name").val() == "") {
+            Utils.alert("角色名称不能为空!");
+            $("#Name").select().focus();
+            return false;
+        }
+
+        //        if (!ajaxCheckRoleName()) {
+        //            return false;
+        //        }
+        return true;
+    }
+
+    function ajaxCheckRoleName() {
+        var params = { roleName: $("#Name").val() };
+        $.post("/Permission/CheckRoleName", params, function (data) {
+            if (data) {
+                //如果存在，提示
+                Utils.alert("角色名称已存在，请更改!");
+                $("#Name").select().focus();
+                return false;
+            }
+            return true;
+        });
+    }
+
+</script>

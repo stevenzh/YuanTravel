@@ -1,0 +1,62 @@
+﻿@model Lvy.VModels.Op.EditTouristsVModel
+@{
+    ViewBag.Title = "客人名单打印";
+}
+@section AdditionalResources { }
+<form id="theForm" method="POST" action="@Url.Action("Visitors", new { tourId = Model.Tour.Id })" enctype="multipart/form-data">
+    <div class="station">
+        打印客户名单
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label">
+                        线路名：
+                    </td>
+                    <td>
+                        @Model.Tour.LineName
+                        @Html.HiddenFor(a => a.Tour.LineName)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        线路类型：
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.Line.LineType)
+                        @DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.Line.LineType.ToString())
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        细目：
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(a => a.Visitor.Name2, new { @class = "", @checked = true })姓名 |
+                        @Html.CheckBoxFor(a => a.Visitor.PinYin2, new { @class = "", @checked = true })英文名 |
+                        @Html.CheckBoxFor(a => a.Visitor.Sex2, new { @class = "", @checked = true })性别 |
+                        @Html.CheckBoxFor(a => a.Visitor.DateOfBirth2, new { @class = "", @checked = true })年龄 |
+                        @Html.CheckBoxFor(a => a.Visitor.daili2, new { @class = "", @checked = true })分销商 | <br />
+                        @Html.CheckBoxFor(a => a.Visitor.PassType2, new { @class = "", @checked = true })证件类型 |
+                        @Html.CheckBoxFor(a => a.Visitor.PassNo2, new { @class = "", @checked = true })护照号 |
+                        @Html.CheckBoxFor(a => a.Visitor.DateOfIssue2, new { @class = "", @checked = true })签发日期 |
+                        @Html.CheckBoxFor(a => a.Visitor.DateOfExpiry2, new { @class = "", @checked = true })护照有效期 |
+                        @Html.CheckBoxFor(a => a.Visitor.PlaceOfIssue2, new { @class = "", @checked = true })签发地 |<br />
+                        @Html.CheckBoxFor(a => a.Visitor.Remark2, new { @class = "", @checked = true })护照说明 |
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <div style="text-align: center;">
+        <input type="submit" class="btn btn1" id="Senake" value="导出" />
+        <input type="button" class="btn btn1" id="backBtn" value="返回" />
+    </div>
+</form>
+<script type="text/javascript">
+    $('#backBtn').click(function () {
+        window.location = "/OpTour/SearchTour";
+    });
+</script>

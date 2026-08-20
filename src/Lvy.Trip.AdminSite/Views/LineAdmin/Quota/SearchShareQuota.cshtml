@@ -1,0 +1,40 @@
+﻿@model Lvy.VModels.Product.SearchShareQuotaVModel
+@{
+    ViewBag.Title = "查询共享库存";
+}
+@section AdditionalResources { }
+<form id="theForm">
+    <div id="divSearch" class="xbox">
+        @Html.HiddenFor(m => m.PagedQuota.PageIndex, new { id = "hiddenIndex" })
+        @Html.Partial("Quota/UCSearchShareQuota", Model)
+    </div>
+    <div id="divContent" class="xbox">
+        @Html.Partial("Quota/UCShareQuotaList", Model)
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        //        $("#divShowTour").dialog({
+        //            autoOpen: false,
+        //            resizable: false,
+        //            modal: true,
+        //            buttons: {
+        //                确定: function () {
+        //                    $(this).dialog("close");
+        //                }
+        //            }
+        //        });
+
+        //查询
+        $('#btnSearch').click(function () {
+            pageselectCallback(0);
+        });
+
+        //取消
+        $('#btnClear').click(function () {
+            $('input:text[name="ShareId"]').val('');
+            $('input:text[name="ShareName"]').val('');
+            pageselectCallback(0);
+        });
+    });
+</script>

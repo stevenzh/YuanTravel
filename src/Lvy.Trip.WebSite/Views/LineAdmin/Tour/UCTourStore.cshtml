@@ -1,0 +1,110 @@
+﻿@model Lvy.VModels.Product.AddTourVModel
+@{
+    ViewBag.Title = "库存团期";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+    <style>
+        .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events { min-height: 1.5em; }
+        .text150 { width: 150px; }
+        .text70 { width: 70px; }
+    </style>
+}
+
+@Html.HiddenFor(m => m.LineId)
+
+<div class="card">
+    <div class="card-body">
+        <p class="card-text">
+            <b>当前产品：</b>@Html.DisplayTextFor(m => m.Line.LineName) &nbsp;&nbsp;
+            <b>产品编号：</b>@Html.DisplayFor(m => m.LineId)  &nbsp;&nbsp;
+            <b>产品状态：</b> @(Model.Line.LineState==3?"上线":"下线")
+        </p>
+        <a href="@Url.Action("SearchLine")" class="card-link">返回产品列表</a>
+    </div>
+</div>
+
+<div class="row">
+    @*<div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">产品套餐</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool">增加套餐</button>
+                </div>
+            </div>
+            <div class="card-body">
+                @foreach (var item in Model.SuiteList)
+                {
+                    <button type="button" class="btn btn-info btn-block">@item.PackageDescr</button>
+                }
+            </div>
+        </div>
+    </div>*@
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">库存及团期</h3>
+                <div class="card-tools">
+                    <a class="btn btn-tool" href="@Url.Action("CreateTour",new { lineId = Model.LineId })">添加团期</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id='calendar'></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(function () {
+
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            header: { left: 'prev', center: 'title', right: 'next' },
+            locale: 'zh-cn',
+            height: 'auto',
+            defaultView: 'dayGridMonth',//默认视图
+            buttonText: { today: '今天', dayGridMonth: '月', dayGridWeek: '周', },
+            //navLinks: true, // can click day/week names to navigate views
+            dateClick: function (info) {
+                //alert('Clicked on: ' + info.dateStr);
+                //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+                //alert('Current view: ' + info.view.type);
+            },
+            events: function(info, successCallback, failureCallback){
+                    $.ajax({
+                        type : "post",
+                        url : '/LineAdmin/GetCalendar/@Model.LineId',
+                        data: {},
+                        dataType: "json",
+                        success : function(result) {
+                            successCallback(result);
+                        }
+                    });
+            },
+            eventClick: function (info) {
+                layer.open({
+                    type: 2,
+                    title: '编辑开班  出发日期：' + moment(info.event.start).format('YYYY-MM-DD') ,
+                    shadeClose: true,
+                    shade: 0.8,
+                    area: ['900px', '90%'],
+                    content: '/LineAdmin/EditTour/' + info.event.extendedProps.PlanId, //iframe的url
+                });
+            }
+        });
+        calendar.render();
+
+    });
+
+
+</script>

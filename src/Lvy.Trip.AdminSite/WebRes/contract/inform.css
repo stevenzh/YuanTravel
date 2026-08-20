@@ -1,0 +1,361 @@
+.inform-box {
+    padding-bottom: 20px;
+    background: #fff;
+}
+
+.inform-box .content {
+    padding: 20px;
+}
+
+.inform-box .title {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    line-height: 55px;
+    font-size: 16px;
+    color: #409EFF;
+    padding: 0 20px;
+    background: #F2F6FC;
+    border-bottom: #ddd solid 1px;
+}
+
+.inform-box .title .subtitle {
+    padding-left: 20px;
+    font-size: 12px;
+    color: #909399;
+}
+
+.inform-add-btn {
+    display: inline-block;
+    padding: 10px 25px;
+    border: #45a6d8 solid 1px;
+    background: #fff;
+    color: #45a6d8;
+    text-align: center;
+    font-size: 14px;
+    border-radius: 3px !important;
+    cursor: pointer;
+}
+
+.inform-choseall-btn {
+    display: inline-block;
+    background: #fff;
+    color: #45a6d8;
+    text-align: center;
+    font-size: 12px;
+    border-radius: 3px !important;
+}
+
+.inform-page {
+    color: #ccc;
+    text-align: center;
+}
+
+.inform-page span.disabled {
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    padding: 0 10px;
+    margin: 0 2px;
+    color: #bfbfbf;
+    background: #f2f2f2;
+    border: 1px solid #bfbfbf;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.inform-page span.current {
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    padding: 0 10px;
+    margin: 0 2px;
+    color: #fff;
+    background-color: #59b214;
+    border: 1px solid #59b214;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.inform-page a {
+    display: inline-block;
+    color: #59b214;
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    margin: 0 2px;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.inform-page-chose-team {
+    padding: 6px 6px;
+    border: #45a6d8 solid 1px;
+    background: #fff;
+    color: #45a6d8;
+    text-align: center;
+    font-size: 14px;
+    border-radius: 3px !important;
+}
+
+.inform-align-center {
+    text-align: center;
+}
+
+.inform-p {
+    color: #fb8d50;
+    font-weight: 500;
+}
+
+.inform-next-move {
+    border-radius: 5px !important;
+    width: 100px;
+    color: #fff;
+    background: #409EFF;
+    font-size: 14px;
+}
+
+.inform-remove {
+    border-radius: 5px !important;
+    width: 100px;
+    color: #fff;
+    background: #d9534f;
+    font-size: 14px;
+}
+
+.inform-list-row {
+    border-bottom: 1px solid #ccc;
+    padding: 10px
+}
+
+.inform-emergencye-contact {
+    text-align: center;
+    margin: 20px;
+}
+
+.inform-contact-container {
+    padding: 0 0 0 -10px;
+    border: 1px solid #ccc;
+}
+
+.inform-itinerary {
+    color: #fb8d50;
+    font-weight: 500;
+    padding-left: 30px;
+}
+
+.inform-notice-title {
+    text-align: center;
+    font-size: 20px;
+    padding-top: 15px;
+    color: #fb8d50;
+    line-height: 50px;
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+.inform-import-history-btn {
+    float: right;
+    border: 1px solid #409EFF;
+    padding: 5px 10px;
+    line-height: 25px;
+    margin: 0 10px;
+    border-radius: 7px !important;
+    font-size: 14px;
+}
+
+.inform-itinerary-title-btn {
+    display: inline-block;
+    padding: 5px 20px;
+    border: #45a6d8 solid 1px;
+    background: #fff;
+    color: #45a6d8;
+    text-decoration: none;
+    text-align: center;
+    font-size: 12px;
+    float: right;
+    border-radius: 3px !important;
+}
+
+.inform-edit-notice-btn {
+    position: absolute;
+    right: 20px;
+    top: 6px;
+}
+
+.inform-label-weight {
+    font-weight: 500;
+}
+
+.inform-label-content-color {
+    color: #909399;
+}
+
+.inform-other-infomation {
+    font-weight: 500;
+    color: #909399
+}
+
+.inform-detail-change-content {
+    margin: 30px;
+    height: 500px;
+    overflow-y: auto;
+}
+
+.inform-row-background {
+    background: #ffffff !important;
+}
+
+.inform-tourist-title {
+    padding: 20px;
+    border-bottom: 2px solid #ccc;
+    color: #fb8d50;
+}
+
+.inform-status-color-sended {
+    font-weight: 500;
+}
+
+.inform-sended-status {
+    color: #fb8d50;
+}
+
+.inform-readed-status {
+    color: #67C23A;
+}
+
+.inform-not-send-status {
+    color: #909399;
+}
+
+.inform-search-contract {
+    margin-top: 5px;
+    float: right;
+    margin-right: 5px;
+}
+
+.inform-clear-5 {
+    height: 5px;
+    clear: both
+}
+
+.inform-contract-border {
+    border: 1px solid #ccc;
+    margin: 0px 10px;
+    padding: 10px 0px;
+}
+
+.inform-not-have-contract {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fb8d50;
+}
+
+.inform-zebra td, .inform-zebra th {
+    padding: 10px;
+    border-bottom: 1px solid #f2f2f2;
+
+}
+
+.inform-zebra tbody tr:nth-child(even) {
+    background: #f5f5f5;
+    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+}
+
+.inform-zebra th {
+    color: #ffffff;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    background-color: #909399;
+}
+
+.inform-zebra th:first-child {
+    -moz-border-radius: 6px 0 0 0;
+    -webkit-border-radius: 6px 0 0 0;
+    border-radius: 6px 0 0 0;
+}
+
+.inform-zebra th:last-child {
+    -moz-border-radius: 0 6px 0 0;
+    -webkit-border-radius: 0 6px 0 0;
+    border-radius: 0 6px 0 0;
+}
+
+.inform-zebra th:only-child {
+    -moz-border-radius: 6px 6px 0 0;
+    -webkit-border-radius: 6px 6px 0 0;
+    border-radius: 6px 6px 0 0;
+}
+
+.inform-zebra tfoot td {
+    border-bottom: 0;
+    border-top: 1px solid #fff;
+    background-color: #f1f1f1;
+    text-align: center;
+}
+
+.inform-zebra tfoot td:first-child {
+    -moz-border-radius: 0 0 0 6px;
+    -webkit-border-radius: 0 0 0 6px;
+    border-radius: 0 0 0 6px;
+}
+
+.inform-zebra tfoot td:last-child {
+    -moz-border-radius: 0 0 6px 0;
+    -webkit-border-radius: 0 0 6px 0;
+    border-radius: 0 0 6px 0;
+}
+
+.inform-zebra tfoot td:only-child {
+    -moz-border-radius: 0 0 6px 6px;
+    -webkit-border-radius: 0 0 6px 6px;
+    border-radius: 0 0 6px 6px;
+}
+
+.inform-import-button {
+    border-radius: 6px !important;
+    font-weight: 500;
+    width: 140px;
+}
+
+.inform-send-button {
+    float: right !important;
+    margin: 0px 20px;
+}
+
+.inform-notice-title-preview {
+    text-align: center;
+    font-size: 50px;
+    padding: 15px;
+    color: #fb8d50;
+    line-height: 50px;
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+.inform-preview-world {
+    font-size: 22px;
+    font-weight: 500;
+
+}
+
+.inform-color-gray {
+    color: #909399;
+}
+
+.inform-padding-left-20 {
+    padding-left: 20px;
+}
+
+.inform-preview-border {
+    margin: 10px 20px;
+    border: 1px solid #ccc;
+}
+
+.inform-background-white{
+    background-color:#ffffff !important;
+}

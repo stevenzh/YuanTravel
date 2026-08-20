@@ -1,0 +1,131 @@
+﻿@model Lvy.VModels.Hotel.HotelVModel
+@using Lvy.Web.Common
+@if (Model.Hotels.Items.Count > 0)
+{
+    <table class="table table-striped table-bordered table-sm">
+        <thead>
+            <tr>
+                <td>酒店名称</td>
+                <td>所在地</td>
+                <td>部门</td>
+                <td>负责人</td>
+                <td>类型</td>
+                <td>星级</td>
+                <td style="width:150px;" align="center">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Hotels.Items)
+            {
+                <tr>
+                    <td>
+                        @item.HotelName<br />
+                        @item.HotelCode
+                    </td>
+                    <td>
+                        @item.CountryCode<br />
+                        @DictionaryTools.GetDestName(item.ProvinceCode)
+                    </td>
+                    <td>@DictionaryTools.GetCachedTeam(item.TeamID).TeamName</td>
+                    <td>@DictionaryTools.GetCachedAccount(item.CreatedBy).Name</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.HotelTypeEnum, item.HotelType.ToString())</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.HotelLevelEnum, item.RankCode.ToString())</td>
+                    <td class="project-actions">
+                        @if (item.HotelState == 2)
+                        {
+                            <a name="changeState" class="btn btn-primary btn-sm mt-1" url="/HotelAdmin/ChangeOnline/@item.HotelCode" data-id="@item.HotelCode" state="offline" deleteState="@item.IsValid" title="上线" href="javascript:void(0);">
+                                <i class="fa fa-arrow-up"></i>上线
+                            </a>
+                        }
+                        else
+                        {
+                            <a name="changeState" class="btn btn-primary btn-sm mt-1" url="/HotelAdmin/ChangeOffline/@item.HotelCode" data-id="@item.HotelCode" state="online" deleteState="@item.IsValid" title="下线" href="javascript:void(0);">
+                                <i class="fa fa-arrow-down"></i>下线
+                            </a>
+                        }
+                        <a href="@Url.Action("Edit", "HotelAdmin", new { id = item.HotelCode })" class="btn btn-primary btn-sm mt-1">
+                            <i class="fas fa-edit"></i>编辑
+                        </a>
+                        <a href="@Url.Action("Stock", "HotelAdmin", new { id = item.HotelCode })" class="btn btn-info btn-sm mt-1">
+                            <i class="fas fa-building"></i>房型
+                        </a>
+                        <a href="@Url.Action("Delete", "HotelAdmin", new { id = item.HotelCode })" onclick="return confirm('确定要删除嘛？')" class="btn btn-danger btn-sm mt-1">
+                            <i class="fas fa-trash"></i>删除
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @Html.HiddenFor(a => a.Hotels.PageIndex)
+    <div id="Pagination" class="digg"></div>
+}
+else
+{
+    <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+        <br />
+        对不起，没有查找到数据！请重新输入查询条件 ！
+    </div>
+}
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Hotels.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Hotels.PageSize'),
+                current_page: @Model.Hotels.PageIndex-1
+        });
+
+        //更改上线、下线状态
+        $("a[name=changeState]").click(function () {
+            if (Number($(this).attr('deleteState')) == 0) {
+                Utils.alert('该产品已被删除！');
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            var $link = $(this);
+            $.post($link.attr("url"), function (data) {
+                if (data == "no") {
+                    Utils.alert('权限不足！');
+                }
+                else if (Number(data) > 0) {
+                    var state = $link.attr("state");  // 当前状态
+                    if (state == "online") {
+                        $link.attr("state", "offline");
+                        $link.attr("title", "上线");
+                        $link.attr("url", "/HotelAdmin/ChangeOnline/" + $link.attr("data-id"));
+                        $link.html('<i class="fa fa-arrow-up"></i>上线');
+                    } else {
+                        $link.attr("state", "online");
+                        $link.attr("title", "下线");
+                        $link.attr("url", "/HotelAdmin/ChangeOffline/" + $link.attr("data-id"));
+                        $link.html('<i class="fa fa-arrow-down"></i>下线');
+                    }
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+
+        var load_iii = Utils.layerLoad();
+
+        $("#Customers_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

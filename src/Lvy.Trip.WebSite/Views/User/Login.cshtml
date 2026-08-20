@@ -1,0 +1,118 @@
+﻿@model Lvy.VModels.Base.LoginVModel
+@{
+    ViewBag.Title = "商户登录";
+}
+@section AdditionalResources {
+}
+
+<!-- Register Section Begin -->
+<div class="register-login-section spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+                <div class="login-form">
+                    <h2>商户登录</h2>
+                    @using (Html.BeginForm("LoginIn", "User", FormMethod.Post, new { @id = "theForm" }))
+                    {
+                        @Html.HiddenFor(m => m.Account.OwnerCode)
+                        <div class="group-input">
+                            <label for="username">账号/邮箱 *</label>
+                            @Html.TextBoxFor(model => model.Account.LoginName, new { @class = "form-control uname" })
+                        </div>
+                        <div class="group-input">
+                            <label for="pass">密码 *</label>
+                            @Html.PasswordFor(model => model.Account.Pwd, new { @class = "form-control pword m-b" })
+                        </div>
+                        @*<div class="group-input">
+                                <img src="@Url.Action("CreateImageCode", "Validate")" onclick="reloadValidate(this);" style="vertical-align: top; cursor: pointer; width:101px; height:34px; " alt="点击换验证码" title="点击换验证码" id="validimg" />
+                                <input type="text" id="ValidateCode" name="ValidateCode" style="color:#343434" class="form-control" placeholder="验证码" />
+                            </div>*@
+                        <div class="group-input gi-check">
+                            <div class="gi-more">
+                                <label for="save-pass">
+                                    保存密码
+                                    <input type="checkbox" id="save-pass">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <a href="#" class="forget-pass">忘记了密码</a>
+                            </div>
+                        </div>
+                        <button type="submit" id="BtnLogin" class="site-btn login-btn">登录</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Register Form Section End -->
+
+@section PageScripts{
+    <script type="text/javascript">
+    $(function () {
+
+        //登录验证。
+        $("#BtnLogin").click(function () {
+
+            if (!CheckControl()) {
+                return false;
+            }
+
+            $("#theForm").submit()
+
+            @*var ok = false;
+            $.ajax({
+                url: '@Url.Action("LoginIn", "User")',
+                type: 'post',
+                data: $("form").serialize(),
+                async: false,
+                success: function (data) {
+                    if (data.Code == 500) {
+                        Utils.alert(data.Message);
+                        ok = false;
+                    } else if (data.Code == 501) {
+                        Utils.alert(data.Message);
+                        $("#ValidateCode").val("");
+                        reloadValidate($("#validimg"));
+                        ok = false;
+                    }
+                    else {
+                        ok = true;
+                    }
+                }
+            });
+
+            return ok;*@
+        });
+
+    });
+
+    //reloadValidate("#validimg");
+    //验证用户输入
+    function CheckControl() {
+        if ($.trim($("#Account_LoginName").val()).length == 0) {
+            // Utils.alert("用户名不得为空！", 1500);
+            Utils.alert("用户名不得为空！")
+            $("#Account_LoginName").select().focus();
+            return false;
+        }
+        if ($.trim($("#Account_Pwd").val()).length == 0) {
+            //Utils.alert("密码不得为空！", 1500);
+            Utils.alert("密码不得为空！");
+            $("#Account_Pwd").select().focus();
+            return false;
+        }
+        //if ($.trim($("#ValidateCode").val()).length == 0) {
+        //    // Utils.alert("验证码不得为空！", 1500);
+        //    Utils.alert("验证码不得为空！");
+        //    $("#ValidateCode").select().focus();
+        //    return false;
+        //}
+
+        return true;
+    }
+
+    function reloadValidate(handler) {
+        $(handler).attr('src', '@Url.Action("CreateImageCode", "Validate")' + '?' + Math.random());
+    }
+    </script>
+}

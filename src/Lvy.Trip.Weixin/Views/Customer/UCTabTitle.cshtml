@@ -1,0 +1,35 @@
+﻿@model string
+<table class="table table-condensed text-center">
+    <tr>
+        @if (!string.IsNullOrEmpty(Model))
+        {
+            <td>
+                @Html.ActionLink("编辑客户", "CustomerEdit", new { code = Model }, new { @class = "btn btn-default" })
+            </td>
+            <td>
+                @Html.ActionLink("联系人管理", "ContactInfo", new { code = Model }, new { @class = "btn btn-default" })
+            </td>
+            <td>
+                @Html.ActionLink("合同附件", "Uploading", new { code = Model }, new { @class = "btn btn-default" })
+            </td>
+            <td>
+                @Html.ActionLink("折扣规则", "ProducPolicy", new { code = Model }, new { @class = "btn btn-default" })
+            </td>
+        }
+        else
+        {
+            <td>
+                <span>编辑客户</span>
+            </td>
+            <td>
+                <span>联系人管理</span>
+            </td>
+            <td>
+                <span>合同附件</span>
+            </td>
+            <td>
+                <span>折扣规则</span>
+            </td>
+        }
+    </tr>
+</table>

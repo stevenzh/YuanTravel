@@ -1,0 +1,134 @@
+﻿@model Lvy.VModels.Product.AddTourVModel
+@{
+    ViewBag.Title = "库存团期";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+}
+<style>
+    .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events { min-height: 1.5em; }
+    .text150 { width: 150px; }
+    .text70 { width: 70px; }
+</style>
+@Html.HiddenFor(m => m.LineId)
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>@ViewBag.Title</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("SearchLine")">产品列表</a></li>
+                        <li class="breadcrumb-item active">@ViewBag.Title </li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="card-text"><b>当前产品：</b>@Html.DisplayTextFor(m => m.Line.LineName)</p>
+                            <p class="card-text"><b>产品编号：</b>@Html.DisplayFor(m => m.LineId)  <b>产品状态：</b> 上线</p>
+                            @*<a href="@Url.Action("SearchLine")" class="card-link">返回产品列表</a>*@
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">产品套餐</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-success">增加套餐</button>
+                                @*<a href="@Url.Action("BatchEditTour", new { lineId = Model.LineId })" title="批量修改团计划">
+                                        <i class="fa fa-th"></i>
+                                    </a>*@
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var item in Model.SuiteList)
+                            {
+                                <button type="button" class="btn btn-info btn-block">@item.PackageDescr</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">库存及团期</h3>
+                            <div class="card-tools">
+                                <a class="btn btn-success" href="@Url.Action("CreateTour",new { lineId = Model.LineId })">添加团期</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id='calendar'></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+
+    $(function () {
+
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            header: { left: 'prev', center: 'title', right: 'next' },
+            locale: 'zh-cn',
+            height: 'auto',
+            defaultView: 'dayGridMonth',//默认视图
+            buttonText: { today: '今天', dayGridMonth: '月', dayGridWeek: '周', },
+            //navLinks: true, // can click day/week names to navigate views
+            dateClick: function (info) {
+                //alert('Clicked on: ' + info.dateStr);
+                //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+                //alert('Current view: ' + info.view.type);
+            },
+            events: function(info, successCallback, failureCallback){
+                    $.ajax({
+                        type : "post",
+                        url : '/LineAdmin/GetCalendar/@Model.LineId',
+                        data: {},
+                        dataType: "json",
+                        success : function(result) {
+                            successCallback(result);
+                        }
+                    });
+            },
+            eventClick: function (info) {
+                layer.open({
+                    type: 2,
+                    title: '编辑开班  出发日期：' + moment(info.event.start).format('YYYY-MM-DD') ,
+                    shadeClose: true,
+                    shade: 0.8,
+                    area: ['900px', '90%'],
+                    content: '/LineAdmin/EditTour/' + info.event.extendedProps.PlanId, //iframe的url
+                });
+            }
+        });
+        calendar.render();
+
+    });
+</script>

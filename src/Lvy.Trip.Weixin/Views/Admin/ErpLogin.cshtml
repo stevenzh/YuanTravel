@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "微信公众号";
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+    var list = ViewData["AccountModel"] as List<CrmAccountModel>;
+}
+@using Lvy.Models.CrmDB
+
+<div class="ui basic segment">
+
+    @using (Html.BeginForm("AgreeLogin", "Admin", FormMethod.Post, new { @id = "frm", @class = "ui form", @onsubmit = "return checkfrm()" }))
+    {
+        <h4 class="ui dividing header">后台登陆确认</h4>
+        <input name="sceneId" type="hidden" value="@ViewData["SceneId"]" />
+        <div class="ui form segment">
+            @foreach (var item in list)
+            {
+                <div class="inline field">
+                    @Html.RadioButton("accountCode", item.Code)
+                    @Html.Label(item.Name)
+                </div>
+            }
+
+            <button type="submit" class="fluid ui button">同意登陆</button>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("input[name='accountCode']").first().prop('checked', true);
+    });
+    function checkfrm() {
+        //验证方法
+        var code = $('input:radio[name=accountCode]:checked').val();
+        if (code == '' || code == null) {
+            Utils.alert("请选择登陆用户");
+            return false;
+        }
+        else { return true; }
+    }
+</script>

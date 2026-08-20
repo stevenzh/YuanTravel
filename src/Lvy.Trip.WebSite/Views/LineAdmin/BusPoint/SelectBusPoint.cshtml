@@ -1,0 +1,75 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.SelectBusPointVModel
+@{
+    Layout = null;
+    ViewBag.Title = "选择上车点";
+}
+@using (Html.BeginForm("SaveBusPoint", "Product", FormMethod.Post, new { id = "theForm" }))
+{
+    <input type="hidden" name="TpLine.LineId" value="@Model.Line.LineId" />
+
+    <table class="table table-borderless">
+        <tr>
+            <td>上车点：</td>
+            <td>
+                @Html.TextBoxFor(m => m.BusPointName, new { @class = "form-control" })
+            </td>
+            <td>组别：</td>
+            <td>
+                @Html.DropDownListFor(m => m.GroupId, Model.GroupItems.ToSelectListFor(Model.GroupId ?? ""), new { id = "conditionGroup", @class = "form-control" })
+            </td>
+            <td>
+                <input class="btn btn-info" id="searchBtn" type="button" value="搜索" />
+            </td>
+        </tr>
+    </table>
+    <div id="bpListContainer" class="xbox">
+        @Html.Partial("BusPoint/UCBusPointList", Model)
+    </div>
+}
+<script type="text/javascript">
+    $(function () {
+
+        $('#searchBtn').click(function () {
+            var load_iii = Utils.layerLoad();
+            var params = {
+                LineId: $('#LineId').val(),
+                BusPointName: $("#BusPointName").val(),
+                GroupId: $('#conditionGroup option:selected').val()
+            };
+            $.ajax({
+                type: "POST",
+                cache: false,
+                url: '@Url.Action("UCBusPointList", "LineAdmin")',
+                data: params,
+                success: function (data) {
+                    $('#bpListContainer').children().remove();
+                    $('#bpListContainer').html(data);
+                    hoverChangeStyle();
+                    Utils.layerClose(load_iii);
+                }
+            });
+        });
+
+        $('#backBtn').click(function () {
+            window.location = "/Product/SearchLine";
+        });
+    });
+
+    function CheckHour(handler) {
+        var pattern = /^[0-1][0-9]|[2][0-3]$/;
+        if (!pattern.test($(handler).val())) {
+            Utils.alert('时间格式有误！应为24h制，且在00-23之间。');
+            $(handler).focus().select();
+        }
+    }
+
+    function CheckMinutes(handler) {
+        var pattern = /^[0-5][0-9]$/;
+        if (!pattern.test($(handler).val())) {
+            Utils.alert('时间格式有误！应为00-59范围内。');
+            $(handler).focus().select();
+        }
+    }
+
+</script>

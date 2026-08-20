@@ -1,0 +1,77 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+@{
+    //距出发日期还有1天的
+    DateTime OneDay = DateTime.Now.AddDays(1);
+    var OneDayModels = Model.OrderModels.Where(a => a.OutDate == OneDay).ToList();
+    int cnt = OneDayModels.Count;
+}
+@if (cnt > 0)
+{
+    var bookName0 = DictionaryTools.GetCachedCustomer(OneDayModels[0].BookingCustomer).Name;
+    <tr name="1">
+        <td name="orderCode" align="center" orderCode="@OneDayModels[0].OrderCode">
+            @OneDayModels[0].Id
+        </td>
+        <td align="left" title="@OneDayModels[0].LineName">
+            @OneDayModels[0].LineName.TrimWithElipsis(20)
+        </td>
+        <td align="center">@OneDayModels[0].OutDate.ToString("MM-dd")</td>
+        <td align="center">@OneDayModels[0].LinkMan</td>
+        <td align="center">@OneDayModels[0].TravellerCount</td>
+        <td name="orderState" align="center" style="color: red;">
+            @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, OneDayModels[0].OrderState.ToString())
+        </td>
+        <td align="center">@OneDayModels[0].TolYsPrice</td>
+        <td align="center">@OneDayModels[0].Managers</td>
+        <td align="left">
+            @Html.EditActionLink("EditTimerOrder", "Order", new { orderCode = OneDayModels[0].OrderCode })
+            <!--0:时间相等；1在两个小时范围之外；-1在两个小时范围之内-->
+            @if (DateTime.Now.CompareTo(OneDayModels[0].CreatedTime.AddHours(2)) < 1)
+            {
+                <a href="javascript:void(0);" class="delete">
+                    <span name="remark" style="display: none;">@OneDayModels[0].Remark</span><span name="createdTime" style="display: none;">@OneDayModels[0].CreatedTime</span>
+                </a>
+            }
+        </td>
+    </tr>
+    for (int i = 1; i < cnt; i++)
+    {
+        var bookName = DictionaryTools.GetCachedCustomer(OneDayModels[i].BookingCustomer).Name;
+        <tr name="1">
+            <td name="orderCode" align="center" orderCode="@OneDayModels[i].OrderCode">
+                @OneDayModels[i].Id
+            </td>
+            <td align="left" title="@OneDayModels[i].LineName">
+                @OneDayModels[i].LineName.TrimWithElipsis(20)
+            </td>
+            <td align="center">@OneDayModels[i].OutDate.ToString("MM-dd")</td>
+            <td align="center">@OneDayModels[i].LinkMan</td>
+            <td align="center">@OneDayModels[i].TravellerCount</td>
+            <td name="orderState" align="center" style="color: red;">
+                @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, OneDayModels[i].OrderState.ToString())
+            </td>
+            <td align="center">@OneDayModels[i].TolYsPrice</td>
+            <td align="center">@OneDayModels[i].Managers</td>
+            <td align="left">
+                @Html.EditActionLink("EditTimerOrder", "Order", new { orderCode = OneDayModels[i].OrderCode })
+                <!--0:时间相等；1在两个小时范围之外；-1在两个小时范围之内-->
+                @if (DateTime.Now.CompareTo(OneDayModels[i].CreatedTime.AddHours(2)) < 1)
+                {
+                    <a href="javascript:void(0);" class="delete">
+                        <span style="display: none;">@OneDayModels[i].Remark</span>
+                        <span name="createdTime" style="display: none;">@OneDayModels[i].CreatedTime</span>
+                    </a>
+                }
+                <a title="确认单" href="@Url.Action("OrderConfirmPrint", "Seller", new { orderCode = OneDayModels[i].OrderCode, isTimerOrder = 1 })">确认单</a>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="9" style="text-align: center; color: red;">
+            当前没有数据
+        </td>
+    </tr>
+}

@@ -1,0 +1,59 @@
+﻿@model Lvy.VModels.Order.OrderConfirmPrintVModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>账单信息</title>
+    <link rel="stylesheet" href="~/WebRes/css/manage.css" />
+    <script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+    <link rel="stylesheet" href="~/WebRes/scripts/My97DatePicker/skin/WdatePicker.css" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+</head>
+<body>
+    <div id="divPrint" style="width: 650px; margin: 0 auto;">
+        @Html.Partial("print/UCConfirmPrint", Model)
+    </div>
+    <table class="sotable" style="width:100%;">
+        <tr>
+            <td>
+                &nbsp;
+            </td>
+            <td align="center">
+                <input class="btn btn1" id="btnPrint" type="button" value="打印" />
+                <input class="btn btn1" id="btnClose" type="button" value="关闭" />
+            </td>
+        </tr>
+    </table>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            printView();
+            $("input[type=button]").show();
+            document.title = "账单信息";
+        };
+
+        $(function () {
+            //打印
+            $("#btnPrint").click(function () {
+                printView();
+                $("input[type=button]").show();
+                document.title = "账单信息";
+            });
+            //关闭
+            $("#btnClose").click(function () {
+                window.close();
+            });
+        });
+
+        //打印
+        function printView() {
+            document.title = "";
+            $("input[type=button]").hide();
+            window.print();
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+﻿@model Lvy.VModels.Base.BasePlaceVModel
+@{
+    ViewBag.Title = "景区管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources { }
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" method="POST" action="@Url.Action("Search")" class="form-search">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">景区列表</h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width:300px;">
+                        @Html.TextBoxFor(a => a.PlaceName, new { @class = "form-control float-right", @placeholder = "景区名称" })
+                        @Html.DropDownListFor(a => a.PlaceLevel, ViewBag.PlaceLevels as IEnumerable<SelectListItem>, new { @class = "form-control float-right", @placeholder = "景区星级" })
+                        <div class="input-group-append">
+                            <a id="btnSave" class="btn btn-sm btn-default"><i class="fas fa-search"></i></a>
+                            <a href="@Url.Action("Create")" class="btn btn-sm btn-success"><i class="fas fa-plus"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.box-header -->
+            <div class="card-body">
+                @Html.Partial("UCSearch")
+            </div>
+        </div>
+    </form>
+
+</section>
+
+

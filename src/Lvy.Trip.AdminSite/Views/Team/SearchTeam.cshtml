@@ -1,0 +1,56 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Crm.TeamVModel
+@{
+    ViewBag.Title = "部门管理";
+}
+@section AdditionalResources { }
+<form id="theForm" action="">
+    <div id="SearchContainer" class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                部门管理
+            </div>
+            <table id="searchTable" class="sotable" style="width:100%;">
+                <tr>
+                    <td class="label">职能：</td>
+                    <td>
+                        @Html.DropDownListFor(model => model.DepartType, Model.DepartList.ToSelectListFor(), new { @class="text150" })
+                    </td>
+                    <td class="label">部门名称：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.TeamName, new { id = "conditionBp", @class = "text150" })
+                    </td>
+                </tr>
+            </table>
+            <input class="btn btn1" id="searchBtn" type="button" value="搜索" />
+            <input class="btn btn1" id="resetBtn" type="button" value="清空" />
+        </div>
+    </div>
+    <div id="ListContainer" class="xbox">
+        <div class="btnlist">
+            <div class="fr">
+                <a href="@Url.Action("CreateTeam")" class="btn btn1" title="添加部门">添加部门</a>
+            </div>
+        </div>
+        <div id="busPointListContent">
+            @Html.Partial("UCTeamList", Model)
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#searchBtn').click(function () {
+            pageselectCallback(0);
+        });
+
+        // 清空查询条件
+        $('#resetBtn').click(function () {
+            $('#conditionBp').val('');
+            $('#conditionGroup').children().eq(0).attr("selected", 'selected');
+        });
+
+    });
+
+</script>

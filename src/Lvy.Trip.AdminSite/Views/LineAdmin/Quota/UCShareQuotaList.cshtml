@@ -1,0 +1,115 @@
+﻿@model Lvy.VModels.Product.SearchShareQuotaVModel
+<div class="btnlist">
+    <div class="fr">
+        <a id="addNewShareQuota" href="@Url.Action("CreateShareQuota")" class="btn btn1">添加共享库存</a>
+    </div>
+</div>
+<table class="listtbl" style="width:100%;">
+    <thead>
+        <tr>
+            <td style="text-align: center;">编号</td>
+            <td style="text-align: center;">共享名称</td>
+            <td style="text-align: center;">出发日期</td>
+            <td style="text-align: center;">计划</td>
+            <td style="text-align: center;">已用</td>
+            <td style="text-align: center;">剩余</td>
+            <td style="text-align: center;">预留</td>
+            <td style="text-align: center; width: 70px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.PagedQuota.Items == null || Model.PagedQuota.Items.Count == 0)
+        {
+            <tr>
+                <td colspan="8">
+                    <span>无数据</span>
+                </td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model.PagedQuota.Items)
+            {
+                <tr>
+                    <td>
+                        @item.Id
+                    </td>
+                    <td>
+                        @item.QuotaName
+                    </td>
+                    <td style="text-align: center;">
+                        @item.OutDate.ToDateFormat()
+                    </td>
+                    <td style="text-align: center;">
+                        @item.PlanQuota
+                    </td>
+                    <td style="text-align: center;">
+                        @item.UsedQuota
+                    </td>
+                    <td style="text-align: center;">
+                        @item.UseQuota
+                    </td>
+                    <td style="text-align: center;">
+                        @item.HoldQuota
+                    </td>
+                    <td style="text-align: center;">
+                        <a class="search" title="共享查看" name="showShareTourLink" href="javascript:void(0);" quota="@item.Id"></a>
+                        @Html.EditActionLink("EditShareQuota", "LineAdmin", new { id = @item.Id })
+                        @Html.DeleteActionLink("DeleteShareQuota", "LineAdmin", 1, new { id = @item.Id })
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<div id="divPagination" class="digg">
+</div>
+<script type="text/javascript">
+
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post(
+	        '@Url.Action("SearchShareQuota")',
+	        params,
+	        function (data) {
+	            $('#divContent').html(data);
+	            hoverChangeStyle();
+	            //	            $('#divShowTour').show();
+	            Utils.layerClose(load_iii);
+	        });
+    }
+
+    $(function () {
+
+        //初始化分页
+        $("#divPagination").pagination(
+        Number('@Model.PagedQuota.TotalCount'), {
+            callback: pageselectCallback,
+            items_per_page: (@Model.PagedQuota.PageSize),
+            num_display_entries: 5,
+            num_edge_entries: 2,
+            current_page: (@Model.PagedQuota.PageIndex-1)
+        });
+
+        $('a[name="showShareTourLink"]').click(function () {
+            var id = $(this).attr('quota');
+            $.post('/LineAdmin/DisPlayShareQuota/' + id, function(data) {
+                //$('#divShowTour').html(data);
+                layer.open({
+                    type: 1, title: '共享查看', maxmin: false,
+                    shadeClose: false, area: ['400px', '300px'],
+                    content: data,
+                    btn: ["确认", "关闭"],
+                    yes: function (index, layero) {
+                    },
+                    btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+            });
+        });
+
+    });
+</script>

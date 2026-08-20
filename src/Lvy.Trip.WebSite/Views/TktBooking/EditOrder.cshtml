@@ -1,0 +1,373 @@
+﻿@model Lvy.VModels.TktOnline.BookingVModel
+@{
+    ViewBag.Title = "编辑订单";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link rel="stylesheet" href="~/styles/tkt.booking.css" />
+    <link rel="stylesheet" href="~/lib/My97DatePicker/skin/default/datepicker.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/select2/css/select2.min.css" />
+}
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="~/images/shop_background.jpg"></div>
+    <div class="home_overlay"></div>
+    <div class="home_content d-flex flex-column align-items-center justify-content-center">
+        <h2 class="home_title">当前目的地: @DictionaryTools.GetDestNameStr(Model.Product.ArriveDest)</h2>
+    </div>
+</div>
+
+<div class="single_post">
+    <div class="container">
+
+        <form id="theForm">
+            <div class="row">
+                <div class="col-lg-3">
+                    @{Html.RenderAction("OpenSearchDialog", "TktBooking", new { destId = Model.Product.ArriveDest }); }
+                </div>
+                <div class="col-lg-6">
+                    <div id="divProducts" class="scenic_info">
+                        @{
+                            int index = 0;
+                        }
+                        @foreach (var product in Model.OrderedProducts)
+                        {
+                            <div id="product-@product.Id" class="info_con_money">
+                                <span style="float: right; padding-right: 6px;" class="scenic_info_span">
+                                    <a href="javascript:;" onclick="delProduct(@product.Id);">删除</a>
+                                </span>
+                                <table class="table">
+                                    <tr>
+                                        <td><b class="scenic_info_b">产品名称</b></td>
+                                        <td>@product.ProductName</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b class="scenic_info_b">预定须知</b></td>
+                                        <td>@Html.Raw(product.BookingDesc)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b class="scenic_info_b">游玩时间</b></td>
+                                        <td>
+                                            <input type="text" productId="@product.Id" class="Wdate" name="outdates" value="@Model.Order.OrderDetails[index].OutDate.ToDateFormat()" onfocus="WdatePicker({doubleCalendar:true,dateFmt:'yyyy-MM-dd',onpicked:getPricesCallBack})" />
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div id="divPrices-@product.Id" class="price_table">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>报价类型</td>
+                                            <td>市场价</td>
+                                            <td>结算价</td>
+                                            @if (product.TktType == 1 || product.TktType == 2)
+                                            {
+                                                <td>签单价</td>
+                                            }
+                                            else
+                                            {
+                                                <td>返利</td>
+                                            }
+                                            <td>价格政策</td>
+                                            <td align="center">人数</td>
+                                            <td align="center">结算价</td>
+                                            <td style="display: none"></td>
+                                        </tr>
+                                        @foreach (var item in Model.ProductsCurrentDatePrices.Where(a => a.ProductId == product.Id))
+                                        {
+                                            <tr>
+                                                <td title="@item.PriceType">@item.PriceType</td>
+                                                <td>@item.MarketPrice</td>
+                                                <td name="tdSettlePrice">@item.SettlePrice</td>
+                                                <td name="tdSysPrice">@item.SysPrice</td>
+                                                <td title="@item.PriceDesc">@item.PriceDesc.TrimWithElipsis(10)</td>
+                                                <td align="center">
+                                                    @*<input name="PeopleNum" type="text" input-limit='number' class="mem_num_input"
+                                                        value="@item.PeopleNum" onkeyup="CalcOneYsPrice(this);" />*@
+                                                    @if (Model.Product.TuiJianType == 2)
+                                                    {
+                                                        <input name="PeopleNum" type="text" input-limit='number' class="mem_num_input" onkeyup="checkPeopleNum(this,@Model.Product.Id,@item.PeopleNum);" value="@item.PeopleNum" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input name="PeopleNum" type="text" input-limit='number' class="mem_num_input" value="@item.PeopleNum" onkeyup="CalcOneYsPrice(this);" />
+                                                    }
+                                                    <input name="PriceIds" type="hidden" value="@item.Id" />
+                                                </td>
+                                                <td align="center" name="tdOneYsPrice">0</td>
+                                                <td style="display: none" name="tdTktType">@item.TktType</td>
+                                            </tr>
+                                        }
+
+                                    </table>
+                                </div>
+                                <div class="bac_money_table"></div>
+                                <input type="hidden" name="ProductIds" value="@product.Id" />
+                            </div>
+                            index++;
+                        }
+                    </div>
+                </div>
+                <!--m_left end-->
+                <!--m_right start-->
+                <div class="col-lg-3">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><span class="some_tips">*</span>导游：</td>
+                            <td>
+                                @Html.TextBoxFor(a => a.Order.GuideName, new { @Id = "GuideName", @class = "form-control" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="some_tips">*</span>导游电话：</td>
+                            <td>@Html.TextBoxFor(a => a.Order.GuidePhone, new { @Id = "GuidePhone", @class = "form-control" })</td>
+                        </tr>
+                        <tr>
+                            <td><span class="some_tips">*</span>联系人姓名：</td>
+                            <td>@Html.TextBoxFor(a => a.Order.Managers, new { @Id = "Managers", @class = "form-control" })</td>
+                        </tr>
+                        <tr>
+                            <td><span class="some_tips">*</span>联系人电话：</td>
+                            <td>@Html.TextBoxFor(a => a.Order.ManagerPhone, new { @Id = "ManagerPhone", @class = "form-control" })</td>
+                        </tr>
+                        <tr>
+                            <td>备注：</td>
+                            <td>
+                                @Html.TextAreaFor(a => a.Order.Remarks, new { @Id = "Remarks", @class = "form-control" })
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>总计：</td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>景区现付 </td>
+                                        <td><span id="tdTaskPay">0</span>元</td>
+                                    </tr>
+                                    <tr>
+                                        <td>返利 </td>
+                                        <td><span id="tdTaskFanli">0</span>元</td>
+                                    </tr>
+                                    <tr>
+                                        <td>签单 </td>
+                                        <td><span id="tdQiandanPay">0</span>元</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" align='center'>
+                                <input type="button" id="btnSaveOrder" value="保存订单" class="btn btn-info" />
+                                <input type="button" value="返回列表" class="btn btn-info" onclick="location.href='@Url.Action(" Search","TktOrder")'" />
+
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!--m_right end-->
+                @Html.HiddenFor(a => a.Order.Id)
+            </div>
+        </form>
+    </div>
+</div>
+
+@section PageScripts
+{
+    <script src="~/lib/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="@CDNServerUrl/select2/js/select2.full.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/i18n/zh-CN.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            CalcOneYsPrice();
+
+            // 保存订单
+            $("#btnSaveOrder").click(function () {
+                if (!CheckControls()) {
+                    return false;
+                }
+
+                var params = decodeURIComponent($("#theForm").formSerialize());
+                var load_iii = Utils.layerLoad();
+                $.post('/TktBooking/UpdateOrder', params, function (data) {
+                    if (data) {
+                        if (data == "no") {
+                            Utils.alert("权限不足！");
+                        }
+                        else if (data.State == "0") {
+                            Utils.alert(data.Msg);
+                        }
+                        else {
+                            Utils.alert("保存成功!");
+                            location.href = data.ReturnUrl;
+                            return;
+                        }
+                    } else {
+                        Utils.alert("保存失败！");
+                    }
+
+                    Utils.layerClose(load_iii);
+                });
+
+            });
+
+        });
+
+        // 删除产品
+        function delProduct(productId) {
+            if (!confirm("确定要删除吗？")) {
+                return false;
+            }
+            $("#divProducts").find("#product-" + productId).remove();
+            CalcOneYsPrice();
+        }
+
+        // 获取报价数据的回调函数
+        function getPricesCallBack(obj) {
+            if ($(obj).attr("class") != "Wdate") {
+                obj = this;
+            }
+            if ($(obj).val() == "") {
+                return;
+            }
+
+            var pId = $(obj).attr('productId');
+            var params = { selectDate: $(obj).val(), productId: pId };
+            var d = layer.load(1, { shade: [0.1, '#fff'] });
+
+            $.post('/TktBooking/GetCurrentPrices', params, function (html) {
+                layer.close(d);
+                $("#divPrices-" + pId).html(html);
+                // 过滤 只能输入数字
+                $("form input[input-limit='number']").keypress(function () {
+                    InputLimitNumber();
+                });
+                CalcOneYsPrice();
+            });
+        }
+
+        //检查人数
+        function checkPeopleNum(_this, productId, oldNum) {
+            var $this = $(_this);
+            var peopleCount = Number($this.val());
+            if (Number(oldNum) < peopleCount) {
+                peopleCount = peopleCount - Number(oldNum);
+                var param = { ProductId: productId, PeopleCount: peopleCount };
+                $.post('/TktBooking/CheckQuota', param, function (data) {
+                    if (data) {
+                        if (data.State == 1) {
+                            CalcOneYsPrice(_this);
+                        } else {
+                            Utils.alert(data.Msg);
+                            $this.val(oldNum);
+                            CalcOneYsPrice(_this);
+                            $this.focus().select();
+                        }
+                    } else {
+                        Utils.alert('系统出现异常，请联系管理员。');
+                    }
+                });
+            }
+        }
+
+        // 计算结算金额
+        function CalcOneYsPrice(_this) {
+            $("#tdTaskPay").html(0);
+            $("#tdTaskFanli").html(0);
+            $("#tdQiandanPay").html(0);
+            $(".price_table input[name='PeopleNum']").each(function () {
+                _this = this;
+                var model = new Object();
+                var obj = $(_this).parents("tr");
+                if (Utils.Trim($(_this).val()) == "") {
+                    model.Num = 0;
+                } else {
+                    model.Num = parseInt($(_this).val());
+                }
+
+                model.TktType = parseInt(Utils.Trim(obj.find("td[name='tdTktType']").html()));
+                model.SettlePrice = parseInt(Utils.Trim(obj.find("td[name='tdSettlePrice']").html()));
+                model.SysPrice = parseInt(Utils.Trim(obj.find("td[name='tdSysPrice']").html()));
+
+
+                if (model.TktType == 1 || model.TktType == 2) { // 签单
+                    model.OneYsPrice = model.SysPrice * model.Num;
+                } else {
+                    model.OneYsPrice = (model.SettlePrice - model.SysPrice) * model.Num;
+                }
+                // 显示一个报价类型的结算价
+                obj.find("td[name='tdOneYsPrice']").html(model.OneYsPrice);
+
+
+                // 景区先付  任务单
+                var taskPay = parseInt(Utils.Trim($("#tdTaskPay").html()));
+                // 任务单 返利
+                var taskFanli = parseInt(Utils.Trim($("#tdTaskFanli").html()));
+                // 签单
+                var qiandanPay = parseInt(Utils.Trim($("#tdQiandanPay").html()));
+                if (model.TktType == 1 || model.TktType == 2) { // 签单
+                    qiandanPay = qiandanPay + model.SysPrice * model.Num;
+                } else {
+                    taskPay = taskPay + model.SettlePrice * model.Num;
+                    taskFanli = taskFanli + model.SysPrice * model.Num;
+                }
+                $("#tdTaskPay").html(taskPay);
+                $("#tdTaskFanli").html(taskFanli);
+                $("#tdQiandanPay").html(qiandanPay);
+            });
+        }
+
+        // 验证控件
+        function CheckControls() {
+
+            var num = 0;
+            $(".price_table input[name='PeopleNum']").each(function () {
+                var _this = this;
+
+                if (Utils.Trim($(_this).val()) == "") {
+                    num = num + 0;
+                } else {
+                    num = num + parseInt($(_this).val());
+                }
+            });
+
+            if (num <= 0) {
+                Utils.alert("必须输入人数！");
+                return false;
+            }
+
+            if (Utils.Trim($("#GuideName").val()) == "") {
+                Utils.alert("必须输入导游姓名！");
+                $("#GuideName").focus().select();
+                return false;
+            }
+            if (Utils.Trim($("#GuidePhone").val()) == "") {
+                Utils.alert("必须输入导游电话！");
+                $("#GuidePhone").focus().select();
+                return false;
+            }
+
+            if (Utils.Trim($("#Managers").val()) == "") {
+                Utils.alert("必须输入联系人姓名！");
+                $("#Managers").focus().select();
+                return false;
+            }
+            if (Utils.Trim($("#ManagerPhone").val()) == "") {
+                Utils.alert("必须输入联系人电话！");
+                $("#ManagerPhone").focus().select();
+                return false;
+            }
+
+            return true;
+        }
+
+
+    </script>
+
+}
+

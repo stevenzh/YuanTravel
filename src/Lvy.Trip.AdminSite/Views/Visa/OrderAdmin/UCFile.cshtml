@@ -1,0 +1,168 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@using Arch.Common
+@{
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th></th>
+            <th>类型</th>
+            <th>上传人</th>
+            <th>上传时间</th>
+            <th>描述</th>
+            @*<th>版本</th>*@
+            <th style="width:100px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @Html.HiddenFor(m => m.OrderCode)
+        @foreach (var item in Model.FileList)
+
+        {
+            <tr>
+                @if (item.MediaType == "image")
+                {
+                    <td>
+                        <a class="go" href="@(picroot + item.FilePath)" title="@item.FileName" rel="gallery">
+                            <img style="width:60px;" src="@(picroot + item.FilePath)">
+                        </a>
+                    </td>
+                }
+                else
+                {
+                    <td>@item.FileName</td>
+                }
+                <td>@DictionaryTools.GetEnumValue(Enums.FileBusinessEnum, item.SourceType)</td>
+                <td>@DictionaryTools.GetCachedAccount(item.CreatedBy).Name</td>
+                <td>@item.CreatedTime.ToString()</td>
+                <td>@item.Remark</td>
+                @*<td>@item.Revision</td>*@
+                <td>
+                    <a href="javascript:DeleteTourFile(@item.Id)">删除</a>
+                    <a href="@Url.Action("DownLoadFile",new { id=item.Id})">下载</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+<div class="card card-primary card-outline">
+    <div class="card-header">
+        <h5 class="card-title">上传附件</h5>
+        <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-success" id="btnUpload">上传</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-group row">
+            <label class="col-4">文件类型：</label>
+            <div class="col-8">@Html.DropDownList("sourceType", (List<SelectListItem>)ViewBag.FileEnum, new { @id = "sourceType", @class = "form-control form-control-sm" })</div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4">选择交款单：</label>
+            <div class="col-8"><select id="keyId" class="form-control form-control-sm"></select></div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4">描述：</label>
+            <div class="col-8"><input type="text" name="Remark" id="Remark" class="form-control form-control-sm" /></div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">附件上传</label>
+            <div class="col-8 input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" name="tourFileName" />
+                    <label class="custom-file-label" data-browse="选择文件" for="tourFileName">选择文件</label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#sourceType").change(function () {
+            var sourceType = $(this).val();
+            if (sourceType == '1' || sourceType == '2') {   // 付款凭证
+                $("#keyId").empty();
+
+                if (sourceType=='1')
+                    $("#tdKeyTitle").html("<b>选择游客</b>");
+                else
+                    $("#tdKeyTitle").html("<b>选择缴款单</b>");
+
+                // 游客选择
+                $.ajax({
+                    url: '@Url.Action("JsonOrderInfo", "TktOrder")',
+                    type: 'POST',
+                    data: { "orderCode": '@Model.OrderCode', "fileType": sourceType },
+                    success: function (data) {
+                        var html = "";
+                        $(data.FileKeyList).each(function (i, item) {
+                            html += "<option value=\"" + item.Key + "\">" + item.Value + "</option>";
+                        });
+                        $("#keyId").html(html);
+                    }
+                });
+            } else {
+                $("#keyId").empty();
+                $("#tdKeyTitle").html("");
+            }
+        });
+
+        $("#btnUpload").click(function () {
+
+            if ($.trim($("[name='tourFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("#sourceType").val()) == "") {
+                Utils.alert("请选择文件类型！");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("tourFileName", $("[name='tourFileName']")[0].files[0]);
+            formData.append("SourceType", $("#sourceType").val());
+            formData.append("KeyId", $("#keyId").val());
+            formData.append("MasterOrderCode", orderCode);
+            formData.append("Remark", $("#Remark").val());
+            $.ajax({
+                url: '@Url.Action("AddUpLoadFile")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.Code == "1") {
+                        reloadFiles();
+                    }
+                }
+            });
+        });
+    })
+
+    function DeleteTourFile(Id) {
+        if (!confirm("确定删除？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("DeleteTourFile")',
+            type: 'POST',
+            data: { id: Id },
+            success: function (data) {
+                if (data.Code == "1") {
+                    reloadFiles();
+                } else {
+                    Utils.alert(data.Message);
+                }
+            }
+        });
+    }
+
+</script>

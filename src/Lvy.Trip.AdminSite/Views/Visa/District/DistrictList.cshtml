@@ -1,0 +1,83 @@
+﻿@model Lvy.Visa.Models.CountryConsularDistrictQModel
+@{
+    Layout = null;
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">领区列表</h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-success" id="AddConsularDistrict">增加领区</button>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body table-responsive p-0">
+        <table class="table">
+            <tr>
+                <th style="width:80px;">序号</th>
+                <th style="width:150px;">领区</th>
+                <th>领区受理范围</th>
+                <th style="width:150px;">有效/无效</th>
+                <th style="width:150px;">操作</th>
+            </tr>
+            @if (Model.ConsularDistrictList.Count() > 0)
+            {
+                int j = 1;
+                foreach (var cdistrict in Model.ConsularDistrictList)
+                {
+                    <tr>
+                        <td>@j</td>
+                        <td>@cdistrict.VisaAreaValue</td>
+                        <td>@cdistrict.AcceptRange</td>
+                        <td>@(cdistrict.IsValid == true ? "有效" : "无效")</td>
+                        <td align="center">
+                            <a href="####" onclick="funModifyConsularDis('@cdistrict.ConsularDistrictCode')">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <span style="margin-right: 2px; margin-left: 2px;">|</span>
+                            @if (cdistrict.IsValid)
+                            {
+                                <a href="####" onclick="funDeleConsularDis('@cdistrict.ConsularDistrictCode','@cdistrict.VisaCountryCode','0')">
+                                    <i class="text-dark fas fa-check"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="####" onclick="funDeleConsularDis('@cdistrict.ConsularDistrictCode','@cdistrict.VisaCountryCode','1')">
+                                    <i class="text-primary fas fa-check"></i>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                    j++;
+                }
+            }
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    ///新增领区
+    $("#AddConsularDistrict").click(function () {
+        if ($("#CountryCodeStr").val() == "") {
+            alert("请先添加签证国家！！");
+            $("#CountryCode").focus();
+            return;
+        }
+        var url = "/District/AddDistrict/?VisaCountryCode=" + $("#VisaCountryCode").val() + "&CountryCode=" + $("#CountryCodeStr").val() + "&Rnd=" + Math.random();
+        layer.open({ type: 2, title: '新增领区', maxmin: true, shadeClose: true, area: ['800px', '400px'], content: url });
+    });
+    //修改领区
+    function funModifyConsularDis(code) {
+        var url = "/District/ConsularDistrict/?code=" + code + "&Rnd=" + Math.random();
+        layer.open({ type: 2, title: '修改领区', maxmin: true, shadeClose: true, area: ['800px', '400px'], content: url });
+    }
+    //删除领区
+    function funDeleConsularDis(code, visacountryCode, isvalid) {
+        var param = { "code": code, "visacountryCode": visacountryCode, "isvalid": isvalid };
+        $.post("/District/DeleteConsularDistrict", param, function (data) {
+            refreshDistrictList();
+        });
+    }
+</script>
+

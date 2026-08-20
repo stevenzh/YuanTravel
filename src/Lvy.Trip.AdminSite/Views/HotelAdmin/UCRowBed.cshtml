@@ -1,0 +1,38 @@
+﻿@model Lvy.Models.HotelDB.HotelRoomBedModel
+@{
+    Layout = null;
+    var index = ViewBag.RowIndex;
+}
+<div class="form-row">
+    <div class="col-5">
+        <select name="BedList[@index].BedType" class="form-control form-control-sm">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBy(Enums.BedTypeEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </div>
+    <div class="col">
+         <input type="text" name="BedList[@index].BedIntroduce" class="form-control form-control-sm" placeholder="说明">
+    </div>
+    <div class="col-2">
+        <select name="BedList[@index].BedNum" class="form-control form-control-sm">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+    <div class="col-1">
+        <input type="hidden" name="BedList[@index].RoomID" value="@Model.RoomID" />
+        <button name="lnkDel" type="button" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+    </div>
+</div>
+<script type="text/javascript">
+    $("button[name='lnkDel']").on("click", function () {
+        var obj = $(this).parent().parent("div.form-row");
+        $(obj).remove();
+    })
+</script>

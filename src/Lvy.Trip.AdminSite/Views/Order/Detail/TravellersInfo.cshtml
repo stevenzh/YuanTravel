@@ -1,0 +1,157 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+    游客列表
+</div>
+
+<table class="listtbl" style="width:100%; border: 0px;">
+    <thead>
+        <tr>
+            <td align="center">姓名</td>
+            @if (Model.Order.Line.LineScope > 2)
+            {
+                <td align="center">性别</td>
+                <td align="center">英文名</td>
+                <td align="center">出生日期</td>
+                <td align="center">出生地</td>
+            }
+            <td align="left">证件类型</td>
+            <td align="left">证件号码</td>
+            @if (Model.Order.Line.LineScope > 2)
+            {
+                <td align="center">签发时间</td>
+                <td align="center">签发地</td>
+                <td align="center">证件有效期</td>
+            }
+            <td align="left">电话</td>
+            <td align="left">报价种类</td>
+            @if (Model.Order.Line.TrafficType == 3)
+            {
+                <td align="left">税</td>
+            }
+            @if (Model.Order.Line.LineScope > 2)
+            {
+                <td align="left">签证费</td>
+            }
+            <td align="center"><label>保证自费</label></td>
+            <td align="center"><label>房差</label></td>
+            <td align="center"><label>折让/特价让利</label></td>
+            <td align="center">应收款</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Travellers.Count > 0)
+        {
+            var Tax = Model.TourPlan.Tax;
+            var VisaPrice = Model.TourPlan.VisaPrice;
+            //有效游客信息的 状态2
+            var cnt = Model.Travellers2.Count();
+            for (int i = 0; i < cnt; i++)
+            {
+                var price = Model.Prices.FirstOrDefault(a => a.Id == Model.Travellers2[i].PriceId);
+                var zifei = price == null ? 0 : price.ZiFei;
+                var singleRoom = price == null ? 0 : price.SingleRoom;
+                <tr>
+                    <td align="center">@Model.Travellers2[i].Name</td>
+                    @if (Model.Order.Line.LineScope > 2)
+                    {
+                        <td align="left">
+                            @if (!string.IsNullOrEmpty(Model.Travellers2[i].Sex))
+                            {
+                                @DictionaryTools.GetEnumValue(Enums.SexEnum, string.IsNullOrEmpty(Model.Travellers2[i].Sex) ? "" : Model.Travellers2[i].Sex)
+                            }
+                        </td>
+                        <td align="left">@Model.Travellers2[i].PinYin</td>
+                        <td align="left">
+                            @(Model.Travellers2[i].DateOfBirth == null ? "" : Model.Travellers2[i].DateOfBirth.Value.ToString("yyyy-MM-dd"))
+                        </td>
+                        <td align="left">@Model.Travellers2[i].PlaceOfBirth</td>
+                    }
+                    <td align="left">
+                        @DictionaryTools.GetEnumValue(Enums.PassTypeEnum, Model.Travellers2[i].PassType.ToString())
+                    </td>
+                    <td align="left">@Model.Travellers2[i].PassNo</td>
+                    @if (Model.Order.Line.LineScope > 2)
+                    {
+                        <td align="left">
+                            @(Model.Travellers2[i].DateOfIssue == null ? "" : Model.Travellers2[i].DateOfIssue.Value.ToString("yyyy-MM-dd"))
+                        </td>
+                        <td align="left">@Model.Travellers2[i].PlaceOfIssue</td>
+                        <td align="left">
+                            @(Model.Travellers2[i].DateOfExpiry == null ? "" : Model.Travellers2[i].DateOfExpiry.Value.ToString("yyyy-MM-dd"))
+                        </td>
+                    }
+                    <td align="left">@Model.Travellers2[i].Phone</td>
+                    <td align="left" title="@Model.Travellers2[i].PriceContent">@Model.Travellers2[i].PriceContent.TrimWithElipsis(8)</td>
+                    @if (Model.Order.Line.TrafficType == 3)
+                    {
+                        <td align="left">@Model.Travellers2[i].Tax</td>
+                    }
+                    @if (Model.Order.Line.LineScope > 2)
+                    {
+                        <td align="left">@Model.Travellers2[i].VisaPrice</td>
+                    }
+                    <td align="center">@Model.Travellers2[i].ZiFei</td>
+                    <td align="center">@Model.Travellers2[i].SingleRoom</td>
+                    <td align="center">@(Model.Travellers2[i].FanLi + "/" + Model.Travellers2[i].TeJiaFanLi) </td>
+                    <td align="center" name="YsPrice">@Model.Travellers2[i].YsPrice</td>
+                </tr>
+            }
+            //已取消或已退团游客信息 状态1或0
+            var cnt2 = Model.Travellers10.Count();
+            for (int i = 0; i < cnt2; i++)
+            {
+                <tr>
+                    <td align="center">@Model.Travellers10[i].Name</td>
+                    @if (Model.Order.Line.LineScope > 2)
+                    {
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                    }
+                    <td align="left">
+                        @DictionaryTools.GetEnumValue(Enums.PassTypeEnum, Model.Travellers10[i].PassType.ToString())
+                    </td>
+                    <td align="left">@Model.Travellers10[i].PassNo</td>
+                    @if (Model.Order.Line.LineScope > 2)
+                    {
+                        <td align="left"></td>
+                        <td align="center"></td>
+                        <td align="center"></td>
+                    }
+                    <td align="left">@Model.Travellers10[i].Phone</td>
+                    <td align="left"></td>
+                    @if (Model.Order.Line.TrafficType == 3)
+                    {
+                        <td align="left"></td>
+                    }
+                    @if (Model.Order.Line.LineScope > 2)
+                    {
+                        <td align="center"></td>
+                    }
+                    <td align="center"></td>
+                    <td align="center"></td>
+                    <td align="center"></td>
+                    <td align="center" name="YsPrice">@Model.Travellers10[i].YsPrice</td>
+                    <td align="center">
+                        @if (Model.Travellers10[i].State == 0)
+                        {
+                            <label style="color: red;">已取消</label>
+                        }
+                        else
+                        {
+                            <label style="color: red;">已退团</label>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" align="center" style="color: red;">当前没有数据！</td>
+            </tr>
+        }
+    </tbody>
+</table>

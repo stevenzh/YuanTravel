@@ -1,0 +1,63 @@
+﻿@using Lvy.Models
+@model Lvy.Models.TourDB.TpTourCostModel
+@{
+    var index = ViewBag.RowIndex;
+    var items = DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor();
+}
+<tr>
+    <td height="40px">
+        <select name="CostModels[@index].Item" class="text100">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>
+        <select name="CostModels[@index].SupplierId" class="text300">
+            <option value="0" paymentType="0">-- 请选择 --</option>
+            @foreach (var item in ViewBag.Suppliers as IEnumerable<KeyValueBean>)
+            {
+                <option value="@item.Key" payment="@item.Help1" paymentType="@item.Help2"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td style="text-align: center;">
+        <select name="CostModels[@index].currency" class="text100">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.CurrencyEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td style="text-align: center;">
+        <input type="text" name="CostModels[@index].roe" class="text70" value="0" />
+    </td>
+    <td style="text-align: center;">
+        <input type="text" name="CostModels[@index].Cost" class="text70" value="0" />
+    </td>
+    <td style="text-align: center;">
+        <input type="text" name="CostModels[@index].Num" class="text50" value="0" />
+    </td>
+    <td style="text-align: center;">
+        <input type="text" name="CostModels[@index].ItemCost" class="text70" value="0" />
+    </td>
+    <td style="text-align: center;">
+        <input type="text" name="CostModels[@index].Remark" class="text150" />
+    </td>
+    <td style="text-align: center;"><span name="payment"></span></td>
+    <td style="text-align: center;">初始</td>
+    <td style="text-align: center;">
+        <input type="hidden" name="CostModels[@index].ItemType" value="2" />
+        <input type="hidden" name="CostModels[@index].MasterOrderCode" value="@Model.MasterOrderCode" />
+        <input type="hidden" name="CostModels[@index].IsValid" value="1" />
+        <input type="hidden" name="CostModels[@index].PaymentType" value="0" />
+        <a href="#" name="lnkDel">删除</a>
+    </td>
+</tr>
+
+<script type="text/javascript">
+    $("select[name$='.SupplierId']").select2({ language: "zh-CN"});
+</script>

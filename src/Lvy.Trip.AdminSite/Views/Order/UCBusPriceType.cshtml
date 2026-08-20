@@ -1,0 +1,33 @@
+﻿@model Lvy.VModels.Order.GoNoticePrintVModel
+<table style="border: 0px;" class="listtbl" width="100%">
+    <thead>
+        <tr>
+            <td align="left">价格类型</td>
+            <td align="center">自费</td>
+            <td align="center">单房差</td>
+            <td align="center">折扣</td>
+            <td align="center">人数</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.BusTravellerVModels.Count > 0)
+        {
+            foreach (var item in Model.BusTravellerVModels)
+            {
+                <tr>
+                    <td align="left">@item.PriceContent</td>
+                    <td align="center">@item.ZiFei.ToInteger()</td>
+                    <td align="center">@item.SingleRoom.ToInteger()</td>
+                    <td align="center">@item.FanLi</td>
+                    <td align="center">@item.PeopleCount</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" align="center" style="color: red;">当前没有数据！</td>
+            </tr>
+        }
+    </tbody>
+</table>

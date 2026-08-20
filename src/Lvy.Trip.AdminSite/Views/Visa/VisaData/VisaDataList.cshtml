@@ -1,0 +1,206 @@
+﻿@model Lvy.Visa.Models.VisaDataQModel
+@{
+    Layout = null;
+}
+
+<input type="hidden" value="@Model.InformationCode" name="InformationCode" id="InformationCode" />
+<table class="table table-bordered table-sm" id="tblVisaDatas">
+    <tr>
+        <td style="width:50px;">序号</td>
+        <td>项目</td>
+        <td>说明</td>
+        <td style="width:100px;">是否必须</td>
+        <td style="width:100px;">是否模版</td>
+        <td style="width:100px;">是否原件</td>
+        <td style="width:100px;">是否退还</td>
+        <td style="width:150px;">操作</td>
+    </tr>
+    @if (Model.DataList != null)
+    {
+        var m = 1;
+        foreach (var item in Model.DataList)//签证材料
+        {
+            <tr>
+                <td rowspan="@(item.DataFilesList != null && item.DataFilesList.Count > 0 ? 2 : 1)">
+                    @m
+                    <input type="hidden" name="DataList[@(m - 1)].DataCode" value='@item.DataCode' />
+                </td>
+                <td>
+                    @item.DataName
+                </td>
+                <td>
+                    @Html.Raw(item.DataExplain)
+                </td>
+                <td>
+                    @(item.IsNeed == 1 ? "是" : "否")
+                </td>
+                <td>
+                    @(item.IsTemplate == 1 ? "是" : "否")
+                </td>
+                <td>
+                    @(item.IsOriginal == 1 ? "是" : "否")
+                </td>
+                <td>
+                    @(item.IsBack == 1 ? "是" : "否")
+                </td>
+                <td>
+                    <a href="####" class="btn btn-info btn-sm" onclick="funModifyVisaData('@item.DataCode')"><i class="fas fa-edit"></i></a>
+                    <a href="####" class="btn btn-info btn-sm" name="DelA@m" mark="@item.DataId" listindex="@(m - 1)" onclick="funDelRow(@item.DataId,'@item.CategoryCode','@Model.InformationCode');"><i class="fas fa-trash"></i></a>
+                    <a href="####" class="btn btn-info btn-sm" onclick="funShowOrderByDiv(@m)"><i class="fas fa-sort"></i></a>
+                    <div id="divOrderBy_@m" class="tips012" style="width:300px; margin-left:-200px; display:none; ">
+                        <table class="table table-bordered">
+                            <tr>
+                                <td colspan="2"><a href="####" style="color:Red;" onclick="funCloseOrderByDiv(@m)">关闭</a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    移至：第
+                                    <select style="width:70px;" id="number_@m">
+                                        @for (var rowi = 1; rowi <= Model.DataList.Count; rowi++)
+                                        {
+                                            <option value='@rowi'>@rowi</option>
+                                        }
+                                    </select>
+                                    行
+                                </td>
+                                <td>
+                                    <input type="button" class="btn btn-primary btn-sm" onclick="UpdateNumber(@item.Number,@m,'@item.DataCode','@item.InformationCode','@item.CategoryCode')" value="确认" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+
+            if (item.DataFilesList != null && item.DataFilesList.Count > 0)//签证材料附件
+            {
+                <tr>
+                    <td colspan="7">
+                        <table width="50%" id="@("tbFiles"+m)">
+                            @{ var n = 0;
+                                foreach (var files in item.DataFilesList)
+                                {
+                                    <tr>
+                                        <td>
+                                            附件：
+                                            <input type="hidden" name="DataList[@(m - 1)].DataFilesList[@n].FilesCode" value="@files.FilesCode" />
+                                            @if (!string.IsNullOrEmpty(files.FileUrl))
+                                            {
+                                                <a href='@files.FileUrl' title="点击下载">@files.FileName</a>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:gray;">  没有上传文档！！</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="####" name="fileDelA@n" onclick="funDeleFilesRows(@m,@n,'@files.FilesId','@files.InformationCode')">
+                                                删除附件
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    n++;
+                                }
+                            }
+                        </table>
+                    </td>
+                </tr>
+
+            }
+            m++;
+        }
+    }
+</table>
+<div style="padding: 10px; border-top:1px solid #ddd;">
+    <input type="button" value="选择模板" class="btn btn-info" onclick="funSelectTemplate('@Model.InformationCode','@Model.CategoryCode')" />
+    <input type="button" value="增加一行" class="btn btn-info" name="btnAddRows" onclick="funAddVisaDatasRows('@Model.CategoryCode','@Model.InformationCode')" />
+</div>
+
+
+<script type="text/javascript">
+    $("table[id^='tbFiles'] tr td").css({ "border": "0px" });
+
+    //删除材料
+    function funDelRow(dataid, categoryCode, proCode) {
+        if (confirm("您确定要删除该条材料？？\n 删除后，资料下面的附件也将一并删除。")) {
+            if (dataid != 0) {
+                var url = "/VisaData/DeleteVisaData";
+                var paramdel = { "DataId": dataid, "infoCode": proCode };
+                $.post(url, paramdel, function (data) {
+                    if (data == "0") {
+                        alert("删除失败！");
+                    }
+                });
+            }
+            funGetVisaDatas(categoryCode, proCode);
+        }
+    }
+    //编辑单条签证材料
+    function funModifyVisaData(datacode) {
+        var url = "/VisaData/ModifyVisaData/?DataCode=" + datacode;
+        layer.open({ type: 2, title: '编辑签证材料', maxmin: true, shadeClose: true, area: ['900px', '550px'], content: url });
+    }
+    //新增材料 弹窗
+    function funAddVisaDatasRows(categoryCode, productCode) {
+        if ($("#ulCatagoryList").find("a[id^='li']").length > 0) {
+            var url = "/VisaData/AddVisaData/?CategoryCode=" + categoryCode + "&&InformationCode=" + productCode;
+            layer.open({ type: 2, title: '新增签证材料', maxmin: true, shadeClose: true, area: ['900px', '550px'], content: url });
+        } else {
+            alert("您还没有添加分类呢，请添加！！");
+            funAddCategory(productCode);
+        }
+    }
+    //删除行 附件  m  n
+    function funDeleFilesRows(tbIndex, rowIndex, filesid, infoCode) {
+        if (confirm("您确定要删除该附件？？")) {
+            //移除行
+            var tabObj = document.getElementById("tbFiles" + tbIndex);
+            tabObj.deleteRow(rowIndex);
+            if (filesid != "") {
+                //去数据库删除附件
+                var url = "/VisaData/DeleteFile";
+                var param = { "FilesId": filesid, "infoCode": infoCode }
+                $.post(url, param, function (data) {
+                });
+            }
+        }
+    }
+    //选择模板
+    function funSelectTemplate(procode, categoryCode) {
+        var urlTemp = "/VisaData/SearchVisaDatasTemplate?informationCode=" + procode + "&&categoryCode=" + categoryCode;
+        layer.open({ type: 2, title: '选择模版材料', maxmin: true, shadeClose: true, area: ['900px', '550px'], content: urlTemp });
+    }
+    //排序div开启
+    function funShowOrderByDiv(n) {
+        $("div[id^='divOrderBy_']").hide();
+        $("#divOrderBy_" + n).show();
+    }
+    //排序div关闭
+    function funCloseOrderByDiv(n) {
+        $("#divOrderBy_" + n).hide();
+        $("#number_" + n).val("1");
+    }
+    //排序确认
+    function UpdateNumber(oldnumber, m, dataCode, proCode, categoryCode) {
+        var newnumber = $("#number_" + m).val();
+        if (parseInt(oldnumber) == parseInt(newnumber)) {
+            alert("保存成功！！");
+            funCloseOrderByDiv(m);
+            return;
+        }
+        else {
+            var param = {
+                "DataCode": dataCode,
+                "newNumber": newnumber,
+                "oldNumber": oldnumber,
+                "proCode": proCode,
+                "categoryCode": categoryCode
+            };
+            $.post("/VisaData/SaveNumber", param, function (data) {
+                alert("保存成功！！");
+                funGetVisaDatas(categoryCode, proCode);
+            });
+        }
+    }
+</script>
+

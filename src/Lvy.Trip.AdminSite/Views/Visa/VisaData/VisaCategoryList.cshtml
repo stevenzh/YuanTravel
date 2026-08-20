@@ -1,0 +1,39 @@
+﻿@model Lvy.Visa.Models.VisaDataQModel
+@{
+    Layout = null;
+}
+<div class="page_tag">
+    <div id="ulCatagoryList" class="btn-group">
+        @if (Model.CategroyList != null)
+        {
+            if (Model.CategroyList.Count > 0)
+            {
+                var i = 0;
+                foreach (var item in Model.CategroyList)
+                {
+                    i++;
+                    if (i == 1)
+                    {
+                        if (string.IsNullOrEmpty(Model.CategoryCodeNum))
+                        {
+                            <input type="hidden" id="hidCategoryCode" value="@item.CategoryCode" />
+                        }
+                        else
+                        {
+                            <input type="hidden" id="hidCategoryCode" value="@Model.CategoryCodeNum" />
+                        }
+                    }
+                    <a id="@("li"+i)" onclick="javascript:funDataPartial('@i','@item.CategoryCode');" class="btn btn-sm @(i > 1 ? "btn-default" : "btn-info") " href="####">@item.CategoryName</a>
+                    @*<a class="close current" href="#">
+                            <img onclick="funDelCategory(this.parentElement,'@item.CategoryId','@item.CategoryCode','@item.InformationCode')" src="../../Images/icon_close.gif">
+                        </a>*@
+                }
+            }
+        }
+
+        <a href="####" class="btn btn-danger btn-sm" onclick="funAddCategory('@Model.InformationCode');">添加分类</a>
+        <input type="hidden" id="hidDataCodeStr" />
+    </div>
+
+</div>
+

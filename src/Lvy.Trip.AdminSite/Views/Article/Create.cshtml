@@ -1,0 +1,139 @@
+﻿@model Lvy.Models.BaseDB.BaseArticleModel
+@using Lvy.Models.BaseDB
+@{
+    ViewBag.Title = "添加文章";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <link href="@CDNServerUrl/summernote/summernote-bs4.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/summernote/summernote-bs4.min.js"></script>
+    <script src="@CDNServerUrl/summernote/lang/summernote-zh-CN.min.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" action="@Url.Action("Add")" method="POST">
+        <div class="card">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-2 col-form-label"><span class="point">*</span>类型：</label>
+                    <div class="col-10">
+                        @Html.DropDownListFor(a => a.NoticeType, ViewBag.NoticeTypes as IEnumerable<SelectListItem>, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">置顶</label>
+                    <div class="col-3">
+                        @Html.TextBoxFor(m => m.IsTop, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">标题：</label>
+                    <div class="col-10">
+                        @Html.TextBoxFor(a => a.Title, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">网址：</label>
+                    <div class="col-10">
+                        @Html.TextBoxFor(a => a.Url, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">标签：</label>
+                    <div class="col-10">
+                        <select id="mySelect5" name="ThemeIds" multiple="multiple" class="form-control form-control-sm">
+                            @foreach (var item in ViewBag.TagList as List<BaseTagModel>)
+                            {
+                                <option value="@item.TagName">@item.TagName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">
+                        <span class="point">*</span>内容：
+                        <span style="color:crimson; font-size:small;">（小图可以粘贴，大图请保存后重新编辑）</span>
+                    </label>
+                    <div class="col-10">
+                        @Html.TextAreaFor(a => a.Contents, new { @class = "summernote form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <input class="btn btn-info" id="btnSave" type="submit" value="提交" />
+                <input class="btn btn-info" id="btnBack" onclick="location.href='@Url.Action("Search")';" type="button" value="返回列表" />
+            </div>
+        </div>
+    </form>
+</section>
+<script type="text/javascript">
+    $(function () {
+
+        $('.summernote').summernote({
+            lang: 'zh-CN',
+            height: 200,
+            tabsize: 2,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+
+        $("#theForm").submit(function () {
+            if (!CheckControls()) {
+                return false;
+            }
+        });
+        $('#mySelect5').select2({
+            language: "zh-CN"
+        });
+
+    });
+
+    //验证用户输入
+    function CheckControls() {
+
+        if (Utils.Trim($("#NoticeType").val()) == "") {
+            Utils.alert("请选择类型", 1000);
+            $("#NoticeType").focus().select();
+            return false;
+        }
+
+        if (Utils.Trim($("#Contents").val()) == "") {
+            Utils.alert("内容不得为空！", 1000);
+            $("#Contents").focus().select();
+            return false;
+        }
+
+        return true;
+
+    }
+</script>

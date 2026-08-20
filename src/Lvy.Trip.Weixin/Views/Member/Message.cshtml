@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "微信公众号";
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+}
+
+<div class="ui vertical segment">
+    <h4 class="ui header">
+        账户绑定
+    </h4>
+
+    <div class="ui Purple message">
+        <div class="header">提示信息</div>
+        <p>@ViewData["Message"]</p>
+        <p><a href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fweixin%2Fbinding&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect">重新绑定</a></p>
+    </div>
+</div>
+

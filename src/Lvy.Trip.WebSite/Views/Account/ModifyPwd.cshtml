@@ -1,0 +1,78 @@
+﻿@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    ViewBag.Title = "Index";
+    var userInfo = GlobalContext.Current.UserInfo;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+<div class="card card-widget">
+    <div class="card-header">
+        <h3 class="card-title">
+            修改密码
+            <small>用于修改后台账号密码。</small>
+        </h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+
+        <div class="form-group row">
+            <label class="col-sm-3">原密码</label>
+            <div class="col-sm-9">
+                <input type="password" id="password" name="password" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-3">新密码</label>
+            <div class="col-sm-9">
+                <input type="password" id="newPassword" name="newPassword" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-3">确认新密码</label>
+            <div class="col-sm-9">
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer card-comments">
+        <button type="button" id="btnPwd" class="btn btn-success">修改密码</button>
+    </div>
+    <!-- /.card-footer -->
+</div>
+<!-- /.card -->
+@section PageScripts {
+    <script type="text/javascript">
+
+        $(function () {
+
+            $("#btnPwd").click(function () {
+
+                var newPwd = $("#newPassword").val();
+                if (newPwd == '' || newPwd.length < 6) {
+                    Utils.alert("请输入新密码.");
+                    return;
+                }
+
+                var confirmPwd = $("#confirmPassword").val();
+                if (confirmPwd != newPwd) {
+                    Utils.alert("确认新密码不匹配.");
+                    return;
+                }
+
+                var params = {
+                    accountCode: '@userInfo.Code',
+                    pwd: $("#password").val(),
+                    newPwd: Utils.Trim($("#newPassword").val())
+                };
+                $.post("@Url.Action("ModifyPwd")", params, function (data) {
+                    if (data.Code == '1') {
+                        Utils.alert("重置密码成功！");
+                    } else {
+                        Utils.alert(data.Message);
+                    }
+                });
+            });
+        });
+    </script>
+}

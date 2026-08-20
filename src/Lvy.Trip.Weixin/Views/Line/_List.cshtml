@@ -1,0 +1,164 @@
+﻿@model List<TopWeb.Model.ProductModel>
+@using TopWeb.Model
+@{
+    Layout = null;
+    MemberModel cuser = (MemberModel)HttpContext.Current.Session["WeixinUser"]; //当前用户
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>商品列表</title>
+    @Styles.Render("~/Content/adminlte/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <link href="@CDNServerUrl/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="/Scripts/html5.js"></script>
+      <script src="/Scripts/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        a { color: #373737; }
+        hr { margin: 0; }
+        .wrapper { padding-bottom: 20px; }
+        .info-box { margin: 5px 0 5px 0; box-shadow: none; }
+        .info-box-number { font-size: 24px; font-family: 'Microsoft YaHei UI'; font-weight: normal; }
+        .btn-app { border-radius: 0px; margin: 0px; padding: 10px 5px; min-width: 65px; height: 47px; background-color: #fff; border: none; }
+        .product-list-in-box > .item { display: list-item; }
+        .products-list .product-info { margin-left: 0; }
+        .products-list .product-title { margin-left: 60px; }
+        .label { font-size: 14px; }
+        .nav-tabs-custom > .nav-tabs { border-bottom-color: #00a65a;position:fixed;top:0;width:100%;background-color:white; }
+            .nav-tabs-custom > .nav-tabs > li.active { border-top: 0px none; }
+            .nav-tabs-custom > .nav-tabs > li > a, .nav-tabs-custom > .nav-tabs > li > a:hover { font-weight: bold; }
+            .nav-tabs-custom > .nav-tabs > li.active > a, .nav-tabs-custom > .nav-tabs > li.active:hover > a { background-color: #eee; }
+        .nav-tabs { border-bottom: 2px solid #ddd; }
+        .nav > li > a { padding: 15px 18px; }
+    </style>
+</head>
+
+<body class="skin-blue-light">
+    <div class="wrapper">
+        @*<section class="content-header"><h1>商品列表</h1></section>*@
+        <div class="content">
+            <div class="row">
+                <div class="col-md-6 no-padding ">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">短线签证</a></li>
+                            <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false">长线签证</a></li>
+                            <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false">差价其他</a></li>
+                        </ul>
+                        <div class="tab-content" style="padding-top:40px;">
+                            <div class="tab-pane active" id="tab_1">
+                                @for (int i = 0; i <= Model.Count - 1; i++)
+                                {
+                                    var item = Model[i];
+                                    if (item.Category == "D1")
+                                    {
+                                        <a href="@Url.Action("Index", "Line", new {id = item.ProductId})" class="info-box">
+                                            <span class="info-box-icon bg-aqua"><img src="@item.ImageMain" height="90" width="90" style="vertical-align:baseline;" /></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">@item.ProductTitle</span>
+                                                @if (cuser != null && cuser.Approved == 1)
+                                                {
+                                                    <span class="info-box-number">￥@item.TradePriceArea</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="info-box-number">￥@item.PriceArea</span>
+                                                }
+                                            </div>
+                                        </a>
+                                        <hr />
+                                    }
+                                }
+                            </div>
+                            <!-- /.tab-pane -->
+                            <div class="tab-pane" id="tab_2">
+                                @for (int i = 0; i <= Model.Count - 1; i++)
+                                {
+                                    var item = Model[i];
+                                    if (item.Category == "D2")
+                                    {
+                                        <a href="@Url.Action("Index", "Line", new {id = item.ProductId})" class="info-box">
+                                            <span class="info-box-icon bg-aqua"><img src="@item.ImageMain" height="90" width="90" style="vertical-align:baseline;" /></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">@item.ProductTitle</span>
+                                                @if (cuser != null && cuser.Approved == 1)
+                                                {
+                                                    <span class="info-box-number">￥@item.TradePriceArea</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="info-box-number">￥@item.PriceArea</span>
+                                                }
+                                            </div>
+                                        </a>
+                                        <hr />
+                                    }
+                                }
+                            </div>
+                            <!-- /.tab-pane -->
+                            <div class="tab-pane" id="tab_3">
+                                @for (int i = 0; i <= Model.Count - 1; i++)
+                                {
+                                    var item = Model[i];
+                                    if (item.Category == "D3")
+                                    {
+                                        <a href="@Url.Action("Index", "Line", new {id = item.ProductId})" class="info-box">
+                                            <span class="info-box-icon bg-aqua"><img src="@item.ImageMain" height="90" width="90" style="vertical-align:baseline;" /></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">@item.ProductTitle</span>
+                                                @if (cuser != null && cuser.Approved == 1)
+                                                {
+                                                    <span class="info-box-number">￥@item.TradePriceArea</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="info-box-number">￥@item.PriceArea</span>
+                                                }
+                                            </div>
+                                        </a>
+                                        <hr />
+                                    }
+                                }
+                            </div>
+                            <!-- /.tab-pane -->
+                        </div>
+                        <!-- /.tab-content -->
+                    </div>
+
+                </div>
+            </div>
+
+            @Html.Partial("_ChatPartial")
+        </div>
+
+        <footer class="main-footer" style="position:fixed;bottom:0;width:100%;padding:2px;">
+            <a class="btn btn-app btn-primary"><i class="fa fa-home"></i>首页</a>
+            <a id="btn-chat1" class="btn btn-app btn-default"><i class="fa fa-comments-o"></i>客服</a>
+            <a class="btn btn-app" href="/Line/ShoppingCart">
+                @if (cuser != null && cuser.CartProductNum > 0)
+                {
+                    <span class="badge bg-purple">@cuser.CartProductNum</span>
+                }
+                <i class="fa fa-shopping-cart"></i>购物车
+            </a>
+        </footer>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("#CurrentPage").val("L:产品列表页");
+            $("#btn-chat1").click(function () {
+                $("#divChat").show();
+                document.body.scrollTop = document.body.scrollHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+﻿@model Lvy.VModels.Ticket.TktOrderVModel
+
+<table class="table">
+    <tr>
+        <td style="text-align: right;">销售数量：</td>
+        <td style="color: red;">@Model.TotalSaledNum</td>
+        <td style="text-align: right;">销售总额：</td>
+        <td>￥@Model.TotalSaledVolume</td>
+    </tr>
+    <tr>
+        <td style="text-align: right;">实收总额：</td>
+        <td>￥@Model.TotalPaid</td>
+        <td style="text-align: right;">剩余总额：</td>
+        <td>￥@Model.TotalDebt</td>
+        <td colspan="2" style="text-align: center;"></td>
+    </tr>
+</table>
+
+<div class="xbox">
+    @if (Model.Orders.Items.Count > 0)
+    {
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr style="text-align: center;">
+                    <th>订单编号</th>
+                    <th>产品名称</th>
+                    <th>日期</th>
+                    <th>价格类型</th>
+                    <th>人数</th>
+                    <th>购买方式</th>
+                    <th>应收账款</th>
+                    <th>联系人</th>
+                    <th>订单状态</th>
+                    <th style="width: 90px;"></th>
+                </tr>
+            </thead>
+            <tfoot>
+                @foreach (var item in Model.Orders.Items)
+                {
+                    <tr name="trOrderCode">
+                        <td rowspan="@item.OrderDetails.Count">@item.MasterOrderCode</td>
+                        <td title="@item.OrderDetails[0].ProductName">@item.OrderDetails[0].ProductName.TrimWithElipsis(7)</td>
+                        <td>@item.OrderDetails[0].OutDate.ToDateFormat().Substring(5)</td>
+                        <td title="@item.OrderDetails[0].PriceType">@item.OrderDetails[0].PriceType.TrimWithElipsis(5)</td>
+                        <td>@item.OrderDetails[0].PeopleNum</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.TktTypeEnum, item.OrderDetails[0].TktType.ToString())</td>
+                        <td>@item.OrderDetails[0].YsPrice</td>
+                        <td rowspan="@item.OrderDetails.Count">@item.ContactName<br />@item.ContactName</td>
+                        <td rowspan="@item.OrderDetails.Count">@item.OrderState</td>
+                        <td rowspan="@item.OrderDetails.Count" align="left">
+                            @if (item.IsCancel != 1 && GlobalContext.Current.UserInfo.CustomerCode == item.AgentCode)
+                            {
+                                if (item.OrderState == 1)
+                                {
+                                    <a title="编辑" href="@Url.Action("EditOrder", "TktBooking", new { orderId = item.Id })" class="edit">编辑</a>
+                                    <a title="删除" href="javascript:void(0);" bindId="@item.Id" class="delete">删除</a>
+                                    <br />
+                                }
+                                <a title="确认单" href="@Url.Action("PrintConfirmation", "Seller", new { orderCode = item.MasterOrderCode })" target="_blank">确认单</a>
+                            }
+                        </td>
+                    </tr>
+                    for (int j = 1; j < item.OrderDetails.Count; j++)
+                    {
+                        <tr name="trOrderCode">
+                            <td title="@item.OrderDetails[j].ProductName">@item.OrderDetails[j].ProductName.TrimWithElipsis(7)</td>
+                            <td>@item.OrderDetails[j].OutDate.ToDateFormat().Substring(5)</td>
+                            <td title="@item.OrderDetails[j].PriceType">@item.OrderDetails[j].PriceType.TrimWithElipsis(5)</td>
+                            <td>@item.OrderDetails[j].PeopleNum</td>
+                            <td>@DictionaryTools.GetEnumValue(Enums.TktTypeEnum, item.OrderDetails[j].TktType.ToString())</td>
+                            <td>@item.OrderDetails[j].YsPrice</td>
+                        </tr>
+                    }
+                }
+            </tfoot>
+        </table>
+        @Html.HiddenFor(a => a.Orders.PageIndex)
+        <div id="Pagination" class="digg">
+        </div>
+    }
+    else
+    {
+        <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+            <br />
+            对不起，没有查找到数据！请重新输入查询条件 ！
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    $(function () {
+
+        $("table .delete").each(function (index, element) {
+            $(element).click(function () {
+                if (!confirm("确定要删除吗？")) {
+                    return false;
+                }
+                var params = {
+                    orderId: $(this).attr("bindId")
+                };
+                $.get('@Url.Action("TktDelete","TktBooking")', params, function (data) {
+                    if (data > 0) {
+                        pageselectCallback(@Model.Orders.PageIndex-1);
+                    } else if (data == "no") {
+                        Utils.alert('权限不足！');
+                    } else {
+                        Utils.alert("删除失败！");
+                    }
+
+                });
+                return false;
+            });
+        });
+
+        //分页控件 begin
+        $("#Pagination").pagination(
+                Number('@Model.Orders.TotalCount'), {
+                    callback: pageselectCallback,
+                    items_per_page: Number('@Model.Orders.PageSize'),
+                    current_page: @Model.Orders.PageIndex-1
+                });
+
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#PagedList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("TktOrderSearch", "Seller")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+            }
+            else {
+                $('#listContent').html(data);
+                hoverChangeStyle();
+            }
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

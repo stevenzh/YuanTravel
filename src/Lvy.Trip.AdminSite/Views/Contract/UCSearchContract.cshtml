@@ -1,0 +1,107 @@
+﻿@model Lvy.VModels.Contract.ConditionVModel
+<div class="btnlist">
+    <div class="fr">    </div>
+</div>
+<div class="xbox clear">
+    <table id="tbllist" class="listtbl" style="width:100%; text-align:center;">
+        <thead>
+            <tr>
+                <td>合同编号</td>
+                <td>订单编号</td>
+                <td>合同模版</td>
+                <td>产品名称</td>
+                <td>合同下载</td>
+                <td>合同预览</td>
+                <td>合同签署</td>
+                <td>合同状态</td>
+                <td style="width: 150px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PagedList.Items.Count > 0)
+            {
+                foreach (var item in Model.PagedList.Items)
+                {
+                    var status = item.status == "0" ? "草稿" :
+                        item.status == "1" ? "已生成" :
+                        item.status == "2" ? "已签署" :
+                        item.status == "3" ? "已作废" :
+                        item.status == "4" ? "签署" :
+                        item.status == "5" ? "作废" : "草稿";
+                    <tr>
+                        <td name="contractNumber" style="width:40px" contractNumber='@item.contractNumber'>@item.contractNumber</td>
+                        <td>@item.orderCode</td>
+                        <td>@item.templateId</td>
+                        <td>@item.routeName</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.fileURL))
+                            {
+                                <a href="@item.fileURL" target="_blank" title="item.fileURL"> 下载 </a>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.viewURL))
+                            {
+                                <a href="@item.viewURL" target="_blank" title="item.fileURL"> 预览 </a>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.signingURL) && !string.IsNullOrEmpty(item.qrCodeURL))
+                            {
+                                <a href="@item.signingURL" target="_blank" title="item.fileURL"> 签署 </a>
+                                <span>|</span>
+                                <a href="@item.qrCodeURL" target="_blank" title="item.qrCodeURL">二维码 </a>
+                            }
+                        </td>
+                        <td>@status</td>
+                        <td>
+                            <a href="@Url.Action("CreateContract","Contract",new { orderCode=item.orderCode })">详情</a>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="10" style="color: red; font-weight: bold;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(a => a.PagedList.PageIndex)
+    <div id="Pagination" class="digg"> </div>
+    <script type="text/javascript">
+        $(function () {
+            //分页控件 begin
+            $("#Pagination").pagination(
+                Number('@Model.PagedList.TotalCount'), {
+                    callback: pageselectCallback,
+                    items_per_page: Number('@Model.PagedList.PageSize'),
+                    current_page: @Model.PagedList.PageIndex-1
+                });
+        });
+
+        //回调方法
+        function pageselectCallback(page_id, jq) {
+
+            $("#PagedList_PageIndex").val(page_id + 1);
+            var params = $("#theForm").formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('@Url.Action("Index", "Contract")', params, function (data) {
+
+                console.log(data);
+
+                if (data.length < 1) {
+                    Utils.alert("查询出错，请稍后查询！");
+                    return false;
+                }
+
+                $('#divContractSearch').html(data);
+                hoverChangeStyle();
+                Utils.layerClose(load_iii);
+            });
+        }
+
+    </script>
+</div>

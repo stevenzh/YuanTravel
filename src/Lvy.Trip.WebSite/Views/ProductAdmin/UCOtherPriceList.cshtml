@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Lvy.VModels.Ticket.OtherPriceListVModel>
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <div class="card collapsed-card">
+            <div class="card-header" style="background-color: @item.PriceRule.BgColor">
+                <h3 class="card-title" style="color:white;">@item.PriceRule.RuleName @if (item.PriceRule.IsValid == 0)
+                {<span>（失效）</span>} </h3>
+                <div class="card-tools">
+                    @if (item.PriceRule.IsValid == 1)
+                    {
+                        <a ruleid="@item.PriceRule.Id" name="deleteOtherPrice" class="btn btn-sm btn-danger" href="javascript:void(0);" title="删除">删除</a>
+                        <a ruleId="@item.PriceRule.Id" name="editOtherPrice" class="btn btn-sm btn-info" href="javascript:void(0);" title="编辑">编辑</a>
+                    }
+                    else
+                    {
+                        <a ruleid="@item.PriceRule.Id" name="restoreOtherPrice" class="btn btn-sm btn-primary" href="javascript:void(0);" title="恢复">恢复</a>
+                    }
+
+
+                    <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div class="card-body p-0" style="display:none;">
+                <table class="table table-sm">
+                    <thead>
+                        <tr style="text-align: center;">
+                            <th style="width: 230px;">报价类型</th>
+                            <th>市场价</th>
+                            <th>结算价</th>
+                            <th>
+                                @if (item.TktType == 1 || item.TktType == 2)
+                                {
+                                    @("签单价")
+                                }
+                                else
+                                {
+                                    @("返利")
+                                }
+                            </th>
+                            <th>有效</th>
+                            <th>标准价</th>
+                            <th>价格说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var priceItem in item.PriceList)
+                        {
+                            <tr style="text-align: center;">
+                                <td title="@priceItem.PriceType" style="text-align: left;">
+                                    @priceItem.PriceType.TrimWithElipsis(20)
+                                </td>
+                                <td>@priceItem.MarketPrice</td>
+                                <td>@priceItem.SettlePrice</td>
+                                <td>@priceItem.SysPrice</td>
+                                <td>
+                                    @if (priceItem.IsValid == 1)
+                                    {
+                                        <label>
+                                            <input type="checkbox" checked="checked" disabled="disabled" />有效
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label>
+                                            <input type="checkbox" disabled="disabled" />有效
+                                        </label>
+                                    }
+                                </td>
+                                <td>
+                                    @if (priceItem.IsStandard == 1)
+                                    {
+                                        <label>
+                                            <input type="radio" checked="checked" disabled="disabled" />标准
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label>
+                                            <input type="radio" disabled="disabled" />标准
+                                        </label>
+                                    }
+                                </td>
+                                <td title="@priceItem.PriceDesc">
+                                    @priceItem.PriceDesc.TrimWithElipsis(20)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

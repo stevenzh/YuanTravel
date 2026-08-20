@@ -1,0 +1,319 @@
+﻿@model Lvy.VModels.OpTour.ExchangeTourVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "SelectExchangeTour";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+<div id="exchangeTourTitle" class="station">
+    <span>选择需要调整的团期</span>
+</div>
+<form id="theForm" action="">
+    @Html.HiddenFor(m => m.OperationState)
+    @Html.HiddenFor(m => m.ExchangeFromTourId)
+    @Html.HiddenFor(m => m.ExchangeToTourId)
+    @Html.HiddenFor(m => m.ExchangeOrders)
+    <div id="exchangeTourWrap">
+        <div class="xbox">
+            <div align="center" class="xboxcontent">
+                <div class="sotable_tit">
+                    团单信息查询
+                </div>
+                <table id="searchTable" width="80%" class="sotable">
+                    <tr>
+                        <td width="100" class="label">产品部门：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                        </td>
+                        <td class="label">团号：</td>
+                        <td>@Html.TextBoxFor(a => a.TourNo, new { @Class = "text150" })</td>
+                        <td class="label">线路名称：</td>
+                        <td>@Html.TextBoxFor(a => a.LineName, new { @Class = "text150" })</td>
+                    </tr>
+                    <tr>
+                        <td class="label">是否成团：</td>
+                        <td>
+                            @Html.RadioGroup("TourOk", ViewBag.IsToured as IEnumerable<KeyValueBean>, Model.TourOk)
+                        </td>
+                        <td class="label">出发日期：</td>
+                        <td colspan="3">
+                            <input type="text" name="MinOutDate" id="d4311" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4312\')}',onpicked:function (){$('#d4312')[0].focus();}})" onclick="$(this).focus();" />
+                            &nbsp;--&nbsp;
+                            <input type="text" name="MaxOutDate" id="d4312" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4311\')}'})" onclick="$(this).focus();" />
+                        </td>
+                    </tr>
+                </table>
+                <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                <input class="btn btn1" id="btnReset" type="button" value="清空" />
+            </div>
+        </div>
+    </div>
+</form>
+<div id="exchangeToursContent" class="xbox">
+    @*存放团期列表*@
+</div>
+<div id="exchangeOrdersContent" style="display: none; height: 300px; overflow-y: auto;"
+     class="clear">
+    @*存放被换团的订单列表（始终隐藏，于Dialog中显示）*@
+</div>
+<div>
+    <input class="btn btn1" id="btnNext" type="button" value="下一步" style="display: none;" />
+</div>
+<script type="text/javascript">
+
+    $(function () {
+        //查询
+        $('#btnSearch').click(function () {
+            var url = '/OpTour/SelectExchangeTour'; //$('#OperationState').val() == "1" ? '/OpTour/SelectExchangeTour' : '/OpTour/MergeExistTour';
+            var param = $('#theForm').formSerialize();
+            $.post(url, param, function (data) {
+                if (data) {
+                    $('#exchangeToursContent').html(data);
+                    hoverChangeStyle();
+                    var $next = $('#btnNext');
+                    var operation = $('#OperationState').val();
+                    if (operation == "2") {
+                        $next.val('并团');
+                    }
+                    if (!$next.is(':visible'))
+                        $next.show();
+                }
+                else {
+                    Utils.alert('请求发生异常.');
+                }
+            });
+        });
+        //下一步
+        $('#btnNext').click(function () {
+            var operation = $('#OperationState').val();
+            if (operation == "1") {
+                showExchangeOrder();
+            }
+            else if (operation == "2") {
+                mergeToExistTour();
+            }
+            else {
+                saveToNewTour();
+            }
+        });
+    });
+
+    function clearQueryInput() {
+        $('#searchTable input').each(function () { $(this).val(''); });
+    }
+
+    //获取选中订单Id，拼接成字符串
+    function getCheckedOrderId() {
+        var result = new Array();
+        var $checkedCheckBox = $(':checkbox[name=checkExchangeOrder]:checked');
+        if ($checkedCheckBox.length > 0) {
+
+            for (var i = 0, len = $checkedCheckBox.length; i < len; i++) {
+                result.push($checkedCheckBox[i].value);
+            }
+            return result.join(',');
+        }
+        else {
+            return null;
+        }
+    }
+    //渲染弹出框，选择订单
+    function renderOrderDialog() {
+
+        layer.open({
+            type: 1, title: '选择需要换团的订单', maxmin: false,
+            shadeClose: false, area: ['600px', '300px'],
+            content: document.getElementById('exchangeOrdersContent'),
+            btn: ["并入他团", "分入新团", "关闭"],
+            yes: function (index, layero) {
+                var orderIdStr = getCheckedOrderId();
+                if (orderIdStr) {
+                    $('#exchangeTourTitle').html('<span>选择并入的团期</span>');
+                    $('#OperationState').val('2');
+                    $('#exchangeToursContent').html('');
+                    hoverChangeStyle();
+                    $('#ExchangeOrders').val(orderIdStr);
+                    clearQueryInput();
+                    $('#btnNext').hide();
+                    return true;
+                } else {
+                    Utils.alert('请选择订单.');
+                    return false;
+                }
+            },
+            btn2: function (index, layero) {
+                var orderIdStr = getCheckedOrderId();
+                if (orderIdStr) {
+                    $('#exchangeTourTitle').html('<span>分入新团：创建团期</span>');
+                    $('#OperationState').val('3');
+                    $('#exchangeToursContent').html('');
+                    hoverChangeStyle();
+                    $('#ExchangeOrders').val(orderIdStr);
+                    $.post('/Product/RenderCopyTour', { tourId: $('#ExchangeFromTourId').val() }, function (data) {
+                        $('#exchangeTourWrap').html(data);
+                        var operation = $('#OperationState').val();
+                        if (operation == "3") {
+                            $('#btnNext').val('分团');
+                        }
+                    });
+                    return true;
+                } else {
+                    Utils.alert('请选择订单.');
+                    return false;
+                }
+            },
+            btn3: function (index, layero) {
+                // 关闭
+            }
+        });
+
+    }
+    //显示需要操作的订单列表
+    function showExchangeOrder() {
+        var $checkedRadio = $(':radio[name="checkExchangeTour"]:checked');
+        if ($checkedRadio.length > 0) {
+            var load_iii = Utils.layerLoad();
+            $('#ExchangeFromTourId').val($checkedRadio.val());
+            var param = { tourId: $checkedRadio.val() };
+            $.post('/OpTour/SelectExchangeOrder', param, function (data) {
+                if (data) {
+                    $('#exchangeOrdersContent').html(data);
+                    hoverChangeStyle();
+                    Utils.layerClose(load_iii);
+                    renderOrderDialog();
+                } else {
+                    Utils.alert('请求发生异常.');
+                    Utils.layerClose(load_iii);
+                }
+            });
+        } else {
+            Utils.alert('请选择团期.');
+        }
+    }
+    //选择合并已有团期
+    function mergeToExistTour() {
+        var $checkedRadio = $(':radio[name="checkExchangeTour"]:checked');
+        if ($checkedRadio.length > 0) {
+            var load_iii = Utils.layerLoad();
+            $('#ExchangeToTourId').val($checkedRadio.val());
+            //提交验证
+            var param = $('#theForm').formSerialize();
+            $.post('/OpTour/MergeToExistTour', param, function (data) {
+                if (data) {
+                    if (data.State == 0) {
+                        Utils.alert('操作成功.');
+                        window.location.href = '/OpTour/EditTourists?tourId=' + $('#ExchangeToTourId').val();
+                    } else if (data.State == 1) {
+
+                        layer.open({
+                            type: 1, title: '警告', maxmin: false,
+                            shadeClose: false, area: ['400px', '300px'],
+                            content: '并入他团的库存不足，请重新选择并入的订单',
+                            btn: ["确认", "取消"],
+                            yes: function (index, layero) {
+                                renderOrderDialog();
+                                layer.close(index);
+                            },
+                            btn2: function (index, layero) {
+                                // 取消
+                            }
+                        });
+
+                        Utils.layerClose(load_iii);
+                    } else if (data.State == 2) {
+
+                        layer.open({
+                            type: 1, title: '警告', maxmin: false,
+                            shadeClose: false, area: ['400px', '300px'],
+                            content: '座位号【' + data.SeatNo + '】存在重复，请修改重复的座位号<br /><a target="_blank" href="/OpTour/EditTourists?tourId=' + $('#ExchangeFromTourId').val() + '">调整团期</a><br /><a target="_blank" href="/OpTour/EditTourists?tourId=' + $('#ExchangeToTourId').val() + '">并入团期</a>',
+                            btn: ["继续提交", "关闭"],
+                            yes: function (index, layero) {
+                                mergeToExistTour();
+                                layer.close(index);
+                            },
+                            btn2: function (index, layero) {
+                                // 取消
+                            }
+                        });
+
+                        Utils.layerClose(load_iii);
+                    } else if (data.State == 3) {
+                        Utils.alert('请求发生异常,操作失败.');
+                    }
+                }
+            });
+        } else {
+            Utils.alert('请选择团期.');
+        }
+    }
+    //保存换团订单到新团
+    function saveToNewTour() {
+        //验证
+        var trafficType = $('#Line_TrafficType').val();
+        if (trafficType == "1") {
+            if ($('#busSeatContainer').children().length == 0) {
+                Utils.alert('请选择座位表!');
+                return false;
+            }
+            else {
+                //当前预留库存
+                var curHold = Number($('#copyHoldQuota').val());
+                //预留座位数
+                var holdCount = $(".seat_box .blue").length;
+                if (holdCount != curHold) {
+                    Utils.alert('请确认预留座位是否一致。');
+                    return false;
+                }
+            }
+        }
+        var load_iii = Utils.layerLoad();
+        var param = $('#theForm').formSerialize();
+        $.post('/OpTour/SplitToNewTour', param, function (data) {
+            if (data) {
+                if (data.State == 0) {
+                    Utils.alert('操作成功.');
+                    window.location.href = '/OpTour/EditTourists?tourId=' + data.TourId;
+                } else if (data.State == 1) {
+
+                    layer.open({
+                        type: 1, title: '警告', maxmin: false,
+                        shadeClose: false, area: ['400px', '300px'],
+                        content: '并入他团的库存不足，请重新选择并入的订单',
+                        btn: ["确认", "取消"],
+                        yes: function (index, layero) {
+                            renderOrderDialog();
+                            layer.close(index);
+                        },
+                        btn2: function (index, layero) {
+                            // 取消
+                        }
+                    });
+
+                    Utils.layerClose(load_iii);
+                } else if (data.State == 2) {
+
+                    layer.open({
+                        type: 1, title: '警告', maxmin: false,
+                        shadeClose: false, area: ['400px', '300px'],
+                        content: '座位号【' + data.SeatNo + '】存在重复，请修改重复的座位号<br /><a target="_blank" href="/OpTour/EditTourists?tourId=' + $('#ExchangeFromTourId').val() + '">调整团期</a>',
+                        btn: ["继续提交", "关闭"],
+                        yes: function (index, layero) {
+                            saveToNewTour();
+                            layer.close(index);
+                        },
+                        btn2: function (index, layero) {
+                            // 取消
+                        }
+                    });
+
+                    Utils.layerClose(load_iii);
+                } else if (data.State == 3) {
+                    Utils.alert('请求发生异常,操作失败.');
+                }
+            }
+        });
+        return false;
+    }
+</script>

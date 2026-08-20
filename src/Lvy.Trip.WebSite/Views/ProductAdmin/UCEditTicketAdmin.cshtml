@@ -1,0 +1,57 @@
+﻿@model Lvy.VModels.Ticket.EditTicketAdminVModel
+<form id="ticketAdminForm" action="@Url.Action("SaveTicketAdmin")">
+<input type="hidden" name="TicketId" value="@Model.TicketId"/>
+<div style="width: 280px; float: left;">
+    <div class="station">
+        用户列表：
+    </div>
+    <div style="max-height: 250px; overflow-y: auto;">
+        <table class="listtbl" width="100%">
+            <thead>
+                <tr style="text-align: center;">
+                    <th>
+                        选择
+                    </th>
+                    <th>
+                        用户名
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Admins != null && Model.Admins.Count > 0)
+                {
+                    for (int i = 0, len = Model.Admins.Count; i < len; i++)
+                    {
+                    <tr style="text-align: center;">
+                        <td>
+                            <input type="hidden" name="Admins[@i].TktAdminId" value="@Model.Admins[i].TktAdminId"/>
+                            <input type="hidden" name="Admins[@i].AccountCode" value="@Model.Admins[i].AccountCode"/>
+                            <input type="hidden" name="Admins[@i].Checked" value="@Model.Admins[i].Checked"/>
+                            @if (@Model.Admins[i].Checked == 0)
+                            {
+                                <input type="checkbox" name="IsChecked" value="@Model.Admins[i].Checked" />
+                            }
+                            else
+                            {
+                                <input type="checkbox" name="IsChecked" checked="checked" value="@Model.Admins[i].Checked" />
+                            }
+                        </td>
+                        <td>
+                            @Model.Admins[i].Name
+                        </td>
+                    </tr>
+                    }
+                }
+                else
+                {
+                    <tr style="text-align: center;">
+                        <td colspan="3">
+                            <span style="color: #FF0000">无数据</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+</form>

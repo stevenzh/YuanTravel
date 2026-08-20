@@ -1,0 +1,87 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Base.ArticleVModel
+
+<table class="table table-sm table-bordered ">
+    <thead>
+        <tr>
+            <td align="center">编号</td>
+            <td align="left">类型</td>
+            <td align="left">标题</td>
+            <td align="center">创建时间</td>
+            <td align="left">是否有效</td>
+            <td align="left">是否置顶</td>
+            <td align="center" style="width: 70px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.ArticlePageList.Items.Count > 0)
+        {
+            foreach (var item in Model.ArticlePageList.Items)
+            {
+
+        <tr>
+            <td align="center">@item.Id</td>
+            <td align="left">@DictionaryTools.GetEnumValue(Enums.NoticeTypeEnum, item.NoticeType.ToString())</td>
+            <td align="left">@item.Title</td>
+            <td align="center">@item.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            <td align="left">@item.IsValid</td>
+            <td align="left">@item.IsTop</td>
+            <td align="center">
+                <div class="btn-group btn-group-sm">
+                    @if (GlobalContext.Current.UserInfo.AccountType == 2 
+                        || GlobalContext.Current.LoginUserRoles.Any(m => m.Name == "销售总监")
+                        || GlobalContext.Current.UserInfo.Code == item.CreatedBy )
+                    {
+                        @Html.IconActionLink("编辑", "Edit", "Article", "fa fa-edit", new { id = item.Id }, new { @class = "btn" })
+                        @Html.IconDeleteActionLink("SetValidState", "Article", item.IsValid, new { id = item.Id }, new { @class = "btn" })
+                    }
+                    <button type="button" class="btn" onclick="javascript:parent.openTabPage('@("/Article/Details/" + item.Id)','文章【@item.Id】')" title="详情"><i class="fa fa-list"></i></button>
+                </div>
+            </td>
+        </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(a => a.ArticlePageList.PageIndex)
+<div id="Pagination" class="digg"></div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function() {
+        $("#Pagination").pagination(
+            Number('@Model.ArticlePageList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.ArticlePageList.PageSize'),
+                current_page: @Model.ArticlePageList.PageIndex-1
+            });
+    });
+
+
+    //回调方法
+     function pageselectCallback(page_id, jq) {
+
+         var load_iii = Utils.layerLoad();
+
+         $("#Notices_PageIndex").val(page_id + 1);
+         var params = $("#theForm").formSerialize();
+
+         $.post('@Url.Action("Search")', params, function(data) {
+             if (data.length<1) {
+                 Utils.alert("查询出错，请稍后查询！");
+                 return false;
+             }
+             $('#divNotices').html(data);
+             Utils.layerClose(load_iii);
+         });
+     }
+
+</script>

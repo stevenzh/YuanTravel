@@ -1,0 +1,29 @@
+﻿@model string
+    <div class="station">
+        @if (!string.IsNullOrEmpty(Model))
+        {
+            @Html.ActionLink("编辑客户", "Edit", new { code = Model })
+            <span>&nbsp;&nbsp;</span>
+            @Html.ActionLink("联系人管理", "ContactInfo", new { code = Model })
+            <span>&nbsp;&nbsp;</span>
+            @Html.ActionLink("合同附件", "Uploading", new { code = Model })
+            @*<span>&nbsp;&nbsp;</span>
+            @Html.ActionLink("折扣规则", "ProducPolicy", new { code = Model })*@
+            <span>&nbsp;&nbsp;</span>
+            @Html.ActionLink("操作日志", "LogList", new { code = Model })
+            <span>&nbsp;&nbsp;</span>
+        }
+        else
+        {
+            <span>编辑客户</span>
+            <span>&nbsp;&nbsp;</span>
+            <span>联系人管理</span>
+            <span>&nbsp;&nbsp;</span>
+            <span>合同附件</span>
+            @*<span>&nbsp;&nbsp;</span>
+            <span>折扣规则</span>*@
+            <span>&nbsp;&nbsp;</span>
+            <span>操作日志</span>
+            <span>&nbsp;&nbsp;</span>
+        }
+    </div>

@@ -1,0 +1,62 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+
+@if (null != Model.InnerRemarkList && Model.InnerRemarkList.Count > 0)
+{
+    var LastInnerRemarkModel = Model.InnerRemarkList.FirstOrDefault();
+
+    <div style="margin:2px auto; height:24px; line-height:24px;">
+        <img src="../../Images/ico_lb.gif" align="absmiddle" />
+        <span style="color:Blue;">&nbsp;最新消息【@LastInnerRemarkModel.OperateDate】@LastInnerRemarkModel.OperateName 说：</span>
+        <span style="color:#464646;">@LastInnerRemarkModel.Note.TrimWithElipsis(30)</span>
+        <a href="####" id="ShowMoreA">》查看更多</a>
+    </div>
+    <div id="divInnerRemarks" class="tips012" style="width:600px; text-align:center;" align="center">
+        <table style="width:100%; border:0; color:#fff;" class="tab02">
+            <tr bgcolor="#505050">
+                <td style="width:20%;">记录人</td>
+                <td style="width:20%;">记录时间</td>
+                <td style="width:60%;">备注</td>
+            </tr>
+        </table>
+        <div style="background-color:#FFFFEC; border:1px solid #c9c9c9; height:190px; overflow:auto;">
+            <table style="width:100%; border:0;" class="tab02">
+                @foreach (var innerNoteModel in Model.InnerRemarkList)
+                {
+                    <tr>
+                        <td style="width:20%; border-bottom:1px solid #e4e4e4;">@innerNoteModel.OperateName</td>
+                        <td style="width:20%; border-bottom:1px solid #e4e4e4;">@innerNoteModel.OperateDate</td>
+                        <td style="width:60%; white-space:normal; border-bottom:1px solid #e4e4e4;">@innerNoteModel.Note</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+}
+<script type="text/javascript">
+    $(function () {
+        //查看更多
+        $("#ShowMoreA").bind({
+            "mouseenter": function () {
+                var $more = $(this);
+                $("#divInnerRemarks").css({
+                    "top": $more.offset().top + $more.outerHeight(true),
+                    "left": $more.offset().left - 220
+                }).show();
+            },
+            "mouseleave": function () {
+                var $more = $(this);
+                $("#divInnerRemarks").hide();
+            }
+        });
+        //div
+        $("#divInnerRemarks").bind({
+            "mouseenter": function () {
+                $(this).show();
+            },
+            "mouseleave": function () {
+                $(this).hide();
+            }
+        });
+    });
+</script>

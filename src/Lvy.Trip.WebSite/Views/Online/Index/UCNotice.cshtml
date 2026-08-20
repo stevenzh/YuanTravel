@@ -1,0 +1,16 @@
+﻿@model IEnumerable<Lvy.Models.BaseDB.BaseArticleModel>
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>
+            @if (item.Url.IsNullOrEmpty())
+            {
+                <span class="notice_span">@item.Title</span>
+            }
+            else
+            {
+                <span class="notice_span"><a href="http://@item.Url" target="_blank">@item.Title</a></span>
+            }
+        </li>
+    }
+</ul>

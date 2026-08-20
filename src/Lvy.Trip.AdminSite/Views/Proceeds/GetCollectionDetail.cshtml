@@ -1,0 +1,23 @@
+﻿@model Lvy.Models.BaseDB.VTProceedsModel
+
+<table align="center" border="0">
+    <tr align="center" style="background: #ddd">
+        <td width="10%">收款编号</td>
+        <td width="10%">收款人</td>
+        <td width="6%">收款方式</td>
+        <td width="10%">收款金额</td>
+        <td width="10%">收款时间</td>
+        <td width="10%"></td>
+    </tr>
+    <tr style="text-align: center" id="cf_@Model.Id">
+        <td width="10%">@Model.ProceedsCode</td>
+        <td width="10%">@Model.ChargerName</td>
+        <td width="6%">@Model.MultiType</td>
+        <td width="10%">@decimal.Round(Model.ReceiveSum.Value, 2)</td>
+        <td width="10%">@Model.ProceedsDate</td>
+        <td width="10%">
+            <a href="javascript:void(0)" onclick="CollectionPrint('@Model.ProceedsCode')">查看/打印</a>
+        </td>
+    </tr>
+</table>
+

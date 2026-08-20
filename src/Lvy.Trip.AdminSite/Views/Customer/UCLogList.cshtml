@@ -1,0 +1,73 @@
+﻿@model Lvy.VModels.Crm.CustomerVModel
+
+<style>
+    .listtbl tbody td { text-align: center; }
+</style>
+<div class="xbox clear">
+    @if (Model.LogList.Items.Count > 0)
+    {
+        <table class="listtbl" style="width:100%;">
+            <thead>
+                <tr>
+                    <td>事件</td>
+                    <td>状态</td>
+                    <td>事件</td>
+                    <td>操作部门</td>
+                    <td>操作人</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.LogList.Items)
+                {
+                    <tr>
+                        <td style="text-align:left;">@item.Event</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.SexEnum, item.Status.ToString())</td>
+                        <td>@item.ModifiedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@DictionaryTools.GetCachedTeam(item.TeamID).TeamName</td>
+                        <td>@DictionaryTools.GetCachedAccount(item.ModifiedBy).Name</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.HiddenFor(a => a.LogList.PageIndex)
+        <div id="Pagination" class="digg"></div>
+    }
+    else
+    {
+        <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+            <br />
+            对不起，没有查找到数据！请重新输入查询条件 ！
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.LogList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.LogList.PageSize'),
+                current_page: @Model.LogList.PageIndex-1
+            });
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#LogList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("LogList")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divLogList').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+</script>

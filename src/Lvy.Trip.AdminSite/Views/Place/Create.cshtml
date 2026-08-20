@@ -1,0 +1,190 @@
+﻿@model Lvy.Models.BaseDB.BasePlaceModel
+@{
+    ViewBag.Title = "创建景区";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/jquery.validate.min.js"></script>
+    <script src="~/WebRes/scripts/jquery.validate.message.cn.js"></script>
+    <link href="@CDNServerUrl/summernote/summernote-bs4.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/summernote/summernote-bs4.min.js"></script>
+    <script src="@CDNServerUrl/summernote/lang/summernote-zh-CN.min.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Destop">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/Place/Search"> 景区管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+        </div><!-- /.box-header -->
+        <form role="form" id="theForm" method="POST" class="form-horizontal" enctype="multipart/form-data" action="@Url.Action("Create")">
+            @Html.HiddenFor(m => m.PlaceCode)
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceName">景区名称</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="PlaceName" id="PlaceName" maxlength="50" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceLevel">景区星级</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(m => m.PlaceLevel, ViewBag.PlaceLevels as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceLevel">景区所在地</label>
+                    <div class="col-sm-10">
+                        <select id="DestinationStr" name="DestinationStr" class="form-control form-control-sm">
+                            <option value="">选择所在地</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="OpenTime">开放时间|价格政策</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => model.OpenTime, new { @class = "form-control form-control-sm", @rows = 5 })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="SimpleDesc">简单描述</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => model.SimpleDesc, new { @class = "form-control form-control-sm", @rows = 4 })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceDesc">景区描述</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => model.PlaceDesc, new { @class = "form-control form-control-sm summernote", @rows = 5 })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="UploadFile">景点图片</label>
+                    <div class="col-sm-10">
+                        <input type="file" name="UploadFile" id="UploadFile" />
+                        <input type="button" id="btnUpload" class="btn btn-info" value="上传图片" />
+                        <div id="photoView"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <button id="btnSave" type="submit" class="btn btn-primary">保 存</button>
+                <button name="btnClear" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Search")'">返回列表</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#DestinationStr').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Id, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $("#btnUpload").click(function () {
+            var params = $("#theForm").formSerialize();
+            $.post("/Place/UploadPhoto",params,function (data) {
+                if (parseInt(data)>0) {
+                    photoView();
+                }
+            });
+        });
+
+        photoView();
+
+        // Summernote
+        $('.summernote').summernote({
+            lang: 'zh-CN',
+            height: 400,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                // ['insert', ['link', 'picture', 'video', 'elfinder']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onImageUpload: function (files) {
+                     Utils.alert("景区保存后才能插图骨片");
+                }
+            }
+        });
+
+        // validate signup form on keyup and submit
+        $("#theForm").validate({
+            rules: {
+                PlaceName: "required",
+                PlaceLevel: "required",
+                OpenTime: "required",
+                PlaceDesc:"required"
+            },
+            messages: {
+                PlaceName: "请输入景区名称！",
+                PlaceLevel: "请输入景区星级",
+                OpenTime: "请输入开放时间！",
+                PlaceDesc:"请输入景区描述"
+
+            }
+        });
+    });
+
+    function photoView() {
+        $.get("/Place/PhotoView", { placeCode: '@Model.PlaceCode' }, function(html) {
+            $("#photoView").html(html);
+        });
+    }
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+</script>

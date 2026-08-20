@@ -1,0 +1,17 @@
+﻿@using Arch.Common
+@model List<Lvy.Models.BaseDB.BaseFileResModel>
+
+<p class="left_title"> 下载专区</p>
+<div style="padding-left: 8px; padding-top: 10px;  font-size: 14px;">
+    <ul style="width:220px;">
+        @foreach (var item in Model)
+        {
+            <li style="height:  18px;">
+                <div style="float: left;"><a href="@AppSetting.Get("UploadFileRoot")@item.Path" title="@item.FileName">@item.FileName.TrimWithElipsis(12)</a> </div>
+                <div style="float: right; padding-right: 0px; font-size: 12px;  ">@item.FileSize K</div>
+            </li>
+            <li style="height: 5px; border-top: 1px dashed #ccc;" align="left"> </li>
+        }
+    </ul>
+    <p style="height:10px;"></p>
+</div>

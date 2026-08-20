@@ -1,0 +1,85 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    ViewBag.Title = "添加单团核算";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <link href="~/WebRes/scripts/My97DatePicker/skin/WdatePicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+}
+
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/Balance/Search">报团管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+ 
+<section class="content">
+    @using (Html.BeginForm("Create", "Balance", FormMethod.Post, new { id = "theForm" }))
+    {
+        @Html.HiddenFor(t => t.Balance.MasterOrderCode)
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"></h3>
+            </div>
+            <div class="card-body">
+                <!-- 团队基本信息 -->
+                @Html.Partial("EditTourInfo")
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-success" id="btnSave" type="button">保存</button>
+                <a class="btn btn-secondary" href="@Url.Action("Search")">返回列表</a>
+            </div>
+        </div>
+    }
+</section>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSave").click(function () {
+            if ($("#ProductType").val() == "") {
+                Utils.alert("必须选择项目类型！");
+                $(this).focus().select();
+                return false;
+            }
+
+            if ($("#TourNo").val() == "0") {
+                Utils.alert("必须填写团号！");
+                $(this).focus().select();
+                return false;
+            }
+
+            if ($("#ProductName").val() == "") {
+                Utils.alert("必须填写项目名称！");
+                $(this).focus();
+                return false;
+            }
+
+            if ($("#Pax").val() == "") {
+                Utils.alert("必须填写游客人数！");
+                $(this).focus();
+                return false;
+            }
+
+            $("#theForm").submit();
+        });
+
+    });
+
+</script>
+

@@ -1,0 +1,91 @@
+﻿@model Lvy.VModels.Base.BrandVModel
+<form id="editForm">
+    @*<div class="station">
+            品牌管理
+        </div>*@
+    <div class="inform">
+        <div class="in_box">
+            @Html.HiddenFor(a => a.BrandModel.ID)
+            @Html.HiddenFor(a => a.BrandModel.Code)
+            @Html.HiddenFor(a => a.BrandModel.IsValid)
+            @Html.HiddenFor(a => a.BrandModel.CreatedTime)
+            @Html.HiddenFor(a => a.BrandModel.CreatedBy)
+            <table style="width:100%;">
+                <tr>
+                    <td class="label"><span class="point">*</span>品牌名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.BrandModel.Name, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.BrandModel.TeamID, (List<SelectListItem>)ViewBag.TeamBeans)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input class="btn btn1" id="btnSave" type="button" value="保存" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSave").click(function () {
+            if (!checkControls()) {
+                return;
+            }
+            var load_iii = Utils.layerLoad();
+            var params = $("#editForm").formSerialize();
+            $.post("/Brand/Edit", params, function (data) {
+                if (data.code == '0') {
+                    parent.pageselectCallback(0);
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        // 焦点移出的场合，验证角色名称是否存在。
+        $("#BrandModel_Name").focusout(function () {
+            ajaxCheckRoleName();
+        });
+    });
+
+    // 验证控件
+    function checkControls() {
+        if ($("#BrandModel_Name").val() == "") {
+            Utils.alert("品牌名称不能为空!");
+            $("#Name").select().focus();
+            return false;
+        }
+
+        if (ajaxCheckRoleName()) {
+            return false;
+        }
+        return true;
+    }
+
+    function ajaxCheckRoleName() {
+        var params = { name: $("#BrandModel_Name").val(), 'brandId': $("#BrandModel_ID").val() };
+        $.post("/Brand/CheckBrandName", params, function (data) {
+            if (data) {
+                //如果存在，提示
+                Utils.alert("品牌名称已存在，请更改!");
+                $("#BrandModel_Name").select().focus();
+                return false;
+            }
+            return true;
+        });
+    }
+
+</script>

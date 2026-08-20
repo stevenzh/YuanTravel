@@ -1,0 +1,194 @@
+﻿@model Lvy.Models.CrmDB.CrmAccountModel
+@{
+    ViewBag.Title = "商户注册";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources{ }
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="images/shop_background.jpg"></div>
+    <div class="home_overlay"></div>
+    <div class="home_content d-flex flex-column align-items-center justify-content-center">
+        <h2 class="home_title">@ViewBag.Title</h2>
+    </div>
+</div>
+
+<div class="register-login-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+                <div class="register-form">
+                    <form class="form-horizontal" id="theForm" method="POST" action="@Url.Action("DoReg", "Index")" enctype="multipart/form-data">
+                        @*<div class="group-input">
+                                <label> 用户名*</label>
+                                @Html.TextBoxFor(model => model.LoginName, new { @class = "" })
+                            </div>
+                            <div class="group-input">
+                                <label>密码*</label>
+                                @Html.PasswordFor(model => model.Pwd)
+                            </div>
+                            <div class="group-input">
+                                <label> 确认密码*</label>
+                                <input type="password" id="PwdConfirm" name="PwdConfirm" />
+                            </div>*@
+                        <div class="group-input">
+                            <label>公司名称*</label>
+                            @Html.TextBoxFor(model => model.Customer.Name, new { @class = "form-control" })
+                        </div>
+                        <div class="group-input">
+                            <label> 联系手机*</label>
+                            @Html.TextBoxFor(model => model.Customer.Mobile)
+                        </div>
+                        @*<div class="group-input ">
+                                <label>公司电话*</label>
+                                @Html.TextBoxFor(model => model.Customer.Phone)
+                            </div>*@
+                        <div class="group-input ">
+                            <label> 公司地址*</label>
+                            @Html.TextBoxFor(model => model.Customer.Address, new { @class = "form-control" })
+                        </div>
+                        <div class="group-input ">
+                            <label>公司营业执照*</label>
+                            <div class="controls">
+                                <div class="file-box">
+                                    <input type="text" id="textfieldx1" name="textfieldx1" placeholder="请上传1M内大小图片" />
+                                    <input type="button" value="浏览..." class="btn btn1" />
+                                    <input type="file" class="file" name="imgFile1" size="25" onchange="document.getElementById('textfieldx1').value=this.value;$('#btnUpload1').click();" />
+                                    <input id="btnUpload1" type="button" value="上传" class="btn btn1" style="display: none" />
+                                </div>
+                                <div>
+                                    <img id="view1" alt="" style="display: none; height: 100px;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-input ">
+                            <label> 法人身份证（正面）*</label>
+                            <div class="controls  ">
+                                <div class="file-box">
+                                    <input type="text" id="textfieldx2" name="textfieldx2" placeholder="请上传1M内大小图片" />
+                                    <input type="button" value="浏览..." class="btn btn1" />
+                                    <input type="file" class="file" name="imgFile2" size="25" onchange="document.getElementById('textfieldx2').value=this.value;$('#btnUpload2').click();" />
+                                    <input id="btnUpload2" type="button" value="上传" class="btn btn1" style="display: none" />
+                                </div>
+                                <div>
+                                    <img id="view2" name="view2" alt="" style="display: none; height: 100px;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group-input ">
+                            <label>备注</label>
+                            @Html.TextAreaFor(model => model.Customer.Remarks, new { @Rows = "4", @class = "form-control" })
+                        </div>
+                        <button id="btnSave" type="button" class="site-btn register-btn">提 交</button>
+
+                        @Html.HiddenFor(a => a.CustomerCode)
+                        <input type="hidden" id="hidImgFile" name="imgFile" />
+                        <input type="hidden" id="BusinessLicencePath" name="BusinessLicencePath" />
+                        <input type="hidden" id="IdCardPath" name="IdCardPath" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="@CDNServerUrl/jquery-validation/jquery.validate.min.js"></script>
+    <script src="@CDNServerUrl/jquery-validation/localization/messages_zh.min.js" type="text/javascript"></script>
+    <script src="@CDNServerUrl/jquery-form/jquery.form.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var host = '@Arch.Common.AppSetting.Get("UploadFileRoot")';
+    </script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            $("#btnUpload1").click(function () {
+                var load_iii = Utils.layerLoad();
+                // var params = decodeURIComponent($("#theForm").formSerialize());
+                $("#hidImgFile").val("imgFile1");
+                $("#BusinessLicencePath").val('');
+                $("#theForm").ajaxSubmit({
+                    type: "post",
+                    dataType: "json",
+                    url: '/User/UploadPhoto',
+                    success: function (msg) {
+
+                        if (msg.error == 1) {
+                            Utils.alert(msg.message);
+                        } else {
+                            $("#view1").attr('src', host + msg.url);
+                            $("#view1").show();
+                            $("#BusinessLicencePath").val(msg.url);
+
+                        }
+                        $('#theForm').attr('action', '/Index/DoReg');
+                        Utils.layerClose(load_iii);
+                    }
+                });
+
+            });
+
+            $("#btnUpload2").click(function () {
+                var load_iii = Utils.layerLoad();
+                // var params = decodeURIComponent($("#theForm").formSerialize());
+                $("#hidImgFile").val("imgFile2");
+                $("#IdCardPath").val('');
+                $("#theForm").ajaxSubmit({
+                    type: "post",
+                    dataType: "json",
+                    url: '/User/UploadPhoto',
+                    success: function (msg) {
+
+                        if (msg.error == 1) {
+                            Utils.alert(msg.message);
+                        } else {
+                            $("#view2").attr('src', host + msg.url);
+                            $("#view2").show();
+                            $("#IdCardPath").val(msg.url);
+                        }
+                        $('#theForm').attr('action', '/Index/DoReg');
+
+                        Utils.layerClose(load_iii);
+                    }
+                });
+
+            });
+
+            $("#theForm").validate({
+                rules: {
+                    LoginName: {
+                        required: true, userName: "#LoginName", rangelength: [6, 30],
+                        remote: {
+                            url: '/User/RemoteLoginName',
+                            type: "get",
+                            datatype: "json",
+                            data: {
+                                userName: function () {
+                                    return $("#LoginName").val();
+                                }
+                            }
+                        }
+                    },
+                    Pwd: { required: true, minlength: 6 },
+                    PwdConfirm: { required: true, equalTo: "#Pwd" },
+                    "Customer.Name": { required: true },
+                    "Customer.Head": { required: true },
+                    "Customer.Mobile": { required: true },
+                    "Customer.Phone": { required: true },
+                    "Customer.Fax": { required: true },
+                    "Customer.Address": { required: true },
+                    "textfieldx1": { required: true },
+                    "textfieldx2": { required: true }
+                },
+                messages: {
+                    LoginName: { remote: "用户名已经被注册！" },
+                    PwdConfirm: { equalTo: "密码输入不一致，请重新输入！" }
+                },
+                onkeyup: false
+            });
+        });
+    </script>
+
+}

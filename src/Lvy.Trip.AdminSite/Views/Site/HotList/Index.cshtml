@@ -1,0 +1,56 @@
+﻿@model Lvy.Visa.VModels.HotModuleQModel
+@{
+    ViewData["Title"] = "产品推荐设置";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">板块列表</h3>
+        </div>
+        <div class="card-body" id="dataList">
+            <table class="table table-sm table-bordered">
+                <tr>
+                    <th>#</th>
+                    <th>编码</th>
+                    <th>标题</th>
+                    <th>出发城市</th>
+                    <th>类型</th>
+                    <th>备注</th>
+                    <th style="width:150px;">操作</th>
+                </tr>
+                @foreach (var modulemodel in Model.HotModuleList)
+                {
+                    <tr>
+                        <td>@modulemodel.ItemID</td>
+                        <td>@modulemodel.Code</td>
+                        <td>@modulemodel.Name</td>
+                        <td>@(string.IsNullOrEmpty(modulemodel.OutCity)?"": DictionaryTools.GetEnumValue(Enums.OutCityEnum, modulemodel.OutCity))</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.ProductTypeEnum, modulemodel.ProductType)</td>
+                        <td>@modulemodel.Remarks</td>
+                        <td><a href="/HotList/HotList?ItemID=@modulemodel.ItemID" class="btn btn-info btn-sm"><i class="fa fa-list"></i> 关联产品列表</a></td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</section>

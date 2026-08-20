@@ -1,0 +1,58 @@
+﻿@model Lvy.VModels.Booking.BookingVModel
+
+<p>
+    <b style="font-size: 18px;"> <a href="@Url.Action("TourRouteDetail",new{tourId=Model.Tour.Id})" target="_blank">@Model.LineModel.LineName </a> </b>
+</p>
+<p title="@Model.LineModel.LineSpecial">
+    <b style="color:#FF9025;padding-left:8px;">
+        @Model.LineModel.LineSpecial.TrimWithElipsis(50)
+    </b>
+</p>
+
+<input type="hidden" name="tax" value="@Model.Tour.Tax">
+<input type="hidden" name="visaPrice" value="@Model.Tour.VisaPrice">
+<table class="table">
+    <tr>
+        <td>团号：@Model.Tour.TourNo </td>
+        <td>出发地：@(string.IsNullOrEmpty(Model.LineModel.DepartDest)?"多地": DictionaryTools.GetEnumValue(Enums.OutCityEnum, Model.LineModel.DepartDest)) </td>
+        <td>目的地：@DictionaryTools.GetDestNameStr(Model.LineModel.ArriveDest)    </td>
+        <td>出游天数：@Model.LineModel.TravelDays</td>
+        <td>剩余名额：@Model.Quota.UseQuota<input type="hidden" id="hidUseQuota" value="@Model.Quota.UseQuota" /></td>
+    </tr>
+    <tr>
+        <td>出游时间：@Model.Tour.OutDate.ToDateFormat()（@Model.Tour.OutDate.DayOfWeek.ToWeekCn()）</td>
+    </tr>
+    <tr style="display:none;">
+        <td height="45" align="left" colspan="2" class="select_div_tr">
+            <div class="font_1">上车地点：</div>
+            <div class="select_div_address" id="select_div_address">
+                <div class="select_input_address" id="select_input_address">
+                    <div id="address_span">
+                        <p style="background:#fff; color:#ccc ">   === 请选择 === </p>
+                    </div>
+                </div>
+            </div>
+            <div class="select_option_address">
+                @foreach (var item in Model.BusPoints.OrderBy(a => a.JsTime))
+                {
+                    var jsPrice = item.JiePrice + item.SongPrice;
+                    string jsContent = "";
+                    if (item.JsType == 1)
+                    {
+                        jsContent = "[{0}]{1}(只接不送) | 接价:{2}".With(item.JsTime, item.BusPoint, item.JiePrice);
+                    }
+                    else if (item.JsType == 2)
+                    {
+                        jsContent = "[{0}]{1}(只送不接) | {1} | 送价:{2}".With(item.BusPoint, item.JsTime, item.SongPrice);
+                    }
+                    else
+                    {
+                        jsContent = "[{0}]{1} | 接价:{2} | 送价:{3}".With(item.BusPoint, item.JsTime, item.JiePrice, item.SongPrice);
+                    }
+                    <p key="@item.Id" jsPrice="@jsPrice">@jsContent</p>
+                }
+            </div>
+        </td>
+        <td height="45" colspan="3" align="left">接送价格:￥ <label id="jsPrice">0</label> /人</td>
+    </tr>
+</table>

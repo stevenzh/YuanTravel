@@ -1,0 +1,261 @@
+﻿@model Lvy.VModels.OpTour.GatheringVModel
+@{
+    ViewBag.Title = "收款";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+    <style>
+        .select2-container--default .select2-selection--single { border-radius: 0; }
+    </style>
+}
+
+<form id="theForm" method="POST" action="@Url.Action("Search")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                账务收款查询
+            </div>
+            <table id="searchTable" class="edittbl" style="border-bottom: 0px; width:100%;">
+                <tr>
+                    <td class="label">产品部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.LineTeam, ViewBag.ProductTeams as IEnumerable<SelectListItem>, new { @class = "text150" })
+                    </td>
+                    <td class="label">产品名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.ProductName, new { @class = "text150" })
+                    </td>
+                    <td class="label">出发日期：</td>
+                    <td>
+                        <input type="text" name="Condition.OutDateRange" id="OutDateRange" class="text220" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">销售部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SaleTeamId, ViewBag.SalesTeams as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">销售：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>)
+                    </td>
+                    <td class="label">付款日期：</td>
+                    <td>
+                        <input type="text" name="Condition.PayInTimeRange" id="PayInTimeRange" class="text220" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">团号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.TourNo, new { @class = "text150" })
+                    </td>
+                    <td class="label">订单编号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.OrderCode, new { @class = "text150" })
+                    </td>
+                    <td class="label">缴款单号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.PayInId, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">分销商：</td>
+                    <td>
+                        <select id="mySelect1" name="Condition.BookingCustomer" class="text220">
+                            <option value=""></option>
+                        </select>
+                    </td>
+                    <td class="label">状态：</td>
+                    <td>
+                        <select name="Condition.JieSuanState" class="text150">
+                            <option value=""></option>
+                            <option value="0">未确认</option>
+                            <option value="1">已确认</option>
+                        </select>
+                    </td>
+                    <td class="label">财务部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.FrTeamId, ViewBag.FrTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: center;">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="resetBtn" type="button" value="重置" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divPayInList">
+        @Html.Partial("UCSearch", Model)
+    </div>
+</form>
+
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+    $(function () {
+
+        $('#mySelect1').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true
+            //templateResult: formatState
+        });
+        $('#mySelect1').on('select2:select', function (e) {
+            $("#Condition_BookingCustomerName").val(e.params.data.text);
+        });
+
+        $("#Condition_SaleTeamId").change(function () {
+            var teamId = $(this).val();
+            $("#Condition_SalerCode").empty();
+            if (teamId == "") {
+                $("#Condition_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#Condition_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#Condition_SalerCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                    });
+                }
+            });
+         });
+
+        $('#OutDateRange').daterangepicker({
+            autoUpdateInput: true,
+            ranges: {
+                '今天': [moment(), moment()],
+                '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '本周': [moment().startOf('week'), moment()],
+                '上周': [moment().subtract(6, 'days'), moment()],
+                '本月': [moment().startOf('month'), moment().endOf('month')],
+                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                format: "YYYY/MM/DD", //设置显示格式
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        }, function (start, end) {
+            $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+        });
+        $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#OutDateRange').val('');
+        });
+
+        // 初始
+        $('#OutDateRange').val('');
+
+        $('#PayInTimeRange').daterangepicker({
+            autoUpdateInput: true,
+            ranges: {
+                '今天': [moment(), moment()],
+                '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '本周': [moment().startOf('week'), moment()],
+                '上周': [moment().subtract(6, 'days'), moment()],
+                '本月': [moment().startOf('month'), moment().endOf('month')],
+                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                format: "YYYY/MM/DD", //设置显示格式
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        }, function (start, end) {
+                $('#PayInTimeRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+        });
+        $('#PayInTimeRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#PayInTimeRange').val('');
+        });
+
+        // 初始
+        $('#PayInTimeRange').val('');
+
+        //搜索
+        $("#btnSearch").click(function () {
+            pageselectCallback(0);
+        });
+
+        //重置
+        $("#resetBtn").click(function () {
+            $("#searchTable td input[type=text]").val("");
+            $("#searchTable td input[type=hidden]").val("");
+
+            $("#searchTable td select").val("");
+        });
+
+    });
+
+    //确认收款
+    function ConfirmPayIn(payInId) {
+        var load_iii = Utils.layerLoad();
+        var params = { "payInId": payInId };
+        $.post('/Gathering/SingleOrderShowKuanCheck/', params, function(data) {
+            if(data == 'true'){
+                Utils.layerClose(load_iii);
+                layer.confirm('确认收款？', {
+                    btn: ['确认', '关闭'] //按钮
+                }, function () {
+                    $.post('/Gathering/PayInToConfirmed',params,function (result) {
+                        if(result.Result=="1") {
+                            Utils.alert('确认收款成功');
+                            pageselectCallback(@Model.TourPayInList.PageIndex - 1);
+                        }
+                        else {
+                            Utils.alert('提交失败');
+                        }
+                    });
+                }, function () {
+                });
+            }
+            else  {
+                Utils.alert('请求发生异常');
+                Utils.layerClose(load_iii);
+            }
+        });
+    }
+    </script>
+}

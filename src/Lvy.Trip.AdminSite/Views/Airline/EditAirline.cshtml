@@ -1,0 +1,119 @@
+﻿@model  Lvy.VModels.Base.AirlineVModel
+@{
+    ViewBag.Title = "编辑航空公司";
+}
+@section AdditionalResources
+{
+}
+<form id="theForm" action="@Url.Action("Edit", "Airline")" method="POST">
+    @Html.HiddenFor(a => a.AirlineInfo.Id)
+    @*<div class="station">
+        航空公司信息
+    </div>*@
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label" width="90px">
+                        <span class="point">*</span>代码：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.AirlineInfo.Code, new { @class = "text150", @onblur = "ValidLoginName(this);" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>名称：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.AirlineInfo.ShortName, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point"></span>全名：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.AirlineInfo.FullName, new { @class = "text300" })
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">
+                        <span class="point"></span>联系人：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.AirlineInfo.ContactName, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">
+                        联系手机：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.AirlineInfo.ContactPhone, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="button" value="保存" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSave").click(function () {
+            if (Utils.Trim($("#AirlineInfo_Code").val()) == "") {
+                Utils.alert("代码不能为空！");
+                $("#AirlineInfo_Code").select().focus();
+                return  ;
+            }
+
+            if (Utils.Trim($("#AirlineInfo_ShortName").val()) == "") {
+                Utils.alert("名称不能为空！");
+                $("#AirlineInfo_Code").select().focus();
+                return  ;
+            }
+            var flightcode = Utils.Trim($("#AirlineInfo_Code").val());
+            var result = "0";
+            $.ajax({
+                url: '/Airline/CheckAirlineCode?flightcode=' + encodeURIComponent(flightcode)+'&Id='+@Model.AirlineInfo.Id,
+                type: "post",
+                async: false,
+                success: function (data) {
+                    result = data;
+                }
+            })
+            if (result == "1") {
+                Utils.alert("代码已经存在!");
+                $(obj).focus().select();
+                return;
+            }
+
+            var params = decodeURIComponent($("#theForm").formSerialize());
+            $.ajax({
+                url: "/Airline/Edit",
+                type: 'post',
+                dataType: 'json',
+                data: params,
+                success: function (data) {
+                    Utils.alert(data.msg);
+                    parent.pageselectCallback(@Model.AirelinePageList.PageIndex - 1);
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index); 
+                },
+                error: function (data) {
+                    Utils.alert("请求异常");
+                }
+            });
+        });
+    });
+
+</script>
+

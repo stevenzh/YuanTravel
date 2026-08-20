@@ -1,0 +1,31 @@
+﻿@model Lvy.VModels.Booking.BookingVModel
+
+<table class="table table-sm table-bordered	">
+    <tr>
+        <td align='center' width="120px">报价类型</td>
+        <td>姓名</td>
+        <td>联系电话</td>
+        <td align='center'>座位号</td>
+        <td>价格调整</td>
+        <td align='center' width='80'><input type="checkbox" id="chkAll" group="chkAll" onclick="SelectGroup(this);" /><label for="chkAll">保证自费</label></td>
+        <td align='center' width='80'><input type="checkbox" id="chkAll2" group="chkAll2" onclick="SelectGroup(this);" /><label for="chkAll2">单房差</label></td>
+        <td align="center">应收</td>
+    </tr>
+
+    <tbody id="tbTravellers"></tbody>
+
+    <tfoot>
+        <tr>
+            <td colspan="8" align="right">
+                <span class="fr">子订单费用合计：<font id="totalOtherPrice">0 </font>元</span>
+                <span class="fr">自费：<font id="totalZifei">0 </font>人</span>
+                <span class="fr">房差：<font id="totalSingleRoom">0 </font>人</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="8" align="right"><span class="total_money fr">总金额：<font id="totalPrice">0 </font>元</span></td>
+        </tr>
+    </tfoot>
+</table>
+
+@Html.Partial("UCOrderPartial", Model)

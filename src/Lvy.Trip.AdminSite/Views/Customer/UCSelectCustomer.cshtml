@@ -1,0 +1,12 @@
+﻿@model Lvy.VModels.Crm.SelectCustomerVModel
+<div style="margin: 0 5px 5px 0px; border: 1px solid #a7c4e2; width: 400px; text-align: center;" class="xbox xboxcontent">
+    <label>
+        查询条件：
+    </label>
+    @Html.TextBoxFor(m => m.KeyWord, new { @class = "text150", style = "width:150px; height:21px; border:1px #C2C2C2 solid; line-height:20px;  padding-left:3px;" })
+    <input type="button" class="btn btn1" id="searchCustomer" style="width: 65px; height: 26px;
+        margin: 10px 10px 10px 10px;" value="搜索" onclick="searchSelectCustomer();" />
+</div>
+<div id="customerListContent" style="width: 400px; height: 400px; overflow-y: auto; z-index: 9999;">
+    @Html.Partial("UCSelectCustomerList", Model)
+</div>

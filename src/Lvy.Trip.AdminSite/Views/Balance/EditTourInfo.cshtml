@@ -1,0 +1,64 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+
+<table class="table table-sm table-borderless ">
+    <tr>
+        <td style="width: 100px;">团号：</td>
+        <td >@Html.TextBoxFor(t => t.Balance.TourNo, new { @id = "TourNo", @class= "form-control form-control-sm" })</td>
+        <td style="width: 100px;">出发日期：</td>
+        <td >
+        <input name="Balance.OutDate" id="OutDate" value="@(Model.Balance.OutDate==null?"":Model.Balance.OutDate.Value.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+        <td style="width:100px;">分销商</td>
+        <td>
+        <select id="mySelect2" name="Balance.AgentCode" class="form-control form-control-sm">
+            @if(!string.IsNullOrEmpty(Model.Balance.AgentCode))
+            {
+                <option value="@Model.Balance.AgentCode">@DictionaryTools.GetCachedCustomer(Model.Balance.AgentCode).Name</option>
+            }
+        </select>
+        </td>
+    </tr>
+    <tr>
+        <td>产品类型：</td>
+        <td>@Html.DropDownListFor(t => t.Balance.ProductType, (List<SelectListItem>)ViewBag.ProductTypes, new { @id = "ProductType",@class= "form-control form-control-sm" })</td>
+        <td>产品名称：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.ProductName, new { @id = "ProductName", @class = "form-control form-control-sm" })</td>
+        <td>产品部门</td>
+        <td>@Html.DropDownListFor(m => m.Balance.TeamId, ViewBag.Teams as List<SelectListItem>, new { @class= "form-control form-control-sm" })</td>
+    </tr>
+    <tr>
+        <td>领队/导游：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.GuideName, new { @class = "form-control form-control-sm" })</td>
+        <td>销售部门</td>
+        <td>@Html.DropDownListFor(m => m.Balance.SalesTeamId, ViewBag.Teams as List<SelectListItem>, new { @class = "form-control form-control-sm" })</td>
+        <td>销售员</td>
+        <td>@Html.TextBoxFor(t => t.Balance.Saler, new { @class = "form-control form-control-sm" })</td>
+    </tr>
+    <tr>
+        <td>游客姓名：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.TouristName, new { @class = "form-control form-control-sm" })</td>
+        <td>游客电话：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.TouristPhone, new { @class = "form-control form-control-sm" })</td>
+        <td>天数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.TravelDays, new { @class = "form-control form-control-sm" })</td>
+    </tr>
+    <tr>
+        <td>游客人数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.Num, new { @id = "Pax", @class = "form-control form-control-sm" })</td>
+        <td>男性人数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.MalePax, new { @class = "form-control form-control-sm" })</td>
+        <td>女性人数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.FemalePax, new { @class = "form-control form-control-sm" })</td>
+    </tr>
+    <tr>
+        <td>儿童人数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.ChildPax, new { @class = "form-control form-control-sm" })</td>
+        <td>成人人数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.AuditPax, new { @class = "form-control form-control-sm" })</td>
+        <td>老人人数：</td>
+        <td>@Html.TextBoxFor(t => t.Balance.OldPax, new { @class = "form-control form-control-sm" })</td>
+    </tr>
+    <tr>
+        <td>备注</td>
+        <td colspan="5">@Html.TextAreaFor(t => t.Balance.Remarks, new { @rows = "3", @class = "form-control form-control-sm" }) </td>
+    </tr>
+</table>

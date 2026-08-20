@@ -1,0 +1,87 @@
+﻿@model Lvy.Visa.Models.VisaCategoryModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+<div align="center">
+    <table align="center">
+        <tr>
+            <td>名称：</td>
+            <td>
+                <input id="CategoryName" type="text" />
+                <input type="hidden" id="hidInformationCode" value='@Model.InformationCode' />
+                <input type="hidden" id="hidIsFirst" value='@Model.IsFirst' />
+            </td>
+            <td>
+                <input name="" type="button" value="添加" class="btn_1" onclick="funVisaCategoryAdd()" />
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+    function funVisaCategoryAdd() {
+        var cname = $("#CategoryName").val();
+        if (!ValidationData('none', $.trim(cname))) {
+            alert("请输入类别名称！");
+            $("#CategoryName").focus();
+            return false;
+        }
+        var procode = $("#hidInformationCode").val();
+        var isfirst = $("#hidIsFirst").val();
+        if (isfirst == "1") {
+            //添加分类
+            var urlAdd = "/VisaData/SaveVisaCategory";
+            var paramAdd = { "InformationCode": procode, "CategoryName": cname };
+            $.post(urlAdd, paramAdd, function (dataCategroy) {
+                if (dataCategroy != "" && dataCategroy != null) {
+                    alert("添加成功！");
+                    var html = "";
+                    // 重新获取一下材料分类列表list
+                    var paramlist = {
+                        "informationCode": $("#hidInformationCode").val()
+                    };
+                    var m = 0;
+                    $.ajax({
+                        type: "POST",
+                        url: "/VisaData/GetCategoryList/",
+                        data: paramlist,
+                        async: false,
+                        success: function (datalist) {
+                            if (datalist != "") {
+                                for (var i = 0; i < datalist.length; i++) {
+                                    html = html
+                                        + "<a id=\"li" + (i + 1) + "\" onclick=\"funDataPartial('" + (i + 1) + "','" + datalist[i].CategoryCode + "');\" href='####' class='btn btn-default'>" + datalist[i].CategoryName + "</a>";
+                                    // + "<a class='close current' href='#'><img onclick=\"funDelCategory(this.parentElement,'" + datalist[i].CategoryId + "','" + datalist[i].CategoryCode + "','" + datalist[i].InformationCode + "');\" src='../../Images/icon_close.gif'></a>"
+
+                                    m = m + 1;
+                                }
+                                html = html + "<a href=\"####\" class=\"btn btn-danger btn-sm\" onclick=\"funAddCategory('@Model.InformationCode');\">添加分类</a>";
+                                html = html + "<input type=\"hidden\" id=\"hidDataCodeStr\">";
+                            }
+                        },
+                        error: function () {
+                            alert("error");
+                        }
+                    });
+
+                    parent.$("#ulCatagoryList").html(html);
+                    //触发父页面的事件
+                    parent.funDataPartial(m, dataCategroy);
+
+                    //获取窗口索引
+                    var index = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(index);
+                }
+                else {
+                    alert("添加失败！");
+                }
+            });
+
+        }
+    }
+
+</script>
+

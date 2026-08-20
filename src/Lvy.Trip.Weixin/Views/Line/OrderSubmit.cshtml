@@ -1,0 +1,83 @@
+﻿@model TopWeb.Model.ProductModel
+@{
+    Layout = null;
+}
+@using TopWeb.DAL.Model
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>@ViewBag.Title - 商品详情</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <link href="@CDNServerUrl/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="/Scripts/html5.js"></script>
+      <script src="/Scripts/respond.min.js"></script>
+    <![endif]-->
+    <link href="~/Content/wan-spinner/wan-spinner.css" rel="stylesheet" />
+    <script src="~/Content/wan-spinner/wan-spinner.js"></script>
+</head>
+<body class="skin-blue">
+    @using (Html.BeginForm("OrderSubmit", "Line", FormMethod.Post))
+    {
+        @Html.Hidden("Price", Model.Price, new { @id = "Price" })
+        <div class="wrapper">
+            <div class="content-wrapper">
+                <section class="content-header">
+                    <h1>
+                        订单详情
+                    </h1>
+                    <ol class="breadcrumb">
+                        <li><a href="/Product/Index"><i class="fa fa-dashboard"></i> 产品列表</a></li>
+                        <li class="active">订单详情</li>
+                    </ol>
+                </section>
+
+                <section class="content">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="box box-primary">
+                                <div class="box-body box-profile">
+                                    <strong>下单日期</strong>
+                                    <p>@Html.Created</p>
+                                    <hr />
+                                    <strong>订单编号</strong>
+                                    <p>@Model.Tid</p>
+                                    <hr />
+                                    <strong>商品名称</strong>
+                                    <p class="text-muted text-center">@Model.Title</p>
+                                    <hr />
+                                    <strong>商品价格</strong>
+                                    <p>@Model.Price</p>
+                                    <hr />
+                                    <strong>购买数量</strong>
+                                    <p>@Model.Num</p>
+                                    <hr />
+                                    <strong>订单金额</strong>
+                                    <p>@Model.Payment</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="main-footer ">
+                    <img src="@Html.Hidden("Title", Model.ProductTitle)" wi width="300" />
+                    <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>
+                </footer>
+            </div>
+        </div>
+
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+        });
+    </script>
+</body>
+</html>

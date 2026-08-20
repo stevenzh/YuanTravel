@@ -1,0 +1,112 @@
+﻿@model Lvy.VModels.Product.ProductVModel
+<style>
+    .listtbl tbody td {
+        text-align: center;
+    }
+</style>
+<div class="btnlist">
+    <div class="fr">
+        <input type="button" id="btnAdd" class="btn btn1" value="新 增" />
+    </div>
+</div>
+@if (Model.ProductPageList.Items.Count > 0)
+{
+    <table class="listtbl" style="width:100%;">
+        <thead>
+            <tr>
+                <td>名称</td>
+                <td>类型</td>
+                <td>部门</td>
+                <td>供应商</td>
+                <td>单价</td>
+                <td>成本</td>
+                <td align="center" style="width: 70px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.ProductPageList.Items)
+            {
+            <tr>
+                <td>@item.ProductName</td>
+                <td>@item.ProductTypeName</td>
+                <td>@item.TeamName</td>
+                <td>@item.SupplierName</td>
+                <td style="text-align:right;">@item.UnitPrice</td>
+                <td style="text-align:right;">@item.Cost</td>
+                <td>
+                    <a href="javascript:void(0)" class="edit" name="editProduct" title="编辑" bindId="@item.ProductID">编辑</a>
+                    <a href="javascript:void(0)" class="edit" name="deleteProduct" title="删除" bindId="@item.ProductID">删除</a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    @Html.HiddenFor(a => a.ProductPageList.PageIndex)
+    <div id="Pagination" class="digg"></div>
+}
+else
+{
+    <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+        <br />
+        对不起，没有查找到数据！请重新输入查询条件 ！
+    </div>
+}
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+
+        $("#Pagination").pagination(
+            Number('@Model.ProductPageList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.ProductPageList.PageSize'),
+                current_page: @Model.ProductPageList.PageIndex-1
+            });
+
+        $("#btnAdd").click(function () {
+            layer.open({ type: 2, title: '添加子产品', maxmin: true, shadeClose: false, area: ['600px', '350px'], content: '/SubProduct/Edit?id=0' });
+        });
+
+        $("a[name='editProduct']").each(function () {
+            $(this).click(function () {
+                layer.open({ type: 2, title: '编辑子产品', maxmin: true, shadeClose: false, area: ['600px', '350px'], content: "/SubProduct/Edit/" + $(this).attr("bindId")  });
+            });
+        });
+
+        $("a[name='deleteProduct']").each(function () {
+            $(this).click(function () {
+                if (!confirm("确定删除？")) {
+                    return;
+                }
+                var load_iii = Utils.layerLoad();
+                var url = "/SubProduct/Delete";
+                $.get(url, { Id: $(this).attr("bindId") }, function (data) {
+                    if (data.length > 0) {
+                        $("#divSearch").html(data);
+                    }
+                    Utils.layerClose(load_iii);
+                });
+            });
+        });
+
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#ProductPageList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+</script>

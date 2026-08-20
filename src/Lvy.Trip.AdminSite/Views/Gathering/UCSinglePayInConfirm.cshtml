@@ -1,0 +1,30 @@
+﻿@model Lvy.Models.OrderDB.TpOrderPayInModel
+@{
+    Layout = null;
+}
+<form id="singleShoKuan">
+    <div class="xboxcontent clear" style="padding: 0 5px;">
+        <table class="edittbl" style="border-bottom: 0px; width:500px">
+            <tr>
+                <td style="text-align: right; width: 90px;">缴款单号：</td>
+                <td>@Model.Id</td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">订单总金额：</td>
+                <td>@Model.TolYsPrice</td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">已收款：</td>
+                <td>@Model.TolPaid</td>
+            </tr>
+            @*<tr>
+                    <td style="text-align: right;">应收账款：</td>
+                    <td></td>
+                </tr>*@
+            <tr>
+                <td style="text-align: right;">本次收款：</td>
+                <td>@Model.Amount</td>
+            </tr>
+        </table>
+    </div>
+</form>

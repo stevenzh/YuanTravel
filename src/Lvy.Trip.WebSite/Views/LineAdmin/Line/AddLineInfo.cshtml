@@ -1,0 +1,103 @@
+﻿@using System.Globalization
+@using Lvy.Models
+@using Lvy.VModels.Product
+@model Lvy.VModels.Product.AddLineVModel
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/jquery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.min.js"></script>
+
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="@CDNServerUrl/icheck-bootstrap/icheck-bootstrap.min.css">
+    <link href="@CDNServerUrl/inputpicker/jquery.inputpicker.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/inputpicker/jquery.inputpicker.js"></script>
+
+    <link href="@CDNServerUrl/summernote/summernote-bs4.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/summernote/summernote-bs4.min.js"></script>
+    <script src="@CDNServerUrl/summernote/lang/summernote-zh-CN.min.js"></script>
+    <script src="@CDNServerUrl/summernote-ext-elfinder.js"></script>
+
+    <link href="@CDNServerUrl/elfinder/css/elfinder.full.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/elfinder/js/elfinder.min.js"></script>
+    <script src="@CDNServerUrl/elfinder/js/i18n/elfinder.zh_CN.js"></script>
+
+    <script src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/main.js"></script>
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <style>
+        .select2-container--default .select2-selection--multiple { border-radius: 0; }
+        .select2-container--default .select2-selection--single { border-radius: 0; }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice { border-radius: 0; }
+    </style>
+}
+
+<section class="content">
+    <div class="card card-info card-tabs">
+        <div class="card-header p-0 pt-1">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCLineInfo")" aria-expanded="true"> 基本信息</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCLineRoute")" aria-expanded="false">行程信息</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCAddFile")" aria-expanded="false">附件和图片</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCLineYuDingXuZhi")" aria-expanded="false">预定须知</a>
+                </li>
+                @*<li class="nav-item" style="display:none;">
+                        <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCLineItem")" aria-expanded="false">子产品列表</a>
+                    </li>*@
+                @if ((Model.TpLine.LineScope == 1 || Model.TpLine.LineScope == 2) && Model.TpLine.TrafficType == 1)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("SelectBusPoint")" aria-expanded="false">上车点</a>
+                    </li>
+                }
+                @if (Model.TpLine.LineScope == 3 || Model.TpLine.LineScope == 4)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCLineVisa")" aria-expanded="false">签证列表</a>
+                    </li>
+                }
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("UCLineDesc")" aria-expanded="false">单页信息</a>
+                </li>
+                <li class="nav-item" style="display:none;">
+                    <a class="nav-link" data-toggle="pill" name="tabTitle" href="#tab-1" url="@Url.Action("ShowCostRules")" aria-expanded="false">成本规则</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane fade show active">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var loadUrl = "@Url.Action("UCLineInfo")" + "?id=@Model.TpLine.LineId";
+        $("#tab-1").load(loadUrl);
+
+        $("a[name='tabTitle']").click(function () {
+            var id = $("[name='TpLine.LineId']").val();
+            var getTimestamp = new Date().getTime();
+            var url = $(this).attr("url") + "?id=" + id + "&timestamp=" + getTimestamp;
+            $("#tab-1 .ibox-content").remove();
+            $("#tab-1").load(url);
+        });
+    });
+
+</script>
+
+

@@ -1,0 +1,15 @@
+﻿@model  Lvy.VModels.Crm.CustomerFileVModel
+@{
+    ViewBag.Title = "查询";
+}
+@section AdditionalResources { }
+@Html.Partial("UCTabTitle", Model.CustomerFile.CustomerCode)
+<form id="theForm" action="@Url.Action("Uploading",new { code=Model.CustomerFile.CustomerCode})" method="POST">
+
+    <div id="divUploadingUCSelect">
+        @Html.Partial("UploadingUCSelect", Model)
+    </div>
+    <div id="divUploadingListt">
+        @Html.Partial("UploadingList", Model)
+    </div>
+</form>

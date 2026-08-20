@@ -1,0 +1,67 @@
+﻿@model Lvy.VModels.Order.GoNoticePrintVModel
+@{
+    Layout = null;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        #divPrint { width: 650px; margin: 0 auto; font-size: 14px; }
+        .font2 { font-size: 16px; font-weight: bold; color: #FF6602; }
+        .font3 { font-weight: bold; }
+        .font4 { font-size: 14px; color: #FF6602; }
+        .day_introduction { line-height: 23px; }
+        .no_padding td { padding: 0px; }
+        .catering { border-top: 1px dashed #CCCCCC; color: #000; margin-top: 10px; padding-top: 10px; }
+    </style>
+    <title>出团通知</title>
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+</head>
+
+<body>
+    <form>
+        <div id="divPrint">
+            @Html.Partial("print/UCTourNoticePrint", Model)
+        </div>
+        <table class="sotable" style="width:100%;">
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+                <td align="center">
+                    <input class="btn btn1" id="btnPrint" type="button" value="打印" />
+                    <input class="btn btn1" id="btnClose" type="button" value="关闭" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            printView();
+        };
+
+        $(function () {
+            //打印
+            $("#btnPrint").click(function () {
+                printView();
+            });
+            //关闭
+            $("#btnClose").click(function () {
+                window.close();
+            });
+        });
+
+        //打印
+        function printView() {
+            document.title = "";
+            $("input[type=button]").hide();
+            window.print();
+            $("input[type=button]").show();
+            document.title = "出团通知";
+        }
+
+    </script>
+</body>
+</html>

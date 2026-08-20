@@ -1,0 +1,248 @@
+﻿@model Lvy.Models.CrmDB.CrmCustomerModel
+@{
+    ViewBag.Title = "客户详情";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section HeaderContent
+{
+    <!-- Bootstrap Switch -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" />
+    <script src="@CDNServerUrl/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4 ">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">@ViewBag.Title</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <tr>
+                                <td>客户名称：</td>
+                                <td>@Model.Name</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>客户简称：</td>
+                                <td>@Model.ShortName</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>快捷码：</td>
+                                <td>@Model.FastCode</td>
+                            </tr>
+                            <tr>
+                                <td>渠道来源：</td>
+                                <td>@DictionaryTools.GetEnumValue(Enums.CustomerChannelEnum, Model.ChannelType.ToString(), false)</td>
+                            </tr>
+                            <tr>
+                                <td>父公司：</td>
+                                <td>@Model.ParentName</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>负责人：</td>
+                                <td>@Model.Head</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>联系手机：</td>
+                                <td>@Model.Mobile</td>
+                            </tr>
+                            <tr>
+                                <td>公司电话：</td>
+                                <td>@Model.Phone</td>
+                            </tr>
+                            <tr>
+                                <td>地址：</td>
+                                <td>
+                                    @DictionaryTools.GetDestName(Model.Province)
+                                    @DictionaryTools.GetDestName(Model.City)
+                                    @DictionaryTools.GetDestName(Model.County)
+                                    <br />
+                                    @Model.Address
+                                </td>
+                            </tr>
+                            <tr>
+                                <td> 税号：</td>
+                                <td>@Model.TaxNumber</td>
+                            </tr>
+                            <tr>
+                                <td>信用额度：</td>
+                                <td>@Model.CreditLine (0为没有限制)</td>
+                            </tr>
+                            <tr>
+                                <td>结算方式：</td>
+                                <td>@DictionaryTools.GetEnumValue(Enums.PaymentTypeEnum, Model.PaymentType.ToString(), false)</td>
+                            </tr>
+                            <tr>
+                                <td>是否分销商：</td>
+                                <td>@Html.CheckBoxFor(m => m.IsDistributors, new { @class = "js-switch", @disabled = "disabled" })</td>
+                            </tr>
+                            <tr>
+                                <td>是否下设门市或门店：</td>
+                                <td>@Html.CheckBoxFor(m => m.HasChild, new { @class = "js-switch", @disabled = "disabled" })</td>
+                            </tr>
+                            <tr>
+                                <td>是否供应商：</td>
+                                <td>@Html.CheckBoxFor(m => m.IsSupplier, new { @class = "js-switch", @disabled = "disabled" })</td>
+                            </tr>
+                            <tr>
+                                <td>是否组团社：</td>
+                                <td>@Html.CheckBoxFor(m => m.IsGroupTour, new { @class = "js-switch", @disabled = "disabled" })</td>
+                            </tr>
+                            <tr>
+                                <td>账单是否显示折让：</td>
+                                <td>@Html.CheckBoxFor(m => m.RebateInBill, new { @class = "js-switch", @disabled = "disabled" })</td>
+                            </tr>
+                            <tr>
+                                <td>是否自家门店：</td>
+                                <td>@Html.CheckBoxFor(m => m.IsBranch, new { @class = "js-switch", @disabled = "disabled" })</td>
+                            </tr>
+                            <tr>
+                                <td>销售组：</td>
+                                <td>@DictionaryTools.GetCachedTeam(Model.TeamID).TeamName</td>
+                            </tr>
+                            <tr>
+                                <td>对应销售：</td>
+                                <td>@DictionaryTools.GetCachedAccount(Model.SalerCode).Name</td>
+                            </tr>
+                            <tr>
+                                <td>备注：</td>
+                                <td>@Model.Remarks</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group">
+                            @if (Model.CustomerState != 1)
+                            {
+                                if ((GlobalContext.Current.LoginUserRoles.Any(role => role.Name == "销售组长")
+                                    && Model.SalerCode != GlobalContext.Current.UserInfo.Code)
+                                    || GlobalContext.Current.LoginUserRoles.Any(role => role.Name == "销售总监"))
+                                {
+                                    <input class="btn btn-success" id="btnAudit" type="button" value="审核通过" />
+                                    <input class="btn btn-warning" type="button" data-toggle="modal" data-target="#modal-no" value="审核不通过" />
+                                }
+                            }
+                            <input class="btn btn-primary" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 ">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">联系人列表</h3>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover table-sm text-nowrap">
+                            <thead>
+                                <tr>
+                                    <td>姓名</td>
+                                    <td>性别</td>
+                                    <td>手机</td>
+                                    <td>E-Mail</td>
+                                    <td>销售组</td>
+                                    <td>销售</td>
+                                    <td>状态</td>
+                                </tr>
+                            </thead>
+                            @foreach (var item in Model.ContactList)
+                            {
+                                <tr>
+                                    <td>@item.Name</td>
+                                    <td>@DictionaryTools.GetEnumValue(Enums.SexEnum, item.Sex.ToString())</td>
+                                    <td>@item.Mobile</td>
+                                    <td>@item.Email</td>
+                                    <td>@DictionaryTools.GetCachedTeam(item.TeamID).TeamName</td>
+                                    <td>@(item.SalerCode.IsNullOrEmpty()?"": DictionaryTools.GetCachedAccount(item.SalerCode).Name)</td>
+                                    <td>@DictionaryTools.GetEnumValue(Enums.CustomerStateEnum, item.SalerState.ToString())</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-no" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">审核不通过</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <select id="remark">
+                            <option value="信息不全" selected="selected">信息不全</option>
+                            <option value="客户重复">客户重复</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary pull-left" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" id="btnAudit2">提交</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+
+    $(function () {
+        // 单选框初始化
+        $(".js-switch").each(function () {
+            $(this).bootstrapSwitch({ 'state': $(this).prop('checked'), onText: "是", offText: "否" });
+        });
+
+        $("#btnAudit").click(function () {
+            if (!confirm("确定此客户通过审核？")) {
+                return;
+            }
+
+            var url = "@Url.Action("AuditCust")";
+            $.get(url, { code: '@Model.Code', state: 1 }, function (data) {
+                if (data.Code > 0) {
+                    location.href = '@Url.Action("CustomerIndex")';
+                } else {
+                    Utils.alert("审核失败！");
+                }
+            });
+        });
+
+        $("#btnAudit2").click(function () {
+            var url = "@Url.Action("AuditCust")";
+            $.get(url, { code:'@Model.Code', state:2, remark:$("#remark").val()}, function (data) {
+                if (data.Code > 0) {
+                    location.href = '@Url.Action("CustomerIndex")';
+                } else {
+                    Utils.alert("客户审核设置失败！");
+                }
+            });
+
+            $('#modal-no').modal('hide')
+        })
+    });
+</script>

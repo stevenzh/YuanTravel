@@ -1,0 +1,113 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+@{
+    ViewBag.Title = "查询账号";
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+    @Html.HiddenFor(m => m.FirstTime)
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                联系人管理
+            </div>
+            <table class="sotable">
+                <tr>
+                    @*<td class="label">登录名：</td>
+                        <td>@Html.TextBoxFor(a => a.Account.LoginName, new { @class = "text150" })</td>*@
+                    <td class="label">客户名称：</td>
+                    <td>
+                        @if (GlobalContext.Current.OwnerCode == GlobalContext.Current.UserInfo.CustomerCode)
+                        {
+                            // 如果是平台用户，可以查询客户
+                            @Html.TextBoxFor(a => a.Account.CustomerName, new { @class = "text150" })
+                        }
+                        else
+                        {
+                            // 否则只能查自己的账户
+                            @GlobalContext.Current.UserInfo.CustomerName;
+                        }
+                    </td>
+                    <td class="label">联系人姓名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+                    <td class="label">联系电话：</td>
+                    <td>@Html.TextBoxFor(a => a.ContactNumber, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">销售组：</td>
+                    <td>
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "select150" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "select150", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.CrmTeamId)
+                        }
+                    </td>
+                    <td width="100" class="label">对应销售：</td>
+                    <td>
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.SalesCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.SalesCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.SalesCode)
+                        }
+                    </td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="6">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="btnClear" type="button" value="清空" />
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+    <div class="xbox clear">
+        <div id="divSearch">
+            @Html.Partial("UCSearch", Model)
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSearch").click(function () {
+            $("#Accounts_PageIndex").val("1");
+            $("#theForm").submit();
+        });
+
+        $("#CrmTeamId").change(function(){
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#SalesCode").empty();
+            if (teamId == "") {
+                $("#SalesCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#SalesCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#SalesCode").append("<option value=\""+item.Code+"\">"+item.Name+"</option>");
+                    });
+                }
+            });
+        });
+    })
+
+    //重置
+    $("#btnClear").click(function () {
+        $(".sotable td input[type=text]").val("");
+        $(".sotable td input[type=hidden]").val("");
+    });
+</script>

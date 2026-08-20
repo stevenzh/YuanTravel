@@ -1,0 +1,46 @@
+﻿@model Lvy.VModels.Base.FileResVModel
+@{
+    ViewBag.Title = "查询文件";
+}
+@section AdditionalResources { }
+
+<form id="theForm" action="@Url.Action("Search")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent">
+            <div class="sotable_tit">
+                @ViewBag.Title
+            </div>
+            <table width="100%" class="sotable">
+                <tr>
+                    <td class="label">
+                        文件名：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.QueryModel.FileName, new { @Class = "text150" })
+                    </td>
+                    <td class="label">
+                        文件类型：
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(a => a.QueryModel.ResType, ViewBag.FileResTypeBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                </tr>
+            </table>
+            <input class="btn btn1" id="btnSearch" type="submit" value="搜索" />
+            <input class="btn btn1" id="btnClear" type="button" value="取消" />
+        </div>
+    </div>
+    <div id="divFileRes">
+        @Html.Partial("UCSearch", Model)
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnReset").click(function () {
+            $(":input").val("");
+
+        });
+    })
+
+</script>

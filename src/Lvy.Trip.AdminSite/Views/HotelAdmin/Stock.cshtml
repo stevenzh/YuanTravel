@@ -1,0 +1,91 @@
+﻿@model Lvy.Models.HotelDB.HotelModel
+@{
+    ViewBag.Title = "酒店房型";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources { }
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/HotelAdmin/Search">酒店管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="callout callout-info">
+                <h5>酒店名称：@Model.HotelName （@Model.HotelCode） </h5>
+                <p>当前状态： @(Model.HotelState==3?"上线":"下线")</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">房型列表</h3>
+            <div class="card-tools">
+                <div class="input-group input-group-sm" style="width: 110px;">
+                    @*<input type="text" name="table_search" class="form-control float-right" placeholder="Search">*@
+                    <div class="input-group-append">
+                        <button id="btnAdd" type="button" class="btn btn-success">
+                            <i class="fas fa-plus"></i>添加房型
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" id="divSearch">
+            @Html.Partial("UCStock")
+        </div>
+    </div>
+</section>
+@section PageScripts
+{
+    <script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#btnAdd").click(function () {
+            var url = '/HotelAdmin/RoomCreate/@Model.HotelCode';
+            layer.open({ type: 2, title: '添加房型', maxmin: true, shadeClose: false, area: ['800px', '560px'], content: url });
+        });
+    });
+
+    function RoomEdit(roomid) {
+        var url = '/HotelAdmin/RoomEdit/'+ roomid;
+        layer.open({ type: 2, title: '编辑房型', maxmin: true, shadeClose: false, area: ['800px', '560px'], content: url });
+    }
+    function RoomStock(roomid) {
+        var url = '/HotelAdmin/RoomStock/' + roomid + "?hotelCode=@Model.HotelCode";
+        layer.open({ type: 2, title: '编辑房型', maxmin: true, shadeClose: false, area: ['640px', '580px'], content: url });
+    }
+
+    //回调方法
+    function reloadRooms() {
+        var load_iii = Utils.layerLoad();
+        var params = { id:"@Model.HotelCode" };
+        $.post('@Url.Action("Stock")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+    </script>
+
+}

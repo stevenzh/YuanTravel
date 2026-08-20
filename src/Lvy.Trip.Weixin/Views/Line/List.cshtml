@@ -1,0 +1,192 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+@{
+    Layout = "~/Views/Shared/_LineLayout.cshtml";
+    string OutCity = (String)HttpContext.Current.Session["OutCity"];
+    var JSApi = ViewBag.JsApi as Senparc.Weixin.MP.Helpers.JsSdkUiPackage;
+    Member cuser = (Member)HttpContext.Current.Session["WeixinUser"]; //当前用户
+    string employeekey = (cuser != null && !string.IsNullOrEmpty(cuser.EmployeeID)) ? cuser.EmployeeID : "";
+    string binding = (cuser != null) ? cuser.Approved.ToString() : "0";
+    string picroot = AppSetting.Get("UploadFileRoot");
+}
+@using Arch.Common;
+@using Lvy.Models.WeixinDB;
+@using Lvy.Models.ProductDB;
+
+
+<!-- product list -->
+    <div class="product-list segments-page">
+
+        <div class="banner">
+            <div class="ui grid">
+                <div class="sixteen wide column banner-pb">
+                    <img src="@Model.NavCondition.ImgUrl" alt="">
+                </div>
+            </div>
+        </div>
+
+        <div class="ui container">
+            <div class="sort">
+                <div class="ui grid">
+                    <div class="eight wide column pr">
+                        <div class="content-select">
+                            <select class="ui fluid dropdown">
+                                <option value="">Newest Items</option>
+                                <option value="">Best Seller</option>
+                                <option value="">Popular</option>
+                                <option value="">Price: High to Low</option>
+                                <option value="">Price: Low to High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="eight wide column pl">
+                        <div class="content-select">
+                            <select class="ui fluid dropdown">
+                                <option value="">Added: Any Date</option>
+                                <option value="">in the last Year</option>
+                                <option value="">in the last Month</option>
+                                <option value="">in the last Week</option>
+                                <option value="">in the last Day</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @*<div class="content">
+                <div class="product-img"><img src="images/product5.png" alt=""></div>
+                <div class="product-text">
+                    <a href="">
+                        <p>Jacket Modern for Men & Women</p>
+                    </a>
+                    <h5>$99</h5>
+                </div>
+                <div class="clear"></div>
+            </div>*@
+
+            @foreach (TpLineModel item in Model.LineList)
+            {
+                <div class="content">
+                    <div class="product-img"><img src="@(picroot + item.LogoPath)" alt=""></div>
+                    <div class="product-text">
+                        <a href="/line/details/@item.LineId?tourid=0" title="@item.LineName">@item.LineName</a>
+                        <table class="ui small basic unstackable table">
+                            <thead>
+                                <tr>
+                                    <th>开班日期</th>
+                                    <th>余位</th>
+                                    <th>售卖价</th>
+                                    @if (binding.Equals("1"))
+                                    {
+                                        <th>同业价</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < item.Tours.Count; i++)
+                                {
+                                    var plan = item.Tours[i];
+                                    <tr class="center aligned @(i<8 ? "" : string.Format("{0} hidden", item.Id ) )">
+                                        <td>
+                                            @plan.OutDate.ToString("MM-dd")
+                                        </td>
+                                        <td>
+                                            @if (!employeekey.IsNullOrEmpty())
+                                            {@plan.UseQuota;
+                                        }
+                                        else if (plan.UseQuota > 9)
+                                        { @(">9 " + ((plan.UseQuota > 15) ? "充足" : ""));
+                                        }
+                                        else
+                                        { @plan.UseQuota;
+                                    }
+                                        </td>
+                                        <td>@plan.Price</td>
+                                        @if (binding.Equals("1"))
+                                        {
+                                            <td>@plan.Price</td>
+                                        }
+                                    </tr>
+                                }
+                                @if (item.Tours.Count > 8)
+                                {
+                                    <tr class="center aligned @string.Format("{0} linkmore", item.Id)">
+                                        <td colspan="3">
+                                            <a href="###" onclick="showplan('@item.Id');" title="@item.LineName">更多开班请点击</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="clear"></div>
+                    @*@if (!String.IsNullOrEmpty(item.FILE_PATH))
+                    {
+                        <div class="extra">
+                            <div class="well well-sm">
+                                <a href="http://manage.sh-cct.com/download/line/@item.FILE_PATH" onclick="downdoc();"><i class="file word outline icon"></i>下载行程单</a>
+                            </div>
+                        </div>
+                    }*@
+                </div>
+
+            }
+            @if (Model.LineList.Count == 0)
+            {
+                <div class="ui message">
+                    <p>暂时没有 @Model.NavCondition.Title2 旅游线路，到<a href="/line/list?outcity=@Model.NavCondition.OutCity&itemId=@Model.NavCondition.ParentID">其他线路</a>看看。</p>
+                </div>
+            }
+
+            <div class="pagination">
+                <ul>
+                    <li class="active">1</li>
+                    <li><a href="">2</a></li>
+                    <li><a href="">3</a></li>
+                    <li><a href="">4</a></li>
+                    <li><a href="">5</a></li>
+                </ul>
+            </div>
+        </div>
+    </div><!-- end product list -->
+
+@section Scripts {
+    @if (JSApi != null)
+    {
+        <script>
+    wx.config({
+        debug: false,
+        appId: '@JSApi.AppId',
+        timestamp: @JSApi.Timestamp ,
+        nonceStr: '@JSApi.NonceStr',
+        signature: '@JSApi.Signature',
+        jsApiList: [
+        'checkJsApi',
+        'onMenuShareTimeline',
+        'onMenuShareAppMessage',
+        'onMenuShareQQ',
+        'onMenuShareWeibo'
+        ]
+    });
+    wx.ready(function(){
+
+        var shareData = {
+            title: '@Model.NavCondition.Title2 旅游线路',
+            desc: '@Model.NavCondition.Title2 旅游线路',
+            link: 'http://yuanwx.sh-cct.cn/line/list?outcity=@Model.NavCondition.OutCity&itemid=@Model.NavCondition.ItemID&region=@Model.NavCondition.Region',
+            imgUrl: '@("http://yuanwx.sh-cct.cn" + Model.NavCondition.ImgUrl)'
+        };
+        wx.onMenuShareAppMessage(shareData);
+        wx.onMenuShareTimeline(shareData);
+    });
+    function downdoc() {
+        var flag = /MicroMessenger/i.test(navigator.userAgent);
+        if (flag == true)
+            Utils.alert("从浏览器打来页面，可以下载行程单");
+    }
+    function showplan(lineno) {
+        $("tr."+lineno).show();
+        $("tr."+lineno + ".linkmore").hide();
+    }
+        </script>
+    }
+}

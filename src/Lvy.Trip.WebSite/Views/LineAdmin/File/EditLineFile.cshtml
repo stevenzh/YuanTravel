@@ -1,0 +1,86 @@
+﻿@model Lvy.Models.ProductDB.TpLineFileModel
+@using Lvy.Models
+<style>
+    .listtbl tr td { text-align: center; }
+    .label { width: 100px }
+</style>
+
+<form id="theForm" action="" method="post" enctype="multipart/form-data">
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.LineId)
+    @Html.HiddenFor(m => m.CreatedBy)
+    @Html.HiddenFor(m => m.CreatedTime)
+    @Html.HiddenFor(m => m.FilePath)
+    @Html.HiddenFor(m => m.MediaType)
+    @Html.HiddenFor(m => m.IsDel)
+    @Html.HiddenFor(m => m.PhotoId)
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:95%">
+                <tr>
+                    <td class="label">文件名称：</td>
+                    <td>@Html.TextBoxFor(a => a.FileName, new { @class = "text300" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>类型：</td>
+                    <td>
+                        @Html.DropDownListFor(m => m.SourceType, (ViewData["FileBusiList"] as List<KeyValueBean>).ToSelectListFor(), new { @class = "text220" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">文件说明：</td>
+                    <td>@Html.TextBoxFor(a => a.Note, new { @class = "text220" }) </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align: center;">
+            <input type="button" class="btn btn1" id="btnSaveLineVisa" value="保  存" />
+            <input type="button" class="btn btn1" id="btnCancel" value="取 消" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSaveLineVisa").click(function () {
+
+            if ($("#qzTypeSel").val() == "0") {
+                Utils.alert("请选择签证类型！");
+                return;
+            }
+            if ($("#ProductCode").val() == "") {
+                Utils.alert("请选择签证产品！");
+                return;
+            }
+            $("#CountryName").val($("#Country").find("option:selected").text());
+            $("#ProductName").val($("#ProductCode").find("option:selected").text());
+
+            //保存数据的操作.
+            $.ajax({
+                url: '@Url.Action("SaveLineFile")',
+                data: $("#theForm").serialize(),
+                type: 'post',
+                success: function (d) {
+                    if (d.Code == 1) {
+                        Utils.alert("保存成功！");
+                        parent.ReloadUcLineVisa();
+                        // 弹出框关闭
+                        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(index); 
+                    } else {
+                        Utils.alert("保存失败！");
+                    }
+                }
+            });
+        });
+
+        $("#btnCancel").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index); 
+        });
+
+    })
+
+</script>

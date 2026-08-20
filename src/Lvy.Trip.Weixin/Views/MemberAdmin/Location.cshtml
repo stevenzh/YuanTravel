@@ -1,0 +1,32 @@
+﻿@model TopWeb.QModel.MemberQModel
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<table class="table">
+    <tr>
+        <th></th>
+        <th>精度</th>
+        <th>坐标</th>
+        <th>时间</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Locations)
+    {
+        <tr>
+            <td>
+            </td>
+            <td>
+                @item.Precision
+            </td>
+            <td>
+                @item.Longitude
+            </td>
+            <td>
+                @item.Latitude ,@item.CreatedDate
+            </td>
+        </tr>
+    }
+
+</table>
+

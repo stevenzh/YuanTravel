@@ -1,0 +1,98 @@
+﻿@model Lvy.VModels.Op.EditTouristsVModel
+@using Lvy.Models
+@using Arch.Common
+@{
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+
+<div class="sotable_tit">
+    <table>
+        <tr>
+            <td><b>附件上传：</b></td>
+            <td>
+                @Html.DropDownList("FileSource", (ViewBag.FileBusiList as List<KeyValueBean>).ToSelectListFor(), new { @id = "FileSource", @style = "float:left;" })
+            </td>
+            <td><b>描述：</b><input type="text" name="Remark" id="Remark" /></td>
+            <td>
+                <input type="file" name="TourFileName" />
+                <input type="button" value="上传" class="btn btn1" id="btnUpload" />
+            </td>
+        </tr>
+    </table>
+</div>
+<table id="tbTourFile" class="edittbl" style="width:60%;">
+    <thead>
+        <tr style="text-align: center;">
+            <td style="width:150px;">上传时间</td>
+            <td>文件名称</td>
+            <td>版本</td>
+            <td style="width:200px;">操作</td>
+        </tr>
+        @Html.HiddenFor(m => m.Tour.Id)
+        @foreach (var item in Model.TpTourFileList)
+        {
+            <tr style="text-align: center;">
+                <td>@item.CreatedTime.ToString()</td>
+                @if (item.MediaType == "image")
+                {
+                    <td>
+                        <a class="go" href="@(picroot + item.FilePath)" title="@item.FileName" rel="gallery">
+                            <img style="width:60px;" src="@(picroot + item.FilePath)">
+                        </a>
+                    </td>
+                }
+                else
+                {
+                    <td>@item.FileName</td>
+                }
+                <td>@item.Revision</td>
+                <td>
+                    <a href="javascript:DeleteOrderFile(@item.Id)">删除</a>
+                    <a href="@Url.Action("DownTourFile",new { id=item.Id})">下载</a>
+                </td>
+            </tr>
+        }
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script type="text/javascript">
+    //局部刷新添加
+    $(function () {
+        $("#btnUpload").click(function () {
+            if ($.trim($("[name='TourFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            var formData = new FormData();
+            formData.append("TourFileName", $("[name='TourFileName']")[0].files[0]);
+            formData.append("FileSource", $("#FileSource").val());
+            formData.append("TourId", $("#Tour_Id").val());
+            $.ajax({
+                url: '@Url.Action("UploadTourFile")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    $('#addTourFileContainer').html(data);
+                }
+            });
+        });
+    })
+    function DeleteTourFile(Id) {
+        if (!confirm("确定删除？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("DeleteTourFile")',
+            type: 'POST',
+            data: { id: Id },
+            success: function (data) {
+                $('#addTourFileContainer').html(data);
+            }
+        });
+    }
+</script>

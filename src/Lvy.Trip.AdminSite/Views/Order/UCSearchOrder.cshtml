@@ -1,0 +1,375 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+<div class="btnlist">
+    <div class="fr">    </div>
+</div>
+<div class="xbox clear">
+    <table id="tbllist" class="listtbl" style="width:100%; text-align:center;">
+        <thead>
+            <tr>
+                <td>订单号</td>
+                <td>线路名称</td>
+                <td style="width:90px">出发日期</td>
+                <td>人数</td>
+                <td style="width:120px;">订单状态</td>
+                <td>跟单状态</td>
+                <td>应收款</td>
+                <td>已收款</td>
+                <td>销售</td>
+                <td>分销商</td>
+                <td>联系人</td>
+                <td style="width: 160px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PagedList.Items.Count > 0)
+            {
+                foreach (var item in Model.PagedList.Items)
+                {
+                    var sale = DictionaryTools.GetCachedAccount(item.SalerCode);
+                    <tr>
+                        <td name="orderCode" style="width:40px" orderCode='@item.OrderCode'>
+                            <a title="详情" href="@Url.Action("OrderDetail", new { orderCode = item.OrderCode })">@item.OrderCode</a>
+                        </td>
+                        <td title="@item.LineName">@item.LineName.TrimWithElipsis(25)</td>
+                        <td>@item.OutDate.ToDateFormat()</td>
+                        <td>@item.TravellerCount</td>
+                        <td name="orderState" style="text-align:left;">
+                            @if (item.IsCancel == 0)
+                            {
+                                @Common.DisplayState(item.OrderState)
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">取消</span>
+                                @DictionaryTools.GetEnumValue(Enums.OrderCancelStateEnum, item.CancelState.ToString())
+                            }
+                        </td>
+                        <td style="text-align:left;">@Common.DisplayTraceState(item.TraceState)</td>
+                        <td style="text-align:right;">@item.TolYsPrice</td>
+                        <td style="text-align:right;">@item.TolPaid</td>
+                        <td>@sale.Name</td>
+                        <td style="text-align:left;" title="@item.CustomerName">@item.CustomerName.TrimWithElipsis(12)</td>
+                        <td>@item.LinkMan</td>
+                        <td align="left">
+                            @if (item.IsCancel == 0)
+                            {
+                                if (ViewBag.IsOp == 1 || (item.OrderState == 1 && ViewBag.IsSaler == 1))
+                                {
+                                    <a href="@Url.Action("EditOrder", "Order", new { orderCode = item.OrderCode })" title="编辑">编辑</a>
+                                }
+
+                                if (ViewBag.IsSaler == 1)
+                                {
+                                    <a title="状态变更" href="javascript:void(0);" name="affirmOrder" productname="@item.LineName" orderCode='@item.OrderCode' orderprice='@item.TolYsPrice' bookingname="@item.CustomerName" TolPaid="@item.TolPaid" TraceState="@item.TraceState">状态变更</a>
+                                    if (item.OrderState == 2)
+                                    {
+                                        <a title="缴款" href="@Url.Action("CreatePayInfo", "Order", new { OrderCode = item.OrderCode, id = 0 })">缴款</a>
+                                    }
+                                }
+                                if (ViewBag.IsOp == 1)
+                                {
+                                    if (item.OrderState == 1)
+                                    {
+                                        <a title="确认订位" href="javascript:void(0);" name="confirmDingWei" productname="@item.LineName" orderCode='@item.OrderCode' orderprice='@item.TolYsPrice' bookingname="@item.CustomerName" TolPaid="@item.TolPaid">确认占位</a>
+                                    }
+
+                                    <a href="javascript:void(0);" class="delete">取消</a>
+
+                                    if (item.TraceState > 10 || item.OrderState == 2)
+                                    {
+                                        <a title="账单" href="@Url.Action("OrderConfirmPrint", new { orderCode = item.OrderCode })">账单</a>
+                                    }
+                                }
+                                <a title="生成合同" href="@Url.Action("CreateContract", "Contract", new { orderCode = item.OrderCode })">生成合同</a>
+                            }
+                            else
+                            {
+                                if (ViewBag.IsOp == 1)
+                                {
+                                    <a href="javascript:void(0);" class="recove">订单恢复</a>
+                                }
+                                if (item.IsCancel == 2)
+                                {
+                                    <a title="账单" href="@Url.Action("OrderConfirmPrint", new { orderCode = item.OrderCode })">账单</a>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+
+                if (Model.TotalModel != null)
+                {
+                    <tr style="background-color:darkgrey;font-weight:bold;">
+                        <td>合计</td>
+                        <td colspan="11">
+                            总人数：@Model.TotalModel.PaxSum  &nbsp;&nbsp;&nbsp;
+                            占位人数：@Model.TotalModel.HoldPax  &nbsp;&nbsp;&nbsp;
+                            确认人数：@Model.TotalModel.ConfirmPax  &nbsp;&nbsp;&nbsp;
+                            团款：@Model.TotalModel.AmountSum  &nbsp;&nbsp;&nbsp;
+                            未收款：@Model.TotalModel.PaidSum
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="10" style="color: red; font-weight: bold;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(a => a.PagedList.PageIndex)
+    <div id="Pagination" class="digg"> </div>
+    <!--确认订单-->
+    @*<div id="OrderAffirmDiv" style="display: none;">
+            @Html.Partial("UCOrderConfirm")
+        </div>*@
+    <div id="OrderMakeSureDiv" style="display: none;">
+        @Html.Partial("UCOrderMakeSure")
+    </div>
+
+    <!--删除订单-->
+    <div id="DeleteOrderAffirmDiv" style="display: none;">
+        <p>确定取消此订单？</p>
+        产生费用：<input id="money" type="text" value="0" class="text150" /><br />
+        <br />
+        订单备注：<textarea id="OrderRemark" cols="100" rows="30" class="text150" style="height: 60px;"></textarea>
+    </div>
+
+    <!--恢复订单-->
+    <div id="RestoreOrderAffirmDiv" style="display: none;">
+        <p>确定恢复此订单？</p>
+        <div>
+            销售处理时间：
+            <select id="ehour" type="text" value="0" class="text150">
+                <option value="12">12小时</option>
+                <option value="24">24小时</option>
+                <option value="36">36小时</option>
+                <option value="48">48小时</option>
+            </select>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+            //   订单变更
+            $("#tbllist td [name='affirmOrder']").each(function (index, element) {
+                $(element).click(function () {
+                    var orderCode = $(this).attr("orderCode");
+                    var TraceState = $(this).attr("TraceState")
+
+                    $("#SelectTraceState").val(TraceState);
+                    //订单编号
+                    $("#hiddenOrderCode").val(orderCode);
+                    $("#OrderCodeSpan").html(orderCode);
+                    //线路名称
+                    var productname = $(this).attr("productname");
+                    // $("#ProductNameASpan").html($(this).attr("productname"));
+                    //订单金额
+                    var orderprice = $(this).attr("orderprice");
+                    // $("#OrderPriceASpan").html($(this).attr("orderprice"));
+                    //分销商
+                    var bookingname = $(this).attr("bookingname");
+                    // $("#BookingNameASpan").html($(this).attr("bookingname"));
+                    var TolPaid = $(this).attr("TolPaid");
+                    //$("#TolPaidASpan").html($(this).attr("TolPaid"));
+                    var html = "";
+                    $.ajax({
+                        url: '@Url.Action("GetUCOrderConfirm")',
+                        data: {
+                            'traceState': TraceState,
+                            'orderCode': orderCode,
+                            'productname': productname,
+                            'orderprice': orderprice,
+                            'bookingname': bookingname,
+                            'TolPaid': TolPaid
+                        },
+                        async: false,
+                        type: 'post',
+                        success: function (data) {
+                            layer.open({
+                                type: 1, title: '状态变更', maxmin: false
+                                , shadeClose: false, area: ['450px', '350px']
+                                , content: data
+                                , btn: ["提交", "关闭"]
+                                , yes: function (index, layero) {
+                                    var traceState = $("#SelectTraceState").find("option:selected").val();
+                                    if ($.trim(traceState) == "") {
+                                        Utils.alert("请选择跟单状态！");
+                                    }
+                                    var load_iii = Utils.layerLoad();
+
+                                    // var params = $("#theForm").formSerialize();
+                                    $.post('@Url.Action("OrdersSure")', { OrderCode: orderCode, TraceState: traceState }, function (data) {
+                                        if (data == "no") {
+                                            Utils.alert('权限不足！');
+                                        }
+                                        else if (data == "TravellerInfoError") {
+                                            Utils.alert("游客信息不完整，请检查游客信息是否录入完整！");
+                                        }
+                                        else {
+                                            $('#divOrderSearch').html(data);
+                                            layer.close(index);
+                                        }
+                                        Utils.layerClose(load_iii);
+                                    });
+                                }
+                                , btn2: function (index, layero) {
+                                    // 取消
+                                }
+                            });
+                        }
+                    })
+                });
+            });
+
+            //确认订位
+            $("#tbllist td [name='confirmDingWei']").each(function (index, element) {
+                $(element).click(function () {
+                    var orderCode = $(this).attr("orderCode");
+                    //订单编号
+                    $("#hiddenOrderCode2").val(orderCode);
+                    $("#OrderCodeSpan2").html(orderCode);
+                    //线路名称
+                    $("#ProductNameASpan2").html($(this).attr("productname"));
+                    //订单金额
+                    $("#OrderPriceASpan2").html($(this).attr("orderprice"));
+                    //分销商
+                    $("#BookingNameASpan2").html($(this).attr("bookingname"));
+
+                    $("#TolPaidASpan2").html($(this).attr("TolPaid"));
+
+                    layer.open({
+                        type: 1, title: '确认占位', maxmin: false
+                        , shadeClose: false, area: ['400px', '300px']
+                        , content: $("#OrderMakeSureDiv").html()
+                        , btn: ["确认", "取消"]
+                        , yes: function (index, layero) {
+                            var load_iii = Utils.layerLoad();
+                            // var params = $("#theForm").formSerialize();
+                            $.post('@Url.Action("OrdersMakeSure")', { OrderCode: orderCode }, function (data) {
+                                if (data == "no") {
+                                    Utils.alert('权限不足！');
+                                }
+
+                                $('#divOrderSearch').html(data);
+                                layer.close(index);
+                                Utils.layerClose(load_iii);
+                            });
+                        }
+                        , btn2: function (index, layero) {
+                            // 取消
+                        }
+                    });
+                });
+            });
+
+            ////换团
+            //$("#tbllist .swapTour").click(function () {
+            //    Utils.alert("功能待完善......");
+            //});
+
+            //恢复订单
+            $("#tbllist .recove").click(function () {
+                var objParentTr = $(this).parents("tr");
+
+                //订单编号
+                var orderCode = $.trim($(objParentTr).find("td[name='orderCode']").attr('orderCode'));
+                //订单备注
+                //var orderRemark = $.trim($(this).find("span").text());
+
+                //$("#hiddenOrderCode").val("").val(orderCode);
+                //$("#OrderRemark").val("").val(orderRemark);
+
+                layer.open({
+                    type: 1, title: '恢复订单', maxmin: false,
+                    shadeClose: false, area: ['400px', '300px'],
+                    content: $("#RestoreOrderAffirmDiv").html(),
+                    btn: ["保存", "关闭"],
+                    yes: function (index, layero) {
+                        var params = { 'OrderModel.OrderCode': orderCode, 'OrderModel.Remark': '', 'OrderModel.EffectiveHour': $("#ehour").val() };
+                        $.post('@Url.Action("RestoreOrder")', params, function (data) {
+                            if (data.Code == "yes") {
+                                pageselectCallback(0);
+                                layer.close(index);
+                            } else {
+                                Utils.alert('余位不足或无权操作！');
+                            }
+                        });
+                    },
+                    btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+            });
+
+            //删除订单
+            $("#tbllist .delete").click(function () {
+                var objParentTr = $(this).parents("tr");
+                //订单编号
+                var orderCode = $.trim($(objParentTr).find("td[name='orderCode']").attr('orderCode'));
+                //订单备注
+                var orderRemark = $.trim($(this).find("span").text());
+                $("#OrderRemark").val("").val(orderRemark);
+
+                layer.open({
+                    type: 1, title: '取消订单', maxmin: false,
+                    shadeClose: false, area: ['400px', '300px'],
+                    content: $("#DeleteOrderAffirmDiv").html(),
+                    btn: ["保存", "关闭"],
+                    yes: function (index, layero) {
+                        var pw = document.getElementById('money');
+                        if (!Utils.Check.IsMoney(pw.value)) {
+                            Utils.alert("请输入正确格式的费用！");
+                            $("#money").focus().select();
+                            return false;
+                        }
+                        var params = { 'OrderModel.OrderCode': orderCode, 'OrderModel.Remark': $("#OrderRemark").val(), 'OrderModel.TolYsPrice': $("#money").val() };
+
+                        $.post('@Url.Action("CancelOrder")', params, function (data) {
+                            if (data == "no") {
+                                Utils.alert('无权限操作！');
+                            } else {
+                                $('#divOrderSearch').html(data);
+                                hoverChangeStyle();
+                                layer.close(index);
+                            }
+                        });
+                    },
+                    btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+            });
+
+            //分页控件 begin
+            $("#Pagination").pagination(
+                Number('@Model.PagedList.TotalCount'), {
+                    callback: pageselectCallback,
+                    items_per_page: Number('@Model.PagedList.PageSize'),
+                    current_page: @Model.PagedList.PageIndex-1
+                });
+        });
+
+        //回调方法
+        function pageselectCallback(page_id, jq) {
+
+            $("#PagedList_PageIndex").val(page_id + 1);
+            var params = $("#theForm").formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('@Url.Action("SearchOrder", "Order")', params, function (data) {
+                if (data.length < 1) {
+                    Utils.alert("查询出错，请稍后查询！");
+                    return false;
+                }
+
+                $('#divOrderSearch').html(data);
+                hoverChangeStyle();
+                Utils.layerClose(load_iii);
+            });
+        }
+    </script>
+</div>

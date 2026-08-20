@@ -1,0 +1,74 @@
+﻿@using Lvy.Models
+@model Lvy.Models.TourDB.TpTourCostModel
+@{
+    var index = ViewBag.RowIndex;
+    var items = DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor();
+}
+<tr>
+    <td>
+        <select name="CostModels[@index].Item" class="form-control form-control-sm">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>
+        <select name="CostModels[@index].SupplierId" class="form-control form-control-sm">
+            <option value="0" paymentType="0">-- 请选择 --</option>
+            @foreach (var item in ViewBag.Suppliers as IEnumerable<KeyValueBean>)
+            {
+                <option value="@item.Key" payment="@item.Help1" paymentType="@item.Help2"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>
+        <select name="CostModels[@index].currency" class="form-control form-control-sm">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.CurrencyEnum))
+            {
+                if (item.Key == "RMB")
+                {
+                    <option value="@item.Key" selected> @item.Value</option>
+                }
+                else
+                {
+                    <option value="@item.Key"> @item.Value</option>
+                }
+            }
+        </select>
+    </td>
+    <td>
+        <input type="text" name="CostModels[@index].roe" class="form-control form-control-sm" value="1" />
+    </td>
+    <td>
+        <input type="text" name="CostModels[@index].Cost" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <input type="text" name="CostModels[@index].Num" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <input type="text" name="CostModels[@index].ItemCost" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <select class="form-control form-control-sm" data-val="true" name="CostModels[@index]PaymentType">
+            <option value=" ">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.PaymentTypeEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>初始</td>
+    <td>
+        <input type="hidden" name="CostModels[@index].MasterOrderCode" value="@Model.MasterOrderCode" />
+        <input type="hidden" name="CostModels[@index].IsValid" value="1" />
+        <input type="hidden" name="CostModels[@index].PaymentType" value="0" />
+        <a href="#" name="lnkDel">删除</a>
+    </td>
+</tr>
+
+<script type="text/javascript">
+    $("select[name$='.SupplierId']").select2({ language: "zh-CN"});
+</script>

@@ -1,0 +1,173 @@
+﻿@{
+    ViewData["Title"] = "首页";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    List<Member> mp = ViewData["MP"] as List<Member>;
+    List<TpOrderModel> mo = ViewData["MO"] as List<TpOrderModel>;
+    MemberQR qr = ViewData["MyQR"] as MemberQR; // 当前用户的二维码
+    List<TourInfoVModel> lp = ViewData["LP"] as List<TourInfoVModel>;
+}
+@using Lvy.Models.WeixinDB;
+@using Lvy.Models;
+@using Lvy.Models.OrderDB
+@using Lvy.Web.Common
+@using Lvy.VModels.Product
+
+@section HeaderContent{
+    <style>
+        .products-list .product-info { margin-left: 0; }
+    </style>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">最新订单</h3>
+                    <div class="card-tools pull-right">
+                        <a href="/Booking/Index" class="btn">更多</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="products-list product-list-in-card pl-2 pr-2">
+                        @foreach (var io in mo)
+                        {
+                            <li class="item">
+                                @*<div class="product-img">
+                                        <img src="dist/img/default-150x150.png" alt="Product Image" class="img-size-50">
+                                    </div>*@
+                                <div class="product-info">
+                                    <a href="/booking/details/@io.OrderCode" class="product-title">
+                                        @io.LineName
+                                        <span class="badge badge-warning float-right">￥@io.TolYsPrice.ToString("#0")</span>
+                                    </a>
+                                    <span class="product-description">
+                                        @(string.IsNullOrEmpty(io.BookingCustomer) ? "待定" : DictionaryTools.GetCachedCustomer(io.BookingCustomer).Name)
+                                    </span>
+                                    <div>
+                                        @io.Managers <i class="fas fa-calendar"></i>  @io.OutDate
+                                        <span class="label label-info">@io.TravellerCount 人</span>
+                                    </div>
+                                    <div>
+                                        @if (io.IsCancel > 0)
+                                        {
+                                            <span style="color:orangered">取消</span> @DictionaryTools.GetEnumValue("OrderCancelStateEnum", io.CancelState.ToString())
+                                        }
+                                        else
+                                        {
+                                            @DictionaryTools.GetEnumValue("OrderStateEnum", io.OrderState.ToString())
+                                        }
+                                    </div>
+                                </div>
+                            </li>
+                            <!-- /.item -->
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        @if (lp != null)
+        {
+            <div class="col-sm-6 col-md-6">
+                <div class="card">
+                    <div class="card-header ">
+                        <h4 class="card-title">名额未满开班</h4>
+                        <div class="card-tools pull-right">
+                            <a href="/Op/PlanList" class="btn">更多</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table ">
+                            <tr>
+                                <th style="width: 50px">#</th>
+                                <th>品牌/名称</th>
+                                <th style="width: 120px;">进度</th>
+                                <th style="width:60px;">总位</th>
+                            </tr>
+                            @foreach (var tt in lp)
+                            {
+                                <tr>
+                                    <td>@tt.OutDate.ToString("M/dd")</td>
+                                    <td>
+                                        <a href="/Op/PlanDetails/@tt.TourId"><p class="title">@(tt.ProductBrand.IsNullOrEmpty() ? tt.LineName.TrimWithElipsis(15) : tt.ProductBrand)</p></a>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var ttt = Math.Ceiling((tt.UsedQuota * 100D) / tt.PlanQuota);
+                                            var unlock = Math.Ceiling((tt.UnlockQuota * 100D) / tt.PlanQuota);
+                                        }
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-success" style="width: @( ttt + "%")"></div>
+                                            <div class="progress-bar progress-bar-warning" style="width: @( unlock + "%")"></div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-green">@tt.PlanQuota</span>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-sm-6 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"> 新微信客户</h3>
+                    <div class="card-tools">
+                        <a href="/Saler/Index" class="btn ">更多</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        @foreach (var mb in mp)
+                        {
+                            <li class="item">
+                                <div><img src="@mb.HeadImgUrl" style="height:48px; width:48px" /></div>
+                                <div><a href="/MemberAdmin/Details/@mb.OpenID">@mb.NickName</a></div>
+                                <div>@mb.RealName</div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        @if (qr != null)
+        {
+            <div class="col-sm-6 col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">我的二维码</h4>
+                    </div>
+                    <div class="card-body">
+                        <img class="img-fluid" src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=@qr.Ticket">
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</section>
+<!-- /.content -->

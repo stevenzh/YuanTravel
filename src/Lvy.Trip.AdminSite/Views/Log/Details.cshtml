@@ -1,0 +1,98 @@
+﻿@model Lvy.Models.BaseDB.BizLogModel
+@{
+    ViewBag.Title = "日志详情";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/json-browse/jquery.json-browse.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/json-browse/jquery.json-browse.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+            <div class="card-tools">
+                <a class="btn btn-secondary btn-sm" href="@Url.Action("Search")">返回列表</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-4 order-2 order-md-1">
+                    @Html.HiddenFor(m => m.Data)
+                    <pre id="json-renderer" class="json-body"></pre>
+                </div>
+                <div class="col-12 col-md-12 col-lg-4 order-3 order-md-2">
+                    @Html.HiddenFor(m => m.Data2)
+                    <pre id="json-renderer2" class="json-body"></pre>
+                </div>
+                <div class="col-12 col-md-12 col-lg-4 order-1 order-md-3">
+                    <h3 class="text-primary"><i class="fas fa-file-alt"></i> @Model.Event</h3>
+                    <div class="text-muted">
+                        <p class="text-sm">
+                            类型
+                            <b class="d-block">@DictionaryTools.GetEnumValue(Enums.NoticeTypeEnum, Model.Status.ToString())</b>
+                        </p>
+                        <p class="text-sm">
+                            操作时间
+                            <b class="d-block">@Model.ModifiedTime.ToString()</b>
+                        </p>
+                        <p class="text-sm">
+                            收信人
+                            <b class="d-block">@Model.SendTo</b>
+                        </p>
+                        <p class="text-sm">
+                            部门
+                            <b class="d-block">@(Model.TeamID.IsNullOrEmpty()?"": DictionaryTools.GetCachedTeam(Model.TeamID).TeamName)</b>
+                        </p>
+                        <p class="text-sm">
+                            操作人
+                            <b class="d-block">@DictionaryTools.GetCachedAccount(Model.ModifiedBy).Name</b>
+                        </p>
+                        <p class="text-sm">
+                            关联ID
+                            <b class="d-block">@(Model.TableName + ":2" + Model.JoinCode)</b>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    $(function () {
+        try {
+            var input = eval('(' + $('#Data').val() + ')');
+            var input2 = eval('(' + $('#Data2').val() + ')');
+        }
+        catch (error) {
+            //return alert("Cannot eval JSON: " + error);
+        }
+        var options = {
+            collapsed: $('#collapsed').is(':checked'),
+            withQuotes: $('#with-quotes').is(':checked')
+        };
+        $('#json-renderer').jsonBrowse(input, options);
+        $('#json-renderer2').jsonBrowse(input2, options);
+    });
+
+</script>

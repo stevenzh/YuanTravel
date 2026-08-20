@@ -1,0 +1,46 @@
+﻿@model Lvy.VModels.Finance.PayInConfirmVModel
+@if (Model == null)
+{
+    <div style="color: red">
+        未选择任何有效订单
+    </div>
+}
+else
+{
+    <div class="xboxcontent clear" style="padding: 0 5px;">
+        <table width="100%" class="edittbl" style="border-bottom: 0px;">
+            <tr>
+                <td style="text-align: right; width: 90px;">
+                    订单数：：
+                </td>
+                <td style="color: red;">
+                    @Model.OrderCount
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    应收账款：
+                </td>
+                <td>
+                    @Model.TotalYs
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    已收账款：
+                </td>
+                <td>
+                    @Model.TotalPaid
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">
+                    未收账款：
+                </td>
+                <td>
+                    @Model.TotalUnPaid
+                </td>
+            </tr>
+        </table>
+    </div>
+}

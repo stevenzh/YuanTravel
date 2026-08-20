@@ -1,0 +1,56 @@
+﻿@model Lvy.VModels.OpTour.ExchangeTourVModel
+<div style="overflow: hidden;">
+    <span style="font-weight: bold;">团名：</span>@Model.ExchangeFromTour.LineName
+    <span style="margin-left: 50px; font-weight: bold;">出发日期：</span>@Model.ExchangeFromTour.OutDate.ToDateFormat()
+</div>
+<table id="tbllist" class="listtbl" width="100%">
+    <thead>
+        <tr style="text-align: center;">
+            <td style="width: 30px;">选择</td>
+            <td>订单号</td>
+            <td>联系人</td>
+            <td>人数</td>
+            <td>金额</td>
+            <td>分销商</td>
+            <td>联系人</td>
+            <td>订单<br />状态</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.OrderList != null && Model.OrderList.Count > 0)
+        {
+            foreach (var order in Model.OrderList)
+            {
+                <tr style="text-align: center; cursor: pointer;" onclick="checkOrder(this);">
+                    <td><input type="checkbox" name="checkExchangeOrder" value="@order.Id" /></td>
+                    <td>@order.Id</td>
+                    <td>@order.LinkMan</td>
+                    <td>@order.TravellerCount</td>
+                    <td>@order.TolYsPrice</td>
+                    <td>@(order.BookingCustomer == null ? "" : DictionaryTools.GetCachedCustomer(order.BookingCustomer).Name)</td>
+                    <td>@order.Managers</td>
+                    <td>@Common.DisplayState(order.OrderState)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr style="text-align: center;">
+                <td colspan="10" style="color: red; font-weight: bold;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    function checkOrder(e) {
+        var $checkBox = $(e).children().first().children(':checkbox');
+        var isChecked = $checkBox.prop('checked');
+        if (isChecked == 'checked')
+            $checkBox.prop('checked', false);
+        else
+            $checkBox.prop('checked', true);
+
+    }
+</script>

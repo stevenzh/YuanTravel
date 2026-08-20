@@ -1,0 +1,45 @@
+﻿@model Lvy.VModels.Online.SearchProductVModel
+
+<li style="margin-bottom: 5px">
+    <div class="search_title">
+        出发日期
+    </div>
+    <div class="search_content">
+        <dl>
+            <dd>
+                <input id="MinOutDate" name="MinOutDate" type="text" value="@Model.MinOutDate" class="Wdate listTourInput" onfocus="WdatePicker({doubleCalendar:true,minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\'MaxOutDate\')}',readOnly:true,onpicked:function(){$('#MaxOutDate')[0].focus();checkWeekend();}})" onclick="$(this).focus();" />
+            </dd>
+            <dd>
+                <input id="MaxOutDate" name="MaxOutDate" type="text" value="@Model.MaxOutDate" class="Wdate listTourInput" onfocus="WdatePicker({doubleCalendar:true,minDate:'#F{$dp.$D(\'MinOutDate\')||\'%y-%M-%d\'}',readOnly:true,onpicked:function(){checkWeekend();}})" onclick="$(this).focus();" />
+            </dd>
+            <dd class="checkall">
+                <label>
+                    <input type="checkbox" id="not_weekend">非周末
+                </label>
+                <label>
+                    <input type="checkbox" id="weekend">周末
+                </label>
+                <label>
+                    <input type="checkbox" id="week_all">全选
+                </label>
+            </dd>
+        </dl>
+        <div class="week_list">
+            @Html.CheckboxGroup("SelectedDays", Model.DaysOfWeek, Model.SelectedDays == null ? null : Model.SelectedDays.ToArray())
+        </div>
+    </div>
+    <div class="clear">
+    </div>
+</li>
+<li style="margin-bottom: 5px">
+    <div class="search_title">
+        线路名称
+    </div>
+    <div class="search_content">
+        @Html.TextBoxFor(m => m.LineNameSign, new { id = "searchInput", @class = "listTourInput", @style = "color:#ccc;", @onfocus = "$(this).css('color', '#666666');", @onblur = "$(this).css('color', '');" })
+        <a id="searchBtn" title="查询" class="searchButton">查询</a>
+        &nbsp;&nbsp;&nbsp;&nbsp; <a href="#" onclick="clearSearch();">清 空</a>
+    </div>
+    <div class="clear">
+    </div>
+</li>

@@ -1,0 +1,149 @@
+﻿@model Lvy.Trip.Weixin.Models.WapModel
+@using Arch.Common
+@using Lvy.Models.SiteDB
+@using Lvy.Models.HotelDB
+@{
+    ViewBag.Title = "酒店";
+    //var userInfo = HttpContext.Current.Session["WeixinUser"] as MemberModel;
+    string picroot = AppSetting.Get("UploadFileRoot");
+    var banners = ViewData["SiteBanner"] as List<SiteBannerModel>;
+    var hosthotel = ViewData["W001H1"] as List<HotelModel>;        // 热门酒店
+}
+@section HeaderContent{}
+<!-- slider -->
+<div class="slider">
+    <div class="slider-show owl-carousel owl-theme">
+        @foreach (var ban in banners)
+        {
+            <div class="slider-content">
+                <div class="mask2"></div>
+                <img src="@(picroot + ban.PicturePath)" alt="">
+                <div class="caption text-center">
+                    <h2>@ban.Subject</h2>
+                    <p>The Best eCommerce</p>
+                    <a class="button" href="@ban.LinkUrl">详情</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<!-- end slider -->
+<!-- banner -->
+@*<div class="banner">
+        <div class="ui grid">
+            <div class="sixteen wide column banner-pb">
+                <a href="">
+                    <img src="~/images/demo/hotel1.jpg" alt="">
+                </a>
+            </div>
+            <div class="eight wide column pr">
+                <a href="">
+                    <img src="~/images/demo/hotel2.jpg" alt="">
+                </a>
+            </div>
+            <div class="eight wide column pl">
+                <a href="">
+                    <img src="~/images/demo/hotel3.jpg" alt="">
+                </a>
+            </div>
+        </div>
+    </div>*@
+<!-- end banner -->
+<!-- product -->
+<section class="product segments divider">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>热卖酒店</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui grid">
+            @for (int i = 0; i < hosthotel.Count; i++)
+            {
+                var item = hosthotel[i];
+                <div class="eight wide column @(i%2==0?"pr":"pl")">
+                    <div class="content">
+                        <img src="@(picroot + item.LogoPath)" alt="">
+                        <a href="/hotel/details/@item.HotelCode">
+                            <p>@item.HotelName</p>
+                        </a>
+                        @if (item.SalePrice > 0)
+                        {
+                            <h5>￥ @Math.Round(item.SalePrice) <span style="font-size:12px;font-weight:normal;">起</span></h5>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="sixteen wide column full">
+                <div class="link">
+                    <a href="/hotel/list" class="link-color">
+                        更多 <i class="fa fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end product -->
+<!-- product -->
+@*<section class="product segments">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>Popular Product</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui grid">
+            <div class="eight wide column pr">
+                <div class="content">
+                    <img src="~/images/demo/product5.png" alt="">
+                    <a href="">
+                        <p>Jacket Modern for Men &Women</p>
+                    </a>
+                    <h5>$92</h5>
+                </div>
+            </div>
+            <div class="eight wide column pl">
+                <div class="content">
+                    <img src="~/images/demo/product1.png" alt="">
+                    <a href="">
+                        <p>Watch Modern for Men &Women</p>
+                    </a>
+                    <h5>$66</h5>
+                </div>
+            </div>
+            <div class="eight wide column pr">
+                <div class="content">
+                    <img src="~/images/demo/product4.png" alt="">
+                    <a href="">
+                        <p>Monitor 24inch for Designer</p>
+                    </a>
+                    <h5>$90</h5>
+                </div>
+            </div>
+            <div class="eight wide column pl">
+                <div class="content">
+                    <img src="~/images/demo/product8.png" alt="">
+                    <a href="">
+                        <p>Backpack Treanding for Men</p>
+                    </a>
+                    <h5>$80</h5>
+                </div>
+            </div>
+            <div class="sixteen wide column full">
+                <div class="link">
+                    <a href="" class="link-color">
+                        See More <i class="fa fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>*@
+<!-- end product -->
+
+@section Scripts {
+    <script>
+        $(function () {
+
+        });
+    </script>
+}

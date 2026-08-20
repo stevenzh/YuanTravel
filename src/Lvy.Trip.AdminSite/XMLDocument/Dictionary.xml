@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <!--签证产品端 begin-->
+  <!--产品类型-->
+  <Type>
+    <node Key="1">外购及时确认</node>    
+  </Type>
+  <!--类型(个签/团签)-->
+  <VType>
+    <node Key="1">个人签证</node>
+    <node Key="2">团队签证</node>
+  </VType>
+  <!--签证种类-->
+  <VisaType>
+    <node Key="1">旅游签证</node>
+    <node Key="2">商务签证</node>
+    <node Key="3">探访亲友</node>
+  </VisaType>
+  <!--所属洲-->
+  <Continent>
+    <node Key="1">亚洲</node>
+    <node Key="2">欧洲</node>
+    <node Key="3">非洲</node>
+    <node Key="4">美洲</node>
+    <node Key="5">大洋洲</node>
+  </Continent>
+  <!--领区-->
+  <VisaArea>
+    <node Key="1">北京领区</node>
+    <node Key="2">上海领区</node>
+    <node Key="3">广州领区</node>
+    <node Key="4">武汉领区</node>
+    <node Key="5">成都领区</node>
+    <node Key="6">沈阳领区</node>
+    <node Key="7">四川领区</node>
+    <node Key="8">重庆领区</node>   
+  </VisaArea>
+  <!--产品状态-->
+  <State>    
+    <node Key="1">录入中</node>
+    <node Key="2">已提交审核</node>
+    <node Key="3">审核中</node>    
+    <node Key="4">审核不通过</node>
+    <node Key="5">上线</node>
+    <node Key="6">下线</node>
+  </State>
+  <!--面销类型-->
+  <InterviewType>
+    <node Key="1">需要面试</node>
+    <node Key="2">不需要面试</node>
+    <node Key="3">抽签面试</node>
+  </InterviewType>
+  <!--是否担保-->
+  <IsHurry>
+    <node Key="1">是</node>
+    <node Key="0">否</node>
+  </IsHurry>
+  <!--是否可以加急办理-->
+  <IsDanBao>
+    <node Key="1">是</node>
+    <node Key="0">否</node>
+  </IsDanBao>
+ <!--签证产品端 end-->
+  
+  <!---签证资源端 begin-->
+  
+  <!--是否有效-->
+  <IsValid>
+    <node Key="0">无效</node>
+    <node Key="1">有效</node>
+  </IsValid>
+  <!--是否固定资源-->
+  <IsFixed>
+    <node Key="0">非固定资源</node>
+    <node Key="1">固定资源</node>
+  </IsFixed>
+  <!--资源类型-->
+  <ResourcesType>
+    <node Key="0">邮轮房间</node>
+    <node Key="1">机票</node>
+    <node Key="2">酒店</node>
+    <node Key="3">门票</node>
+    <node Key="4">地接</node>
+    <node Key="5">签证</node>
+    <node Key="6">保险</node>
+    <node Key="7">用车</node>
+    <node Key="8">外购线路</node>
+    <node Key="9">导游</node>
+    <node Key="10">领队</node>
+    <node Key="11">餐饮</node>
+    <node Key="12">购物店</node>
+    <node Key="13">单房差</node>
+    <node Key="14">领队人头费</node>
+    <node Key="15">领队佣金</node>
+    <node Key="16">订金损失</node>
+    <node Key="17">自费</node>
+    <node Key="18">小费</node>
+    <node Key="19">升舱费用</node>
+    <node Key="20">免票费用</node>
+    <node Key="21">名单费</node>
+    <node Key="22">加急签</node>
+    <node Key="23">人头费</node>
+    <node Key="24">机票税</node>
+    <node Key="25">邮轮_港务费</node>
+    <node Key="26">邮轮_燃油税费</node>
+    <node Key="27">邮轮_其他费用</node>
+    <node Key="28">邮轮_岸上观光</node>
+  </ResourcesType>
+  <!--币种[资源表]-->
+  <ResourcesCurrencyType>
+    <node Key="1">人民币</node>
+    <node Key="2">美元</node>
+    <node Key="3">澳元</node>
+    <node Key="4">欧元</node>
+    <node Key="5">港币</node>
+    <node Key="6">英镑</node>
+    <node Key="7">日元</node>
+    <node Key="8">韩元</node>
+    <node Key="9">新加坡币</node>
+    <node Key="10">泰国铢</node>
+    <node Key="11">纽币</node>
+  </ResourcesCurrencyType>
+  <!--签证资源端 end-->
+  <!--订单状态-->
+  <OrderStatus>
+    <node Key="1">已预订</node>
+    <node Key="2">已确认</node>
+    <node Key="3">材料收取中</node>
+    <node Key="4">材料已收齐</node>
+    <node Key="5">已送签</node>
+    <node Key="6">材料已审核</node>
+    <node Key="7">已签出</node>
+    <node Key="8">已取消</node>
+  </OrderStatus>
+
+  <!--支付状态>-->
+  <PayStatus>
+    <node Key="1">未支付</node>
+    <node Key="2">全款已支付</node>
+    <!--<node Key="6">已退款</node>-->
+  </PayStatus>
+  
+  <!--度假支付状态-->
+  <VPayState>
+    <node Key="1">未支付</node>
+    <node Key="2">全款已支付</node>
+    <node Key="3">全款部分支付</node>
+    <node Key="4">订金已支付</node>
+    <node Key="5">订金部分支付</node>
+    <node Key="6">已退款</node>
+  </VPayState>
+  
+  <!--可以修改操作员的列表-->
+  <operterName>
+    <node Key="liuzhenfeng">刘珍凤</node>
+    <node Key="fengyoujie">冯幼杰</node>
+    <node Key="xujingying">徐晶莹</node>
+    <node Key="nieyq">聂瑶琴</node>
+  </operterName>  
+
+  <!--订单来源-->
+  <OrderSource>
+    <node Key="1">网站</node>
+    <node Key="2">直客</node>
+    <node Key="3">同业</node>
+    <node Key="4">门店</node>
+    <node Key="5">大客户</node>
+    <node Key="6">淘宝</node>
+  </OrderSource>
+
+  <!--操作状态-->
+  <OperStatus>
+    <node Key="1">待确认</node>
+    <node Key="2">待收齐材料</node>
+    <node Key="3">待送签</node>
+    <node Key="4">待审核材料</node>
+    <node Key="5">待签出</node>
+    <node Key="6">待发起退款</node>    
+    <node Key="8">待审核退款</node>
+    <node Key="9">退款审核通过</node>
+    <node Key="10">退款审核不通过</node>
+    <node Key="11">待退还材料</node>
+    <node Key="7">处理完成</node>
+  </OperStatus>
+
+  <!--支付方式-->
+  <PayType>
+    <node Key="1">网上支付</node>
+    <node Key="2">上门付款</node>
+    <node Key="3">上门收款</node>
+  </PayType>
+
+  <!--产品类型-->
+  <VisaProductType>
+    <node Key="1">外购及时确认</node>
+  </VisaProductType>
+  <!--付款申请是否提交-->
+  <IsPaymentApplication>
+    <node Key="0">未提交</node>
+    <node Key="1">已提交</node>
+  </IsPaymentApplication>
+  <!--是否上传面试通知书-->
+  <IsUploadInterview>
+    <node Key="1">未上传</node>
+    <node Key="2">已上传</node>
+  </IsUploadInterview>
+  <!---是否有效  资源--><!--
+  <IsValid>
+    <node Key="0">无效</node>
+    <node Key="1">有效</node>
+  </IsValid>-->
+
+  <!-- 收款类型  -->
+  - <CollectionType>
+    <node Key="1">现金</node>
+    <node Key="2">支票</node>
+    <node Key="3">银行转账</node>
+    <node Key="4">信用卡</node>
+    <node Key="5">内部担保</node>
+    <node Key="6">冲预付款</node>
+    <node Key="7">代金券</node>
+    <node Key="8">支付宝</node>
+    <node Key="9">财付通</node>
+    <node Key="10">月结欠款账单</node>
+    <node Key="11">康辉旅游卡</node>
+    <node Key="12">建行补贴</node>
+    <node Key="13">交行补贴</node>
+    <node Key="14">京东团购</node>
+    <node Key="15">高朋团购</node>
+    <node Key="16">消费卡</node>
+    <node Key="17">其他</node>
+    <node Key="18">F团团购</node>
+    <node Key="19">中国银行</node>
+  </CollectionType>
+ <!-- 在线收看类型  -->
+  <OnlineCollectionType>
+    <node Key="alipay">支付宝</node>
+    <node Key="baofoo">宝付</node>
+    <node Key="alipaydanbao">支付宝担保支付</node>
+    <node Key="a">其他</node>
+  </OnlineCollectionType>
+  <!-- 退款状态[退款记录表] -->
+  <PayoutState>
+    <node Key="0">未审核</node>
+    <node Key="1">审核通过</node>
+    <node Key="2">审核不通过</node>
+    <node Key="3">财务审核通过</node>
+    <node Key="4">财务确认退款</node>
+    <node Key="5">退款完成</node>
+  </PayoutState>
+  <!--取消类型-->
+  <CancelType>
+    <node Key="1">客户取消</node>
+    <node Key="2">公司取消</node>
+    <node Key="3">其他</node>
+  </CancelType>
+
+  <CancelTypeDetail>
+    <node Key="1">1|客户取消</node>
+    <node Key="2">1|公司取消</node>
+    <node Key="3">1|其他原因</node>
+    <node Key="4">1|行程改变</node>
+    <node Key="5">1|无法满足需求</node>
+    <node Key="6">1|客户通知取消</node>
+    <node Key="7">1|未能及时付款</node>
+    <node Key="8">1|签证拒签</node>
+    <node Key="9">1|其他</node>
+    <node Key="10">2|不成团</node>
+    <node Key="11">2|价格变动</node>
+    <node Key="12">2|资源不确认</node>
+    <node Key="13">2|重复预定</node>
+    <node Key="14">2|无具体联系方式</node>
+    <node Key="15">2|已过最晚付款时限</node>
+    <node Key="16">2|其他</node>
+  </CancelTypeDetail>
+
+  <!-- // 订单处理 // -->
+  <!--送签配送方式-->
+  <VisaDeliveryType>
+    <node Key="1">快递配送</node>
+    <node Key="2">自送</node>
+  </VisaDeliveryType>
+  <!--退还材料配送方式-->
+  <VisaDeliveryType2>
+    <node Key="1">快递配送</node>
+    <node Key="2">上门自取</node>
+  </VisaDeliveryType2>
+  <!--来源-->
+  <VisaOrderFrom>
+    <node Key="1">单签</node>
+    <node Key="2">度假</node>
+    <node Key="3">自助游</node>
+  </VisaOrderFrom>
+  <!--担保方式-->
+  <SuretyType>
+    <node Key="1">现金</node>
+    <node Key="2">担保函</node>
+    <node Key="3">三方担保</node>
+  </SuretyType>
+  <!--担保银行-->
+  <SuretyBank>
+    <node Key="COMM">交通银行</node>
+  </SuretyBank>
+  <!--银行担保类型-->
+  <SuretyBankType>
+    <node Key="1">A+B</node>
+    <node Key="2">A</node>
+    <node Key="3">B</node>
+  </SuretyBankType>
+  <!--申请人签证类型-->
+  <MaterVisaType>
+    <node Key="0">等待处理</node>
+    <node Key="1">签证成功</node>
+    <node Key="2">签证失败</node>
+  </MaterVisaType>
+  <MaterVisaType2>
+    <node Key="0">等待处理</node>
+  </MaterVisaType2>
+  <MaterVisaType3>
+    <node Key="1">签证成功</node>
+    <node Key="2">签证失败</node>
+  </MaterVisaType3>
+  <!--证件类型-->
+  <CardType>
+    <node Key="1">身份证</node>
+    <node Key="2">护照</node>
+    <node Key="3">其他</node>
+    <node Key="4">通行证</node>
+  </CardType>
+
+  <!--自助游支付状态-->
+  <SelfTravelPayStatus>
+    <node Key="1">未支付</node>
+    <node Key="2">已支付</node>
+    <node Key="3">部分支付</node>
+  </SelfTravelPayStatus>
+  <!--资源核算状态-->
+  <BalanceState>
+    <node Key="0">未结算</node>
+    <node Key="1">部分结算</node>
+    <node Key="2">已结算</node>
+    <node Key="3">已追回</node>
+  </BalanceState>
+</root>
+
+
+

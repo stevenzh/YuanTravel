@@ -1,0 +1,159 @@
+﻿@model Lvy.Visa.Models.VisaApplicanterModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    var model = ViewData["OrderModels"] as Lvy.Visa.Models.VisaOrderModel;
+}
+
+<link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+<script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <form id="theForm">
+                        @Html.HiddenFor(a => a.OrderCode, new { @id = "OrderCode" })
+                        @Html.HiddenFor(a => a.OrderCode, new { @id = "VisaOrderCode" })
+                        @Html.HiddenFor(a => a.Id, new { @id = "ApplicanterID" })
+
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label class="col-3"><span class="text-danger">*</span>姓名：</label>
+                                <div class="col-9">
+                                    @Html.TextBoxFor(a => a.Name, new { @class = "form-control form-control-sm", @id = "Name" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">性别：</label>
+                                <div class="col-9">
+                                    <input type="radio" name="radSex" value="1" @(Model.Sex == 1 ? "checked" : "") />男
+                                    <input type="radio" name="radSex" value="0" @(Model.Sex != 1 ? "checked" : "") />女
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">出生日期：</label>
+                                <div class="col-9">
+                                    @Html.TextBox("Birthday", Model.Birthday != null ? Model.Birthday.Value.ToString("yyyy-MM-dd") : "", new { @class = "form-control form-control-sm Wdate", @id = "Birthday", @onclick = "WdatePicker()" })
+                                </div>
+
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">手机号码：</label>
+                                <div class="col-9">
+                                    @Html.TextBoxFor(a => a.Phone, new { @class = "form-control form-control-sm", @id = "Phone" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">证件类型：</label>
+                                <div class="col-9">
+                                    @Html.DropDownListFor(m => m.CardType, ViewData["CardTypeList"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm", @id = "CardType" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">证件号码：</label>
+                                <div class="col-9">
+                                    @Html.TextBoxFor(a => a.CardNo, new { @class = "form-control form-control-sm", @id = "CardNo" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3"><span class="text-danger">*</span>材料分类：</label>
+                                <div class="col-9">
+                                    @if (model.TraceState < 5)
+                                    {
+                                        @Html.DropDownList("Categorycode", ViewData["CategoryList"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm", @id = "Categorycode" })
+                                    }
+                                    else
+                                    {
+                                        @Html.DropDownList("Categorycode", ViewData["CategoryList"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm", @id = "Categorycode", @disabled = "disabled" })
+                                    }
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3"><span class="text-danger">*</span>签证状态：</label>
+                                <div class="col-9">
+                                    @Html.TextBoxFor(a => a.Status, new { @class = "form-control form-control-sm", @id = "Status" })
+                                    @*@Html.DropDownListFor(m => m.Status, ViewData["VisaStateList"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm", @id = "Status" })*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" id="btnModifyGuest" class="btn btn-success">保存</button>
+                            <button type="button" id="colsebtn" class="btn btn-secondary">关闭</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //保存
+        $("#btnModifyGuest").click(function () {
+            var _name = $("#Name").val();
+            var _cardType = $("#CardType").val();
+            var _cardNo = $("#CardNo").val();
+
+            if ($.trim(_name) == "") {
+                alert("请输入姓名！！");
+                $("#Name").focus();
+                return;
+            }
+            if ($.trim(_cardType) == "" || $.trim(_cardType) == "-1") {
+                alert("请选择证件类型！！");
+                $("#CardType").focus();
+                return;
+            }
+            if ($.trim(_cardNo) == "") {
+                alert("请输入证件号码！！");
+                $("#CardNo").focus();
+                return;
+            }
+
+            var _categorycode = $("#Categorycode").val();
+            if ($.trim(_categorycode) == "") {
+                alert("请选择材料分类！！");
+                $("#Categorycode").focus();
+                return;
+            }
+            var param = {
+                "OrderCode": $("#OrderCode").val(),
+                "VisaOrderCode": $("#VisaOrderCode").val(),
+                "ID": $("#ApplicanterID").val(),
+                "Categorycode": $("#Categorycode").val(),
+                "Status": $("#Status").val(),
+                "CategoryName": $("#Categorycode").find("option:selected").text(),
+                "VisaStateName": $("#Status").find("option:selected").text(),
+                "Name": $("#Name").val(),
+                "Sex": $("input:radio[name=radSex]:checked").val(),
+                "Birthday": $("#Birthday").val(),
+                "Phone": $("#Phone").val(),
+                "CardType": $("#CardType").val(),
+                "CardNo": $("#CardNo").val()
+            };
+
+            $.post("/OrderAdmin/UpdateTouristInfo", param, function (data) {
+                if (data == "1") {
+                    alert("已修改！！");
+                    parent.funReloadOrderDetails($("#OrderCode").val());
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                } else {
+                    alert("出错啦，请稍后再试！！");
+                }
+            });
+        });
+
+
+        $("#colsebtn").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+    });
+</script>

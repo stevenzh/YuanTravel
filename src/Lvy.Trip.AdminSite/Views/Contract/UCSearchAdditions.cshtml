@@ -1,0 +1,44 @@
+﻿@model Lvy.VModels.Contract.AdditionsVModel
+@using Lvy.Models
+<div class="btnlist">
+    <div class="fr">    </div>
+</div>
+<div class="xbox clear">
+    <table id="tbllist" class="listtbl" style="width:100%; text-align:center;">
+        <thead>
+            <tr>
+                <td>序号</td>
+                <td>标题</td>
+                <td>内容</td>
+                <td>创建时间</td>
+                <td style="width: 150px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.List == null || Model.List.Count <= 0)
+            {
+                <tr>
+                    <td colspan="10" style="color: red; font-weight: bold;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (ContractAdditions item in Model.List)
+                {
+                    <tr>
+                        <td style="width:40px">@item.id</td>
+                        <td>@item.title</td>
+                        <td>@item.content.TrimWithElipsis(40)</td>
+                        <td>@item.createTime</td>
+                        <td>
+                            <a href="javascript:void(0)" onclick="editAdditions(@item.id)" class="delAddtions">修改</a><span>|</span>
+                            <a href="javascript:void(0)" onclick="delAdditions(@item.id)" class="delAddtions">删除</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

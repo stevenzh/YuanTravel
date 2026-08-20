@@ -1,0 +1,54 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+<div class="sotable_tit">
+    &nbsp;
+</div>
+<h3 class="text-primary"><i class="fas fa-paint-brush"></i> 团队基本信息</h3>
+<div class="text-muted">
+    <p class="text-sm">团名称<b class="d-block">@Model.Balance.TourNo</b></p>
+    <p class="text-sm">产品名称<b class="d-block">@Model.Balance.ProductName</b></p>
+    <p class="text-sm">出发日期<b class="d-block">@Model.Balance.OutDate.ToDateFormat()</b></p>
+    <p class="text-sm">产品类型<b class="d-block">@DictionaryTools.GetEnumValue(Enums.ProductAllTypeEnum, Model.Balance.ProductType.ToString(), false)</b></p>
+    <p class="text-sm">天数<b class="d-block">@Model.Balance.TravelDays</b></p>
+    <p class="text-sm">出团人数<b class="d-block">@Model.Balance.Num</b></p>
+    <p class="text-sm">领队/导游<b class="d-block">@Model.Balance.GuideName</b></p>
+    <p class="text-sm">团单状态<b class="d-block">@DictionaryTools.GetEnumValue(Enums.TourAuditStateEnum, Model.Balance.AuditState.ToString(),false)</b></p>
+</div>
+
+<h5 class="mt-5 text-muted">Project files</h5>
+
+<ul class="list-unstyled"> 
+    <li>
+        <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-user"></i> 创建人：@DictionaryTools.GetCachedAccount(Model.Balance.CreatedBy).Name</a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-clock"></i> 创建时间：@Model.Balance.CreatedTime.ToDateFormat()</a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-user"></i> 操作人：@DictionaryTools.GetCachedAccount(Model.Balance.ModifiedBy).Name</a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-clock"></i> 操作时间：@Model.Balance.ModifiedTime.ToDateFormat()</a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary">
+            <i class="far fa-fw fa-user"></i>   提交人：@if (!Model.Balance.OPAuditBy.IsNullOrEmpty())
+            {
+                @DictionaryTools.GetCachedAccount(Model.Balance.OPAuditBy).Name
+            }
+        </a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-clock"></i> 提交时间：@Model.Balance.OPAuditTime.ToDateFormat()</a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary">
+            <i class="far fa-fw fa-user "></i> 审核人：@if (!Model.Balance.CWAuditBy.IsNullOrEmpty())
+            {
+                @DictionaryTools.GetCachedAccount(Model.Balance.CWAuditBy).Name}
+        </a>
+    </li>
+    <li>
+        <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-clock"></i> 审核时间：@Model.Balance.CWAuditTime.ToDateFormat()</a>
+    </li>
+
+</ul>

@@ -1,0 +1,240 @@
+﻿@using Arch.Common
+@model Lvy.VModels.Ticket.ConfirmOrderVModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link href="~/WebRes/css/reset.css" rel="stylesheet" type="text/css" />
+    <link href="~/WebRes/css/manage.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        input { display: none; }
+        .listtbl { border-collapse: collapse; }
+            .listtbl th { border: 1px solid black; }
+            .listtbl td { border: 1px solid black; }
+        .title { font-size: 24px; font-family: SimHei; padding: 5px 0 5px 0; text-align: center; }
+        .defaultTB { }
+            .defaultTB tr { height: auto; }
+            .defaultTB td { border: none; }
+    </style>
+    <script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+    <div style="width: 650px; margin: 0 auto;">
+        <div class="title">门票确认单</div>
+        <div>
+            <table width="100%" class="listtbl">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">日期</th>
+                        <th style="width: 200px; text-align: center;">门票</th>
+                        <th style="text-align: center;">价格</th>
+                        <th style="text-align: center;">人数</th>
+                        <th style="text-align: center;">购票类型</th>
+                        <th style="text-align: center;">应收</th>
+                        <th style="text-align: center;">返利</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        decimal totalFanLi = 0;
+                        decimal totalCash = 0;
+                        decimal totalBill = 0;
+                    }
+                    @foreach (var item in Model.Order.OrderDetails)
+                    {
+                        <tr style="text-align: center;">
+                            <td>
+                                @item.OutDate.ToDateFormat()
+                            </td>
+                            <td>
+                                @item.ProductName
+                            </td>
+                            <td>
+                                @if (item.TktType == 1 || item.TktType == 2)
+                                {
+
+                                    <span>@item.SysPrice&nbsp;/&nbsp;@item.PriceType</span>
+                                }
+                                else
+                                {
+                                    <span>@item.SettlePrice&nbsp;/&nbsp;@item.PriceType</span>
+                                }
+                            </td>
+                            <td>
+                                @item.PeopleNum<span>人</span>
+                            </td>
+                            <td>
+                                @switch (item.TktType)
+                                {
+                                    case 1:
+                                        <span>固定签单</span>
+                                        break;
+                                    case 2:
+                                        <span>特殊签单</span>
+                                        break;
+                                    case 3:
+                                        <span>任务单</span>
+                                        break;
+                                    case 4:
+                                        <span>特殊任务单</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (item.TktType == 1 || item.TktType == 2)
+                                {
+                                    totalBill += @item.YsPrice;
+                                    @Html.Raw(item.YsPrice);
+                                }
+                                else
+                                {
+                                    totalCash += item.SettlePrice * item.PeopleNum;
+                                    @(0)
+                                }
+                            </td>
+                            <td>
+                                @if (item.TktType == 3 || item.TktType == 4)
+                                {
+                                    totalFanLi += item.SysPrice * item.PeopleNum;
+                                    @item.SysPrice
+                                }
+                                else
+                                {
+                                    <span>0</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td style="text-align: center;">
+                            <b>总计</b>
+                        </td>
+                        <td colspan="6">
+                            <b>景区现付：@totalCash</b><br />
+                            <b>返利：@totalFanLi</b><br />
+                            <b>签单：@totalBill</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">
+                            <b>导游</b>
+                        </td>
+                        <td colspan="6">
+                            @Model.Order.GuideName &nbsp;&nbsp;@Model.Order.GuidePhone
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">
+                            <b>备注</b>
+                        </td>
+                        <td colspan="6">
+                            @Model.Order.Remarks
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td colspan="2">
+                        @*<span style="color: red;">原：★报名后请及时传真此确认单至我处，系统确认后，进用户中心--根据任务单范本格式，在我处提供的任务单原件上填写内容，打印件及复印件无效。★</span>*@
+                        <span style="color: red;">报名后请及时传真此确认单至我处，系统确认后，进用户中心--在任务单范本上填写内容，彩色打印机打印下来即可使用，黑章无效</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;">
+                        @*@Html.Raw(Model.PlatForm.ZuTuanInfo)
+                            <br />*@
+                        <table class="defaultTB">
+                            <tr>
+                                <td>
+                                    <b>组团社：</b>
+                                </td>
+                                <td>
+                                    @Model.PlatCustomer.Name
+                                </td>
+                            </tr>
+                            @if (Model.TicketAdmins != null && Model.TicketAdmins.Count > 0)
+                            {
+                                foreach (var admin in Model.TicketAdmins)
+                                {
+                                    <tr>
+                                        <td>
+                                            <b>专管员：</b>
+                                        </td>
+                                        <td>
+                                            @admin.Name <span>&nbsp;[@admin.Phone]</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            <tr>
+                                <td colspan="2">
+                                    @{
+                                        string strImgSrc = AppSetting.Get("UploadFileRoot") + DictionaryTools.GetCachedCustomer(GlobalContext.Current.OwnerCode).ElecCertifyPath;
+                                    }
+                                    <img style="position:relative;width:110px;height:110px;" alt="公章" src="@strImgSrc" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <table class="defaultTB">
+                            <tr>
+                                <td>
+                                    <b>分销商：</b>
+                                </td>
+                                <td>
+                                    @Model.ReceiveCustomer.Name
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>联系人：</b>
+                                </td>
+                                <td>
+                                    @Model.Order.ContactName [@Model.Order.ContactPhone]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>电话：</b>
+                                </td>
+                                <td>
+                                    @Model.ReceiveCustomer.Phone
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>预定日期：</b>
+                                </td>
+                                <td>
+                                    @Model.Order.CreatedTime.ToString("yyyy-MM-dd hh:mm:ss")
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align: center;">
+            <input type="button" id="printBtn" class="btn btn1" value="打印" />
+            <input type="button" id="closeBtn" class="btn btn1" value="关闭" />
+        </div>
+    </div>
+    <script type="text/javascript">
+        window.onload = function () {
+
+            $('#printBtn').click(function () {
+                window.print();
+            });
+            $('#closeBtn').click(function () {
+                window.close();
+            });
+        };
+
+    </script>
+</body>
+</html>

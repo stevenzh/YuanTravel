@@ -1,0 +1,17 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+@{
+    ViewBag.Title = "联系人管理";
+}
+@section AdditionalResources { }
+
+@Html.Partial("UCTabTitle", Model.Account.CustomerCode)
+<form id="theForm" action="@Url.Action("ContactInfo")">
+    <div id="divEditContact">
+        @Html.Partial("UCSearchContactInfo", Model)
+    </div>
+
+    <div id="divContactInfoList">
+        @Html.Partial("UCContactInfoList", Model)
+    </div>
+</form>
+

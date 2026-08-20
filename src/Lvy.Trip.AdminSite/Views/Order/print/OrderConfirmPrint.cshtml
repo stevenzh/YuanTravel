@@ -1,0 +1,59 @@
+﻿@model Lvy.VModels.Order.OrderConfirmPrintVModel
+@{
+    ViewBag.Title = "确认单信息";
+}
+@section AdditionalResources
+{
+    <link href="~/WebRes/scripts/My97DatePicker/skin/WdatePicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+}
+<form id="theForm">
+    <div id="divPrint">
+        @Html.Partial("print/UCConfirmPrint", Model)
+    </div>
+    <table class="sotable" style="width:100%;">
+        <tr>
+            <td>&nbsp;</td>
+            <td align="center">
+                <input class="btn btn1" id="btnPrint" type="button" value="保存打印" />
+                <input class="btn btn1" id="btnBack" onclick="javascript:history.go(-1);" type="button" value="返回列表" />
+            </td>
+        </tr>
+    </table>
+</form>
+<script type="text/javascript">
+    $(function () {
+
+        //打印
+        $("#btnPrint").click(function () {
+            var descr = $("#OrderModel_BillOffers").val();
+            var deposit = $("#OrderModel_Deposit").val();
+            var depositDate = $("#OrderModel_DepositDate").val();
+            var billamount = $("#OrderModel_BillAmount").val();
+            var billdeadline = $("#OrderModel_BillDeadline").val();
+            var rebateInBill = $("#OrderModel_RebateInBill").val();
+
+            //提交保存特别说明
+            $.ajax({
+                url:'@Url.Action("UpdateBillInfo", "Order")',
+                type: 'post',
+                data: {
+                    'OrderCode':@Model.OrderModel.OrderCode,
+                    'BillOffers': descr,
+                    'Deposit': deposit,
+                    'DepositDate': depositDate,
+                    'BillAmount': billamount,
+                    'BillDeadline': billdeadline,
+                    'RebateInBill': rebateInBill
+                },
+                success: function (data) {
+                    console.log(data.Code);
+                    console.log(data.Message);
+                }
+            })
+
+            // ？保存成功才打印
+            window.location.href="/Order/PrintBillPDF?orderCode=" + @Model.OrderModel.OrderCode;
+        });
+    });
+</script>

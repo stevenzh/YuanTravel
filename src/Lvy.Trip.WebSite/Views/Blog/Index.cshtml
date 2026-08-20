@@ -1,0 +1,23 @@
+﻿@model Lvy.VModels.Base.ArticleVModel
+@{
+    ViewData["Title"] = "博客首页";
+}
+@section AdditionalResources {}
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="images/shop_background.jpg"></div>
+    <div class="home_overlay"></div>
+    <div class="home_content d-flex flex-column align-items-center justify-content-center">
+        <h2 class="home_title">@ViewData["Title"]</h2>
+    </div>
+</div>
+
+<!-- Blog -->
+<div class="blog">
+    <div class="container" id="divNotices">
+        @Html.Partial("List", Model)
+    </div>
+</div>
+
+@section PageScripts{}

@@ -1,0 +1,95 @@
+﻿@using Lvy.Models
+@model Lvy.Models.TourDB.TpTourCostModel
+@{
+    var index = ViewBag.RowIndex;
+    var items = DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor();
+}
+<tr>
+    <td>
+        <select name="CostList[@index].Item" class="form-control form-control-sm">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>
+        <select name="CostList[@index].SupplierId" class="form-control form-control-sm">
+            <option value="0" paymentType="0">-- 请选择 --</option>
+        </select>
+    </td>
+    <td>
+        <input type="text" name="CostList[@index].Cost" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <input type="text" name="CostList[@index].Num" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <select name="CostList[@index].Currency" class="form-control form-control-sm">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.CurrencyEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>
+        <input type="text" name="CostList[@index].roe" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <input type="text" name="CostList[@index].ItemCost" class="form-control form-control-sm" value="0" />
+    </td>
+    <td>
+        <input type="text" name="CostList[@index].Remark" class="form-control form-control-sm" />
+    </td>
+    <td>
+        <select class="form-control form-control-sm" data-val="true" id="PaymentType" name="CostList[@index].PaymentType">
+            <option value=" ">-- 请选择 --</option>
+            @foreach (var item in DictionaryTools.GetEnumsBys(Enums.PaymentTypeEnum))
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>初始</td>
+    <td>
+        <input type="hidden" name="CostList[@index].MasterOrderCode" value="@Model.MasterOrderCode" />
+        <input type="hidden" name="CostList[@index].IsValid" value="1" />
+        <button name="lnkDel" type="button" class="btn btn-sm btn-danger" ><i class="fa fa-trash"></i> 删除</button>
+    </td>
+</tr>
+
+<script type="text/javascript">
+
+    $("select[name$='.SupplierId']").select2({
+        ajax: {
+            url: function (params) {
+                return '/Customer/GetSupplierSelect2?keyword=' + params.term;
+            },
+            dataType: 'json',
+            processResults: function (data, params) {
+                params.page = params.page || 1;
+                var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                var arr = data.items
+                for (item in arr) {
+                    itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                }
+                return {
+                    results: itemList,
+                    pagination: {
+                        more: (params.page * 30) < data.total_count
+                    }
+                };
+            },
+            cache: true,
+        },
+        language: "zh-CN",
+        placeholder: '请选择',//默认文字提示
+        //templateResult: formatState
+    });
+    //$("select[name$='.SupplierId']").on('select2:select', function (e) {
+    //    $("#TpLine_CustomerName").val(e.params.data.text);
+    //});
+
+</script>

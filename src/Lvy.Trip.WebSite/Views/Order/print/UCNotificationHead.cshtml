@@ -1,0 +1,22 @@
+﻿@using Arch.Common
+@model Lvy.Models.OrderDB.TpOrderModel
+<table id="printTable" style="margin-top: 10px;width:100%;">
+    <tr>
+        <td>
+            <div>
+                <div style="float: right; padding: 5px 5px 0 0; text-align: right; height: 60px;">
+                    <b style="font-size: 24px; line-height: 30px;">出团通知</b>
+                    <div style="font-weight: 600; line-height: 30px;">
+                        欢迎参加“@DictionaryTools.GetCachedCustomer(Model.OwnerCode).Name”，祝您旅途愉快
+                    </div>
+                </div>
+                <div style="text-align: left;">
+                    @{
+                        string strImgSrc = AppSetting.Get("UploadFileRoot") + DictionaryTools.GetCachedCustomer(GlobalContext.Current.OwnerCode).LogoPath;
+                    }
+                    <img src="@strImgSrc" alt="" style="height: 60px;" />
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,59 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+@using Arch.Common
+@{
+    Layout = null;
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+
+<div class="card-header">
+    <h3 class="card-title">已上传附件</h3>
+</div>
+<div class="card-body pb-0">
+    <div class="row d-flex align-items-stretch">
+        @foreach (var item in Model.LineFileVModel.LineFileList)
+        {
+            bool IsPrimary = false;
+            if (!string.IsNullOrEmpty(Model.TpLine.LogoPath))
+            {
+                if (item.FilePath == Model.TpLine.LogoPath)
+                {
+                    IsPrimary = true;
+                }
+            }
+            <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch">
+                <div class="card @(IsPrimary ? "bg-gradient-lime":" bg-light") ">
+                    <div class="card-header text-muted border-bottom-0">
+                        @item.FileName
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="row">
+                            <div class="col-7">
+                                <h2 class="lead">@item.FileName</h2>
+                                <p class="text-muted text-sm">@DictionaryTools.GetEnumValue(Enums.FileBusinessEnum, item.SourceType) </p>
+                                <ul class="ml-4 mb-0 fa-ul text-muted">
+                                    <li class="small">@item.Note</li>
+                                    <li class="small">@item.CreatedTime.ToString()</li>
+                                </ul>
+                            </div>
+                            <div class="col-5 text-center">
+                                <img src="@(picroot + item.FilePath)" rel='gallery' class=" img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="text-right">
+                            <a href="javascript:void(0)" class="btn btn-sm bg-teal" onclick="javascript:EditLineFile(this, '@item.Id')" title="编辑"><i class="fas fa-edit"></i></a>
+                            <a href="javascript:void(0)" class="btn btn-sm bg-teal" onclick="javascript:DeleteLineFile(@item.Id, '@item.LineId')" title="删除"><i class="fas fa-trash"></i></a>
+                            <a href="@Url.Action("DownLoadFile",new { id=item.Id})" class="btn btn-sm bg-teal" title="下载"><i class="fas fa-download"></i></a>
+                            @if (!IsPrimary)
+                            {
+                                <a href="javascript:void(0)" class="btn btn-sm bg-teal" onclick="SetPrimaryPic(@item.Id, '@item.LineId');" title="设置首图"><i class="fas fa-university"></i></a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>

@@ -1,0 +1,262 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@using Lvy.Web.Common
+@{
+    ViewBag.Title = "单团核算";
+}
+@section AdditionalResources
+{
+    <link href="/WebRes/scripts/select2/select2.css" rel="stylesheet" type="text/css" />
+    <script src="/WebRes/scripts/select2/select2.min.js" type="text/javascript"></script>
+}
+
+@using (Html.BeginForm("SaveOrderBalance", "Balance", FormMethod.Post, new { id = "theForm" }))
+{
+    @Html.HiddenFor(t => t.Balance.MasterOrderCode)
+    <div class="station">
+        核算明细
+    </div>
+    <div align="center" class="xboxcontent">
+        <!-- 团队基本信息 -->
+        @Html.Partial("UCTourInfo")
+    </div>
+    <div class="margintop10">
+        &nbsp;
+    </div>
+    <div align="center" class="xboxcontent">
+        <!-- 其他收入 -->
+        @Html.Partial("UCPayIn", Model)
+    </div>
+
+    <div class="margintop10">
+        &nbsp;
+    </div>
+    <div align="center" class="xboxcontent">
+        @Html.Partial("UCCosts", Model)
+    </div>
+
+    <div class="margintop10">
+        &nbsp;
+    </div>
+    <div align="center" class="xboxcontent">
+        <table class="edittbl" style="width:100%;">
+            <tr>
+                <td width="200px">创建人：@DictionaryTools.GetCachedAccount(Model.Balance.CreatedBy).Name</td>
+                <td width="200px">操作人：@DictionaryTools.GetCachedAccount(Model.Balance.ModifiedBy).Name</td>
+                <td width="200px">
+                    提交人：@if (!Model.Balance.OPAuditBy.IsNullOrEmpty())
+                    {
+                        @DictionaryTools.GetCachedAccount(Model.Balance.OPAuditBy).Name
+                    }
+                </td>
+                <td width="200px">
+                    审核人：@if (!Model.Balance.CWAuditBy.IsNullOrEmpty())
+                    {
+                        @DictionaryTools.GetCachedAccount(Model.Balance.CWAuditBy).Name}
+                </td>
+            </tr>
+            <tr>
+                <td>创建时间：@Model.Balance.CreatedTime.ToDateFormat()</td>
+                <td>操作时间：@Model.Balance.ModifiedTime.ToDateFormat()</td>
+                <td>提交时间：@Model.Balance.OPAuditTime.ToDateFormat()</td>
+                <td>审核时间：@Model.Balance.CWAuditTime.ToDateFormat()</td>
+            </tr>
+        </table>
+    </div>
+
+    <input class="btn btn1" id="btnSave" type="button" value="保存" />
+    if (Model.Tour.AuditState < 3)
+    {
+        <input class="btn btn2" id="btnComplete" type="button" value="单团核算完成" />
+        <input class="btn btn1" id="btnOpToCaiWu" type="button" value="提交财务" style="display: none;" url="/Optour/AuditTour?tourId=@Model.Balance.MasterOrderCode" />
+    }
+    <input class="btn btn2" id="btnPrint" type="button" value="打印单团核算" />
+
+}
+<script type="text/javascript">
+    $(function () {
+        //打印单团核算
+        $("#btnPrint").click(function () {
+            window.open('@Url.Action("PrintTourBalance", "OpTour", new { tourId = Model.Tour.Id })');
+        });
+
+        $("#btnComplete").click(function () {
+            if (confirm("单团核算完成。 ")) {
+                $("#btnComplete").hide();
+                $("#btnOpToCaiWu").show();
+            }
+        });
+
+        $('#btnOpToCaiWu').click(function () {
+            var $link = $(this);
+            if (!confirm("提交财务!")) {
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            $.post($link.attr("url"), function (data) {
+                if (data == "no") {
+                    Utils.alert("您无权限进行审核。");
+                }
+                else if (data == "1") {
+                    Utils.alert("该团期仍未成团，无法执行审核。");
+                }
+                else if (data == "2") {
+                    Utils.alert("已审核。");
+                    $link.hide();
+                } else {
+                    Utils.alert("请求发生异常。");
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+        $("#btnSave").click(function () {
+
+            var flag = true;
+            $("select[name$='.Item']").each(function () {
+                if ($(this).val() == "") {
+                    Utils.alert("必须选择项目名称！");
+                    $(this).focus().select();
+                    return flag = false;
+                }
+            });
+            if (!flag) { return false; }
+            $("select[name$='.SupplierId']").each(function () {
+                if ($(this).val() == "0") {
+                    Utils.alert("必须选择供应商名称！");
+                    $(this).focus().select();
+                    return flag = false;
+                }
+            });
+            if (!flag) { return false; }
+            $("input[name$='.Cost']").each(function () {
+                if ($(this).val() == "") {
+                    Utils.alert("必须填写单位成本！");
+                    $(this).focus().select();
+                    return flag = false;
+                } else if (!Utils.Check.IsMoney($(this).val())) {
+                    Utils.alert("必须填写金额类型！");
+                    $(this).focus().select();
+                    return flag = false;
+                }
+            });
+            if (!flag) { return false; }
+            if (flag) {
+                $("#theForm").submit();
+            }
+        });
+
+        // 添加成本
+        $("#addItem2").click(function () {
+            var cnt = $("#costtable tbody tr").length;
+            $.post("@Url.Action("AddRowCost")", { rowIndex: cnt, tourId:@Model.Tour.Id  }, function (html) {
+                $("#costtable tbody").append(html);
+            });
+        });
+
+
+        $("a[name='lnkDel']").on("click", function () {
+            var obj = $(this).parent("td").parent("tr")
+            $(obj).remove();
+
+        })
+
+        $("select[name$='SupplierId']").on("change", function () {
+
+            //付款方式text 显示
+            var obj = $(this).parent("td").parent("tr").find("span[name='payment']");
+
+            //付款方式 value
+            var obj2 = $(this).parent("td").parent("tr").find("input[name$='PaymentType']");
+
+            var payment = $(this).find("option:selected").attr("payment");
+
+            var paymentType = $(this).find("option:selected").attr("paymentType");
+
+            $(obj).text(payment);
+            $(obj2).val(paymentType);
+
+            calcCost(this);
+        })
+
+        $("input[name$='Cost']").on("keyup", function () {
+            calcCost(this);
+        })
+        $("input[name$='Num']").on("keyup", function () {
+            calcCost(this);
+        })
+    });
+
+    function calcCost(_this){
+
+        var obj=$(_this).parent("td").parent("tr");
+        ///////计算单行金额////////////////////////////////////////////
+        var Num=parseFloat($(obj).find("input[name$='Num']").val());
+        var Cost=parseFloat($(obj).find("input[name$='Cost']").val());
+
+        var Amount=Num*Cost;
+
+        //成本
+        var xinajie=0.0;
+        var qiandan=0.0;
+        var zongji=0.0;
+        var a=$(obj).find("input[name$='ItemCost']");
+        if (a!=undefined&&a!=null&&a.length>0) {
+            $(a).val(Amount);
+            ////////////////////计算现结，签单，总计////////////////////////////////////
+            $(_this).parents("tbody").find("tr").each(function(index,item){
+
+               // Num=parseFloat($(item).find("input[name$='Num']").val());
+                var ItemCost=parseFloat($(item).find("input[name$='ItemCost']").val());
+                Amount=ItemCost;
+                var PaymentType=$(item).find("input[name$='PaymentType']").val();
+                if (PaymentType>0) {
+                    if (PaymentType==1) {
+                        xinajie+=Amount;
+                    }
+                    else {
+                        qiandan+=Amount;
+                    }
+                }
+            });
+
+            zongji=xinajie+qiandan;
+        }
+          xinajie=0;
+          qiandan=0;
+          zongji=0;
+          Amount=0;
+        //其他收入
+        var b=$(obj).find("span[name='ItemCost']");
+        if (b!=undefined&&b!=null&&b.length>0) {
+
+            $(b).text(Amount);
+            ////////////////////计算现结，签单，总计////////////////////////////////////
+            $(_this).parents("tbody").find("tr").each(function(index,item){
+
+                Num=parseFloat($(item).find("input[name$='Num']").val());
+                Cost=parseFloat($(item).find("input[name$='Cost']").val());
+                Amount=Num*Cost;
+                var PaymentType=$(item).find("input[name$='PaymentType']").val();
+                if (PaymentType>0) {
+
+                    if (PaymentType==1) {
+                        xinajie+=Amount;
+                    }
+                    else {
+                        qiandan+=Amount;
+
+                    }
+                }
+            });
+
+            zongji=xinajie+qiandan;
+        }
+        $(_this).parents("table").find("span[name='xianjie']").text(xinajie);
+
+        $(_this).parents("table").find("span[name='qiandan']").text(qiandan);
+        $(_this).parents("table").find("span[name='zongji']").text(zongji);
+    }
+
+</script>
+

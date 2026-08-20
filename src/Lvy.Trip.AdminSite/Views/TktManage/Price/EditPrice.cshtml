@@ -1,0 +1,593 @@
+﻿@model Lvy.VModels.Ticket.EditPriceVModel
+@{
+    ViewBag.Title = "商品价格设置";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    var actionUrl = Model.Operation == 1 ? Url.Action("AddGeneral") : Url.Action("UpdateGeneral");
+}
+@section AdditionalResources{
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <link href="~/WebRes/css/calendarchange.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="@CDNServerUrl/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+    <!-- Bootstrap Color Picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+    <script src="@CDNServerUrl/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+}
+
+<style>
+    .fc-toolbar.fc-header-toolbar { font-size: 0.7em; }
+    .fc-toolbar, .fc-toolbar.fc-header-toolbar { padding: 0.3em; }
+    .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number { font-size: 1.6em; }
+    .fc-unthemed a.fc-event:not([href]):not([tabindex]) { color: white; }
+    .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events { min-height: 1.5em; }
+    .fc .fc-daygrid-body-natural .fc-daygrid-day-events { margin-bottom: 0.4em; }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-md-6">
+            <form id="generalForm" action="@actionUrl">
+                <!-- form start -->
+                @Html.HiddenFor(m => m.TkcketProduct.ProductId, new { id = "productIdHidden" })
+                @Html.HiddenFor(m => m.TkcketProduct.PriceMode, new { id = "priceModeHidden" })
+                @Html.HiddenFor(m => m.PriceRule.Id, new { id = "generalRuleIdHidden" })
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">商品：@Model.TkcketProduct.ProductName</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-2">
+                        <p>
+                            注：固定价格：没有时间限定，不会依据其他报价，按照下单时刻的价格保存，可以通过修改价格来调整；<br />
+                            日期价格：为使用时的日期，可以制作其他价格（淡季价格），可以批量更新来调整。
+                        </p>
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-2">价格规则</label>
+                            <div class="col-sm-10">
+                                <div class="icheck-primary d-inline">
+                                    <input type="radio" id="radioPrimary1" name="PriceMode" value="1">
+                                    <label for="radioPrimary1">固定价格</label>
+                                </div>
+                                <div class="icheck-primary d-inline">
+                                    <input type="radio" id="radioPrimary2" name="PriceMode" value="2">
+                                    <label for="radioPrimary2">日期价格</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <input class="btn btn-success" id="submitBtn" type="button" value="保存" />
+                        @if (Model.TkcketProduct.PriceMode == 2)
+                        {
+                            <input class="btn btn-info" id="addOtherBtn" type="button" value="添加其他报价" />
+                        }
+                        <input class="btn btn-info" id="batchBtn" type="button" value="批量设置" />
+                        <a class="btn btn-secondary" href="/TktManage/EditTicket?productId=@Model.TkcketProduct.ProductId">返回商品编辑</a>
+                        <a class="btn btn-secondary" href="/TktManage/SearchTicket">返回商品列表</a>
+                    </div>
+                    <!-- /.card-footer -->
+                </div>
+
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">常规报价 </h3>
+                        <div class="card-tools">
+                            <button id="addPriceA" type="button" class="btn btn-sm btn-success" title="添加价格类型">添加价格类型</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table id="priceList" class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th style="width:120px;">类型</th>
+                                    <th style="width:80px;">市场价</th>
+                                    <th style="width:80px;">结算价</th>
+                                    <th style="width:80px;">
+                                        @if (Model.TkcketProduct.TktType == 1 || Model.TkcketProduct.TktType == 2)
+                                        {
+                                            @("签单价")
+                                        }
+                                        else
+                                        {
+                                            @("返利")
+                                        }
+                                    </th>
+                                    <th style="width:50px;">有效</th>
+                                    <th style="width:50px;">标准</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var generalPrice = Model.PriceList;
+                                }
+                                @for (int i = 0; i < generalPrice.Count; i++)
+                                {
+                                    <tr>
+                                        <td title="@generalPrice[i].PriceType">
+                                            <input name="generalPrice[@i].Id" type="hidden" value="@generalPrice[@i].Id" />
+                                            @if (@generalPrice[@i].Id > 0)
+                                            {
+                                                <input name="generalPrice[@i].PriceType" type="hidden" value="@generalPrice[i].PriceType" />
+                                                @generalPrice[i].PriceType.TrimWithElipsis(20)}
+                                            else
+                                            {
+                                                <input name="generalPrice[@i].PriceType" type="text" class="form-control form-control-sm" value="@generalPrice[i].PriceType" />
+                                            }
+                                        </td>
+                                        <td>
+                                            <input name="generalPrice[@i].MarketPrice" type="text" class="form-control form-control-sm" value="@generalPrice[i].MarketPrice" />
+                                        </td>
+                                        <td>
+                                            <input name="generalPrice[@i].SettlePrice" type="text" class="form-control form-control-sm" value="@generalPrice[i].SettlePrice" />
+                                        </td>
+                                        <td>
+                                            <input name="generalPrice[@i].SysPrice" type="text" class="form-control form-control-sm" value="@generalPrice[i].SysPrice" />
+                                        </td>
+                                        <td>
+                                            <input name="generalPrice[@i].IsValid" type="hidden" value="@generalPrice[i].IsValid" />
+                                            @if (generalPrice[i].IsValid == 1)
+                                            {
+                                                <label>
+                                                    <input name="generalPrice.IsValid" type="checkbox" checked="checked" />
+                                                </label>
+                                            }
+                                            else
+                                            {
+                                                <label>
+                                                    <input name="generalPrice.IsValid" type="checkbox" />
+                                                </label>
+                                            }
+                                        </td>
+                                        <td>
+                                            <input name="generalPrice[@i].IsStandard" type="hidden" value="@generalPrice[i].IsStandard" />
+                                            @if (generalPrice[i].IsStandard == 1)
+                                            {
+                                                <label>
+                                                    <input name="generalPrice.IsStandard" type="radio" checked="checked" />
+                                                </label>
+                                            }
+                                            else
+                                            {
+                                                <label>
+                                                    <input name="generalPrice.IsStandard" type="radio" />
+                                                </label>
+                                            }
+                                        </td>
+                                        <td>
+                                            <input name="generalPrice[@i].PriceDesc" type="text" class="form-control form-control-sm" value="@generalPrice[i].PriceDesc" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+            <div id="otherPriceContainer">
+                @*放置其他报价列表*@
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">库存及报价</h3>
+                </div>
+                <div class="card-body">
+                    <div id='calendar'></div>
+                </div>
+                <div class="card-footer">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>价格说明</th>
+                                <th>结算价</th>
+                                <th>市场价</th>
+                                @if (Model.TkcketProduct.TuiJianType == 3)
+                                {
+                                    <th>计划库存</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <input type="text" id="RoomStock_Start" class="form-control form-control-sm" />
+                                </td>
+                                <td>
+                                    <input type="text" id="RoomStock_RuleName" class="form-control form-control-sm" />
+                                </td>
+                                <td>
+                                    <input type="text" id="RoomStock_SettlePrice" class="form-control form-control-sm" />
+                                </td>
+                                <td>
+                                    <input type="text" id="RoomStock_MarketPrice" class="form-control form-control-sm" />
+                                </td>
+                                @if (Model.TkcketProduct.TuiJianType == 3)
+                                {
+                                    <td>
+                                        <input type="text" id="RoomStock_PlanQuota" class="form-control form-control-sm" />
+                                    </td>
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+@section PageScripts
+{
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+
+        var global_calander = null;
+
+        $(function () {
+
+            initialIsValid();
+            initialIsStandard();
+            initialAddPrice();
+            renderOtherPrice(); //加载其他报价规则列表
+
+
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                header: { left: 'prev', center: 'title', right: 'next' },
+                locale: 'zh-cn',
+                height: 'auto',
+                defaultView: 'dayGridMonth',//默认视图
+                buttonText: { today: '今天', dayGridMonth: '月', dayGridWeek: '周', },
+                //navLinks: true, // can click day/week names to navigate views
+                dateClick: function (info) {
+                    //alert('Clicked on: ' + info.dateStr);
+                    //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+                    //alert('Current view: ' + info.view.type);
+                },
+                events: function(info, successCallback, failureCallback){
+                        $.ajax({
+                            type : "post",
+                            url : '/TktManage/GetCalendar/@Model.TkcketProduct.ProductId',
+                            data: { start: moment(info.start).format('YYYY-MM-DD'), end: moment(info.end).format('YYYY-MM-DD')},
+                            dataType: "json",
+                            success : function(result) {
+                                successCallback(result);
+                            }
+                        });
+                },
+                eventClick: function (info) {
+                    $("#RoomStock_Start").val(moment(info.event.start).format('YYYY-MM-DD'));
+                    $("#RoomStock_RuleName").val(info.event.extendedProps.RuleName);
+                    $("#RoomStock_SettlePrice").val(info.event.extendedProps.SettlePrice);
+                    $("#RoomStock_MarketPrice").val(info.event.extendedProps.MarketPrice);
+                    $("#RoomStock_PlanQuota").val(info.event.extendedProps.PlanQuota);
+                }
+            });
+            calendar.render();
+            global_calander = calendar;
+
+            //保存常规报价规则
+            $('#submitBtn').click(function () {
+                // 检查价格是否变更了价格设置
+                var nt = $("input[name='PriceMode']:checked").val();
+                if ($("#priceModeHidden").val() != nt) {
+                    layer.confirm('价格设置有变更，确定修改？', {
+                        btn: ['确定', '取消']
+                    }, function () {
+                        submitForm();
+                    }, function () {
+                    });
+                } else {
+                    submitForm();
+                }
+            });
+
+            //添加其他报价
+            $('#addOtherBtn').click(function () {
+                var params = { productId: $('#productIdHidden').val() };
+                $.post('/TktManage/AddOtherPrice', params, function (data) {
+                    layer.open({
+                        type: 1, title: '添加其他报价', maxmin: false,
+                        shadeClose: false, area: ['700px', '500px'],
+                        content: data,
+                        success: function (layero, index) {
+                            initialEditOther();
+                        },
+                        btn: ["保存", "关闭"],
+                        yes: function (index, layero) {
+                            addOtherPrice();
+                            layer.close(index);
+                        },
+                        btn2: function (index, layero) {
+                            // 取消
+                        }
+                    });
+
+                });
+            });
+
+            $('#batchBtn').click(function () {
+                var url = '/TktManage/UCBatchPrice/' + $('#productIdHidden').val();
+                layer.open({ type: 2, title: '批量设置', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+
+            });
+
+            var pt = '@Model.TkcketProduct.PriceMode';
+            if (pt == '1')
+                $("#radioPrimary1").prop("checked", "checked");
+            else
+                $("#radioPrimary2").prop("checked", "checked");
+
+        });
+
+        // START 常规****************************************
+
+        //初始化是否有效点击事件
+        function initialIsValid() {
+            var $validCkb = $(':checkbox[name="generalPrice.IsValid"]');
+            $validCkb.unbind('change'); //动态添加后删除既有事件绑定，重新绑定事件
+            $validCkb.change(function () {
+                var $this = $(this);
+                if ($this.prop("checked")) {
+                    $this.parent().prev().val(1);
+                } else {
+                    $this.parent().prev().val(0);
+                }
+            });
+        }
+
+        function submitForm() {
+            var load_iii = Utils.layerLoad();
+            var url = $('#generalForm').attr('action');
+            var params = $('#generalForm').formSerialize();
+            $.post(url, params, function (data) {
+                if (data && data.State == 'success') {
+                    Utils.alert('保存成功。');
+                    window.location.reload();
+                } else {
+                    Utils.alert('提交发生异常，请稍后再试或联系管理员。');
+                }
+                Utils.layerClose(load_iii);
+            });
+        }
+
+        //初始化是否标准价选择事件
+        function initialIsStandard() {
+            var $standard = $(':radio[name="generalPrice.IsStandard"]');
+            $standard.unbind('change'); //动态添加后删除既有事件绑定，重新绑定事件
+            $standard.change(function () {
+                $standard.each(function () {
+                    $(this).parent().prev().val(0);
+                });
+                var $this = $(this);
+                if ($this.prop("checked")) {
+                    $this.parent().prev().val(1);
+                }
+            });
+        }
+        //初始化添加报价类型事件
+        function initialAddPrice() {
+
+            $('#addPriceA').click(function () {
+                var $generalForm = $('#generalForm');
+                var $generalPriceTb = $generalForm.find('#priceList');
+                var $generalTBoby = $generalPriceTb.children('tbody');
+                var $generalTr = $generalTBoby.children('tr');
+                var rowCount = $generalTr.length;
+                var newRow = '<tr>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].Id" type="hidden" value="0" /><input name="generalPrice[' + rowCount + '].PriceType" type="text" class="form-control form-control-sm" value="" /></td>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].MarketPrice" type="text" class="form-control form-control-sm" value="0" /></td>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].SettlePrice" type="text" class="form-control form-control-sm" value="0" /></td>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].SysPrice" type="text" class="form-control form-control-sm" value="0" /></td>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].IsValid" type="hidden" value="1" /><label><input name="generalPrice.IsValid" type="checkbox" checked="checked" /></label></td>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].IsStandard" type="hidden" value="0" /><label><input name="generalPrice.IsStandard" type="radio" /></label></td>';
+                newRow += '<td><input name="generalPrice[' + rowCount + '].PriceDesc" type="text" class="form-control form-control-sm" value="" /></td>';
+                newRow += "</tr>";
+                $generalTBoby.append(newRow);
+
+                hoverChangeStyle();
+                initialIsValid();
+                initialIsStandard();
+            });
+        }
+
+        //  END  常规****************************************
+
+        // START 其他****************************************
+
+        //加载其他报价规则列表
+        function renderOtherPrice() {
+            $.post('@Url.Action("SearchOtherPriceList", new { generalId = (Model.PriceRule == null) ? 0 : Model.PriceRule.Id })', function (data) {
+                if (data) {
+                    $('#otherPriceContainer').html(data);
+                    hoverChangeStyle();
+
+                    $('a[name="deleteOtherPrice"]').click(function () {
+                        var $this = $(this);
+                        var ruleId = $this.attr('ruleid');
+                        var productId = $('#productIdHidden').val();
+                        layer.confirm('确定要删除该报价规则？', {
+                            btn: ['确定', '取消']
+                        }, function (index) {
+                            var params = { productId: productId, ruleId: ruleId };
+                            $.post('@Url.Action("DeleteOtherRule")', params, function (result) {
+                                //页面重新加载
+                                window.location.reload();
+
+                                //layer.close(index);
+                            });
+                        }, function () {
+
+                        });
+                    });
+
+                    $('a[name="restoreOtherPrice"]').click(function () {
+                        var $this = $(this);
+                        var ruleId = $this.attr('ruleid');
+                        var productId = $('#productIdHidden').val();
+                        layer.confirm('确定要恢复该报价规则？', {
+                            btn: ['确定', '取消']
+                        }, function (index) {
+                            var params = { productId: productId, ruleId: ruleId };
+                            $.post('@Url.Action("RestoreOtherRule")', params, function (result) {
+                                //页面重新加载
+                                window.location.reload();
+                                //layer.close(index);
+                            });
+                        }, function () {
+
+                        });
+                    });
+
+                    $('a[name="editOtherPrice"]').click(function () {
+                        var ruleId = $(this).attr('ruleid');
+                        var params = { ruleId: ruleId };
+                        $.post('@Url.Action("EditOtherPrice")', params, function (result) {
+                            layer.open({
+                                type: 1, title: '编辑其他报价', maxmin: false,
+                                shadeClose: false, area: ['600px', '400px'],
+                                content: result,
+                                success: function (layero, index) {
+                                    initialEditOther();
+                                },
+                                btn: ["保存", "关闭"],
+                                yes: function (index, layero) {
+                                    updateOtherPrice();
+                                    layer.close(index);
+                                },
+                                btn2: function (index, layero) {
+                                    // 取消
+                                }
+                            });
+
+                        });
+                    });
+                }
+            });
+        }
+        //添加其他报价规则
+        function addOtherPrice() {
+            var $otherForm = $('#otherPriceForm');
+
+            var $ruleName = $('#otherRuleNameTxt');
+            if ($ruleName.val().length == 0) {
+                Utils.alert('规则名称不能为空。');
+                $ruleName.focus().select();
+                return false;
+            }
+
+            var url = $otherForm.attr('action');
+            var params = $('#otherPriceForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: params,
+                success: function (data) {
+                    if (data && data.State == "success") {
+                        Utils.alert('保存成功。');
+                    } else {
+                        Utils.alert('提交出现异常，请稍后再试或联系管理员。');
+                    }
+                    window.location.reload();
+                }
+            });
+
+            return false;
+        }
+
+        //更新其他报价规则
+        function updateOtherPrice() {
+            var $otherForm = $('#otherPriceForm');
+
+            var $ruleName = $('#otherRuleNameTxt');
+            if ($ruleName.val().length == 0) {
+                Utils.alert('规则名称不能为空。');
+                $ruleName.focus().select();
+                return false;
+            }
+
+            var url = $otherForm.attr('action');
+            var params = $('#otherPriceForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: params,
+                success: function (data) {
+                    if (data && data.State == 'success') {
+                        Utils.alert('保存成功。');
+                    } else {
+                        Utils.alert('提交出现异常，请稍后再试或联系管理员。');
+                    }
+                    window.location.reload();
+                }
+            });
+            return false;
+        }
+
+
+        //初始化其他报价弹窗的有效/无效、是否标准选择事件
+        function initialEditOther() {
+            var $otherForm = $('#otherPriceForm');
+            var $validCkb = $otherForm.find(':checkbox[name="otherPrice.IsValid"]');
+            $validCkb.change(function () {
+                var $this = $(this);
+                if ($this.prop("checked")) {
+                    $this.parent().prev().val(1);
+                } else {
+                    $this.parent().prev().val(0);
+                }
+            });
+
+            var $standard = $otherForm.find(':radio[name="otherPrice.IsStandard"]');
+            $standard.change(function () {
+                $standard.each(function () {
+                    $(this).parent().prev().val(0);
+                });
+                var $this = $(this);
+                if ($this.prop("checked")) {
+                    $this.parent().prev().val(1);
+                }
+            });
+
+        }
+
+        function refetchEvents() {
+            global_calander.refetchEvents();
+        }
+
+        //  END  其他****************************************
+    </script>
+}

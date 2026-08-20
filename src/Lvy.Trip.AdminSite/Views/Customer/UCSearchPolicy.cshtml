@@ -1,0 +1,23 @@
+﻿@model Lvy.VModels.Crm.CustomerPolicyVModel
+
+<div class="xbox clear">
+    <div align="center" class="xboxcontent clear">
+        <div class="sotable_tit">
+            规则查询
+        </div>
+        <table style="width:90%" class="sotable">
+            <tr>
+                <td class="label">区域名称：</td>
+                <td>
+                    @Html.HiddenFor(a => a.CustomerCode)
+                    @Html.TextBoxFor(a => a.RegionName, new { @class = "text150" })
+                </td>
+                <td align="center">
+                    <input class="btn btn1" id="btnSearch" type="submit" value="搜索" />
+                    <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>

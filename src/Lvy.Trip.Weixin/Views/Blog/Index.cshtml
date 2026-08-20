@@ -1,0 +1,14 @@
+﻿@model Lvy.VModels.Base.ArticleVModel
+@{
+    ViewData["Title"] = "博客首页";
+}
+@section HeaderContent {}
+<!-- blog -->
+<div class="blog segments-page">
+    <div class="ui container">
+        <div class="pages-title">
+            <h3>博客</h3>
+        </div>
+        @Html.Partial("List", Model)
+    </div>
+</div><!-- end blog -->

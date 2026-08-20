@@ -1,0 +1,128 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Finance.InvoiceVModel
+<div class="xbox clear">
+    <div class="btnlist">
+        <div class="fr">
+            @*<a href="@Url.Action("Create")" class="btn btn1">添加发票</a>*@
+        </div>
+    </div>
+    <table class="listtbl" style="width:100%;">
+        <thead>
+            <tr>
+                <td style="width: 40px;">编号</td>
+                <td>团号</td>
+                <td>客户名称</td>
+                <td>服务项目</td>
+                <td style="width: 70px;">开票金额</td>
+                <td style="width: 70px;">申请人</td>
+                <td style="width: 140px;">申请时间</td>
+                <td style="width: 70px;">状态</td>
+                <td style="width: 120px;">发票号码</td>
+                @*<td style="width: 70px;">审核人</td>
+                <td style="width: 140px;">审核时间</td>*@
+                <td style="width: 120px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.InvoicePageList.Items.Count > 0)
+            {
+                foreach (var item in Model.InvoicePageList.Items)
+                {
+                    var bg = (item.IsValid == 0 ? "#f3f3f4" : "#0000");
+            <tr style="background-color:@bg">
+                <td align="center">@item.Id</td>
+                <td align="center">@item.TourNo</td>
+                <td align="left">@DictionaryTools.GetCachedCustomer(item.SettleCustomer).Name</td>
+                <td align="left" title="@item.ServiceItems">@Html.Raw(item.ServiceItems)</td>
+                <td align="right">@item.Amount</td>
+                <td align="center">@DictionaryTools.GetCachedAccount(item.CreatedBy).Name</td>
+                <td align="center">@item.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td align="center">@(item.IsValid==0 ? "作废":( item.State == 0 ? "申请" : "已开具"))</td>
+                <td>@item.InvoiceNo</td>
+                @*
+        <td align="center">@(string.IsNullOrEmpty(item.CheckedBy) ? "" : DictionaryTools.GetCachedAccount(item.CheckedBy).Name)</td>
+        <td align="center">@(item.CheckedTime == null ? "" : item.CheckedTime.Value.ToString("yyyy-MM-dd HH:mm:ss"))</td>
+                *@
+                <td align="center">
+                    <a href="###" onclick="invoiceDetail('@item.Id')">详情</a>
+                    @if (item.IsValid == 1)
+                    {
+                        if (item.State == 0)
+                        {
+                            <a href="###" onclick="invoiceEdit('@item.Id')">编辑</a>
+                        }
+                        else
+                        {
+                            <a href="###" onclick="invoiceValid('@item.Id')">作废</a>
+                        }
+                    }
+                </td>
+            </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" align="center" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(a => a.InvoicePageList.PageIndex)
+    <div id="Pagination" class="digg"></div>
+</div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function() {
+        $("#Pagination").pagination(Number('@Model.InvoicePageList.TotalCount'), {
+            callback: pageselectCallback,
+            items_per_page: Number('@Model.InvoicePageList.PageSize'),
+            current_page: @Model.InvoicePageList.PageIndex-1
+        });
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#InvoicePageList_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("Search")', params, function(data) {
+            if (data.length<1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divNotices').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+    function invoiceDetail(id) {
+        var url = '/Invoice/Details/' + id;
+        layer.open({ type: 2, title: '发票申请详情', maxmin: true, shadeClose: true, area: ['800px', '350px'], content: url });
+    }
+    function invoiceEdit(id) {
+        var url = '/Invoice/Edit/' + id;
+        layer.open({ type: 2, title: '编辑发票申请', maxmin: true, shadeClose: true, area: ['800px', '500px'], content: url });
+    }
+    function invoiceValid(id) {
+        //询问框
+        layer.confirm('您要作废这条发票申请吗？', {
+            btn: ['取消', '确定'] //按钮
+        }, function () {
+
+        }, function () {
+            $.ajax({
+                url: '/Invoice/SetValid',
+                data: { id: id },
+                success: function () {
+                    pageselectCallback(1);
+                },
+            });
+        });
+    }
+
+</script>
+

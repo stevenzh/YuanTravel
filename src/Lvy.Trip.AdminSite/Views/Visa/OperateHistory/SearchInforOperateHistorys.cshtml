@@ -1,0 +1,37 @@
+﻿@model Lvy.Visa.VModels.YlInformationOperateHistoryQModel
+@{
+    Layout = null;
+}
+
+<div id="divPOperateHistorys">
+    <table class="table table-bordered table-sm">
+        <tr>
+            <th>序号</th>
+            <th>操作人帐号</th>
+            <th>操作人姓名</th>
+            <th>操作人IP</th>
+            <th>产品状态</th>
+            <th>操作动作</th>
+            <th>操作时间</th>
+        </tr>
+        @if (Model.OperateHistoryModels != null)
+        {
+            foreach (var operateHistoryModel in Model.OperateHistoryModels)
+            {
+                var index = Model.OperateHistoryModels.IndexOf(operateHistoryModel) + 1;
+
+                <tr>
+                    <td>@index</td>
+                    <td>@operateHistoryModel.OperatorLoginCode</td>
+                    <td>@operateHistoryModel.Operator</td>
+                    <td>@operateHistoryModel.OperatorIp</td>
+                    <td>@operateHistoryModel.VStateValue</td>
+                    <td style="width: 360px; text-align: left;">@operateHistoryModel.Remark</td>
+                    <td>@operateHistoryModel.OperatorTime</td>
+                </tr>
+            }
+        }
+    </table>
+
+</div>
+

@@ -1,0 +1,102 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+@{
+    ViewBag.Title = "微信公众号";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var dt = Model.TourList.Items.Select(t => t.OutDate).Distinct();
+    var teams = GlobalContext.Current.LoginUserTeams;
+}
+
+<section class="content-header">
+    <h1 class="page-title">首页</h1>
+    <ol class="breadcrumb">
+        <li class="active">面板</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12" style="margin-bottom:20px;">
+            <div class="btn-group" data-toggle="buttons">
+                @foreach (var item in teams)
+                {
+                    if (Model.Condition.CrmTeamId == item.TeamID)
+                    {
+                        <label class="btn btn-default active">
+                            <input type="radio" name="teamId" value="@item.TeamID" checked>@item.TeamName
+                        </label>
+                    }
+                    else
+                    {
+                        <label class="btn btn-default">
+                            <input type="radio" name="teamId" value="@item.TeamID"> @item.TeamName
+                        </label>
+                    }
+                }
+            </div>
+        </div>
+        <div class="col-md-12" style="margin-bottom:20px;">
+            <div class="btn-group" data-toggle="buttons">
+                @if (Model.PlanStatus == "all")
+                {
+                    <label class="btn btn-primary active">
+                        <input type="radio" name="status" value="all" checked>全部
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="radio" name="status" value="over"> 过期
+                    </label>
+                }
+                else
+                {
+                    <label class="btn btn-primary ">
+                        <input type="radio" name="status" value="all">全部
+                    </label>
+                    <label class="btn btn-primary active">
+                        <input type="radio" name="status" value="over" checked> 过期
+                    </label>
+                }
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div id="questionListsDiv" style="margin: 5px;">
+                @Html.Partial("PageList", Model)
+            </div>
+
+            <ul id="pagination-demo" class="pagination-sm"></ul>
+        </div>
+    </div>
+</section>
+<script>
+    $(function () {
+
+        $('#pagination-demo').twbsPagination({
+            totalPages:  @(Model.TourList.TotalCount==0? "1": Math.Ceiling((double)Model.TourList.TotalCount/10).ToString()),
+            visiblePages: 5,
+            first: "首页",
+            prev: "上一页",
+            next: "下一页",
+            last: "末页",
+            onPageClick: function (event, page) {
+                page_id = page;
+                var param = {
+                    'PlanStatus': "@Model.PlanStatus",
+                    'Condition.CrmTeamId':"@Model.Condition.CrmTeamId",
+                    'TourList.PageIndex': page_id,
+                    'TourList.PageSize': 10
+                };
+                $.post('/Op/PageList/', param, function (data) {
+                    $('#questionListsDiv').html(data);
+                });
+            }
+        });
+
+        $('input:radio').change(function () {
+            console.log($(this).attr('name'));
+            var teamId = $("input[name='teamId']:checked").val();
+            var status = $("input[name='status']:checked").val();
+            location.href = '/Op/PlanList?PlanStatus=' + status + "&Condition.CrmTeamId=" + teamId;
+        });
+
+    });
+
+</script>

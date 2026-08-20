@@ -1,0 +1,35 @@
+﻿@model Lvy.Models.BaseDB.BaseArticleModel
+@{
+    ViewBag.Title = "首页";
+}
+@section HeaderContent {}
+<!-- blog single -->
+<div class="blog-single">
+    <div class="ui container">
+        <div class="content segments">
+            <img src="@Model.ImgUrl" alt="">
+            <h4>@Model.Title</h4>
+            <p class="date"><i class="fa fa-calendar"></i>@Model.CreatedTime.ToDateFormat()</p>
+            @Html.Raw(Model.Contents)
+            @*<div class="share-link">
+                <ul>
+                    <li>Share on:</li>
+                    <li><a href=""><i class="fa fa-facebook"></i></a></li>
+                    <li><a href=""><i class="fa fa-twitter"></i></a></li>
+                    <li><a href=""><i class="fa fa-google"></i></a></li>
+                    <li><a href=""><i class="fa fa-instagram"></i></a></li>
+                </ul>
+            </div>*@
+        </div>
+        @*<div class="comment-title">
+            <h4>Leave Your Reply</h4>
+        </div>
+        <form class="ui form">
+            <div class="field"><input type="text" placeholder="Name"></div>
+            <div class="field"><input type="text" placeholder="Email"></div>
+            <div class="field"><textarea cols="30" rows="10" placeholder="Comment"></textarea></div><button class="button">
+                Submit
+            </button>
+        </form>*@
+    </div>
+</div><!-- end blog single -->

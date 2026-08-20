@@ -1,0 +1,75 @@
+﻿@model  Lvy.VModels.Order.OrderEditVModel
+
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;padding:10px">
+    子订单信息
+    <div class="fr">
+        @if (Model.IsOP == 1)
+        {
+            <input type="button" class="btn btn1" id="addChildOrder" value="添加子订单" />
+        }
+    </div>
+</div>
+
+<table class="listtbl" style="width:100%; border: 0px;text-align:center;">
+    <thead>
+        <tr>
+            <td align="center" style="width:50px">编号</td>
+            <td align="center">商品名称</td>
+            <td align="center">产品类型</td>
+            <td align="center">单价</td>
+            <td align="center">份数</td>
+            <td align="center">金额</td>
+            <td align="center">成本</td>
+            <td align="center">供应商</td>
+            <td align="center">备注</td>
+            <td align="center" style="width:110px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            decimal totalPrice = 0;
+        }
+        @foreach (var item in Model.ChildOrderList)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.ProductName</td>
+                <td>@item.ProductTypeName</td>
+                <td>@item.UnitPrice</td>
+                <td>@item.Quantity</td>
+                <td>@item.Amount</td>
+                <td>@item.Cost</td>
+                <td>@item.SupplierName</td>
+                <td>@item.Remark</td>
+                <td>
+                    @if (Model.IsOP == 1)
+                    {
+                        if (item.IsCancel == 0)
+                        {
+                            <a href="javascript:void(0);" onclick="editChildOrder(@item.Id)">编辑</a>
+                            @:&nbsp;
+                            <a href="javascript:void(0);" onclick="CancelChidOrder(@item.Id)">取消</a>
+                        }
+                        else
+                        {
+                            @:&nbsp;
+                            <a href="javascript:void(0);" onclick="RecoverChidOrder(@item.Id)">恢复</a>
+                        }
+                    }
+                </td>
+            </tr>
+            if (item.IsCancel == 0)
+            {
+                totalPrice = totalPrice + item.Amount;
+            }
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="10" align="right">
+                <span class="fr">费用合计：<font id="totalOtherPrice">@totalPrice</font>元</span>
+                <input type="hidden" id="Order_ChildTotalAmount" value="@totalPrice" />
+            </td>
+        </tr>
+    </tfoot>
+</table>

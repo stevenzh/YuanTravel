@@ -1,0 +1,191 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    var pingzheng = Model.FileList.Where(m => m.SourceType == "2").ToList();
+    var zhangdan = Model.FileList.Where(m => m.SourceType == "4").ToList();
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.min.js"></script>
+    <link href="@CDNServerUrl/jquery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+}
+
+<section class="content">
+    <div class="card">
+        <form id="theForm" enctype="multipart/form-data">
+            @Html.HiddenFor(a => a.PayInModel.Id)
+            @Html.HiddenFor(a => a.PayInModel.OrderCode)
+            @Html.HiddenFor(a => a.Balance.Type)
+            <div class="card-body p-2">
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        <tr>
+                            <td style="width:95px;">款项说明：</td>
+                            <td>@Html.TextBoxFor(t => t.PayInModel.Item, new { @class = "form-control form-control-sm" }) </td>
+                            <td style="width:95px;">缴款客户：</td>
+                            <td>
+                                <select id="mySelect2" name="PayInModel.CustomerCode" class="form-control form-control-sm">
+                                    @if (!string.IsNullOrEmpty(Model.PayInModel.CustomerCode))
+                                    {
+                                        <option value="@Model.Balance.AgentCode">@DictionaryTools.GetCachedCustomer(Model.PayInModel.CustomerCode).Name</option>
+                                    }
+                                </select>
+                            </td>
+                            <td style="width:95px;">税号：</td>
+                            <td>@Html.TextBoxFor(a => a.PayInModel.TaxNumber, new { @class = "form-control form-control-sm" })  </td>
+                        </tr>
+                        <tr>
+                            <td>汇款人：</td>
+                            <td>@Html.TextBoxFor(a => a.PayInModel.Remitter, new { @class = "form-control form-control-sm" })  </td>
+                            <td><b>金额：(元)</b></td>
+                            <td>@Html.TextBoxFor(a => a.PayInModel.Amount, new { @class = "form-control form-control-sm" })</td>
+                            <td>付款方式：</td>
+                            <td>@Html.DropDownListFor(m => m.PayInModel.PaymentType, (List<SelectListItem>)ViewBag.PayType, new { @class = "form-control form-control-sm" })</td>
+                        </tr>
+                        <tr>
+                            <td>备注:</td>
+                            <td colspan="5">@Html.TextAreaFor(a => a.PayInModel.Remark, new { @class = "form-control form-control-sm", @rows = "5" })</td>
+                        </tr>
+                        <tr>
+                            <td><b>审核人:</b></td>
+                            <td></td>
+                            <td><b>收款人：（盖章）</b></td>
+                            <td>
+                                @Html.DropDownListFor(m => m.PayInModel.PayInBy, ViewData["UserList"] as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                注：收款人签名或盖章有效
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-bordered">
+                    <tr>
+                        <td colspan="3"><span style="font-weight:500;font-size:16px; ">打印附件</span></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td align="center" style="width:50%;"><span style="font-size:14px;">回传账单</span></td>
+                        <td align="center" style="width:50%;"><span style="font-size:14px;">付款凭证</span></td>
+                    </tr>
+                    <tr>
+                        <td>选择已上传的</td>
+                        <td align="center">
+                            @if (zhangdan.Count > 0)
+                            {
+                                foreach (var item in zhangdan)
+                                {
+                                    <div style="width:33%; float:left;">
+                                        <input type="radio" name="selectBill" value="@item.Id" />
+                                        <a class="fancybox" href="@(picroot + item.FilePath)" title="@item.FileName">
+                                            <img style="width:60px;" src="@(picroot + item.FilePath)">
+                                        </a>
+                                        @item.Remark
+                                    </div>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @if (pingzheng.Count > 0)
+                            {
+                                foreach (var item in pingzheng)
+                                {
+                                    <div style="width:33%; float:left;">
+                                        <input type="radio" name="selectBank" value="@item.Id" />
+                                        <a class="fancybox" href="@(picroot + item.FilePath)" title="@item.FileName">
+                                            <img style="width:60px;" src="@(picroot + item.FilePath)">
+                                        </a>
+                                        @item.Remark
+                                    </div>
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>上传新的</td>
+                        <td>
+                            <input name="billFile" type="file" />
+                        </td>
+                        <td>
+                            <input name="bankFile" type="file" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-footer">
+                <input class="btn btn-primary" id="btnConfirm" type="button" value="提交" />
+            </div>
+        </form>
+    </div>
+</section>
+<script src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/main.js"></script>
+<script>
+    $(function () {
+        $('#mySelect2').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        team: '@Model.Balance.SalesTeamId',
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            //templateResult: formatState
+        });
+
+        $("#btnConfirm").click(function checkConfirm() {
+
+            // 数据验证
+            var pip = $("#PayInModel_PayInBy").val();
+            if (pip == null || pip == '') {
+                Utils.alert("请选择收款人！");
+                return false;
+            }
+
+
+            if (!confirm('确定提交此缴款单？')) {
+                return false;
+            }
+
+            $('#theForm').ajaxSubmit({
+                type: 'post',
+                url: '@Url.Action("SavePayIn", "Balance")',
+                success: function (data) {
+                    Utils.alert('提交成功!');
+                    // 弹出框关闭前调用父窗口方法
+                    parent.reloadPayIn();
+
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                },
+            });
+        });
+
+    });
+
+</script>

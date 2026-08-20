@@ -1,0 +1,27 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@using Arch.Common
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">产品信息</h3>
+    </div>
+    <div class="card-body p-2">
+        <table id="tabOrderBaseInfo" class="table table-sm table-borderless">
+            <tr>
+                <td><strong> 供应商：</strong></td>
+                <td>@Model.OrderModel.SupplierName</td>
+                <td><strong>产品编号：</strong></td>
+                <td>@Model.OrderModel.ProductCode</td>
+            </tr>
+            <tr>
+                <td><strong>产品名称：</strong></td>
+                <td>
+                    @Model.ProductModel.VisaIssuePlaceName.Trim() 送签
+                    <a id="linkOnlinePro" href="@(AppSetting.Get(" Visa") + Model.OrderModel.ProductCode.ToLower() )" target="_blank" title="查看网站产品">@Model.OrderModel.ProductName</a>
+                </td>
+                <td><strong>单价：</strong></td>
+                <td>￥ @Model.OrderModel.Price.ToString("0.##")</td>
+            </tr>
+        </table>
+    </div>
+</div>

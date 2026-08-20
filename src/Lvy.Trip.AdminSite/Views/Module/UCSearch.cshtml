@@ -1,0 +1,126 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Crm.FunctionVModel
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <td align="left">父级名称</td>
+            <td align="left">功能名称</td>
+            <td align="left">功能描述</td>
+            <td align="left">图标</td>
+            <td align="left">Url</td>
+            <td align="center">类型</td>
+            <td align="center">是否有效</td>
+            <td align="center">排序</td>
+            <td align="center" style="width:160px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @try
+        {
+            if (Model.Functions.Items.Count > 0)
+            {
+                foreach (var item in Model.Functions.Items)
+                {
+                    <tr>
+                        <td align="left">
+                            @if (item.ParentId == 0)
+                            {
+                                @item.Name
+                            }
+                            else
+                            {
+                                @item.ModuleValue
+                            }
+                        </td>
+                        <td align="left">@item.Name</td>
+                        <td align="left" title="@item.Description">@item.Description.TrimWithElipsis(6)</td>
+                        <td align="left">@item.IconClass</td>
+                        <td align="left">@item.URL</td>
+                        <td align="center">@DictionaryTools.GetEnumValue(Enums.FuncTypeEnum, item.FuncType.ToString())</td>
+                        <td align="center">@item.IsValid</td>
+                        <td align="center">@item.Sort</td>
+                        <td class="project-actions">
+                            @if (item.FuncType == 1)
+                            {
+                                <a class="btn btn-sm btn-success" title="添加菜单" href="@Url.Action("CreateMenu", "Module", new { Id = item.Id })"><i class="fas fa-plus"></i></a>
+                                //编辑模块
+                                <a class="btn btn-sm btn-info" title="编辑模块" href="@Url.Action("Edit", "Module", new { Id = item.Id })"><i class="fas fa-edit"></i></a>
+                            }
+                            else if (item.FuncType == 2)
+                            {
+                                <a class="btn btn-sm btn-success" title="添加功能" href="@Url.Action("CreateFunction", "Module", new { Id = item.Id })"><i class="fas fa-plus-square"></i></a>
+                                //编辑菜单
+                                <a class="btn btn-sm btn-info" title="编辑模块" href="@Url.Action("EditMenu", "Module", new { Id = item.Id })"><i class="fas fa-edit"></i></a>
+                            }
+                            else
+                            {
+                                //编辑功能
+                                <a class="btn btn-sm btn-info" title="编辑模块" href="@Url.Action("EditFunction", "Module", new { Id = item.Id })"><i class="fas fa-edit"></i></a>
+                            }
+                            @if (item.IsValid)
+                            {
+                                <a class="btn btn-sm btn-danger" href="@Url.Action("SetValidState", "Module", new { Id = item.Id })" onclick="return confirm('确定要删除吗？')"><i class="fas fa-trash"></i></a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-sm btn-warning" href="@Url.Action("SetValidState", "Module", new { Id = item.Id })" onclick="return confirm('确定要恢复吗？')"><i class="fas fa-recycle"></i></a>
+                            }
+
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" align="center" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        }
+        catch (Exception)
+        {
+            <tr>
+                <td colspan="7" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@Html.HiddenFor(a => a.Functions.PageIndex)
+
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Functions.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Functions.PageSize'),
+                current_page: @Model.Functions.PageIndex-1
+            });
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+
+        var load_iii = Utils.layerLoad();
+
+        $("#Functions_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

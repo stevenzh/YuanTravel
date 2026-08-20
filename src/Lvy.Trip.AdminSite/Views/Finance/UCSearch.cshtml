@@ -1,0 +1,338 @@
+﻿@model Lvy.VModels.Finance.FinanceVModel
+<div class="xbox">
+    <div class="xboxcontent clear">
+        <table width="100%" class="edittbl" style="border-bottom: 0px;">
+            <tr>
+                <td style="text-align: right;">收客人数：</td>
+                <td style="color: red;">@Model.SumTravellerCount.ToString() 人</td>
+                <td style="text-align: right;">销售总额：</td>
+                <td>￥@Model.SumPriceCount</td>
+                <td style="text-align: right;">返利总额：</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">实收总额：</td>
+                <td>￥@Model.SumTolPaid</td>
+                <td style="text-align: right;">剩余总额：</td>
+                <td>￥@Model.ShengYuCount</td>
+                <td colspan="2" style="text-align: center;"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="xbox clear">
+    <div class="btnlist">
+        <div class="fl">
+            排序方式：@Html.DropDownListFor(m => m.Condition.SortKey, Model.Condition.SortKeyValueBean.ToSelectListFor(Model.Condition.SortKey))
+            @if (Model.OrderModels.Items.Count > 0)
+            {
+                <label>&nbsp;&nbsp; &nbsp;</label>
+                <input type="button" class="btn btn1" id="btnBatchFinance" value="批量收款" style="margin: 0px;" />
+                <input type="submit" class="btn btn1" value="导出对账单" style="margin: 0px; width: 90px;" />
+                <input id="importBtn" type="button" class="btn btn1" value="导入收款单" style="margin: 0px; width: 90px;" />
+            }
+            else
+            {
+                <label>&nbsp;&nbsp; &nbsp;</label>
+                <input type="button" disabled="disabled" class="btn btn1" id="btnBatchFinance" value="批量收款" style="margin: 0px;" />
+                <input type="submit" disabled="disabled" class="btn btn1" value="导出对账单" style="margin: 0px;" />
+            }
+        </div>
+        <a href="~/WebRes/docs/TempFile/导入销账模板.xls" target="_blank" style="float: right;">
+            下载收款单模板
+        </a>
+    </div>
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                <td align="center" style="width: 10px;">
+                    <input type="checkbox" id="chkAll" />
+                </td>
+                <td align="left">
+                    <label for="chkAll">订单号</label>
+                </td>
+                <td align="left">线路名称</td>
+                <td align="left">出发<br />日期</td>
+                <td align="left">分销商</td>
+                <td align="center">分销商联系人</td>
+                <td align="center">客人名称</td>
+                <td align="center">人数</td>
+                <td align="center">应收款</td>
+                <td align="center">未收款</td>
+                <td align="center">订单<br />状态</td>
+                <td align="center" style="width: 80px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.OrderModels.Items.Count > 0)
+            {
+                foreach (var item in Model.OrderModels.Items)
+                {
+                    <tr>
+                        <td align="center">
+                            @if (item.JieSuanState == 5)
+                            {
+                                <input type="checkbox" disabled="disabled" value='@item.OrderCode' name="chkSingle" />
+                            }
+                            else
+                            {
+                                <input type="checkbox" value='@item.OrderCode' name="chkSingle" />
+                            }
+                        </td>
+                        <td align="left">
+                            <a href="javascript:void(0);" name="ordercode" ordercode='@item.OrderCode'>@item.Id</a>
+                        </td>
+                        <td align="left">
+                            @item.LineName.TrimWithElipsis(16)
+                        </td>
+                        <td align="left">
+                            @item.OutDate.ToString("MM-dd")
+                        </td>
+                        @{var customer = DictionaryTools.GetCachedCustomer(item.BookingCustomer);}
+                        <td align="left" title="@customer.FastCode-@customer.Name">
+                            @customer.Name.TrimWithElipsis(6)
+                        </td>
+                        <td align="center">
+                            @item.Managers
+                        </td>
+                        <td align="center">
+                            @item.LinkMan
+                        </td>
+                        <td align="center">
+                            @item.TravellerCount
+                        </td>
+                        <td align="center">
+                            @item.TolYsPrice
+                        </td>
+                        <td align="center">
+                            @(item.TolYsPrice - item.TolPaid)
+                        </td>
+                        <td align="center">
+                            @Common.DisplayState(item.OrderState)
+                        </td>
+                        <td align="center">
+                            <input type="hidden" name="hiddenOrderCode" value="@item.OrderCode" />
+                            @if (item.JieSuanState < 5)
+                            {
+                                <a href="javascript:void(0);" name="payin" ordercode='@item.OrderCode'>&nbsp;收款&nbsp;</a>
+                                @Html.ActionLink("编辑", "EdtiFinance", new { orderCode = item.OrderCode })
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="11" align="center" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(m => m.OrderModels.PageIndex, new { id = "hiddenIndex" })
+    @Html.HiddenFor(m => m.OrderModels.PageSize)
+    <div id="divPagination" class="digg">
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+        $('#importBtn').click(function () {
+            layer.open({
+                type: 1, title: '导入销账单', maxmin: false
+                , shadeClose: false, area: ['400px', '300px']
+                , content: document.getElementById('uploadForm')
+                , btn: ["提交", "取消"]
+                , yes: function (index, layero) {
+                    document.getElementById('uploadForm').submit();
+                }
+                , btn2: function (index, layero) {
+                    // 取消
+                }
+            });
+        });
+
+        isChkAllDisabled();
+        //分页控件 begin
+        $("#divPagination").pagination(
+            Number('@Model.OrderModels.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: (@Model.OrderModels.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.OrderModels.PageIndex - 1)
+            });
+
+        //全选
+        $("#chkAll").click(function () {
+
+            var $isChecked = $(this).prop("checked");
+            var $objChkSingle = $("input[name=chkSingle][disabled!='disabled']");
+            if ($isChecked)
+                $objChkSingle.prop("checked", true);
+            else
+                $objChkSingle.prop("checked", false);
+        });
+
+        //单选
+        $("input[name=chkSingle]").click(function () {
+            var selectedItems = new Array();
+            var chkCount =Number( $("input[name='chkSingle'][disabled!='disabled']").length);
+            $("input[name='chkSingle']:checked").each(function () {
+                selectedItems.push($(this).val());
+            });
+            if(chkCount==selectedItems.length)
+                $("#chkAll").prop("checked",true);
+            else
+                $("#chkAll").prop("checked",false);
+        });
+
+        //批量收款
+        $("#btnBatchFinance").click(function () {
+
+            var selectedItems = new Array();
+            $("input[name='chkSingle']:checked").each(function () {
+                selectedItems.push($(this).val());
+            });
+
+            if (selectedItems.length == 0) {
+                Utils.alert("请勾选收款项目！");
+                return false;
+            }
+
+            var url = '/Finance/BatchOrderFinance/';
+            var params = { 'chkOpOrderCode': selectedItems.join('|') };
+
+            $.post('/Finance/MultiOrderShowKuanCheck/', params, function(data) {
+                if(data){
+                    Utils.layerClose(load_iii);
+                    layer.open({
+                        type: 1, title: '确认收款', maxmin: false
+                        , shadeClose: false, area: ['400px', '300px']
+                        , content: data
+                        , btn: ["确认", "关闭"]
+                        , yes: function (index, layero) {
+                            $.post(url,params,function (result) {
+                                if(result&&result=="1") {
+                                    Utils.alert('提交成功');
+                                    pageselectCallback(@Model.OrderModels.PageIndex - 1);
+                                }
+                                else {
+                                    Utils.alert('提交失败');
+                                }
+                            });
+                        }
+                        , btn2: function (index, layero) {
+                            // 取消
+                        }
+                    });
+                }
+                else {
+                    Utils.alert('请求发生异常');
+                    Utils.layerClose(load_iii);
+                }
+            });
+
+            return false;
+        });
+
+        //收款
+        $("td [name='payin']").each(function (index, element) {
+            $(element).click(function () {
+                var load_iii = Utils.layerLoad();
+                var $objParentTd = $(this).parents("td");
+                var orderCode = $($objParentTd).find("input[name=hiddenOrderCode]").val();
+                var params = {
+                    "orderCode":orderCode
+                };
+                $.post('/Finance/SingleOrderPayInCheck/', params, function(data) {
+                    if(data){
+                        Utils.layerClose(load_iii);
+                        layer.open({
+                            type: 1, title: '确认收款', maxmin: false
+                            , shadeClose: false, area: ['400px', '300px']
+                            , content: data
+                            , btn: ["确认", "关闭"]
+                            , yes: function (index, layero) {
+                                    var paid=Number($('#singleConfirmPayIn').val());
+                                    //                                if(!paid||paid<=0) {
+                                    //                                    Utils.alert('收款数额需大于零');
+                                    //                                    return false;
+                                    //                                }
+                                    var $unPaid = $('#singleConfirmUnPaid');
+                                    var unPaid = Number($unPaid.text());
+                                    if(Math.abs(paid)>Math.abs(unPaid)) {
+                                        Utils.alert('收款数额大于未收账款');
+                                        return false;
+                                    }
+                                    params.CurrentPayment = $('#singleConfirmPayIn').val();
+                                    $.post('/Finance/OrdersTolPaid',params,function (result) {
+                                        if(result&&result=="1") {
+                                            Utils.alert('提交成功');
+                                            pageselectCallback(@Model.OrderModels.PageIndex - 1);
+                                        }
+                                        else {
+                                            Utils.alert('提交失败');
+                                        }
+                                    });
+                            }
+                            , btn2: function (index, layero) {
+                                // 取消
+                            }
+                        });
+                    }
+                    else  {
+                        Utils.alert('请求发生异常');
+                        Utils.layerClose(load_iii);
+                    }
+                });
+            });
+        });
+
+        //订单编号单击选中
+        $("td [name='ordercode']").each(function (index,element) {
+            $(element).click(function () {
+                var $objParentTr = $(this).parents("tr");
+                var $chkSingle = $($objParentTr).find("input[type='checkbox']");
+                if($($chkSingle).attr("disabled")=="disabled" || $($chkSingle).prop("checked"))
+                    $($chkSingle).prop("checked", false);
+                else
+                    $($chkSingle).prop("checked", true);
+            });
+        });
+
+    });
+
+    //分页
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post(
+            '@Url.Action("SearchFinance")',
+            params,
+            function (data) {
+                $('#divFinanceList').html(data);
+                hoverChangeStyle();
+                Utils.layerClose(load_iii);
+            });
+    }
+
+    //验证全选单选框是否可用
+    function isChkAllDisabled() {
+        var selectedItems = new Array();
+        var chkCount =Number( $("input[name='chkSingle']").length);
+        $("input[name='chkSingle']:disabled").each(function () {
+            selectedItems.push($(this).val());
+        });
+        if(chkCount==selectedItems.length)
+            $("#chkAll").attr("disabled",true);
+        else
+            $("#chkAll").attr("disabled",false);
+    }
+
+
+
+</script>

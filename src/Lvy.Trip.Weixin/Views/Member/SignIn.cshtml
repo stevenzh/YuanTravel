@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "登录";
+}
+
+<!-- sign in -->
+<div class="sign-in segments-page">
+    <div class="ui container">
+        <div class="pages-title">
+            <h3>登录</h3>
+        </div>
+        <form class="ui form">
+            <div class="field"><input type="text" placeholder="用户名/手机号码"></div>
+            <div class="field"><input type="email" placeholder="电子邮箱"></div>
+            <div class="field"><input type="password" placeholder="密码"></div>
+            <p><a href="">找回密码 ?</a></p>
+            <button class="button">登录</button>
+        </form>
+        <div class="social-login">
+            <h5>其他方式登录</h5>
+            <div class="ui grid">
+                <div id="menuitem_info" class="eight wide column pr">
+                    <a class="button-full button-wechat" href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fhome%2Findex%2F&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect">微信登陆</a>
+                </div>
+                @*<div class="eight wide column pl">
+                        <button class="button-full button-twitter"></button>
+                    </div>
+                    <div class="eight wide column pr">
+                        <button class="button-full button-linkedin">Linkedin</button>
+                    </div>
+                    <div class="eight wide column pl">
+                        <button class="button-full button-google">Google+</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div><!-- end sign in -->
+
+<script>
+    $(function () {
+        var flag = /MicroMessenger/i.test(navigator.userAgent);
+        if (flag == false)
+            $("#menuitem_info").hide();
+
+    });
+</script>

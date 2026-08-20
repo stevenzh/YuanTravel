@@ -1,0 +1,501 @@
+﻿@model Lvy.Models.ProductDB.TpLineModel
+@{
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+    ViewBag.Title = Model.LineName;
+    Member cuser = (Member)HttpContext.Current.Session["WeixinUser"]; //当前用户
+    var weixinUser = ViewBag.WeixinUser as Member; //上家
+    var JSApi = ViewBag.JsApi as Senparc.Weixin.MP.Helpers.JsSdkUiPackage;
+    string userkey = (cuser != null) ? cuser.MemberID.ToString() : "";
+    string employeekey = (cuser != null && !string.IsNullOrEmpty(cuser.EmployeeID)) ? cuser.EmployeeID : "";
+    string binding = (cuser != null) ? cuser.Approved.ToString() : "0";
+    bool hideShared = (cuser != null) ? cuser.HideShared : true;
+    string linedesc = "";
+    string lineimage = "http://yuanwx.sh-cct.cn/images/share_link.jpg";
+    string shareLink = "http://yuanwx.sh-cct.cn/line/details/" + Model.Id;
+    if (weixinUser != null)
+    {
+        shareLink = hideShared ? shareLink + "?woid=" + weixinUser.MemberID : shareLink;
+    }
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@using Lvy.Models.WeixinDB;
+@using Lvy.Models.ProductDB;
+@using Lvy.VModels.Product;
+@section HeaderContent
+{
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.carousel.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.theme.default.css" />
+    <link rel="stylesheet" href="~/css/style.css">
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <link href="~/Content/calendarchange.css" rel="stylesheet" />
+    <style>
+        .ui.items > .item .extra > * { margin: .25rem .25rem .25rem 0; padding: 0.5em 0.68em; }
+        .ui.items > .item .extra { color: rgba(0,0,0,.6); }
+    </style>
+}
+
+<!-- wrap content -->
+<div class="wrap-content pusher">
+
+    <!-- product details -->
+    <div class="product-details segments-page" style="margin-top:0;">
+        <div class="ui container">
+            @*
+                @if (Model.PicList != null && Model.PicList.Count > 0)
+                {
+                    for (int i = 0; i < Model.PicList.Count; i++)
+                    {
+                        var pic = Model.PicList[i];
+                        <div class="ui tab @(i==0?"active":"")" data-tab="@("product" + Model.PicList[i].Id)">
+                            <div class="content-img"><img src="@(picroot + pic.FilePath)" alt=""></div>
+                        </div>
+                    }
+                }
+                @if (Model.PicList != null && Model.PicList.Count > 0)
+                {
+                    <div class="ui menu">
+                        @for (int i = 0; i < Model.PicList.Count; i++)
+                        {
+                            var pic = Model.PicList[i];
+                            <a href="" class="item @(i==0?"active":"")" data-tab="@("product" + Model.PicList[i].Id)">
+                                <img src="@(picroot + pic.FilePath)" alt="">
+                            </a>
+                        }
+                    </div>
+                } *@
+            <div class="slide-product owl-carousel owl-theme">
+                @foreach (var item in Model.PicList)
+                {
+                    <div class="slide-content"><img src="@(picroot + item.FilePath)" alt=""></div>
+                }
+            </div>
+            <div class="desc-short">
+                <p class="title">@Model.LineName</p>
+                <h5>99 元 <span style="font-size:14px;">起</span></h5>
+                @*<p> </p>
+                    <button class="button"><i class="fa fa-shopping-cart"></i>预订产品</button>*@
+            </div>
+            <div class="desc-long">
+                <h5>产品经理推荐</h5>
+                <p>
+                    @Html.Raw(Model.LineSpecial.Replace("\r", "<br />"))
+                </p>
+            </div>
+
+            <div class="ui vertical segment">
+                @if (@ViewData["Message"] != null)
+                {
+                    <div class="ui info message">
+                        <div class="header">提示信息</div>
+                        <p>@ViewData["Message"]</p>
+                    </div>
+                }
+            </div>
+            <div class="ui attached segment">
+                <h4><i class="empty calendar purple icon"></i> 出发班期</h4>
+                <table class="ui unstackable very basic table">
+                    <thead>
+                        <tr>
+                            <th>开班</th>
+                            <th>余位</th>
+                            <th>售卖价</th>
+                            @if (binding.Equals("1"))
+                            {
+                                <th>同业价</th>
+                            }
+                        </tr>
+                    </thead>
+                    @{
+                        var row = 0;
+                        foreach (TourInfoVModel plan in Model.Tours)
+                        {
+                            if (row > 8) { break; }
+                            row = row + 1;
+                            <tr>
+                                <td>@plan.OutDate.ToString("MM-dd")</td>
+                                <td>
+                                    @if (plan.UseQuota > 9)
+                                    {@(">9 " + ((plan.UseQuota > 15) ? "充足" : ""));
+                                    }
+                                    else
+                                    { @plan.UseQuota;
+                                }
+                                </td>
+                                <td>@String.Format("{0:0}", plan.Price)</td>
+                                @if (binding.Equals("1"))
+                                {
+                                    <td>
+                                        @String.Format("{0:0}", plan.Price - plan.TeJiaFanLi)
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                </table>
+                <button id="btn_plans" class="ui basic button" style="padding:.55em .75em;">更多</button>
+            </div>
+
+            <div id="context1" class="ui fullscreen modal ">
+                <i class="close icon"></i>
+                <div class="header">出发班期</div>
+                <div class="content">
+                    @*<div class="ui secondary pointing menu">
+                            <a class="active item" data-tab="firsta"><i class="calendar purple icon"></i>月历显示</a>
+                            <a class="item" data-tab="firstb"><i class="browser purple icon"></i>开班列表</a>
+                        </div>*@
+                    <div class="ui active tab" data-tab="firsta">
+                        <div id='calendar'></div>
+                    </div>
+                    <div class="ui active tab" data-tab="firstb">
+                        <table class="ui unstackable table">
+                            <thead>
+                                <tr>
+                                    <th>开班</th>
+                                    <th>余位</th>
+                                    <th>售卖价</th>
+                                    @if (binding.Equals("1"))
+                                    {
+                                        <th>同业价</th>
+                                    }
+                                </tr>
+                            </thead>
+                            @foreach (TourInfoVModel plan in Model.Tours)
+                            {
+                                <tr>
+                                    <td>@plan.OutDate.ToString("MM-dd")</td>
+                                    <td>
+                                        @if (plan.UseQuota > 9)
+                                        {@(">9 " + ((plan.UseQuota > 15) ? "充足" : ""));
+                                        }
+                                        else
+                                        { @plan.UseQuota;
+                                    }
+                                    </td>
+                                    <td>@String.Format("{0:0}", plan.Price)</td>
+                                    @if (binding.Equals("1"))
+                                    {
+                                        <td>
+                                            @String.Format("{0:0}", plan.Price - plan.TeJiaFanLi)
+                                        </td>
+
+                                    }
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <br />
+
+            <div class="ui secondary pointing menu" style="background-color:#f7f7f7" id="route_header">
+                <a class="active item" href="#route-section">@*<i class="browser teal icon"></i>*@行程安排</a>
+                <a class="item" href="#features-section">@*<i class="circular inverted teal dollar icon"></i>*@费用说明</a>
+                @if (binding.Equals("1"))
+                {
+                    <a class="item" href="#price-section">@*<i class="circular teal dollar icon"></i>*@价格说明</a>
+                }
+            </div>
+
+            <div id="context2">
+                <div class="ui bottom active segment" id="route-section">
+                    <div class="ui divided items">
+                        @foreach (TpLineRouteModel route in Model.RouteInfo.TpLineRoutes)
+                        {
+                            <div class="item">
+                                <div class="content">
+                                    <div class="header" style="color:#0094ff">第 @route.Days 天</div>
+                                    <div class="description">
+                                        @*@Html.Raw(route.Contents.Replace("\n", "<br />"))*@
+                                        @Html.Raw(route.Contents)
+                                    </div>
+                                    <div class="extra">
+                                        <div class="ui label"><i class="orange food icon"></i>早餐:@Html.Raw(route.Breakfast)</div>
+                                        <div class="ui label"><i class="orange food icon"></i>午餐:@Html.Raw(route.Lunch)</div>
+                                        <div class="ui label"><i class="orange food icon"></i>晚餐:@Html.Raw(route.Supper)</div>
+                                        <div class="well well-sm">
+                                            <i class="building icon"></i>住宿：@route.Hotel
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="ui bottom segment" id="features-section">
+                    <h4>费用包含</h4>
+                    @Html.Raw(Model.PriceContain.Replace("\r", "<br />"))
+                    <div class="ui divider"></div>
+                    <h4>费用不包含</h4>
+                    @Html.Raw(Model.PriceNoContain.Replace("\r", "<br />"))
+                </div>
+
+                @if (binding.Equals("1"))
+                {
+                    <div class="ui bottom segment" id="price-section">
+                        @foreach (var ppp in Model.Tours)
+                        {
+                            <ul class="ui list">
+                                <li>
+                                    <a class="ui brown label">@ppp.OutDate.ToString("MM/dd(ddd)")</a> <a class="ui tag label">余位 @ppp.UseQuota</a>
+                                    <p>@string.Format("同业价:{0:0}", ppp.Price)</p>
+                                </li>
+                            </ul>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div><!-- end product details	 -->
+</div>
+
+@*<div class="ui segment">
+        <h5 class="ui top header">
+            保存二维码分享给你的朋友
+        </h5>
+        <img class="ui image" src="/QrCode/Line/@Model.Id">
+    </div>*@
+
+<div class="ui modal">
+    <i class="close icon"></i>
+    <div class="header">
+        旅游线路预订
+    </div>
+    <div class="content">
+        <div class="image">
+            @Model.LineName
+        </div>
+        <div class="description">
+            <div class="ui form">
+                <div class="field">
+                    <label>联系人</label>
+                    <input type="text" value="@(cuser != null? cuser.RealName : "")">
+                </div>
+                <div class="field">
+                    <label>联系电话</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>预订人数</label>
+                    <input type="text">
+                </div>
+                <div class="field">
+                    <label>其它要求</label>
+                    <textarea></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <div class="ui button cancel">取消</div>
+        <div class="ui button ok">预订</div>
+    </div>
+</div>
+
+@if (ViewBag.WeixinUser != null)
+{  // 转发带有用户ID
+    if (hideShared)
+    {
+        <style>
+            .pusher { padding-bottom: 80px; }
+        </style>
+
+        <div class="ui blue inverted menu bottom fixed">
+            @if (!string.IsNullOrEmpty(weixinUser.LogoUrl))
+            {
+                <a class="active item" style="padding:5px;">
+                    <img src="@weixinUser.LogoUrl" width="40">
+                </a>
+            }
+            <a class="item" href="tel:@weixinUser.PhoneNumber">
+                <p>
+                    <i class="call icon"></i> @weixinUser.PhoneNumber<br />
+                    <i class="building icon"></i> @weixinUser.CustomerName
+                </p>
+            </a>
+            <div class="right menu">
+                <div class="item" style="padding:5px;">
+                    <p>@weixinUser.RealName</p>
+                    @if (weixinUser.MemberID.ToString() != userkey && hideShared)
+                    {
+                        <a id="wxshare" href="@("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fline%2Fdetails%2F" + Model.Id + "%3Fwxshare%3Dshare%26woid%3D" + weixinUser.MemberID + "&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect")"><i class="share icon"></i>我要分享</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{  // 没有用户信息
+    <style>
+        .pusher { padding-bottom: 30px; }
+    </style>
+    <div id="wxshare" class="ui blue inverted menu bottom fixed">
+        <div class="item">
+            <a href="@("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fline%2Fdetails%2F" + Model.Id + "%3Fwxshare%3Dshare&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect")"><i class="share icon"></i>以我的姓名、电话分享给朋友</a>
+        </div>
+        @*@if (!String.IsNullOrEmpty(Model.FILE_PATH))
+            {
+            <div class="right item">
+                <a href="http://manage.sh-cct.com/download/line/@Model.FILE_PATH" onclick="downdoc();"><i class="download yellow outline icon"></i>下载行程</a>
+            </div>
+            }*@
+    </div>
+}
+
+@section Scripts {
+    <script src="~/Scripts/lunar_demo.js"></script>
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+    <script src="@CDNServerUrl/owl-carousel/owl.carousel.js"></script>
+    <script src="~/js/main.js"></script>
+    <script>
+        $('#context1 .menu .item').tab({ context: $('#context1') });
+        $('#context2 .menu .item').tab({ context: $('#context2') });
+        var flag = /MicroMessenger/i.test(navigator.userAgent);
+        if (flag == false)
+            $("#wxshare").hide();
+    </script>
+    <script>
+    $(document).ready(function () {
+
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            header: {
+                left: 'prev',
+                center: 'title',
+                right: 'next'
+            },
+            locale: 'zh-cn',
+            height: 'auto',
+            editable: false,
+            defaultView: 'dayGridMonth',//默认视图
+            buttonText: {
+                today: '今天',
+                dayGridMonth: '月',
+                dayGridWeek: '周',
+            },
+            events: function(info, successCallback, failureCallback){
+                $.ajax({
+                    type : "post",
+                    url : '/Line/GetCalendar/@Model.LineId',
+                    data: {},
+                    dataType: "json",
+                    success : function(result) {
+                        successCallback(result);
+                    }
+                });
+            },
+        });
+
+        //$('#calendar').fullCalendar({
+        //    //@*defaultDate: '@Model.FirstPlan',*@
+            //editable: false,
+            //header : {
+            //    left:   'prev',
+            //    center: 'title',
+            //    right:  'next'
+            //},
+            //lang: 'zh-cn',
+            //height: 'auto',
+            //aspectRatio:1.2,
+            //dayNamesShort: ['日','一','二','三','四','五','六'],
+            //eventLimit: true, // allow "more" link when too many events
+        //    //eventSources: "/Line/GetCalendar/@Model.Id",
+        //    dayCellDidMount: function (date, cell) {
+        //        var fes = lunar(date).festival();
+        //        if (fes && fes.length > 0) {
+        //            $(cell).html($.trim(fes[0].desc));
+        //            $(cell).addClass('holiday');
+        //        }
+        //    },
+        //    eventClick: function (calEvent, jsEvent, view) {
+        //        //alert('Event.start:' + moment.utc(calEvent.start).format('YYYY-MM-DD'));
+        //        //$('.ui.modal').modal('show');
+        //    }
+        //});
+
+        $('#route_header').sticky({context: '#context2'});
+
+        $('#btn_plans').click(function() {
+            $('#context1.modal').modal('setting', 'closable', true).modal('show');
+            $("#context1").css("margin-top", "14px");//.css("top","200px");
+            calendar.render();
+        });
+
+        $(window).scroll(function () {
+            var rT = $('#route-section').offset().top,  // 位置
+                rH = $('#route-section').outerHeight(), // 高度
+                hT = $('#features-section').offset().top,
+                hH = $('#features-section').outerHeight(),
+                wH = $(window).height(),   // 固定高度
+                wS = $(this).scrollTop();
+
+            if (wS > (hT + hH - wH - 54)) {
+                $("#route_header a").each(function () {
+                    if ($(this).attr('href') == '#features-section') {
+                        $(this).addClass("active");
+                    } else {
+                        $(this).removeClass("active");
+                    }
+                });
+            } else if (wS > (rT + rH - wH)) {
+                $("#route_header a").each(function () {
+                    if ($(this).attr('href') == '#route-section') {
+                        $(this).addClass("active");
+                    } else {
+                        $(this).removeClass("active");
+                    }
+                });
+            }
+        });
+
+        // 点击 menu item 去掉其他选中状态
+        $("#route_header a").bind("click", function () {
+            $(this).addClass("active");
+            $(this).nextAll().removeClass("active");
+            $(this).prevAll().removeClass("active");
+        });
+
+    });
+    </script>
+
+    @if (JSApi != null)
+    {
+        <script>
+        wx.config({
+            debug: false,
+            appId: '@JSApi.AppId',
+            timestamp: @JSApi.Timestamp ,
+            nonceStr: '@JSApi.NonceStr',
+            signature: '@JSApi.Signature',
+            jsApiList: [
+            'checkJsApi',
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'onMenuShareQQ',
+            'onMenuShareWeibo',
+            'closeWindow',
+            'hideMenuItems'
+            ]
+        });
+        wx.ready(function(){
+
+            var shareData = {
+                title: '@Model.LineName',
+                desc: '@linedesc',
+                link: '@shareLink',
+                imgUrl: '@lineimage'
+            };
+            wx.onMenuShareAppMessage(shareData);
+            wx.onMenuShareTimeline(shareData);
+            wx.hideMenuItems({
+                menuList: ['menuItem:profile','menuItem:addContact']
+            });
+        });
+        </script>
+    }
+}

@@ -1,0 +1,273 @@
+﻿@model Lvy.Models.HotelDB.HotelRoomModel
+@{ 
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "编辑房型";
+    var items = DictionaryTools.GetEnumsBy(Enums.BedTypeEnum);
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/jquery.validate.min.js"></script>
+    <script src="~/WebRes/scripts/jquery.validate.message.cn.js"></script>
+}
+
+<section class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <form id="theForm" method="POST">
+                    @Html.HiddenFor(m => m.HotelCode)
+                    @Html.HiddenFor(m => m.RoomID)
+
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="RoomName">房型名称</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.RoomName, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="Pax">可住人数</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.Pax, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceLevel">床型</label>
+                            <div class="col-sm-10" id="divbeds">
+                                @for (int i = 0; i < Model.BedList.Count; i++)
+                                {
+                                    var bbd = Model.BedList[i];
+                                    <div class="form-row">
+                                        <div class="col-5">
+                                            <input type="hidden" name="BedList[@i].BedID" value="@bbd.BedID" />
+                                            <select name="BedList[@i].BedType" value="@bbd.BedType" class="form-control form-control-sm">
+                                                @foreach (var item in items)
+                                                {
+                                                    if (item.Key == Model.BedList[i].BedType.ToString())
+                                                    {
+                                                        <option selected="selected" value="@item.Key"> @item.Value</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.Key"> @item.Value</option>
+                                                    }
+                                                }
+
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <input type="text" name="BedList[@i].BedIntroduce" value="@bbd.BedIntroduce" class="form-control form-control-sm" placeholder="说明">
+                                        </div>
+                                        <div class="col-2">
+                                            <select name="BedList[@i].BedNum" value="@bbd.BedNum" class="form-control form-control-sm">
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-1">
+                                            <input type="hidden" name="BedList[@i].RoomID" value="@bbd.RoomID" />
+                                            @if (i > 1)
+                                            {
+                                                <button name="lnkDel" type="button" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> 删除</button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-10"> <button id="addItem2" type="button" class="btn btn-sm btn-info"><i class="fa fa-pus"></i>添加</button></div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="AddBed">可否加床</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.AddBed, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="AddBedInfo">加床政策</label>
+                            <div class="col-sm-10">
+                                @Html.TextAreaFor(model => model.AddBedInfo, new { @class = "form-control form-control-sm", @row = "3" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="Breakfast">早餐</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(model => model.Breakfast, new { @class = "form-control form-control-sm " })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="RoomInformation">房型介绍</label>
+                            <div class="col-sm-10">
+                                @Html.TextAreaFor(model => model.RoomInformation, new { @class = "form-control form-control-sm ", @row = "3" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="Facility">服务设施</label>
+                            <div class="col-sm-10">
+                                @Html.CheckboxList("Facility", ViewBag.RoomFacilities as IEnumerable<SelectListItem>, Model.RoomFacility)
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="UploadFile">图片上传</label>
+                            <div class="col-sm-3">
+                                <input type="text" name="FileName" class="form-control" id="FileName" placeholder="图片说明" />
+                            </div>
+                            <div class="input-group col-sm-7">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="UploadFile">
+                                    <label class="custom-file-label" data-browse="选择文件" for="UploadFile">选择文件</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <input type="button" id="btnUpload" class="btn btn-info" value="上传" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label">房间照片</label>
+                            <div class="col-sm-10">
+                                <div id="photoView" class="row">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer clearfix">
+                        <button id="btnSave" type="button" class="btn btn-success">保存</button>
+                        <button id="btnClear" type="button" class="btn btn-secondary">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+@section PageScripts
+{
+    <!-- bs-custom-file-input -->
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <script type="text/javascript">
+
+    $(function () {
+
+        bsCustomFileInput.init();
+
+        $("#btnUpload").click(function () {
+            if ($.trim($("[name='UploadFile']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("[name='FileName']").val()) == "") {
+                Utils.alert("上传文件的说明不能空！");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("UploadFile", $("[name='UploadFile']")[0].files[0]);
+            formData.append("HotelCode", '@Model.HotelCode');
+            formData.append("KeyID", '@Model.RoomID');
+            formData.append("Type", '32');    // 固定设置 32 房间照片,  31 酒店照片
+            $.ajax({
+                url: '@Url.Action("UploadPhoto")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    if (parseInt(data) > 0) {
+                        photoView();
+                    }
+                }
+            });
+        });
+
+        $("#btnSave").click(function () {
+            $('#theForm').ajaxSubmit({
+                type: 'post',
+                url: '@Url.Action("RoomEdit")',
+                success: function (data) {
+                    if (data.Code == "1") {
+                        Utils.alert("保存成功");
+
+                        // 弹出框关闭前调用父窗口方法
+                        parent.reloadRooms();
+
+                        // 弹出框关闭
+                        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(index);
+                    } else {
+                        Utils.alert(data.Message);
+                    }
+                },
+            });
+        });
+
+        $("#btnClear").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+
+        // validate signup form on keyup and submit
+        $("#theForm").validate({
+            rules: {
+                PlaceName: "required",
+                PlaceLevel: "required",
+                OpenTime: "required",
+                PlaceDesc: "required"
+            },
+            messages: {
+                PlaceName: "请输入景区名称！",
+                PlaceLevel: "请输入景区星级",
+                OpenTime: "请输入开放时间！",
+                PlaceDesc: "请输入景区描述"
+            }
+        });
+
+
+        // 添加成本
+        $("#addItem2").click(function () {
+            var cnt = $("#divbeds div.form-row").length;
+            $.post("@Url.Action("AddRowBed")", { rowIndex: cnt, roomId: '@Model.RoomID' }, function (html) {
+                $("#divbeds").append(html);
+            });
+        });
+        $("button[name='lnkDel']").on("click", function () {
+            var obj = $(this).parent().parent("div.form-row");
+            $(obj).remove();
+        });
+
+        photoView();
+    });
+
+    function photoView() {
+       $.get("/HotelAdmin/RoomPhotoView", { hotelCode: '@Model.HotelCode', roomId :'@Model.RoomID' }, function(html) {
+            $("#photoView").html(html);
+            $('.delimg').click(function () {
+                var param = { "Id": $(this).attr("data-bind") }
+                 layer.confirm('确定删除图片吗?', { btn: ['是', '否'] }, function () {
+                    $.post("/HotelAdmin/DeletePicture/", param, function (data) {
+                        if (data != null && data.length > 0 && data == "1") {
+                            layer.close(layer.index);
+                            photoView();
+                        } else {
+                            toastr.warning(data);
+                        }
+                    });
+                }, function () {
+                    //console.log("选择的否");
+                });
+            });
+        });
+    }
+
+    </script>
+}

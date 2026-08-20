@@ -1,0 +1,141 @@
+﻿@model Lvy.VModels.Finance.ProceedsSearchQModel
+@{
+    Layout = null;
+}
+@if (Model.ProceedsPageList.TotalCount > 0)
+{
+    int i = 0;
+    <div class="xbox clear">
+        <table class="listtbl" style="width: 100%;">
+            <thead>
+                <tr>
+                    <td>交款单号</td>
+                    <td>交款金额</td>
+                    <td>交款时间</td>
+                    <td>交款客户</td>
+                    <td>业务部门</td>
+                    <td>业务员</td>
+                    <td>收款人</td>
+                    <td>操作</td>
+                </tr>
+            </thead>
+            @foreach (var item in Model.ProceedsPageList.Items)
+            {
+                i++;
+                <tr id="main_@item.ProceedsCode">
+                    <td>@item.ProceedsCode</td>
+                    <td>@decimal.Round(item.ReceiveSum.Value, 2)</td>
+                    <td>@item.ProceedsDate</td>
+                    <td>@item.ChargerHost</td>
+                    <td>@item.ChargerDept</td>
+                    <td>@item.ChargerName</td>
+                    <td>@item.CheckName</td>
+                    <td>
+                        @* <a href="###" onclick="ShowDetail('<%:model.ProceedsCode %>')">详细</a>*@
+                        <a href="javascript:void(0)" onclick="CollectionPrint('@item.ProceedsCode')">查看/打印</a>
+                    </td>
+                </tr>
+                <tr id="@item.ProceedsCode" style="display: none">
+                    <td colspan="10">
+                        <div id="show_@item.ProceedsCode"></div>
+                    </td>
+                </tr>
+            }
+        </table>
+
+        <table width="100%" border="0" style="margin-top: 10px;">
+            <tr class="table_title">
+                <td colspan="12" style="padding-left: 5px;">
+                    <div id="Pagination" class="digg">
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function () {
+        $("#Pagination").pagination(
+            Number(@Model.ProceedsPageList.TotalCount), {
+                callback: pageQueryRefund,
+                prev_text: '前一页',
+                next_text: '后一页',
+                items_per_page: Number(@Model.ProceedsPageList.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: index
+            });
+    });
+
+    function ShowDetail(code) {
+
+        var flag = $("#" + code).css("display");
+        var detail = $("#show_" + code);
+
+        if (flag != "none") {
+            $("#" + code).hide();
+            $("#img_" + code).attr("src", "../../Images/bg_toggle_up.gif");
+            detail.empty();
+        } else {
+            $("#" + code).show();
+            $("#img_" + code).attr("src", "../../Images/bg_toggle_down.gif");
+            var rnd = Math.random();
+            $.get("/Proceeds/GetCollectionDetail", { "orderCode": code, "r": rnd, "flag": "1" }, function (result) {
+                detail.html(result);
+            });
+        }
+    }
+
+    function CollectionPrint(code) {
+        layer.open({ type: 2, title: '打印订单收款单', maxmin: true, shadeClose: false, area: ['700px', '400px'], content: '/Proceeds/CollectionPrint?collectionCode=' + code });
+    }
+
+    //回调方法
+    function pageQueryRefund(page_id, jq) {
+        index = page_id;
+        page_id = page_id + 1;
+        $("#pageIndex").val(page_id);
+        var param = {
+            "OrderType": $("#OrderType").val(),
+            "PayStatus": $("#PayStatus").val(),
+            "CollectionType": $("#CollectionType").val(),
+            "CollectedDateFrom": $("#CollectedDateFrom").val(),
+            "CollectedDateTo": $("#CollectedDateTo").val(),
+            "OrderLinkman": $("#OrderLinkman").val(),
+            "OrderLinkmanMobile": $("#OrderLinkmanMobile").val(),
+            "CollectedMan": $("#CollectedMan").val(),
+            "CollectedConfirmMan": $("#CollectedConfirmMan").val(),
+            "pagedIndex": page_id
+        }
+
+        $.post('/Proceeds/CollectionQueryList', param, function (data) {
+            $('#CollectionQueryList').html(data);
+        });
+    }
+
+    function CollectionPrint(code) {
+        layer.open({ type: 2, title: '打印收款单', maxmin: true, shadeClose: false, area: ['700px', '400px'], content: '/Proceeds/CollectionPrint?collectionCode=' + code });
+    }
+
+    //function ConfirmCollection(code) {
+    //    layer.open({ type: 2, title: '到账确认', maxmin: true, shadeClose: false, area: ['700px', '400px'], content: '/Collection/CollectionConfirm?collectionCode=' + code });
+    //}
+
+    //function RefreshCollection(code, tradeNo) {
+    //    var currLine = $("#cf_" + code);
+    //    currLine.children("td:eq(4)").css("background-color", "white").html("已到账");
+    //    currLine.children("td:eq(7)").html(tradeNo);
+    //    var url = "<a onclick=\"CollectionPrint(\"" + code + "\")\" href=\"javascript:void(0)\">查看/打印</a>";
+    //    currLine.children("td:eq(8)").html(url);
+    //}
+    ////名称:关闭弹出层
+    //function ClosePlan() {
+    // 弹出框关闭
+    // var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+    // parent.layer.close(index); 
+    //}
+</script>
+

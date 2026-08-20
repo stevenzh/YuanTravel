@@ -1,0 +1,497 @@
+﻿@model Lvy.VModels.Op.EditTouristsVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "EditTourists";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+}
+<div class="station">
+    编辑游客资料
+</div>
+<form id="theForm" action="@Url.Action("SaveTourists")">
+    <div class="in_box">
+        <div class="xboxcontent">
+            <div class="sotable_tit">
+                团计划信息
+                @Html.HiddenFor(m => m.Tour.Id)
+                @Html.HiddenFor(m => m.Line.TrafficType)
+            </div>
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label">团号：</td>
+                    <td>@Model.Tour.TourNo</td>
+                    <td class="label">线路名称：</td>
+                    <td colspan="3">@Model.Line.LineName</td>
+                </tr>
+                <tr>
+                    <td class="label">出发日期：</td>
+                    <td>@Model.Tour.OutDate.ToDateFormat()</td>
+                    <td class="label">线路类型：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.Line.LineType.ToString())</td>
+                </tr>
+                <tr>
+                    <td class="label">计划库存：</td>
+                    <td>@(Model.Quota.HoldQuota > 0 ? Model.Quota.PlanQuota - Model.Quota.HoldQuota + "+" + Model.Quota.HoldQuota : Model.Quota.PlanQuota.ToString())</td>
+                    <td class="label">已确认/占位 ：</td>
+                    <td>@Model.Quota.UsedQuota / @Model.Quota.UnLockQuota</td>
+                    <td class="label">剩余库存：</td>
+                    <td>@Model.Quota.UseQuota</td>
+                </tr>
+                @if (Model.Line.LineScope == 4)
+                {
+                    <tr>
+                        <td class="label">入境日期：</td>
+                        <td>
+                            <input type="text" name="Tour.EntryDate" value="@(Model.Tour.EntryDate == null ? "" : Model.Tour.EntryDate.Value.ToString("yyyy-MM-dd"))" class="Wdate text150" onfocus="WdatePicker({isShowClear:false,readOnly:true})" />
+                        </td>
+                        <td class="label">入境口岸：</td>
+                        <td>@Html.DropDownListFor(m => Model.Tour.PortOfEntry, Model.DestinationList.ToSelectListFor())</td>
+                        <td class="label">出境口岸：</td>
+                        <td>@Html.DropDownListFor(m => Model.Tour.PortOfExit, Model.DestinationList.ToSelectListFor())</td>
+                    </tr>
+                }
+                <tr>
+
+                    <td class="label">人均成本：</td>
+                    <td>
+                        @Html.TextBoxFor(m => Model.Tour.PerCapitaCost, new { @class = "text100" })
+                    </td>
+                </tr>
+            </table>
+
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;height:25px">
+                游客列表
+                <div class="fr">
+                    <input type="button" id="guideBtn" class="btn btn1" value="选择领队" />
+                </div>
+            </div>
+            <div id="divUCTourists">
+                <table class="listtbl" style="border: 0px;width:100%;">
+                    <thead>
+                        <tr style="text-align: center;">
+                            <td style="width:30px;"></td>
+                            <td>姓名</td>
+                            @if (Model.Line.LineScope == 3 || Model.Line.LineScope == 4)
+                            {
+                                <td style="width:50px;">性别</td>
+                                <td>英文名</td>
+                                <td>出生日期</td>
+                                <td>出生地</td>
+                            }
+                            <td>证件类型</td>
+                            <td>证件号码</td>
+                            @if (Model.Line.LineScope == 3 || Model.Line.LineScope == 4)
+                            {
+                                <td>签发地</td>
+                                <td>签发时间</td>
+                                <td>证件有效期</td>
+                            }
+                            <td>电话</td>
+                            @if (Model.Line.TrafficType == 1)
+                            {
+                                <td>座位号</td>
+                            }
+                            <td style="width:100px;">价格说明</td>
+                            <td>应收款</td>
+                            <td style="width:80px;">状态</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0, len = Model.Tourists.Count; i < len; i++)
+                        {
+                            @Html.HiddenFor(m => Model.Tourists[i].IsLeader)
+
+                            if (Model.Tourists[i].State == 0 || Model.Tourists[i].State == 1)
+                            {
+                                <tr style="text-align: center;">
+                                    <td><span style="color:blue">@(Model.Tourists[i].IsLeader ? "领队" : "")</span></td>
+                                    <td style="text-align:left;">
+                                        @Html.HiddenFor(m => Model.Tourists[i].Id)
+                                        @Html.HiddenFor(m => Model.Tourists[i].State)
+                                        @Model.Tourists[i].Name
+                                    </td>
+                                    @if (Model.Line.LineScope == 3 || Model.Line.LineScope == 4)
+                                    {
+                                        <td style="text-align:left;">@DictionaryTools.GetEnumValue(Enums.SexEnum, Model.Tourists[i].Sex)</td>
+                                        <td style="text-align:left;">@Model.Tourists[i].PinYin</td>
+                                        <td>@Model.Tourists[i].DateOfBirth</td>
+                                        <td>@Model.Tourists[i].PlaceOfBirth</td>
+                                    }
+                                    <td style="text-align:left;">
+                                        @DictionaryTools.GetEnumValue(Enums.PassTypeEnum, Model.Tourists[i].PassType.ToString())
+                                    </td>
+                                    <td>@Model.Tourists[i].PassNo</td>
+                                    <td>@Model.Tourists[i].Phone</td>
+                                    @if (Model.Line.TrafficType == 1)
+                                    {
+                                        <td>@Model.Tourists[i].SeatNum</td>
+                                    }
+                                    <td>@Model.Tourists[i].PriceContent.TrimWithElipsis(6)</td>
+                                    <td>@Model.Tourists[i].YsPrice</td>
+                                    <td>
+                                        @if (Model.Tourists[i].State == 0)
+                                        {
+                                            <span style="color: red;">已取消</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: red;">已退团</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr style="text-align: center; background-color:@(Model.Tourists[i].IsChecked?"palegreen":"#fff")">
+                                    <td>
+                                        <span style="color:blue;">@(Model.Tourists[i].IsLeader ? "领队" : "")</span>
+                                    </td>
+                                    <td>
+                                        @Html.HiddenFor(m => Model.Tourists[i].Id)
+                                        @Html.HiddenFor(m => Model.Tourists[i].State)
+                                        @Html.TextBoxFor(m => Model.Tourists[i].Name, new { @class = "text70" })
+                                    </td>
+                                    @if (Model.Line.LineScope == 3 || Model.Line.LineScope == 4)
+                                    {
+                                        <td>
+                                            @{
+                                                var resultList = new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                {
+                                                new SelectListItem {Text = "男", Value = "1" ,Selected=("1"==Model.Tourists[i].Sex?true:false)},
+                                                new SelectListItem {Text = "女", Value = "2", Selected=("2"==Model.Tourists[i].Sex?true:false)},
+                                                //new SelectListItem {Text = "其他", Value = "3",Selected=("3"==Model.Tourists[i].Sex?true:false)}
+                                                };
+                                            }
+                                            @Html.DropDownListFor(a => Model.Tourists[i].Sex, resultList, new { @class = "text50" })
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(m => Model.Tourists[i].PinYin, new { @class = "text100" })
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Tourists[@i].DateOfBirth" value="@(Model.Tourists[i].DateOfBirth == null ? "" : Model.Tourists[i].DateOfBirth.Value.ToString("yyyy-MM-dd"))" class="Wdate text100" onfocus="WdatePicker({isShowClear:false})" />
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(m => Model.Tourists[i].PlaceOfBirth, new { @class = "text70" })
+                                        </td>
+                                    }
+                                    <td>
+                                        @Html.DropDownListFor(m => Model.Tourists[i].PassType, DictionaryTools.GetEnumsBy(Enums.PassTypeEnum).ToSelectListFor(Model.Tourists[i].PassType.ToString()), new { dataname = "passtype", passno = "Tourists[" + i + "].PassNo" })
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(m => Model.Tourists[i].PassNo, new { @class = "text100", id = "Tourists[" + i + "].PassNo" })
+                                    </td>
+                                    @if (Model.Line.LineScope == 3 || Model.Line.LineScope == 4)
+                                    {
+                                        <td>
+                                            @Html.TextBoxFor(m => Model.Tourists[i].PlaceOfIssue, new { @class = "text70", id = "Tourists[" + i + "].PlaceOfIssue" })
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Tourists[@i].DateOfIssue" value="@(Model.Tourists[i].DateOfIssue == null ? "" : Model.Tourists[i].DateOfIssue.Value.ToString("yyyy-MM-dd"))" class="Wdate text100" onfocus="WdatePicker({isShowClear:false})" />
+                                        </td>
+                                        <td>
+                                            <input type="text" name="Tourists[@i].DateOfExpiry" value="@(Model.Tourists[i].DateOfExpiry == null ? "" : Model.Tourists[i].DateOfExpiry.Value.ToString("yyyy-MM-dd"))" class="Wdate text100" onfocus="WdatePicker({isShowClear:false})" />
+                                        </td>
+                                    }
+                                    <td>
+                                        @Html.TextBoxFor(m => Model.Tourists[i].Phone, new { @class = "text100" })
+                                    </td>
+                                    @if (Model.Line.TrafficType == 1)
+                                    {
+                                        <td>
+                                            @Html.TextBoxFor(m => Model.Tourists[i].SeatNum, new { @class = "text50", dataname = "seatnum", initialvalue = Model.Tourists[i].SeatNum, errortip = "" })
+                                        </td>
+                                    }
+                                    <td>
+                                        @Model.Tourists[i].PriceContent.TrimWithElipsis(6)
+                                    </td>
+                                    <td>
+                                        @Model.Tourists[i].YsPrice
+                                    </td>
+                                    <td>
+                                        <span>有效</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div style="text-align: center;">
+            @*@if(GlobalContext.Current.IsSysAdmin) {
+                <input type="button" class="btn btn2" id="btnCalcTourQuota" value="重算库存及座位"/>
+                }*@
+            @*<input type="button" class="btn btn2" id="exportDuiZhangDan" value="导出单团对账单" />
+                <input type="button" class="btn btn2" id="printBtn" value="导出游客名单(old)" />
+                <input type="button" class="btn btn2" id="exportTourists" value="导出游客名单(new)" />*@
+            <input type="button" class="btn btn2" id="Senake" value="金棕榈名单导出" />
+            @*<input type="button" class="btn btn2" id="sightseer" value="游客名单导出" />*@
+            <input type="button" class="btn btn2" id="Guest" value="客人名单导出" onclick="location.href='@Url.Action("UCGuest",new { tourId = Model.Tour.Id })'" />
+            <input type="button" class="btn btn2" id="checkBtn" value="客人资料核对" />
+            <input type="button" class="btn btn1" id="saveBtn" value="保存" />
+            <input type="button" class="btn btn1" id="backBtn" value="返回" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    function checkInputId(idType, idValue, idInputElement) {
+        switch (idType) {
+            case "0":
+                return true;
+            case "1":
+                if (!Utils.Check.IsID(idValue)) {
+                    Utils.alert("请输入正确的身份证！");
+                    idInputElement.focus().select();
+                    return false;
+                }
+                break;
+            default:
+                if (Utils.Trim(idValue) == "") {
+                    Utils.alert("请输入证件号码！");
+                    idInputElement.focus().select();
+                    return false;
+                }
+                var date2 = new Date($("#PassportExpiry").val());
+                var date1 = new Date($("#TouristsInfo_DateOfExpiry").val());
+                if (date1 < date2) {
+                    Utils.alert("护照有效期应晚于团返回日期+180天");
+                    return false;
+                }
+        }
+        return true;
+    }
+    function changePassType() {
+        if ($(':hidden[name="Line.TrafficType"]').val() != 1) {
+            $('select[dataname="passtype"]').change(function () {
+                var $this = $(this);
+                var passNoName = $this.attr('passno'); //证件号Html元素的name
+                var $passNo = $(':text[name="' + passNoName + '"]');
+                var passNo = $passNo.val();
+                checkInputId($this.val(), passNo, $passNo);
+            });
+        }
+    }
+    function blurSeatNum() {
+        var $seatInput = $(':text[dataname="seatnum"]');
+        if($seatInput.length>0) {
+            $seatInput.blur(function() {
+                var $this = $(this);
+                var initialValue = $this.attr('initialvalue');
+                if(initialValue==$this.val()) {
+                    $this.attr('errortip','');
+                    return;
+                }
+                var seatNum = $this.val();
+                if (seatNum.length > 0) {
+                    $.post('@Url.Action("CheckSeatNum")', { tourId: @Model.Tour.Id, seatNum: seatNum }, function(result) {
+                        if (result == 100) {
+                            //
+                            $this.attr('errortip','');
+                        }
+                        else if (result == 101) {
+                            Utils.alert("已经有客人吧车位占了，请重新选择车位！");
+                            $this.attr('errortip','已经有客人吧车位占了，请重新选择车位！');
+                        } else if (result == 102) {
+                            Utils.alert("车位已经被万恶的Op锁定了，请联系Op！");
+                            $this.attr('errortip','车位已经被万恶的Op锁定了，请联系Op！');
+                        } else if (result == 110) {
+                            Utils.alert("车位超出范围！");
+                            $this.attr('errortip','车位超出范围！');
+                        } else {
+                            Utils.alert("这个错误我也不知道该怎么形容了！请联系技术支持！");
+                            $this.attr('errortip','这个错误我也不知道该怎么形容了！请联系技术支持！');
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    function LoadTravellers() {
+        //console.log("LoadTravellers");
+        window.location.reload();
+    }
+
+    $(function () {
+        changePassType();
+        //blurSeatNum();
+
+        // 拼音生成
+        $("input[name$='Name']").on("keyup keydown change blur", function () {
+            var obj = $(this).parent("td").parent("tr");
+            obj.find("input[name$='PinYin']").val($(this).toPinyin());
+        });
+
+        $('#saveBtn').click(function () {
+
+            if (!CheckControl()) {
+                return false;
+            }
+
+            var params = decodeURIComponent($("#theForm").formSerialize());
+            var load_iii = Utils.layerLoad();
+            $.post('@Url.Action("SaveTourists")', params, function (data) {
+                if (data.StateCode == 100) {
+                    window.location.reload();
+                } else if (data.StateCode == 101) {
+                    // 车位已经占了的场合，刷新车位数据，提示客户重新选择车位
+                    Utils.alert("保存失败。已经有客人吧车位占了，请重新选择车位！");
+                } else if (data.StateCode == 102) {
+                    // 车位已经被锁定的场合，刷新车位数据，提示客户重新选择车位
+                    Utils.alert("保存失败。车位已经被万恶的Op锁定了，请联系Op！");
+                } else {
+                    Utils.alert("保存失败。这个错误我也不知道该怎么形容了！请联系技术支持！");
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+
+        $("#exportDuiZhangDan").click(function() {
+            window.open('@Url.Action("ExportDuiZhangDanExcel", new { tourId = Model.Tour.Id   })');
+        });
+        $('#printBtn').click(function() {
+            window.open('@Url.Action("TouristsList", new { tourId = Model.Tour.Id   })');
+        });
+
+        $('#backBtn').click(function() {
+            window.location = "/OpTour/SearchTour";
+        });
+        //金棕榈名单导出
+        $('#Senake').click(function() {
+            window.open('@Url.Action("Visitor", new { tourId = Model.Tour.Id  })');
+        });
+        @*//游客信息导出
+        $('#sightseer').click(function() {
+            window.open('@Url.Action("Listourists", new { tourId = Model.Tour.Id   })');
+        });*@
+        $("#exportTourists").click(function() {
+            window.open('@Url.Action("ExportTourists", new { tourId = Model.Tour.Id   })');
+        });
+
+        // 重算库存和座位号
+        $("#btnCalcTourQuota").click(function() {
+            window.location = "/OpTour/ReCalcTourQuota?tourId="+@Model.Tour.Id;
+        });
+
+        $("#guideBtn").click(function(){
+
+            var result=false;
+            $.ajax({
+                type:'post',
+                url:'@Url.Action("CheckTourTravellerCount")',
+                async:false,
+                data:{tourId:@Model.Tour.Id},
+                success:function(data){
+                    if (data.UseQuota>0) {
+                        result=true;
+                    }
+                }
+            })
+
+            if (!result) {
+                Utils.alert("该团可用名额不足！");
+                return;
+            }
+
+            // 弹出框
+            var url = '@Url.Action("ChoiceGuide",new { tourId=Model.Tour.Id })';
+            layer.open({ type: 2, title: '选择领队', maxmin: true, shadeClose: false, area: ['1000px', '500px'], content: url });
+        });
+
+        $("#checkBtn").click(function () {
+            var url = '@Url.Action("CheckTourists", new { tourId=Model.Tour.Id })';
+            layer.open({ type: 2, title: '游客信息核对', maxmin: true, shadeClose: false, area: ['1000px', '550px'], content: url });
+        })
+    });
+
+
+        //验证输入数据
+    function CheckControl() {
+
+        // 姓名不能为空
+        var returnvalue = true;
+        var touristName = new Array()
+        $("#divUCTourists").find("input[name$='Name']").each(function (index, item) {
+            touristName[index] = $(this).val();
+            if (Utils.Trim($(this).val()) == "") {
+                Utils.alert("第"+(index+1)+"行游客姓名不能为空！");
+                $(this).focus().select();
+                returnvalue = false;
+                return false;
+            }
+        });
+        //$("#divUCTourists").find("select[name$='Sex']").each(function (index,item) {
+        //    if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+        //        Utils.alert("第"+(index+1)+"行请选择性别！");
+        //        $(this).focus().select();
+        //        returnvalue = false;
+        //        return false;
+        //    }
+        //});
+        if (!returnvalue) {
+            return returnvalue;
+        }
+
+        $("#divUCTourists").find("select[name$='PassType']").each(function (index, item) {
+            if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+                Utils.alert("第" + (index + 1) + "行请选择证件类型！");
+                $(this).focus().select();
+                returnvalue = false;
+                return false;
+            }
+        });
+        if (!returnvalue) {
+            return returnvalue;
+        }
+
+        // 核实证件有效期
+        //$("#divUCTourists").find("input[name$='PassNo']").each(function (index, item) {
+        //    if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+        //        Utils.alert("第" + (index + 1) + "行证件号码不能为空！");
+        //        $(this).focus().select();
+        //        returnvalue = false;
+        //        return false;
+        //    }
+        //});
+        //if (!returnvalue) {
+        //    return returnvalue;
+        //}
+
+        //$("#divUCTourists").find("input[name$='DateOfExpiry']").each(function (index, item) {
+        //    if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+        //        Utils.alert("第" + (index + 1) + "行证件有效期不能为空！");
+        //        // $(this).focus().select();
+        //        returnvalue = false;
+        //        return false;
+        //    }
+        //});
+        //if (!returnvalue) {
+        //    return returnvalue;
+        //}
+
+        var OutDate = new Date('@Model.Tour.OutDate.AddDays(Model.Line.TravelDays)');
+        $("#divUCTourists").find("input[name$='DateOfExpiry']").each(function (index, item) {
+            if (touristName[index] != "") {
+                var date2 = new Date($(this).val());
+                var d = ((date2 - OutDate) / (1000 * 60 * 60 * 24))
+                if (d < 180) {
+                    Utils.alert("第" + (index + 1) + "行证件有效期应大于【团返回日期】+180天");
+                    returnvalue = false;
+                    return false;
+                }
+            }
+        });
+
+        if (!returnvalue) {
+            return returnvalue;
+        }
+
+        return true;
+    }
+
+</script>

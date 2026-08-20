@@ -1,0 +1,127 @@
+﻿@model Lvy.Models.OrderDB.TpChildOrderModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <form id="theForm" action="@Url.Action("SaveChildOrder")" method="post" enctype="multipart/form-data">
+                        @Html.HiddenFor(a => a.OrderCode)
+                        @Html.HiddenFor(a => a.ChildOrderCode)
+                        @Html.HiddenFor(a => a.Id)
+                        <div class="card-body">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td><span class="text-danger">*</span>子产品选择：</td>
+                                    <td colspan="3">@Html.DropDownListFor(a => a.ProductID, ViewBag.itemList as List<SelectListItem>, new { @class = "form-control form-control-sm" })</td>
+                                </tr>
+                                <tr>
+                                    <td class="label"><span class="text-danger">*</span>商品名称：</td>
+                                    <td>@Html.TextBoxFor(a => a.ProductName, new { @class = "form-control form-control-sm" })</td>
+                                    <td class="label"><span class="text-danger">*</span>产品类型：</td>
+                                    <td>
+                                        @Html.DropDownListFor(a => a.ProductType, ViewBag.lineType as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                                        @Html.HiddenFor(a => a.ProductTypeName)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label"><span class="text-danger">*</span>单价：</td>
+                                    <td>@Html.TextBoxFor(a => a.UnitPrice, new { @class = "form-control form-control-sm" })</td>
+                                    <td class="label"><span class="text-danger">*</span>份数：</td>
+                                    <td>@Html.TextBoxFor(a => a.Quantity, new { @class = "form-control form-control-sm" })</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">成本：</td>
+                                    <td>@Html.TextBoxFor(a => a.Cost, new { @class = "form-control form-control-sm" })</td>
+                                    <td class="label">供应商：</td>
+                                    <td>@Html.DropDownListFor(a => a.SupplierCode, ViewBag.supplierList as List<SelectListItem>, new { @class = "form-control form-control-sm" })</td>
+                                </tr>
+                                <tr>
+                                    <td class="label">备注：</td>
+                                    <td colspan="3">@Html.TextAreaFor(a => a.Remark, new { @rows = "5", @class = "form-control form-control-sm" })</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <input type="button" class="btn btn-info" id="btnSaveChildOrder" value="保  存" />
+                            <input type="button" class="btn btn-info" id="btnCancel" value="取 消" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSaveChildOrder").click(function () {
+
+            if ($.trim($("input[name='ProductName']").val()) == "") {
+                Utils.alert("商品名称不能为空！");
+                return;
+            }
+            if ($.trim($("select[name='ProductType']").val()) == "") {
+                Utils.alert("请选择产品类型！");
+                return;
+            }
+            if ($.trim($("input[name='UnitPrice']").val()) == "") {
+                Utils.alert("请输入单价！");
+                return;
+            }
+            if ($.trim($("input[name='Quantity']").val()) == "") {
+                Utils.alert("请输入份数！");
+                return;
+            }
+            if ($.trim($("select[name='SupplierCode']").val()) == "") {
+                Utils.alert("请选择供应商！");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("SaveChildOrder")',
+                data: $("#theForm").serialize(),
+                type: 'post',
+                success: function (d) {
+                    if (d.Code == 0) {
+                        Utils.alert("保存成功！");
+                        parent.ReloadChildOrders();
+                        // 弹出框关闭
+                        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(index);
+                    } else {
+                        Utils.alert("保存失败！");
+                    }
+                }
+            });
+        });
+
+        $("#btnCancel").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+
+        $("#ProductID").change(function () {
+            $.ajax({
+                url: '/SubProduct/GetSubProductInfo',
+                data: { productId: $(this).val()},
+                type: 'post',
+                success: function (data) {
+                    if (data.code == '0') {
+                        $("#ProductName").val(data.info.ProductName);
+                        $("#ProductType").val(data.info.ProductType);
+                        $("#UnitPrice").val(data.info.UnitPrice);
+                        $("#SupplierCode").val(data.info.SupplierCode);
+                    }
+                }
+            });
+        });
+
+    });
+
+</script>

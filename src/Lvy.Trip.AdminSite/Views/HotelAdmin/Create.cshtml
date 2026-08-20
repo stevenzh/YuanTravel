@@ -1,0 +1,373 @@
+﻿@model Lvy.Models.HotelDB.HotelModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "添加酒店";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/jquery.validate.min.js"></script>
+    <script src="~/WebRes/scripts/jquery.validate.message.cn.js"></script>
+    <link href="@CDNServerUrl/summernote/summernote-bs4.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/summernote/summernote-bs4.min.js"></script>
+    <script src="@CDNServerUrl/summernote/lang/summernote-zh-CN.min.js"></script>
+    <script src="@CDNServerUrl/summernote-ext-elfinder.js"></script>
+
+    <link href="@CDNServerUrl/elfinder/css/elfinder.full.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/elfinder/js/elfinder.min.js"></script>
+    <script src="@CDNServerUrl/elfinder/js/i18n/elfinder.zh_CN.js"></script>
+
+    <!-- dropzonejs -->
+    <link rel="stylesheet" href="@CDNServerUrl/dropzone/min/dropzone.min.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/HotelAdmin/Search">酒店管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header" data-original-title>
+                    <h3 class="card-title"><i class="icon-edit"></i>@ViewBag.Title</h3>
+                </div>
+                <form id="theForm" method="POST" enctype="multipart/form-data">
+                    @Html.HiddenFor(m => m.HotelCode)
+                    @Html.HiddenFor(m => m.CountryCode)
+
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceName">酒店名称</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.HotelName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceLevel">所属部门</label>
+                            <div class="col-sm-10">
+                                @Html.DropDownListFor(m => m.TeamID, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceLevel">酒店星级</label>
+                            <div class="col-sm-10">
+                                @Html.DropDownListFor(m => m.RankCode, ViewBag.HotelLevels as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceLevel">酒店所在地</label>
+                            <div class="col-sm-2">
+                                @Html.DropDownListFor(a => a.ProvinceCode, ViewBag.ProvinceList as IEnumerable<SelectListItem>, new { @class = "form-control", @onchange = "ProvinceChange()" })
+                            </div>
+                            <div class="col-sm-2">
+                                <select id="City" name="CityCode" class="form-control" onchange="CityChange()">
+                                    <option value="">-- 请选择 --</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <select id="CityAreaCode" name="CityAreaCode" class="form-control">
+                                    <option value="">-- 请选择 --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="OpenTime">酒店地址</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(model => model.Address, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="SimpleDesc">联系人</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(model => model.ContactName, new { @class = "form-control form-control-sm " })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceDesc">联系电话</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(model => model.ContactPhone, new { @class = "form-control form-control-sm " })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="PlaceDesc">联系邮箱</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(model => model.ContactEmail, new { @class = "form-control form-control-sm " })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="Introduction">酒店介绍</label>
+                            <div class="col-sm-10">
+                                @Html.TextAreaFor(model => model.Introduction, new { @class = "form-control form-control-sm summernote", @rows = 5 })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 control-label" for="Introduction">服务设施</label>
+                            <div class="col-sm-10">
+                                @Html.CheckboxList("Facility", ViewBag.HotelServices as IEnumerable<SelectListItem>, Model.Facility)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer clearfix">
+                        <input type="hidden" id="ImgPath" name="ImgPath" />
+                        <button id="btnSave" type="button" class="btn btn-primary">保 存</button>
+                        <button name="btnClear" type="button" class="btn btn-info" onclick="location.href='@Url.Action("Search")'">返回酒店列表</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-default">
+                <div class="card-header">
+                    <h3 class="card-title">添加酒店图片</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/HotelAdmin/SaveUploadedFile" method="post" enctype="multipart/form-data" class="dropzone" id="dropzoneForm">
+                        <div class="fallback">
+                            <input name="resFileName" type="file" />
+                        </div>
+                        <div class="dz-message" data-dz-message><span>选择新的文件，点击或拖放到这里</span></div>
+                    </form>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                    Visit <a href="https://www.dropzonejs.com">dropzone.js documentation</a> for more examples and information about the plugin.
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <!-- /.row -->
+
+</section>
+
+@section PageScripts
+{
+    <!-- dropzonejs -->
+    <script src="@CDNServerUrl/dropzone/min/dropzone.min.js"></script>
+    <script type="text/javascript">
+
+    $(function () {
+
+        $('#DestinationStr').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $("#btnUpload").click(function () {
+            if ($.trim($("[name='UploadFile']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("[name='FileName']").val()) == "") {
+                Utils.alert("上传文件的说明不能空！");
+                return;
+            }
+
+            var formData = new FormData();
+            //var name = $("[name='UploadFile']").val();
+            formData.append("UploadFile", $("[name='UploadFile']")[0].files[0]);
+            //formData.append("PlaceId", $("#PlaceId").val());
+            formData.append("PlaceCode", $("#PlaceCode").val());
+            formData.append("FileName", $("#FileName").val());
+            $.ajax({
+                url: '@Url.Action("UploadPhoto")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    if (parseInt(data) > 0) {
+                        photoView();
+                    }
+                }
+            });
+        });
+
+        // Summernote
+        $('.summernote').summernote({
+            lang: 'zh-CN',
+            height: 400,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                // ['insert', ['link', 'picture', 'video', 'elfinder']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onImageUpload: function (files) {
+                    //上传图片到服务器
+                    var formData = new FormData();
+                    formData.append('UploadFile', files[0]);
+                    formData.append("PlaceId", $("#PlaceId").val());
+                    formData.append("PlaceCode", $("#PlaceCode").val());
+                    $.ajax({
+                        url: '/Place/UploadDocPhoto',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (path) {
+                            $('.summernote').summernote('insertImage', path);
+                        }, error: function () {
+                            Utils.alert("上传失败");
+                        }
+                    });
+                }
+            }
+        });
+
+
+        $("#btnSave").click(function () {
+            $('#theForm').ajaxSubmit({
+                type: 'post',
+                url: '@Url.Action("Create")',
+                success: function (data) {
+
+                    if (data.Code == "1") {
+                        layer.open({
+                            type: 1, title: '提示', maxmin: false,
+                            shadeClose: false,
+                            content: "保存成功，是否继续添加酒店房型？",
+                            btn: ["添加酒店房型", "返回酒店列表", "关闭"],
+                            yes: function (index, layero) {
+                                location.href = "/HotelAdmin/Edit/"+ data.HotelCode;
+                            },
+                            btn2: function (index, layero) {
+                                location.href = "/HotelAdmin/Search";
+                            },
+                            btn3: function (index, layero) {
+                                // 取消
+                            }
+                        });
+
+                    } else {
+                        Utils.alert(data.Message);
+                    }
+                },
+            });
+        });
+
+        // validate signup form on keyup and submit
+        $("#theForm").validate({
+            rules: {
+                PlaceName: "required",
+                PlaceLevel: "required",
+                OpenTime: "required",
+                PlaceDesc: "required"
+            },
+            messages: {
+                PlaceName: "请输入景区名称！",
+                PlaceLevel: "请输入景区星级",
+                OpenTime: "请输入开放时间！",
+                PlaceDesc: "请输入景区描述"
+            }
+        });
+    });
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+        };
+
+    function ProvinceChange() {
+        var provinceId = $("#ProvinceCode").val();
+        var cityOption = '<option value="">-- 请选择 --</option>';
+        $("#City").empty();
+        $.ajax({
+            url: '@Url.Action("GetCityListByProvinceId","Customer")',
+            data: { provinceId: provinceId },
+            type: 'post',
+            async: false,
+            success: function (data) {
+                $.each(data, function (index, item) {
+                    cityOption += '<option value="' + item.Id + '">' + item.Name + '</option>';
+                });
+            }
+        });
+
+        $("#City").append(cityOption);
+    }
+
+    function CityChange() {
+        var cityId = $("#City").val();
+        var cityOption = '<option value="">-- 请选择 --</option>';
+        $("#CityAreaCode").empty();
+        $.ajax({
+            url: '@Url.Action("GetCountyListByCityId","Customer")',
+            data: { cityId: cityId },
+            type: 'post',
+            async: false,
+            success: function (data) {
+                $.each(data, function (index, item) {
+                    cityOption += '<option value="' + item.Id + '">' + item.Name + '</option>';
+                });
+            }
+        });
+
+        $("#CityAreaCode").append(cityOption);
+    }
+
+    Dropzone.options.dropzoneForm = {
+        paramName: "resFileName", // The name that will be used to transfer the file
+        maxFilesize: 2, // MB
+        acceptedFiles: "image/*",
+        init: function () {
+            this.on("success", function (file, response) {
+                var l = $("#ImgPath").val();
+                $("#ImgPath").val(l + response.Message + ",");
+            });
+            this.on("addedfile", function (file) { console.log("Added file."); });
+        }
+    };
+
+    </script>
+}

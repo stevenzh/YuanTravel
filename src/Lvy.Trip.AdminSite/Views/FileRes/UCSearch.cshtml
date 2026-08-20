@@ -1,0 +1,98 @@
+﻿@model Lvy.VModels.Base.FileResVModel
+
+<div class="xbox clear">
+    <div class="btnlist">
+        <div class="fr">
+            <a href="@Url.Action("Create")" class="btn btn1">添加文件</a>
+        </div>
+    </div>
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                <td align="center">
+                    编号
+                </td>
+                <td align="left">
+                    文件名
+                </td>
+                <td align="left">
+                    文件大小
+                </td>
+                <td align="center">
+                    文件类型
+                </td>
+                <td align="center" style="width: 50px;">
+                    操作
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.FileResModels.Items.Count > 0)
+            {
+                foreach (var item in Model.FileResModels.Items)
+                {
+                    <tr>
+                        <td align="center">
+                            @item.Id
+                        </td>
+                        <td align="left">
+                            @item.FileName
+                        </td>
+                        <td align="left">
+                            @item.FileSize
+                        </td>
+                        <td align="center">
+                            @DictionaryTools.GetEnumValue(Enums.ResTypeEnum, item.ResType.ToString())
+                        </td>
+                        <td align="center">
+                            <a href="@Url.Action("SetValidState", "FileRes", new { id = item.Id })" onclick="return confirm('确认需要删除吗？')" title="删除">删除</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" align="center" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(a => a.FileResModels.PageIndex)
+    <div id="Pagination" class="digg"></div>
+
+    <script type="text/javascript">
+
+        //分页控件 begin
+        $(function () {
+            $("#Pagination").pagination(
+                Number('@Model.FileResModels.TotalCount'), {
+                    callback: pageselectCallback,
+                    items_per_page: Number('@Model.FileResModels.PageSize'),
+                    current_page: @Model.FileResModels.PageIndex-1
+                });
+        });
+
+
+        //回调方法
+        function pageselectCallback(page_id, jq) {
+
+            var load_iii = Utils.layerLoad();
+
+            $("#FileResModels_PageIndex").val(page_id + 1);
+            var params = $("#theForm").formSerialize();
+
+            $.post('@Url.Action("Search")', params, function (data) {
+                if (data.length < 1) {
+                    Utils.alert("查询出错，请稍后查询！");
+                    return false;
+                }
+                $('#divFileRes').html(data);
+                Utils.layerClose(load_iii);
+            });
+        }
+
+    </script>
+</div>

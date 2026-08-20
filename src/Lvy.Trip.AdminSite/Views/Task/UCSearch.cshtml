@@ -1,0 +1,86 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Base.TaskVModel
+
+<table class="table table-sm table-bordered ">
+    <thead>
+        <tr>
+            <td>编号</td>
+            <td>提出部门</td>
+            <td>提出人</td>
+            <td>提出时间</td>
+            <td>流程名称</td>
+            <td>状态</td>
+            <td>审核部门</td>
+            <td>审核人</td>
+            <td>操作时间</td>
+            <td style="width: 70px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TaskPageList.Items.Count > 0)
+        {
+            foreach (var item in Model.TaskPageList.Items)
+            {
+
+                <tr>
+                    <td>@item.TaskID</td>
+                    <td>@DictionaryTools.GetCachedTeam(item.TeamID).TeamName</td>
+                    <td>@DictionaryTools.GetCachedAccount(item.Originator).Name</td>
+                    <td>@item.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.WorkFlowEnum, item.WorkFlowID.ToString())</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.TaskStatusEnum, item.Status.ToString(), false)</td>
+                    <td>@(item.WorkmanTeam == null ? "" : DictionaryTools.GetCachedTeam(item.WorkmanTeam).TeamName)</td>
+                    <td>@(item.Workman == null ? "" : DictionaryTools.GetCachedAccount(item.Workman).Name)</td>
+                    <td>@(item.OperateTime == null ? "" : item.OperateTime.Value.ToString("yyyy-MM-dd HH:mm:ss"))</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-info" onclick="javascript:parent.openTabPage('@("/Task/Details/" + item.TaskID)','任务【@item.TaskID】')" title="详情"><i class="fa fa-list"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(a => a.TaskPageList.PageIndex)
+<div id="Pagination" class="digg"></div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function() {
+        $("#Pagination").pagination(
+            Number('@Model.TaskPageList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.TaskPageList.PageSize'),
+                current_page: @Model.TaskPageList.PageIndex-1
+            });
+    });
+
+
+    //回调方法
+     function pageselectCallback(page_id, jq) {
+
+         var load_iii = Utils.layerLoad();
+
+         $("#TaskPageList_PageIndex").val(page_id + 1);
+         var params = $("#theForm").formSerialize();
+
+         $.post('@Url.Action("Search")', params, function(data) {
+             if (data.length<1) {
+                 Utils.alert("查询出错，请稍后查询！");
+                 return false;
+             }
+             $('#divNotices').html(data);
+             Utils.layerClose(load_iii);
+         });
+     }
+
+</script>

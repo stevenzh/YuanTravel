@@ -1,0 +1,31 @@
+﻿@model Lvy.VModels.Crm.CustomerVModel
+@{
+    ViewBag.Title = "折让规则";
+}
+@section AdditionalResources { }
+
+@Html.Partial("UCTabTitle", Model.Customer.Code)
+
+<div class="xbox clear">
+    <div align="center" class="xboxcontent clear">
+        <div class="sotable_tit">
+            操作日志
+        </div>
+        <table style="width:90%" class="sotable">
+            <tr>
+                <td style="width:70%;"></td>
+                <td align="center">
+                    <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+<form id="theForm" action="@Url.Action("LogList")">
+    <div id="divLogList">
+        @Html.Partial("UCLogList", Model)
+    </div>
+</form>
+

@@ -1,0 +1,72 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Base.LogVModel
+
+<table class="table table-sm table-bordered ">
+    <thead>
+        <tr>
+            <td align="center">序号</td>
+            <td align="left">标题</td>
+            <td align="left">部门</td>
+            <td align="left">操作人</td>
+            <td align="center">收信人</td>
+            <td align="center">创建时间</td>
+            <td align="center">关联ID</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.LogList.Items.Count > 0)
+        {
+            foreach (var item in Model.LogList.Items)
+            {
+                var sendtu = (item.SendTo == null ? null : DictionaryTools.GetCachedAccount(item.SendTo));
+                <tr>
+                    <td align="center">@item.Id</td>
+                    <td align="left" title="@item.Data"><a href="/Log/Details/@item.Id">@item.Event</a></td>
+                    <td align="left">@(item.TeamID.IsNullOrEmpty()?"": DictionaryTools.GetCachedTeam(item.TeamID).TeamName)</td>
+                    <td align="left">@DictionaryTools.GetCachedAccount(item.ModifiedBy).Name</td>
+                    <td align="center">@(sendtu == null ? "" : sendtu.Name)</td>
+                    <td align="center">@item.ModifiedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td align="center">@(item.TableName + ":" + item.JoinCode)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(a => a.LogList.PageIndex)
+<div id="Pagination" class="digg"></div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function() {
+        $("#Pagination").pagination(
+            Number('@Model.LogList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.LogList.PageSize'),
+                current_page: @Model.LogList.PageIndex-1
+            });
+    });
+
+    //回调方法
+     function pageselectCallback(page_id, jq) {
+         var load_iii = Utils.layerLoad();
+         $("#LogList_PageIndex").val(page_id + 1);
+         var params = $("#theForm").formSerialize();
+
+         $.post('@Url.Action("Search")', params, function(data) {
+             if (data.length<1) {
+                 Utils.alert("查询出错，请稍后查询！");
+                 return false;
+             }
+             $('#divNotices').html(data);
+             Utils.layerClose(load_iii);
+         });
+     }
+</script>

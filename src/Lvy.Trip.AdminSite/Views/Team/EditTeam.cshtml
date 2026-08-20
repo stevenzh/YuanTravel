@@ -1,0 +1,102 @@
+﻿@model Lvy.VModels.Crm.TeamVModel
+@{
+    ViewBag.Title = "编辑部门";
+}
+@using (Html.BeginForm("EditTeam", "Team", FormMethod.Post))
+{
+    <div class="station">
+        编辑部门
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            @Html.HiddenFor(m => m.Team.TeamID)
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label" width="150px"><span class="point">*</span>部门名称：</td>
+                    <td>@Html.TextBoxFor(model => model.Team.TeamName, new { id = "TeamName", @class = "text150", @maxlength = "100" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>职能：</td>
+                    <td>@Html.DropDownListFor(p => p.Team.DepartCode, Model.DepartList.ToSelectListFor(Model.Team.DepartCode.ToString()))</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>负责人：</td>
+                    <td>
+                        @Html.DropDownListFor(p => p.Team.LeaderCode, Model.TeamAccounts.ToSelectListFor(a => a.Code, a => a.Name, Model.Team.LeaderCode), new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">备注：</td>
+                    <td>@Html.TextAreaFor(m => m.Team.Remark, new { @row = "3" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>是否有效：</td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Team.IsValid, new List<SelectListItem> { new SelectListItem { Text = "无效", Value = "0", Selected = Model.Team.IsValid.ToBool() }, new SelectListItem { Text = "有效", Value = "1", Selected = Model.Team.IsValid.ToBool() } }, new { id = "IsValid" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>是否锁定线路名称：</td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Team.LockName, new List<SelectListItem> { new SelectListItem { Text = "不锁", Value = "0", Selected = Model.Team.LockName.ToBool() }, new SelectListItem { Text = "锁定", Value = "1", Selected = Model.Team.LockName.ToBool() } }, new { id = "LockName" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>对应财务：</td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Team.FinanceCode, Model.FinanceTeams.ToSelectListFor(t => t.TeamID, t => t.TeamName))
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" name="submitBtn" type="submit" value="保存" />
+                        <input class="btn btn1" name="backBtn" type="button" value="返回" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(function () {
+
+        // 限制输入为数字
+        $('input:text[contentType="Number"]').keypress(function () {
+            InputLimitNumber();
+        });
+
+        // 提交
+        $("input[name=submitBtn]").click(function () {
+
+            var $busPoint = $('#BusPoint');
+            if ($busPoint.val().length == 0) {
+                Utils.alert('请输入上车点。');
+                $busPoint.focus().select();
+                return false;
+            }
+
+            var $jsType = $('select[name="BusPoint.JsType"]');
+            if ($jsType.val().length == 0) {
+                Utils.alert("接送类型不能为空！");
+                $jsType.focus().select();;
+                return false;
+            }
+
+            var $checkedGroup = $(':checkbox[name="GroupIds"]:checked');
+            if ($checkedGroup.length <= 0) {
+                Utils.alert('请选择组别。');
+                $(':checkbox[name="GroupIds"]').first().focus().select();
+                return false;
+            }
+
+            return true;
+        });
+
+        // 返回
+        $("input[name=backBtn]").click(function () {
+            window.location = "/Team/SearchTeam";
+        });
+
+    });
+</script>

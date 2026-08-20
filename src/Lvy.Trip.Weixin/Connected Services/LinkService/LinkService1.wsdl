@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="WeixinQrRtn">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="sceneId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="accountCode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="WeixinQrRtnResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="WeixinQrRtnResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="WeixinQrRtnSoapIn">
+    <wsdl:part name="parameters" element="tns:WeixinQrRtn" />
+  </wsdl:message>
+  <wsdl:message name="WeixinQrRtnSoapOut">
+    <wsdl:part name="parameters" element="tns:WeixinQrRtnResponse" />
+  </wsdl:message>
+  <wsdl:portType name="LinkServiceSoap">
+    <wsdl:operation name="WeixinQrRtn">
+      <wsdl:input message="tns:WeixinQrRtnSoapIn" />
+      <wsdl:output message="tns:WeixinQrRtnSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="LinkServiceSoap" type="tns:LinkServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="WeixinQrRtn">
+      <soap:operation soapAction="http://tempuri.org/WeixinQrRtn" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="LinkServiceSoap12" type="tns:LinkServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="WeixinQrRtn">
+      <soap12:operation soapAction="http://tempuri.org/WeixinQrRtn" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="LinkService">
+    <wsdl:port name="LinkServiceSoap" binding="tns:LinkServiceSoap">
+      <soap:address location="http://manage.sh-cct.cn/LinkService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="LinkServiceSoap12" binding="tns:LinkServiceSoap12">
+      <soap12:address location="http://manage.sh-cct.cn/LinkService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

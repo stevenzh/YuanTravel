@@ -1,0 +1,96 @@
+﻿@{
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<!-- 后台子页面旧（原始CSS） -->
+<html>
+<head>
+    <title>@Arch.Common.AppSetting.Get("Title")</title>
+    <link rel="stylesheet" href="~/WebRes/css/manage.css" />
+    <link rel="stylesheet" href="~/WebRes/scripts/powerFloat/powerFloat.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/pagination.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/layer/theme/default/layer.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/select2-bootstrap4-theme/select2-bootstrap4.min.css" />
+
+    <script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+    <script src="~/WebRes/Scripts/common.js" type="text/javascript"></script>
+    <script src="~/WebRes/scripts/powerFloat/jquery-powerFloat-min.js" type="text/javascript"></script>
+    <script src="@CDNServerUrl/jquery.pagination.js"></script>
+    <script src="@CDNServerUrl/jquery-form/jquery.form.min.js"></script>
+    <script src="@CDNServerUrl/layer/layer.js"></script>
+    <script src="@CDNServerUrl/select2/js/select2.full.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/i18n/zh-CN.js"></script>
+    @RenderSection("AdditionalResources", false)
+</head>
+<body>
+    <div class="content-wrapper">
+        @RenderBody()
+    </div>
+
+    @*<!--页面结束-->
+        <!--footer start-->
+        <div class="footer">
+                @{Html.RenderPartial("Footer");}
+            </div>
+        <!--footer end-->*@
+
+    <script type="text/javascript">
+        $("#contactUs").powerFloat({
+            target: $("#qq_right"),
+            width: 200,
+            eventType: "hover"
+        });
+
+        function newOrderCallback(data) {
+            if (data.State == "200") {
+                var content = '';
+                if (Number(data.OrderCount) > 0) {
+                    content = '<a href="/Message/CheckNewOrder"><strong>您有&nbsp;<span>' + data.OrderCount + '</span>&nbsp;条未处理团队游订单</strong></a>';
+                    if (Number(data.TktOrderCount) > 0) content += '<br/>';
+                }
+                if (Number(data.TktOrderCount) > 0) {
+                    content += '<a href="/Message/CheckNewTktOrder"><strong>您有&nbsp;<span>' + data.TktOrderCount + '</span>&nbsp;条未处理门票订单</strong></a>';
+                }
+                if (Number(data.NoAuditCustomerCount) > 0 && '@GlobalContext.Current.OwnerCode' == '@GlobalContext.Current.OwnerInfo.CustomerCode')
+                {
+                    content+= '<br/><a href="/Message/CheckNoAduitCustomers"><strong>您有&nbsp;<span>' + data.NoAuditCustomerCount + '</span>&nbsp;个未审核客户</strong></a>';
+                }
+                if (content.length) {
+                    $('#tipContent').html(content);
+                    $('#newOrderTip').show();
+                    var x = $('.h_top_box').offset().left + $('.h_top_box').width() - $('#newOrderTip').width();
+                    $('#newOrderTip').css('left', x);
+                } else {
+                    $('#newOrderTip').hide();
+                }
+            }
+        }
+
+        var timeoutHandler;
+        function sendXhr() {
+            $.ajax({
+                type: "post",
+                url: '/Message/NewOrder',
+                dataType: "json",
+                success: function (data) {
+                    newOrderCallback(data);
+                },
+                complete: function (xhr) {
+                    xhr = null;
+                    if (null != timeoutHandler) {
+                        timeoutHandler = null;
+                    }
+                    var timeoutHandler = setTimeout(sendXhr, 600000);
+                }
+            });
+        }
+
+        $(function () {
+            // sendXhr();
+        });
+    </script>
+    @RenderSection("PageScripts", required: false)
+</body>
+</html>

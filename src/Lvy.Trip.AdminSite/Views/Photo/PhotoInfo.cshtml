@@ -1,0 +1,574 @@
+﻿@model  Lvy.Models.BaseDB.PhotoAlbumModel
+@using Arch.Common
+@{
+    ViewBag.Title = "编辑相册";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string picroot = AppSetting.Get("UploadFileRoot");
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">图片库管理</a></li>
+                    <li class="breadcrumb-item active">相册[@Model.AlbumName]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<div class="content">
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">相册信息</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-8">
+                    <table class="table table-sm table-bordered" id="tbPhotoAlbum">
+                        <tbody>
+                            <tr>
+                                <td>标题:</td>
+                                <td>
+                                    <input type="text" id="txtAlbumName" class="form-control form-control-sm" value="@Model.AlbumName" />
+                                </td>
+                                <td>是否有效</td>
+                                <td>
+                                    <input type="radio" name="rdValid" value="1" @(Model.Status == 1 ? "checked='checked'" : "") />有效
+                                    &nbsp; &nbsp;
+                                    <input type="radio" name="rdValid" value="0" @(Model.Status == 0 ? "checked='checked'" : "") />无效
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>目的地</td>
+                                <td>
+                                    <select id="txtAimCity" name="txtAimCity" class="form-control form-control-sm">
+                                        <option value="@Model.AreaId">@DictionaryTools.GetDestName(Model.AreaId.ToString())</option>
+                                    </select>
+                                </td>
+                                <td colspan="2">
+                                    <input type="radio" value="-1" name="rdRange" checked="checked" />全部&nbsp;
+                                    <input type="radio" value="2" name="rdRange" />省 &nbsp;
+                                    <input type="radio" value="1" name="rdRange" />市 &nbsp;
+                                    <input type="radio" value="0" name="rdRange" />景
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>图片数</td>
+                                <td>
+                                    <input type="text" id="txtSize" class="form-control form-control-sm" value="@Model.Size" />
+                                </td>
+                                <td>排序</td>
+                                <td>
+                                    <input type="text" id="txtSeq" class="form-control form-control-sm" value="@Model.Seq" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>描述</td>
+                                <td colspan="3">
+                                    <textarea class="form-control form-control-sm" rows="3" cols="15" id="txtDescription">@Model.Description</textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-4">
+                    <div id="divConver">
+                        @if (Model.CoverPhotoId > 0)
+                        {
+                            <img id="imgCover" class="img-fluid" rel="@Model.ConverPhoto.PhotoId" alt="@Model.ConverPhoto.Caption" title="@Model.ConverPhoto.Caption" src="@(picroot+Model.ConverPhoto.Url)" />
+                        }
+                        else
+                        {
+                            Html.Raw("  暂无封面");
+                        }
+                        <h3>封面</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <input type="button" value="保存" class="btn btn-info" id="btnSavePhotoAlbum" />
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-tools">
+                <div class="input-group " style="width: 400px;">
+                    <input type="text" id="txtPhotoName" class="form-control" placeholder="名称" />
+                    <select id="selIsValid" class="form-control">
+                        <option value="-1">--请选择--</option>
+                        <option value="1">有效</option>
+                        <option value="0">无效</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-default" id="btnPhotoSearch"><i class="fas fa-search"></i> </button>
+                        <button type="button" class="btn btn-success btn-sm" id="btnAddPhoto">添加图片</button>
+                    </div>
+                </div>
+            </div>
+            <ul class="nav nav-tabs" id="custom-content-below-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="custom-content-below-home-tab" data-toggle="pill" href="#custom-content-below-home" role="tab" aria-controls="custom-content-below-home" aria-selected="true">文件列表</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="custom-content-below-profile-tab" data-toggle="pill" href="#custom-content-below-profile" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">图片</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content " id="custom-content-below-tabContent">
+                <div class="tab-pane fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+                    <table class="table table-bordered" id="tbList">
+                        <thead>
+                            <tr>
+                                <th style="width: 20px;">ID</th>
+                                <th>图片名称</th>
+                                <th>所属相册</th>
+                                <th style="width: 60px;">排序</th>
+                                <th style="width: 80px;">有效性</th>
+                                <th style="width: 50px;">宽*高</th>
+                                <th style="width: 160px;">更新时间</th>
+                                <th style="width:350px;">操作<span class=" ">次序</span><a href='javascript:void(0)' id="linkSeqAll" class="">保存选中顺序</a></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="custom-content-below-profile" role="tabpanel" aria-labelledby="custom-content-below-profile-tab">
+                    <div class="photoList" id="divPhotoList"></div>
+                </div>
+            </div>
+
+            <div class="l-toolbar_b">
+                <span id="msgShow">共找到<em id="emTotal">0</em>张图片</span>
+                <ul class="pagination pagination-sm" id="pager"></ul>
+            </div>
+
+            <input type="hidden" id="hiddenAlbumId" value="@Model.PhotoAlbumId" />
+            <input type="hidden" id="hiddenAreaId" value="@Model.AreaId" />
+        </div>
+        <div class="card-footer">
+            @if (Model.PhotoAlbumId > 0)
+            {
+                <p>&nbsp;&nbsp;操作者:&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: Teal; ">@Model.Operator</span></p>
+                <p>&nbsp;&nbsp;创建时间:&nbsp;&nbsp;<span class="cGray">@Model.CreateTs</span>&nbsp;&nbsp;修改时间:&nbsp;&nbsp;<span class="cGray">@Model.UpdateTs</span></p>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    // 目的地
+    var areaId = parseInt($("#hiddenAreaId").val());
+    if (isNaN(areaId)) areaId = 0;
+    var albumId = parseInt($("#hiddenAlbumId").val());
+
+    var albumCount = 0;
+    var pageSize = 15;
+    var ST_Valid = { "0": "<span class='cRed'>无效</span>", "1": "<span class='cGreen'>有效</span>", "": "未设置", "-1": "禁用", "undefined": "未设置", "3": "<span class-'cGray'>禁用</span>" };
+
+    $(document).ready(function () {
+
+        $('#txtAimCity').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Id, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $("#btnPhotoSearch").click();
+    });
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+
+    $("#btnPhotoSearch").click(function () {
+        LoadPhotoList(1);
+    });
+    $("#selIsValid").change(function () {
+        LoadPhotoList(1);
+    })
+
+    function LoadPhotoList(pageIndex) {
+        if (areaId > 0) {
+            albumCount = 0;
+            // 加载图片列表
+            // $("#divPhotoList").html("<span class='cRed'>图片列表加载中</span>");
+            var param = {
+                'info.Model.Caption': $.trim($("#txtPhotoName").val()),
+                'info.Model.AreaId': areaId,
+                'info.Model.Status': $("#selIsValid").val(),
+                'info.PageIndex': pageIndex,
+                'info.PageSize': pageSize
+            }
+            $.post('/Photo/GetPhotoInfoForPage/', param, function (data) {
+                var recordCount = parseInt(data.Total);
+                if (isNaN(recordCount)) recordCount = 0;
+
+                $("#msgShow em:first").html(recordCount);
+                if (data.List != null && data.List != undefined && data.List.length > 0) {
+                    var info = '<div class="row">';
+                    $.each(data.List, function (i, n) {
+                        info += '<div class="col-sm-3">'
+                        info += '<a href="javascript:void(0)" rel="' + n["PhotoId"] + '">'
+                        info += ' <p class="nu">' + n["Seq"] + '</p>'
+                        info += ' <p class="img">'
+                        info += '<img alt="' + n["Caption"] + '" class="img-fluid" src="@picroot' + n["Url"] + '" title="' + n["Caption"] + '">'
+                        info += '</p>'
+                        info += '<p>'
+                        info += n["Caption"]
+                        info += '</p>'
+                        info += '</a>'
+                        info += '<p><input type="button" name="viewPhoto" class="btn btn-sm btn-info" value="查看原图" rel="@picroot' + n["Url"] + '" ></p>'
+                        info += '</div>'
+                    });
+                    info += '</div>'
+                    $("#divPhotoList").html(info);
+                    $("input[name=viewPhoto]").click(function () {
+                        window.open($(this).attr("rel"));
+                    });
+                    $("#tbList>tbody").html(GetPhotoListInfo(data.List));
+                    $("#txtSize").val(albumCount);
+                    var pageCount = Math.max(Math.ceil(recordCount / pageSize), 1);
+                    $('#pager').twbsPagination({
+                        totalPages: pageCount,
+                        visiblePages: 5,
+                        first: '首页',
+                        last: '末页',
+                        prev: '上一页',
+                        next: '下一页',
+                        onPageClick: function (evt, page) {
+                            LoadPhotoList(page);
+                        }
+                    });
+
+                    $("#tbList>tbody>tr").hover(function () {
+                        $(this).addClass("row_hover")
+                    }, function () {
+                        $(this).removeClass("row_hover")
+                    });
+                    $("td[name='size']").each(function () {
+                        var url = $(this).attr("url");
+                        var id = $(this).attr("id");
+                        $.post("/Photo/GetPictSize/", { "url": url }, function (data) {
+                            $("#" + id).html(data);
+                        });
+                    });
+
+                    $("#tbList>tbody>tr a[name=edit]").click(function () {
+                        var url = '/Photo/PhotoEdit?PhotoId=' + $(this).attr("rel");
+                        layer.open({ type: 2, title: '图片编辑', maxmin: true, shadeClose: true, area: ['800px', '550px'], content: url });
+                        return false;
+                    });
+                    $("#tbList>tbody>tr a[name=delete]").click(function () {
+                        var photoId = $(this).attr("rel");
+                        layer.confirm('确定要删除此图片吗？', { btn: ['删除', '取消'] }, function (index) {
+                            var param = { "PhotoId": photoId };
+                            $.post("/Photo/DeletePhotoInfo/", param, function (data) {
+                                if (data != null && data.length > 0 && data == "0000") {
+                                    $("#btnPhotoSearch").click();
+                                } else {
+                                    console.log(data);
+                                }
+                                layer.close(index);
+                            });
+                        }, function () {
+                            // 选择取消
+                        });
+                        return false;
+                    });
+                    $("#tbList>tbody>tr a[name=valid]").click(function () {
+                        var status = parseInt($(this).attr("isValid")) == 1 ? 0 : 1;
+                        var param = { "model.Status": status, "model.PhotoId": $(this).attr("rel") }
+                        var confrimMsg = status == 0 ? "无效" : "有效";
+                        layer.confirm('确定要设置图片' + confrimMsg + '吗？', { btn: ['是', '否'] }, function (index) {
+                            $.post("/Photo/SetPhotoInfoValid/", param, function (data) {
+                                if (data != null && data.length > 0 && data == "0000") {
+                                    $("#btnPhotoSearch").click();
+                                } else {
+                                    console.log(data);
+                                }
+                                layer.close(index);
+                            });
+                        }, function () {
+                            // 选择否
+                        });
+                        return false;
+                    });
+                    $("#tbList>tbody>tr a[name=cover]").click(function () {
+                        var url = '@picroot'+ $(this).attr("u");
+                        var caption = $(this).attr("c");
+                        var coverPhotoId = $(this).attr("rel");
+                        var param = { "CoverPhotoId": coverPhotoId, "PhotoAlbumId": albumId }
+                        $.post("/Photo/SetAlbumConver/", param, function (data) {
+                            if (data != null && data.length > 0 && data == "0000") {
+                                if ($("#imgCover").length > 0) {
+                                    $("#imgCover").attr("title", caption).attr("src", url).attr("alt", caption).attr("rel", coverPhotoId);
+                                } else {
+                                    $("#divConver").html('<img id="imgCover" class="img-fluid"  rel="' + coverPhotoId + '" alt="' + caption + '" title="' + caption + '" src="' + url + '" />')
+                                }
+                            } else {
+                                console.log(data);
+                            }
+                        });
+                        return false;
+                    });
+                    $("#tbList>tbody>tr a[name=linkTop]").click(function () {
+                        var param = { "Seq": 0, "PhotoId": $(this).attr("rel") }
+                        $.post("/Photo/SetPhotoInfoSeq/", param, function (data) {
+                            if (data != null && data.length > 0 && data == "0000") {
+                                $("#btnPhotoSearch").click();
+                            } else {
+                                console.log(data);
+                            }
+                        });
+                        return false;
+                    });
+                    $("#tbList>tbody>tr input[name=txtSeq]").click(function () {
+                        var linkSave = $("a[name=linkSeqSave]:first", $(this).parent());
+                        linkSave.show();
+                        var linkRefresh = $("a[name=linkRefresh]:first", $(this).parent());
+                        linkRefresh.hide();
+                        var cb = $("input[name=cbOp]:first", $(this).parent());
+                        cb.prop("checked", true);
+                        return false;
+                    }).blur(function () {
+                        var linkRefresh = $("a[name=linkRefresh]:first", $(this).parent());
+                        linkRefresh.hide();
+                    });
+                    $("#tbList>tbody>tr a[name=linkSeqSave]").click(function () {
+                        var lbSeq = $(this);
+                        var txt = $("input[name=txtSeq]:first", $(this).parent());
+                        var seq = parseInt($.trim(txt.val()));
+                        if (isNaN(seq)) {
+                            toastr.warning('请输入正确的顺序号！')
+                            return;
+                        }
+                        var param = { "Seq": seq, "PhotoId": txt.attr("rel") }
+                        $.ligerDialog.confirm('确定要设置信息顺序吗?', function (type) {
+                            if (type) {
+                                $.post("/Photo/SetPhotoInfoSeq/", param, function (data) {
+                                    if (data != null && data.length > 0 && data == "0000") {
+                                        lbSeq.hide();
+                                        var cb = $("input[name=cbOp]:first", $(lbSeq).parent());
+                                        cb.prop("checked", false);
+                                        var lbRefresh = $("a[name=linkRefresh]:first", $(lbSeq).parent());
+                                        lbRefresh.show();
+                                    } else {
+                                        console.log(data);
+                                    }
+                                });
+                            }
+                        });
+                        return false;
+                    });
+                    $("#tbList>tbody>tr a[name=linkRefresh]").click(function () {
+                        $("#btnPhotoSearch").click();
+                        return false;
+                    });
+
+                    $("#divPhotoList>ul>li>a").click(function () {
+                        $("#tbList>tbody>tr").removeClass("checked");
+                        $("#tr_" + $(this).attr("rel")).addClass("checked");
+                        $(".l-tab-links ul li:first").click();
+                    })
+                } else {
+                    $("#tbList>tbody").html("");
+                    //$("#pager").hide();
+                    $("#divPhotoList").html("<span class='cRed'>当前没有图片</span>");
+                }
+            });
+        } else {
+            $("#divPhotoList").html("<span class='cRed'>当前没有图片</span>");
+            $("#btnAddPhoto").attr("disabled", true);
+        }
+    }
+
+    $("#linkSeqAll").click(function () {
+        var cbChooses = $("input[name=cbOp]:checked");
+        var isCheck = true;
+        if (cbChooses.length > 0) {
+            $.each(cbChooses, function (i, n) {
+                var td = $(n).parent();
+                var txt = $("input[name=txtSeq]:first", td);
+                var seq = parseInt($.trim(txt.val()));
+                if (isNaN(seq)) {
+                    toastr.warning('请输入正确的顺序号！(第' + (i + 1) + ')行！')
+                    isCheck = false;
+                    return false;
+                }
+            });
+
+            if (isCheck) {
+                $.ligerDialog.confirm('确定要保存选中信息顺序吗?', function (type) {
+                    if (type) {
+                        $.each(cbChooses, function (i, n) {
+                            var td = $(n).parent();
+                            var txt = $("input[name=txtSeq]:first", td);
+                            var seq = parseInt($.trim(txt.val()));
+                            var param = { "Seq": seq, "PhotoId": txt.attr("rel") }
+                            $.post("/Photo/SetPhotoInfoSeq/", param, function (data) {
+                                if (data != null && data.length > 0 && data == "0000") {
+                                } else {
+                                    toastr.warning(data);
+                                    return false;
+                                }
+                            });
+                        });
+                        toastr.success('操作成功！');
+                        $("#btnPhotoSearch").click();
+                    }
+                });
+            }
+
+        } else {
+            toastr.warning('请选择操作项！');
+        }
+        return false;
+    });
+
+    function GetPhotoListInfo(tab) {
+        var info = '';
+        $.each(tab, function (i, n) {
+            info += "<tr id='tr_" + n["PhotoId"] + "'>"
+            info += "<td >" + n["PhotoId"] + "</td>"
+            info += "<td style='text-align:left' title='" + n["Caption"] + "'>" + $.subStr(n["Caption"], 16) + "</td>"
+            info += "<td style='text-align:left' title='" + n["AlbumName"] + "'>" + $.subStr(n["AlbumName"], 16) + "</td>"
+            info += "<td >" + n["Seq"] + "</td>"
+            info += "<td >" + ST_Valid[n["Status"]] + "</td>"
+            info += "<td name='size' url='" + n["Url"] + "' id='size_" + n["PhotoId"] + "'>0*0</td>"
+            info += "<td >" + $.CovertJsonDateTime(n["UpdateTs"]) + "</td>"
+            var validEditShow = parseInt(n["Status"]) == 1 ? "无效" : "有效";
+            var validEditIcon = parseInt(n["Status"]) == 1 ? "youxiao" : "wuxiao";
+            info += "<td>";
+            if (albumId > 0) {
+                info += "<a href='javascript:void(0)' class='btn btn-sm btn-default' title='设置为相册封面'  name='cover' u='" + n["Url"] + "' rel='" + n["PhotoId"] + "' c='" + n["Caption"] + "'><i class='fas fa-home'></i></a>";
+            }
+            info += "<a name='valid' class='btn btn-sm btn-default' rel='" + n["PhotoId"] + "' isValid='" + n["Status"] + "' href='javascript:void(0)' title='设置" + validEditShow + "'><i class='fa fa-check'></i></a>" +
+                "<a name='edit' class='btn btn-sm btn-default' rel='" + n["PhotoId"] + "' href='javascript:void(0)' title='编辑'><i class='fa fa-edit'></i></a>"
+
+            info += "<a name='delete' class='btn btn-sm btn-default' rel='" + n["PhotoId"] + "' href='javascript:void(0)' title='删除'><i class='fa fa-trash'></i></a>";
+            if (n["AreaStr"].indexOf("/" + areaId + "/") == n["AreaStr"].length - 2 - areaId.toString().length && albumId == parseInt(n["AlbumId"])) {
+                // 本相册内允许排序
+                albumCount++;
+                info += "<a name='linkTop' class='btn btn-sm btn-default' rel='" + n["PhotoId"] + "' href='javascript:void(0)'><i class='fa fa-angle-double-up'></i></a>";
+                info += "&nbsp;&nbsp;<input type='text' rel='" + n["PhotoId"] + "'  class='l-dialog-inputtext' style='height:20px; width:50px;' name='txtSeq' value='" + n["Seq"] + "' />"
+
+                info += "<a href='javascript:void(0)' class='btn btn-sm btn-default' name='linkSeqSave' rel='" + n["PhotoId"] + "' style='display:none;;margin:5px;' class='link'>保存</a>"
+                info += "<a href='javascript:void(0)' class='btn btn-sm btn-default' name='linkRefresh' rel='" + n["PhotoId"] + "' style='display:none;;margin:5px;' class='link'>刷新</a>"
+                info += "<input type='checkbox' name='cbOp' style='margin-left:15px;' />"
+            } else {
+                info += "<a href='javascript:void(0)' style='margin-left:120px;'></a>"
+            }
+            info += "</td>"
+            info += "</tr>"
+        });
+        return info;
+    }
+
+
+    $("#btnSavePhotoAlbum").click(function () {
+        var url = "/Photo/AddAlbum/"
+        if (albumId > 0) {
+            // 修改
+            url = "/Photo/EditAlbum/"
+        }
+        var albumName = $.trim($("#txtAlbumName").val());
+        if (albumName.length == 0) {
+            toastr.warning('请输入相册名称');
+            return;
+        }
+        var areaId = parseInt($("#txtAimCity").val());
+        if (isNaN(areaId)) areaId = 0;
+        if (areaId == 0) {
+            toastr.warning('请选择目的地');
+            return;
+        }
+        var converPhotoId = 0;
+        if ($("#imgCover").length > 0) {
+            converPhotoId = parseInt($("#imgCover").attr("rel"));
+        }
+        var description = $.trim($("#txtDescription").val());
+        var seq = parseInt($.trim($("#txtSeq").val()));
+        if (isNaN(seq)) seq = 0;
+        var param = {
+            'AlbumName': albumName,
+            'PhotoAlbumId': albumId,
+            'Status': $("input[name=rdValid]:checked").val(),
+            'AreaId': areaId,
+            'CoverPhotoId': converPhotoId,
+            'Size': parseInt(albumCount),
+            'Description': description,
+            'Seq': seq
+        };
+        $.post(url, param, function (data) {
+            if (data != null && data.length > 0) {
+                if (albumId > 0) {
+                    // 修改
+                    if (data == '0000') {
+                        toastr.success('修改成功');
+                        $("#txtSize").val(albumCount)
+                    } else {
+                        toastr.error(data);
+                    }
+                } else {
+                    albumId = parseInt(data);
+                    if (isNaN(albumId)) albumId = 0;
+                    if (albumId == 0) {
+                        toastr.error(data);
+                    } else {
+                        toastr.success('创建相册成功');
+                        $("#btnAddPhoto").removeAttr("disabled");
+                        $("#btnPhotoSearch").click();
+                    }
+                }
+            }
+        });
+    });
+
+    $("#btnAddPhoto").click(function () {
+        // 添加图片
+        var url = '/Photo/PhotoEdit?AlbumId=' + albumId
+        layer.open({ type: 2, title: '图片添加', maxmin: true, shadeClose: true, area: ['600px', '550px'], content: url });
+
+    });
+
+    function RefreshPhotoListCallBack() {
+        $("#btnPhotoSearch").click();
+    }
+</script>
+

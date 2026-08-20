@@ -1,0 +1,196 @@
+﻿@model Lvy.VModels.Base.LoginVModel
+@{
+    Layout = null;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>@Arch.Common.AppSetting.Get("Title")- 登录</title>
+    <link href="@CDNServerUrl/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link href="@CDNServerUrl/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Theme/css/style.css" rel="stylesheet" />
+    <link href="~/Theme/css/login.css" rel="stylesheet" />
+    <link href="~/Theme/js/plugins/layer/skin/layer.css" rel="stylesheet" />
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html" /><![endif]-->
+    <script>
+        if (window.top !== window.self) {
+            window.top.location = window.location
+        }
+    </script>
+    <style>
+        .signinpanel form { padding: 5px; }
+    </style>
+</head>
+
+<body class="signin">
+    <div class="signinpanel">
+        <div class="row">
+            <div class="col-sm-7">
+                <div class="signin-info">
+                    <div class="logopanel m-b">
+                        <h1>@(ViewBag.CustomerName + "管理系统")</h1>
+                    </div>
+                    <div class="m-b"></div>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="tabs-container">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a data-toggle="tab" href="#tab-1" aria-expanded="true">账户登陆 </a>
+                        </li>
+                        <li class="">
+                            <a data-toggle="tab" href="#tab-2" id="qrbutton" aria-expanded="false">扫码登陆</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="tab-1" class="tab-pane active">
+                            <div class="panel-body">
+                                @using (Html.BeginForm("LoginIn", "User"))
+                                {
+                                    @Html.HiddenFor(m => m.Account.OwnerCode)
+                                    @*@Html.AntiForgeryToken()*@
+                                    @*<div class="form-group has-feedback">
+                                            @Html.DropDownListFor(m => m.Account.OwnerCode, Model.Platforms.ToSelectListFor(Model.Account.OwnerCode), new { @class = "form-control", @placeholder = "商户号" })
+                                            @Html.ValidationMessageFor(model => model.Account.OwnerCode)
+                                        </div>*@
+
+                                    @Html.TextBoxFor(model => model.Account.LoginName, new { @class = "form-control uname", @placeholder = "账号/邮箱" })
+                                    @Html.ValidationMessageFor(model => model.Account.LoginName)
+
+                                    @Html.PasswordFor(model => model.Account.Pwd, new { @class = "form-control pword m-b", @placeholder = "密码" })
+                                    @Html.ValidationMessageFor(model => model.Account.Pwd)
+                                    <div class="form-group has-feedback">
+                                        <img src="@Url.Action("CreateImageCode", "Validate")" onclick="reloadValidate(this);" style="vertical-align: top; cursor: pointer; width:101px; height:34px; " alt="点击换验证码" title="点击换验证码" id="validimg" />
+                                        <input type="text" id="ValidateCode" name="ValidateCode" style="color:#343434" class="form-control" placeholder="验证码" />
+                                    </div>
+                                    <a href="http://www.sh-cct.cn" target="_blank">前台站点</a>
+                                    <button id="btnLogin" class="btn btn-success btn-block">登录</button>
+                                }
+                            </div>
+                        </div>
+                        <div id="tab-2" class="tab-pane">
+                            <div class="panel-body">
+                                <h5 style="color: darkslategrey;">打开手机微信&nbsp;&nbsp;  扫描下方二维码</h5>
+                                <div id="qr_login" style="height:263px;">
+                                    <img id="qrimg" class="image" style="width:200px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="signup-footer">
+            <div class="pull-left">
+                &copy; @DateTime.Today.Year 上海新康辉版权所有<br />
+                地址：上海市武定路458号12-13楼 传真：61819800<br />
+                上海新康辉国际旅行社有限责任公司，旅行社业务经营许可证编号：L-SH-GJ00042<br />
+                <a href="https://beian.miit.gov.cn">沪ICP备09073213号-10</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/Theme/js/jquery.min.js"></script>
+    <script src="@CDNServerUrl/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="~/Theme/js/plugins/layer/layer.min.js"></script>
+    <script src="~/WebRes/scripts/common.js"></script>
+
+    <script>
+        $(function () {
+
+            //登录验证。
+            $("#btnLogin").click(function () {
+
+                if (!CheckControl()) {
+                    return false;
+                }
+                var ok = false;
+                $.ajax({
+                    url: '@Url.Action("CheckLogin", "User")',
+                    type: 'post',
+                    data: $("form").serialize(),
+                    async: false,
+                    success: function (data) {
+                        if (data.Code == 500) {
+                            Utils.alert(data.Message);
+                            ok = false;
+                        } else if (data.Code == 501) {
+                            Utils.alert(data.Message);
+                            $("#ValidateCode").val("");
+                            reloadValidate($("#validimg"));
+                            ok = false;
+                        }
+                        else {
+                            ok = true;
+                        }
+                    }
+                });
+
+                return ok;
+            });
+
+        });
+
+        //reloadValidate("#validimg");
+        //验证用户输入
+        function CheckControl() {
+            if ($.trim($("#Account_LoginName").val()).length == 0) {
+               // Utils.alert("用户名不得为空！", 1500);
+                Utils.alert("用户名不得为空！")
+                $("#Account_LoginName").select().focus();
+                return false;
+            }
+            if ($.trim($("#Account_Pwd").val()).length == 0) {
+                //Utils.alert("密码不得为空！", 1500);
+                Utils.alert("密码不得为空！");
+                $("#Account_Pwd").select().focus();
+                return false;
+            }
+            if ($.trim($("#ValidateCode").val()).length == 0) {
+               // Utils.alert("验证码不得为空！", 1500);
+                Utils.alert("验证码不得为空！");
+                $("#ValidateCode").select().focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function reloadValidate(handler) {
+            $(handler).attr('src', '@Url.Action("CreateImageCode", "Validate")' + '?' + Math.random());
+        }
+
+        function clock() {
+            // 取得数据
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/User/CheckWeixinQr",
+                success: function (result) {
+                    if (result == "OK") {
+                        console.log("weixin Login OK");
+                        window.location.href = '@Url.Action("LoginWeixinQr","User")';
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                }
+            });
+        }
+
+        $("#qrbutton").click(function () {
+
+            var timer = setInterval(clock, 3600);
+
+            // 刷新二维码
+            $.post("/User/CreateWeixinQr", function (data) {
+                  $("#qrimg").attr('src', 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket='+data);
+            });
+        });
+    </script>
+</body>
+</html>

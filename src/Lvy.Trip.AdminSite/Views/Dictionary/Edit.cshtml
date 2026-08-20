@@ -1,0 +1,87 @@
+﻿@model Lvy.Models.BaseDB.BaseDictionaryModel
+@{
+    ViewBag.Title = "编辑字典";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Destop">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">编辑字典</h3>
+            </div>
+            <form role="form" id="theForm" method="POST" action="@Url.Action("UpdateDictionary", "Dictionary")">
+                <div class="card-body">
+                    @Html.HiddenFor(t => t.Id)
+                    @Html.HiddenFor(t => t.IsValid)
+
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="Name">字典名称</label>
+                        <div class="col-sm-8">
+                            @Html.TextBoxFor(model => model.Name, new { @class = "form-control " })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="TableName">表名</label>
+                        <div class="col-sm-8">
+                            @Html.TextBoxFor(model => model.TableName, new { @class = "form-control " })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="FieldName">字段名</label>
+                        <div class="col-sm-8">
+                            @Html.TextBoxFor(model => model.FieldName, new { @class = "form-control " })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="Remark">备注</label>
+                        <div class="col-sm-8">
+                            @Html.TextBoxFor(model => model.Remark, new { @class = "form-control " })
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button id="btnSave" type="submit" class="btn btn-primary" onclick='return CheckControl();'>保  存</button>
+                    <button name="btnClear" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Search")'">返回列表</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</section>
+<script type="text/javascript">
+    //验证用户输入
+    function CheckControl() {
+
+        if ($.trim($("#Name").val()).length == 0) {
+            Utils.alert("字典名称不得为空！", 1500);
+            $("#Name").select().focus();
+            return false;
+        }
+        if ($.trim($("#TableName").val()).length == 0) {
+            Utils.alert("表名不得为空！", 1500);
+            $("#TableName").select().focus();
+            return false;
+        }
+        return true;
+    }
+</script>

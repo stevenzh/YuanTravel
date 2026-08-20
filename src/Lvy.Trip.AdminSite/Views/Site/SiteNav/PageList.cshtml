@@ -1,0 +1,66 @@
+﻿@model Lvy.VModels.Online.NavQModel
+@{
+    Layout = null;
+}
+<table class="table table-sm table-bordered ">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>编码</th>
+            <th>项目名称</th>
+            <th style="width: 110px;">出发城市</th>
+            <th>说明</th>
+            <th style="width: 80px;">是否有效</th>
+            <th style="width: 140px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.PageList != null && Model.PageList.Items.Count > 0)
+        {
+            foreach (var item in Model.PageList.Items)
+            {
+                <tr>
+                    <td>@item.NavID</td>
+                    <td>@item.Code</td>
+                    <td>@item.Name</td>
+                    <td>@(string.IsNullOrEmpty(item.OutCity)?"": DictionaryTools.GetEnumValue(Enums.OutCityEnum, item.OutCity))</td>
+                    <td>@item.Remarks.TrimWithElipsis(20)</td>
+                    <td>@item.IsValid</td>
+                    <td class="project-actions">
+                        <a class="btn btn-sm btn-danger" href="javascript:DeleteNav('@item.NavID')">删除</a>
+                        <a class="btn btn-sm btn-info" href="javascript:EditNav('@item.NavID')">编辑</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" style="text-align: center; font-size: 14px; color: Red;">对不起！没有找到您要的数据！ </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+        //分页控件 begin
+    $(function () {
+        $('#pagination-demo').twbsPagination({
+            totalPages: Math.ceil(Number('@Model.PageList.TotalCount') / @Model.PageList.PageSize),
+            visiblePages: 5,
+            first: "首页",
+            prev: "上一页",
+            next: "下一页",
+            last: "末页",
+            onPageClick: function (event, page) {
+                page_id = page;
+                var param = {
+                    'PageList.PageIndex': page_id,
+                    'PageList.PageSize': @Model.PageList.PageSize
+                };
+                $.post('/SiteNav/PageList/', param, function (data) {
+                    $('#navListsDiv').html(data);
+                });
+            }
+        });
+    });
+</script>

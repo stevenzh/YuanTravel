@@ -1,0 +1,138 @@
+﻿@model Lvy.VModels.Product.CopyTourVModel
+@Html.HiddenFor(m => m.Tour.Id)
+@Html.HiddenFor(m => m.Line.TrafficType)
+<div class="inform">
+    <table width="100%" class="edittbl">
+        <tbody>
+            <tr>
+                <td class="label">线路名：</td>
+                <td>@Model.Tour.LineName</td>
+            </tr>
+            @*<tr>
+                    <td class="label">团标注：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Tour.TourSign, new { @class = "text150", @maxlength = "50" })
+                    </td>
+                </tr>*@
+            <tr>
+                <td class="label">出发日期：</td>
+                <td>
+                    @*@Model.Tour.OutDate.ToDateFormat()*@
+                    <input type="text" name="OutDate" value="@Model.Tour.OutDate.ToDateFormat()" class="Wdate text150" onfocus="WdatePicker({isShowClear:false,readOnly:true})" />
+                </td>
+            </tr>
+            @*注：复制团期一律视为非共享（无论源团期是否共享）[20130425]*@
+            <tr>
+                <td class="label">总库存：</td>
+                <td>
+                    @Html.TextBoxFor(m => m.Quota.PlanQuota, new { id = "copyPlanQuota", @class = "text150", onkeypress = "InputLimitNumber();", @onkeyup = "$('#copyUseQuota').text(Number($(this).val()) - Number($('#copyHoldQuota').val()) - Number($('#copyUsedQuota').text()));" })
+                    &nbsp;&nbsp;
+                    @if (Model.Line.TrafficType == 1)
+                    {
+                        <input type="button" id="showBusSeat" value="显示车位" onclick="BindShowBusSeat();" />
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td class="label">预留库存：</td>
+                <td>
+                    @Html.TextBoxFor(m => m.Quota.HoldQuota, new { id = "copyHoldQuota", @class = "text150", onkeypress = "InputLimitNumber();", @onkeyup = "$('#copyUseQuota').text(Number($('#copyPlanQuota').val()) - Number($(this).val()) - Number($('#copyUsedQuota').text()));" })
+                </td>
+            </tr>
+            <tr>
+                <td class="label">已用库存：</td>
+                <td>
+                    <span id="copyUsedQuota">@Model.Quota.UsedQuota</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">剩余库存：</td>
+                <td>
+                    <span id="copyUseQuota">@Model.Quota.UseQuota</span>
+                </td>
+            </tr>
+            @if (Model.Line.TrafficType == 1)
+            {
+                <tr>
+                    <td class="label">选择巴士：</td>
+                    <td>
+                        <div id="busSeatContainer"></div>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td class="label">最小成团人数：</td>
+                <td>
+                    @Html.TextBoxFor(m => m.Tour.MixedNum, new { @class = "text150", onkeypress = "InputLimitNumber();" })
+                </td>
+            </tr>
+            <tr>
+                <td class="label">推荐方式：</td>
+                <td>
+                    @Html.DropDownListFor(m => m.Tour.TuiJianType, new List<SelectListItem> { new SelectListItem { Text = "常规团", Value = "0", Selected = Convert.ToBoolean(Model.Tour.TuiJianType) }, new SelectListItem { Text = "特价团", Value = "1", Selected = Convert.ToBoolean(Model.Tour.TuiJianType) } }, new { onchange = "changeTuiJianType(this);" })
+                </td>
+            </tr>
+            @if (@Model.Line.TrafficType != 1)
+            {
+                <tr>
+                    <td class="label">附加信息：</td>
+                    <td>
+                        <span style="color: red;">主要描述航班信息、行程变化等。</span>
+                        <br />
+                        @Html.TextAreaFor(m => m.Tour.AdditionInfo, new { @class = "textarea440" })
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td class="label">
+                    备注：
+                </td>
+                <td>
+                    @Html.TextAreaFor(m => m.Tour.Remarks, new { @class = "textarea440" })
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="xbox">
+    <div id="addPriceContainer" style="margin: 0px; padding: 0px; border: 0px;">
+        @Html.Partial("Tour/UCAddPrice", Model.PriceList)
+    </div>
+    <div style="margin: 4px 0px 0px 0px; padding: 0px; border: 0px;">
+        单房差：@Html.TextBoxFor(m => m.SingleRoom, new { @class = "text150", onkeypress = "InputLimitNumber();" })
+        &nbsp; 特价让利：
+        @if (Model.Tour.TuiJianType == 0)
+        {
+            @Html.TextBoxFor(m => m.TeJiaFanLi, new { @class = "text150", disabled = "disabled" })
+        }
+        else
+        {
+            @Html.TextBoxFor(m => m.TeJiaFanLi, new { @class = "text150", onkeypress = "InputLimitNumber();" })
+        }
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+
+    });
+
+    //变更推荐类型
+    function changeTuiJianType(e) {
+        var $this = $(e);
+        if ($this.val() == 1) {
+            $('input[name="TeJiaFanLi"]').removeAttr('disabled');
+        } else {
+            $('input[name="TeJiaFanLi"]').attr('disabled', 'disabled');
+        }
+    }
+
+    //显示车位
+    function BindShowBusSeat() {
+        var load_iii = Utils.layerLoad();
+        $.post("/LineAdmin/CreateBusSeat?seatNum=" + $('#copyPlanQuota').val(), function (data) {
+            $("#busSeatContainer").html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

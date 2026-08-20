@@ -1,0 +1,340 @@
+﻿@using Lvy.Models.WeixinDB
+@using Arch.Common
+@{
+    var member = HttpContext.Current.Session["WeixinUser"] as Member;
+    string CDNServerUrl = AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="~/favicon.ico">
+    <title>@ViewBag.Title - @AppSetting.Get("WeixinSubject") </title>
+    <link rel="stylesheet" href="@CDNServerUrl/font-awesome/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/semanticUI/semantic.min.css">
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.carousel.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.theme.default.css" />
+    <link rel="stylesheet" href="~/css/style.css?v=1.0">
+    @RenderSection("HeaderContent", false)
+</head>
+
+<body>
+    <!-- sidebar left -->
+    <div class="ui sidebar sidebar-left inverted vertical menu">
+        @if (member != null)
+        {
+            <div class="user-profile">
+                <img src="~/images/demo/profile.png" alt="">
+                <h4>@(string.IsNullOrEmpty(member.RealName)?member.NickName: member.RealName)</h4>
+            </div>
+        }
+        <div class="ui styled accordion">
+            <a class="item" href="/home">
+                <i class="fa fa-home"></i>
+                首页
+            </a>
+            <div class="title">
+                <i class="fa fa-list-alt"></i>
+                商品分类
+                <span>
+                    <i class="dropdown icon"></i>
+                </span>
+            </div>
+            <div class="content">
+                <a href="/home/categories" class="item">分类页面</a>
+                <div class="accordion categories-accordion">
+                    <div class="title">
+                        国内游
+                        <span>
+                            <i class="dropdown icon"></i>
+                        </span>
+                    </div>
+                    <div class="content">
+                        <a href="product.html" class="item">云南</a>
+                        <a href="product.html" class="item">四川</a>
+                        <a href="product.html" class="item">Accessories</a>
+                        <a href="product.html" class="item">Shoes</a>
+                        <a href="product.html" class="item">Jacket</a>
+                    </div>
+                    <div class="title">
+                        酒店
+                        <span>
+                            <i class="dropdown icon"></i>
+                        </span>
+                    </div>
+                    <div class="content">
+                        <a href="product.html" class="item">酒单首页</a>
+                        <a href="product.html" class="item">Earning</a>
+                        <a href="product.html" class="item">Bracelet</a>
+                        <a href="product.html" class="item">Ring</a>
+                    </div>
+                    @*<div class="title">
+                        门票
+                        <span>
+                            <i class="dropdown icon"></i>
+                        </span>
+                    </div>
+                    <div class="content">
+                        <a href="/ticket" class="item">门票首页</a>
+                    </div>*@
+                    <div class="title">
+                        签证
+                        <span>
+                            <i class="dropdown icon"></i>
+                        </span>
+                    </div>
+                    <div class="content">
+                        <a href="product.html" class="item">签证首页</a>
+                        <a href="product.html" class="item">旅游个签办理</a>
+                        <a href="product.html" class="item">加急签证办理</a>
+                        <a href="product.html" class="item">团签查询</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/blog" class="item">
+            <i class="fa fa-envelope-o"></i>
+            博客
+        </a>
+        <a href="/home/about" class="item">
+            <i class="fa fa-envelope-o"></i>
+            关于我们
+        </a>
+        @*<a href="/home/contact" class="item">
+                <i class="fa fa-envelope-o"></i>
+                联系我们
+            </a>*@
+        @if (member != null)
+        {
+            <a href="/member/order" class="item">
+                <i class="fa fa-envelope-o"></i>
+                我的订单
+            </a>
+            <a href="/member/settings" class="item">
+                <i class="fa fa-cog"></i>
+                设置
+            </a>
+            <a href="/member/logoff" class="item">
+                <i class="fa fa-share"></i>
+                注销
+            </a>
+        }
+        else
+        {
+            <a href="/member/signin" class="item">
+                <i class="fa fa-sign-in"></i>
+                登录
+            </a>
+            <a href="/member/signup" class="item">
+                <i class="fa fa-user-plus"></i>
+                注册
+            </a>
+        }
+
+    </div>
+    <!-- end sidebar left -->
+    <!-- sidebar search -->
+    <div class="ui sidebar search inverted right vertical menu">
+        <div class="ui form">
+            <input type="search">
+            <button class="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <h5>热门搜索</h5>
+        <ul>
+            <li>
+                <a href="">海南</a>
+            </li>
+            <li>
+                <a href="">西藏</a>
+            </li>
+            <li>
+                <a href="">四川</a>
+            </li>
+        </ul>
+    </div>
+    <!-- end sidebar search -->
+    <!-- sidebar cart -->
+    <div class="ui sidebar cart inverted right vertical menu">
+        <div class="content">
+            <div class="cart-img">
+                <img src="~/images/demo/product1.png" alt="">
+            </div>
+            <div class="cart-title">
+                <a href="">Watch Modern for Men &Women</a>
+                <h5>$69</h5>
+            </div>
+            <div class="cart-remove">
+                <i class="fa fa-remove"></i>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="content">
+            <div class="cart-img">
+                <img src="~/images/demo/product2.png" alt="">
+            </div>
+            <div class="cart-title">
+                <a href="">Women Trending Bags for Girls</a>
+                <h5>$94</h5>
+            </div>
+            <div class="cart-remove">
+                <i class="fa fa-remove"></i>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="content">
+            <div class="cart-img">
+                <img src="~/images/demo/product3.png" alt="">
+            </div>
+            <div class="cart-title">
+                <a href="">Hat Blue Trending for Men &Women</a>
+                <h5>$79</h5>
+            </div>
+            <div class="cart-remove">
+                <i class="fa fa-remove"></i>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="cart-button">
+            <ul>
+                <li>
+                    <button class="button">
+                        <i class="fa fa-shopping-cart"></i>
+                        View Cart
+                    </button>
+                </li>
+                <li>
+                    <button class="button">
+                        <i class="fa fa-send"></i>
+                        Checkout
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- end sidebar cart -->
+    <!-- wrap content -->
+    <div class="wrap-content pusher">
+        <!-- navbar -->
+        <div class="navbar">
+            <div class="ui container">
+                <div class="ui grid">
+                    <!-- navbar toggle left -->
+                    <div class="five wide column">
+                        <div class="navbar-toggle-left navbar-icon">
+                            <i class="fa fa-navicon"></i>
+                        </div>
+                    </div>
+                    <!-- navbar logo -->
+                    <div class="six wide column">
+                        <div class="navbar-logo">
+                            <a href="/home">
+                                <img src="~/images/logo_1.png" alt="">
+                            </a>
+                        </div>
+                    </div>
+                    <!-- navbar toggle right -->
+                    <div class="five wide column">
+                        <div class="navbar-toggle-right">
+                            <div class="navbar-toggle-search">
+                                <i class="fa fa-search"></i>
+                            </div>
+                            @*<div class="navbar-toggle-cart">
+                                    <i class="fa fa-shopping-cart">
+                                        <sup>3</sup>
+                                    </i>
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end navbar -->
+
+        @RenderBody()
+
+        <!-- footer -->
+        <footer>
+            @*<div class="ui container">
+                    <div class="content">
+                        <img src="images/logo_1.png" alt="" class="logo">
+                        <p>地址: 上海市武定路458号12-13楼</p>
+                        <p>电子邮箱: help@sh-cct.com</p>
+                        <p>客服电话: 400-620-7888</p>
+                        <div class="social-link">
+                            <a href="">
+                                <i class="fa fa-facebook"></i>
+                            </a>
+                            <a href="">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                            <a href="">
+                                <i class="fa fa-instagram"></i>
+                            </a>
+                            <a href="">
+                                <i class="fa fa-google"></i>
+                            </a>
+                        </div>
+                        <div class="payment-logo">
+                            <ul>
+                                <li>
+                                    <img src="~/images/payment1.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="~/images/payment2.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="~/images/payment3.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="~/images/payment4.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="~/images/payment5.png" alt="">
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>*@
+            <div class="reserved">
+                <p>@AppSetting.Get("BanQuanInfo")</p>
+            </div>
+        </footer>
+        <!-- end footer -->
+
+    </div>
+    <!-- end wrap content -->
+
+    <div class="ui grey bottom fixed four item menu">
+        <a class="item" href="/home">
+            <i class="home icon"></i>首页
+        </a>
+        <a class="item" href="/home/categories">
+            <i class="bars icon"></i> 分类
+        </a>
+        <a class="item" href="/Blog/Index">
+            <i class="location arrow icon"></i>发现
+        </a>
+        @if (member != null)
+        {
+            <a class="item" href="/member/memberprofile">
+                <i class="user icon"></i> 我的
+            </a>
+        }
+    </div>
+
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="@CDNServerUrl/semanticUI/semantic.min.js"></script>
+    <script src="@CDNServerUrl/owl-carousel/owl.carousel.js"></script>
+    <script src="~/js/main.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+        $(function () {
+
+        });
+    </script>
+</body>
+
+</html>

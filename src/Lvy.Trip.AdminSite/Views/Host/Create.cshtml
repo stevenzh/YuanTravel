@@ -1,0 +1,122 @@
+﻿@model Lvy.Models.CrmDB.SysPlatformModel
+@{
+    ViewBag.Title = "创建商户";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">商户列表</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" method="POST" action="@Url.Action("Add")" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card ">
+                    <div class="card-header">
+                        <h3 class="card-title">@ViewBag.Title</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label for="Name">商户名称</label>
+                            @Html.TextBoxFor(m => m.CrmCustomer.Name, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group row">
+                            <label for="ShortName">商户简称</label>
+                            @Html.TextBoxFor(m => m.CrmCustomer.ShortName, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group">
+                            <label for="Phone">公司电话</label>
+                            @Html.TextBoxFor(m => m.CrmCustomer.Phone, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group">
+                            <label for="Address">地址</label>
+                            @Html.TextBoxFor(model => model.CrmCustomer.Address, new { @class = "form-control input-xxlarge" })
+                        </div>
+                        <div class="form-group">
+                            <label for="Platform_Url">Url</label>
+                            @Html.TextBoxFor(model => model.Url, new { @class = "form-control input-xlarge" })
+                        </div>
+                        <div class="form-group">
+                            <label for="IconPath">公司logo(128*128)</label>
+                            <input type="file" name="IconPath" id="IconPath" class="form-control uniform_on input-file" />
+                        </div>
+                        <div class="form-group">
+                            <label for="LogoPath">公司logo(137*80)</label>
+                            <input type="file" name="LogoPath" id="LogoPath" class="form-control uniform_on input-file" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ElecCertifyPath">公司电子章</label>
+                            <input type="file" name="ElecCertifyFile" id="ElecCertifyFile" class="form-control uniform_on " />
+                            <p class="help-block">（需提供.png透明格式）</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="Remarks">备注</label>
+                            @Html.TextAreaFor(model => model.CrmCustomer.Remarks, new { @class = "form-control span7", @rows = "8" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">其他信息</h3>
+                    </div>
+                    <div class="card-body">
+                        @for (int i = 0; i < Model.ProfileModels.Count; i++)
+                        {
+                            var u = Model.ProfileModels[i];
+                            <tr>
+                                <td>
+                                    @u.Key
+                                    <input type="hidden" name="ProfileModels[@i].Key" />
+                                </td>
+                                <td> <input type="text" name="ProfileModels[@i].Value" /> </td>
+                            </tr>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button id="btnSave" type="submit" class="btn btn-success">保 存</button>
+                <button type="button" class="btn btn-secondary float-right" onclick="location.href='@Url.Action("Search")'">返回列表</button>
+            </div>
+        </div>
+    </form>
+
+</section>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        // validate signup form on keyup and submit
+        $("#theForm").validation({
+            rules: {
+                Name: "required",
+                Head: "required"
+            },
+            messages: {
+                Name: "请输入客户名称！",
+                Head: "请输入负责人姓名！"
+                //Head: "Please enter your lastname"
+
+            }
+        });
+    });
+
+</script>

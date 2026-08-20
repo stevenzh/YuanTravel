@@ -1,0 +1,45 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+<div class="card-header">
+    <h4 class="card-title"><i class="ion ion-clipboard mr-1"></i>缴款记录</h4>
+    <div class="card-tools">
+        <button type="button"  class="btn btn-success" id="btnAddPayInfo"><i class="fa fa-plus"></i> 添加缴款记录</button>
+    </div>
+</div>
+<div class="card-body p-2">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>缴款单号</th>
+                <th>项目</th>
+                <th>提交时间</th>
+                <th>交款方式</th>
+                <th>缴款金额</th>
+                <th>状态</th>
+                <th style="width:80px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.PayInList)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Item</td>
+                    <td>@(item.CreatedTime.ToString("yyyy-MM-dd HH:mm"))</td>
+                    <td>@item.PaymentType</td>
+                    <td>@item.Amount</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.PayInStateEnum, item.State.ToString(), false)</td>
+                    <td>
+                        @if (item.State < 20)
+                        {
+                            <button onclick="payInfoDetail('@item.Id','@Model.Balance.MasterOrderCode')" type="button" class="btn btn-sm btn-info"><i class="fa fa-pencil-alt"></i> 编辑</button>
+                        }
+                        else
+                        {
+                            <button onclick="payInfoDetail('@item.Id','@Model.Balance.MasterOrderCode')" type="button" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i> 详情</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

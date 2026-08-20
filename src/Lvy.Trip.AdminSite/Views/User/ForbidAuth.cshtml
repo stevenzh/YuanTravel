@@ -1,0 +1,26 @@
+﻿@{
+    ViewBag.Title = "ForbidAuth";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<div id="conmid">
+    <div id="content">
+        <div>
+            <a>
+                <img src="../../WebRes/images/manage/icon_a05.gif" />对不起，您没有操作权限。<br />
+                如需开通权限，请与管理人员取得联系。
+            </a>
+            <br />
+            <br />
+            <button type="button" id="btn_return" class="btn btn-primary ">返回上一页</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#btn_return').click(function () {
+            window.history.go(-1);
+        });
+    });
+</script>

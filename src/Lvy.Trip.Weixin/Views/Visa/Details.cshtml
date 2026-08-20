@@ -1,0 +1,92 @@
+﻿@model Lvy.Visa.VModels.OnLineProductQModel
+@{
+    ViewBag.Title = Model.VisaModel.InformationName + "_签证办理";
+    string picRoot = AppSetting.Get("UploadFileRoot");
+}
+@using Arch.Common;
+@section HeaderContent{}
+
+<div class="product-details segments-page">
+    <div class="ui container">
+        <img class="ui fluid bordered image" src="@(picRoot + Model.VisaModel.ImgUrl)" />
+
+        <table class="ui table unstackable">
+            @*<tr>
+                    <td><b>办理费用</b></td>
+                    <td>¥ @(binding.Equals("0") ? Math.Round(Model.VisaModel.SellPrice, 0) : Math.Round(Model.VisaModel.TradePrice, 0))</td>
+                </tr>*@
+            <tr>
+                <td style="width:30%;"><b>受理范围</b></td>
+                <td>@Model.VisaModel.AcceptedRange</td>
+            </tr>
+            <tr>
+                <td><b>签证有效期</b></td>
+                <td>@Model.VisaModel.VisaExpiryDate </td>
+            </tr>
+            <tr>
+                <td><b>办理时长</b></td>
+                <td>@Model.VisaModel.AcceptedTime</td>
+            </tr>
+            <tr>
+                <td><b>入境次数</b></td>
+                <td>@Model.VisaModel.EnterCount </td>
+            </tr>
+            <tr>
+                <td><b>最长停留时间</b></td>
+                <td>@Model.VisaModel.StayDays </td>
+            </tr>
+            <tr>
+                <td><b>面试</b></td>
+                <td>@Model.VisaModel.InterviewTypeValue</td>
+            </tr>
+        </table>
+
+
+        <div class="ui menu">
+            @for (int i = 0; i < Model.VisaCategoryModels.Count; i++)
+            {
+                var categoryModel = Model.VisaCategoryModels[i];
+                <a href="" class="item @(i == 0?"active":"") " data-tab="@("category"+i)">@categoryModel.CategoryName </a>
+            }
+        </div>
+
+        @for (int i = 0; i < Model.VisaCategoryModels.Count; i++)
+        {
+            var categoryModel = Model.VisaCategoryModels[i];
+            var tempVisaDatas = Model.VisaDataModels.Where(a => categoryModel.CategoryCode.Equals(a.CategoryCode));
+
+            <div class="ui tab @(i == 0?"active":"") " data-tab="@("category"+i)">
+                <table class="ui table unstackable">
+                    @foreach (var dataModel in tempVisaDatas)
+                    {
+                        var tempDataFiles = Model.VisaDataFileModels.Where(a => a.DataCode.Equals(dataModel.DataCode));
+                        <tr>
+                            <td valign="top"><b>@dataModel.DataName </b></td>
+                            <td valign="top">
+                                @Html.Raw(dataModel.DataExplain)
+                                @if (tempDataFiles.Count() > 0)
+                                {
+                                    <br />
+                                    <br />
+                                    <span>附下载：</span>
+                                    foreach (var dataFileModel in tempDataFiles)
+                                    {
+                                        <a href="@dataFileModel.FileUrl" title="@dataFileModel.FileName" target="_blank">@dataFileModel.FileName</a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(".menu .item").tab();
+        $(function () {
+
+        });
+    </script>
+}

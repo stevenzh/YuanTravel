@@ -1,0 +1,88 @@
+﻿@model Lvy.VModels.Weixin.MemberQModel
+@{
+    ViewBag.Title = "微信用户管理";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section HeaderContent
+{
+    <script>
+        var page_id = 1;
+    </script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-tools">
+                @using (Html.BeginForm("Index", "Saler", FormMethod.Post, new { role = "form" }))
+                {
+                    <div class="input-group input-group-sm" style="width:300px;">
+                        <input id="Name" name="Name" class="form-control" placeholder="姓名" style="width:100px;" />
+                        @Html.DropDownListFor(t => t.Approved, (List<SelectListItem>)ViewBag.ApprovedList, new { @class = "form-control", style = "width:100px;" })
+                        @*<label>是否绑定:</label> @Html.DropDownListFor(t => t.Binding, (List<SelectListItem>)ViewBag.BindingList, new { @class = "form-control" })*@
+                        <div class="input-group-append">
+                            <button type="submit" class="btn"><i class="fas fa-search"></i> </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div id="questionListsDiv" class="card-body table-responsive p-0">
+            @Html.Partial("PageList", Model)
+        </div>
+        <div class="card-footer">
+            <ul id="pagination-demo" class="pagination-sm"></ul>
+        </div>
+    </div>
+</section>
+
+<script>
+    $(function () {
+
+        $('#pagination-demo').twbsPagination({
+            totalPages: Math.ceil(Number('@Model.MemberPageList.TotalCount') / 10),
+            visiblePages: 3,
+            first: "首页",
+            prev: "上一页",
+            next: "下一页",
+            last: "末页",
+            onPageClick: function (event, page) {
+                page_id = page;
+                var param = {
+                    'hostID': $("#hostID").val(),
+                    'Name': $("#Name").val(),
+                    'Sales': $("#Sales").val(),
+                    'Approved': $("#Approved").val(),
+                    'Binding': $("#Binding").val(),
+                    'OpenID': $("#OpenID").val(),
+                    'Subscribe': $("#Subscribe").val(),
+                    'Employee': $("#Employee").val(),
+                    'MemberPageList.PageIndex': page_id,
+                    'MemberPageList.PageSize': 10
+                };
+                $.post('/Saler/PageList/', param, function (data) {
+                    $('#questionListsDiv').html(data);
+                });
+            }
+        });
+    });
+
+</script>

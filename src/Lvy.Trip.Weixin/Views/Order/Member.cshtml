@@ -1,0 +1,177 @@
+﻿@model TopWeb.Model.MemberModel
+@{
+    ViewBag.Title = "编辑用户";
+    Layout = null;
+
+    var send = false;
+    if (Model.LastMessageTime != null)
+    {
+        if (Model.LastMessageTime.Value.AddDays(2) > DateTime.Now)
+        {
+            send = true;
+        }
+    }
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">用户信息</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                @Html.HiddenFor(model => model.MemberID)
+                @Html.HiddenFor(model => model.OpenID)
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.RealName, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(model => model.RealName, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="control-group">
+                    @Html.LabelFor(model => model.PhoneNumber, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.Binding, new { @class = "control-label" })
+                    <div class="controls">
+                        @Html.TextBoxFor(model => model.BindingValue, new { @class = "form-control" })
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">微信用户信息</h3>
+            </div><!-- /.box-header -->
+
+            <div class="box-body">
+                <table class="table table-bordered table-striped">
+                    <tr class="form-group">
+                        <td>昵称</td>
+                        <td class="col-md-10" colspan="2">@Model.NickName</td>
+                    </tr>
+                    <tr class="form-group">
+                        <td>是否关注</td>
+                        <td class="col-md-10">@Model.Subscribe</td>
+                        <td rowspan="7"><img src="@Model.HeadImgUrl" style="width:200px;" /></td>
+                    </tr>
+                    <tr class="form-group">
+                        <td>关注时间</td>
+                        <td class="col-md-10">@Model.SubscribeTime</td>
+                    </tr>
+
+                    <tr class="form-group">
+                        <td>性别</td>
+                        <td class="col-md-10">@Model.Sex</td>
+                    </tr>
+                    <tr class="form-group">
+                        <td>国家</td>
+                        <td class="col-md-10">@Model.Country</td>
+                    </tr>
+                    <tr class="form-group">
+                        <td>省份</td>
+                        <td class="col-md-10">@Model.Province</td>
+                    </tr>
+                    <tr class="form-group">
+                        <td>城市</td>
+                        <td class="col-md-10">@Model.City</td>
+                    </tr>
+                    <tr class="form-group">
+                        <td>OpenID</td>
+                        <td class="col-md-10">@Model.OpenID</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">微信消息记录</h3>
+                <div class="box-tools">
+                    @if (send)
+                    {
+                        <button id="btn_sendmessage" class="btn btn-sm btn-default"><i class="fa fa-search"></i>发消息</button>
+                    }
+                </div>
+            </div><!-- /.box-header -->
+            <div id="boxmessage" class="box-body">
+                @Html.Partial("MessageList", Model)
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div>
+</div>
+
+<div id="exampleModal" class="modal fade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">发送微信消息</h4>
+            </div>
+            <div class="modal-body">
+                <textarea id="sendContent" rows="4" class="form-control"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary pull-left" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-default" id="btn_send">发送</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+<script>
+    $(function () {
+        $("#btn_sendmessage").click(function () {
+            $("#exampleModal").modal('show');
+        });
+
+        $("#btn_send").click(function () {
+            $("#exampleModal").modal('hide');
+
+            $.ajax({
+                type: "POST",
+                // dataType: "json",
+                data: {
+                    OpenID: $("#OpenID").val(),
+                    Content: $("#sendContent").val()
+                },
+                url: "/Member/SendMessage",
+                success: function (data) {
+                    if (data == "ok") {
+                        refreshMessage();
+                    } else {
+                        // 显示结果
+                        Utils.alert("发送失败");
+                    }
+                },
+                error: function () {
+                    Utils.alert("保存失败！");
+                }
+            });
+        });
+    });
+
+    function refreshMessage() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("MessageList", "Order")',
+            data: { OpenID: $("#OpenID").val() },
+            success: function (response) {
+                $("#boxmessage").html(response);
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,145 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    ViewBag.Title = "单团核算";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+    @*<section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>开班计划</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item active">开班计划</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>*@
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <form id="theForm">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">核算明细</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-md-12 col-lg-8 ">
+                                <div class="row">
+                                    <div class="col-12 col-sm-4">
+                                        <div class="info-box bg-light">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text text-center text-muted">收入</span>
+                                                <span class="info-box-number text-center text-muted mb-0">@Model.Balance.YingShou</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-4">
+                                        <div class="info-box bg-light">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text text-center text-muted">成本</span>
+                                                <span class="info-box-number text-center text-muted mb-0">@Model.Balance.TotalCost</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-4">
+                                        <div class="info-box bg-light">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text text-center text-muted">毛利</span>
+                                                <span class="info-box-number text-center text-muted mb-0">@Model.Balance.MaoLi</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        @Html.Partial("TourBalance/UCTourCalc")
+
+                                        @if (Model.Balance.IsPackage == 1)
+                                        {
+                                            <!-- 订单记录 -->
+                                            @Html.Partial("TourBalance/UCBussinessIncomm", Model)
+                                        }
+
+                                        <!-- 缴款记录 -->
+                                        @Html.Partial("TourBalance/UCPayIn", Model)
+
+                                        <!-- 成本列表 -->
+                                        @Html.Partial("TourBalance/UCCostsReadOnly", Model)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-4 ">
+                                @Html.Partial("TourBalance/UCTourInfo")
+
+                                <div class="text-center mt-5 mb-3">
+                                    @if (Model.Balance.AuditState < 4)
+                                    {
+                                        <button class="btn btn-sm btn-primary" type="button" id="btnSave" url="/Finance/FinanceAuditTour?orderCode=@Model.Balance.MasterOrderCode">财务审核</button>
+                                    }
+                                    <a href="@Url.Action("PrintTourBalance", new { orderCode = Model.MasterOrderCode })" target="_blank" class="btn btn-sm btn-warning">打印单团核算</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+<script type="text/javascript">
+    $(function () {
+        //打印单团核算
+        $("#btnPrint").click(function () {
+            window.open('');
+        });
+
+        $('input[type="checkbox"]').click(function () {
+            var costid = $(this).attr("data-content");
+            $.post("/optour/costpay?costId=" + costid, function (data) {
+                if (data == "no") {
+                    Utils.alert("您无权限进行审核。");
+                } else if (data == "0") {
+                    Utils.alert("已设置为未收款。");
+                } else if (data == "2") {
+                    Utils.alert("已设置为收款。");
+                } else {
+                    Utils.alert("请求发生异常。");
+                }
+            });
+        });
+
+        $('#btnSave').click(function () {
+            var $link = $(this);
+            if (!confirm("财务审核!")) {
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            $.post($link.attr("url"), function (data) {
+                if (data == "no") {
+                    Utils.alert("您无权限进行审核。");
+                } else if (data == "1") {
+                    Utils.alert("已审核。");
+                    $link.hide();
+                } else {
+                    Utils.alert("请求发生异常。");
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+    })
+</script>
+

@@ -1,0 +1,47 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;padding:10px">
+    缴款列表
+    <div class="fr">
+        @if (GlobalContext.Current.LoginUserRoles.Any(t => t.Name == "销售"))
+        {
+            <buttn class="btn btn1" id="btnAddPayInfo">添加缴款</buttn>
+        }
+    </div>
+</div>
+<table class="listtbl" style="width:100%;">
+    <thead>
+        <tr>
+            <th align="center">缴款单号</th>
+            <th align="center" style="width:150px;">提交时间</th>
+            <th align="center">付款方式</th>
+            <th align="center">缴款金额</th>
+            <th align="center">状态</th>
+            <th align="center">备注</th>
+            <th align="center" style="width:160px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ListTourPayInModel)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@(item.CreatedTime.ToString("yyyy-MM-dd HH:mm"))</td>
+                <td>@DictionaryTools.GetEnumValue(Enums.PayTypeEnum, item.PaymentType.ToString())</td>
+                <td>@item.Amount</td>
+                <td>@DictionaryTools.GetEnumValue(Enums.PayInStateEnum, item.State.ToString(), false)</td>
+                <td>@item.Remark</td>
+                <td>
+                    @if (item.State == 0)
+                    {
+                        <button onclick="payInfoEdit('@item.Id','@item.OrderCode')" type="button">编辑</button>
+                        <button onclick="payInfoDelete('@item.Id','@item.OrderCode')" type="button">删除</button>
+                    }
+                    else
+                    {
+                        <button onclick="payInfoDetail('@item.Id','@item.OrderCode')" type="button">详情</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

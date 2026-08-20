@@ -1,0 +1,88 @@
+﻿@{
+    ViewBag.Title = "签证办理";
+    var groupList = ViewData["GroupVisaList"] as List<VisaProductQModel>;
+    var personList = ViewData["PersonVisaList"] as List<VisaProductQModel>;
+    string picRoot = AppSetting.Get("UploadFileRoot");
+}
+@using Arch.Common;
+@using Lvy.Visa.VModels;
+@section HeaderContent{}
+
+<div class="product segments-page">
+
+    <div class="ui container">
+
+        @*<div class="sort">
+            <div class="ui grid">
+                <div class="eight wide column pr">
+                    <div class="content-select">
+                        <select class="ui fluid dropdown">
+                            <option value="">Newest Items</option>
+                            <option value="">Best Seller</option>
+                            <option value="">Popular</option>
+                            <option value="">Price: High to Low</option>
+                            <option value="">Price: Low to High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="eight wide column pl">
+                    <div class="content-select">
+                        <select class="ui fluid dropdown">
+                            <option value="">Added: Any Date</option>
+                            <option value="">in the last Year</option>
+                            <option value="">in the last Month</option>
+                            <option value="">in the last Week</option>
+                            <option value="">in the last Day</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+        <div class="section-title">
+            <h3>签证服务</h3>
+            <div class="line"></div>
+        </div>
+
+        <div class="ui three column grid">
+            @for (int i = 0; i < personList.Count; i++)
+            {
+                var item = personList[i];
+                <div class="column pr ">
+                    <div class="content">
+                        <img src="@(picRoot+ item.CountryImgUrl)" alt="">
+                        <a href="@("/visa/details/" + item.ProductCode.ToLower())">
+                            <p>@item.ProductName</p>
+                        </a>
+                        <h5>￥ @Math.Round(item.SalePrice)</h5>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="section-title">
+            <h3>团队签证查询</h3>
+            <div class="line"></div>
+        </div>
+
+        <div class="ui three column grid">
+            @for (int i = 0; i < groupList.Count; i++)
+            {
+                var item = groupList[i];
+                <div class="column pr">
+                    <div class="content">
+                        <img src="@(picRoot+ item.CountryImgUrl)" alt="">
+                        <a href="@("/visa/details/" + item.ProductCode.ToLower())">
+                            <p>@item.ProductName</p>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+

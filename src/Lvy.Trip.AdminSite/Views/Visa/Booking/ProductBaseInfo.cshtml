@@ -1,0 +1,47 @@
+﻿@model Lvy.Visa.Models.VisaInformationModel
+@{
+    Layout = null;
+}
+<table class="table table-sm table-bordered">
+    <tr>
+        <td >产品编号：</td>
+        <td>@Model.InformationCode</td>
+        <td >产品名称：</td>
+        <td>@Model.InformationName</td>
+    </tr>
+    <tr>
+        <td >签证类型：</td>
+        <td>@Model.VisaTypeValue</td>
+        <td >提前预定天数：</td>
+        <td>@Model.AdvanceDays 天</td>
+    </tr>
+    <tr>
+        <td >销售价格：</td>
+        <td><span style="color: Red;">@Math.Round(Model.SellPrice, 2)</span> 元/人</td>
+        <td >所属领区：</td>
+        <td>@Model.VisaAreaValue</td>
+    </tr>
+    <tr>
+        <td >办理地点：</td>
+        <td>@Model.VisaIssuePlaceName</td>
+        <td >受理时间：</td>
+        <td>@Model.AcceptedTime</td>
+    </tr>
+    <tr>
+        <td >签证有效期：</td>
+        <td>@Model.VisaExpiryDate</td>
+        <td >最长停留时间：</td>
+        <td>@Model.StayDays</td>
+    </tr>
+    <tr>
+        <td >入境次数：</td>
+        <td>@Model.EnterCount</td>
+        <td >面销类型：</td>
+        <td>@Model.InterviewTypeValue</td>
+    </tr>
+    <tr>
+        <td >受理范围：</td>
+        <td colspan="3">@Model.AcceptedRange</td>
+    </tr>
+</table>
+

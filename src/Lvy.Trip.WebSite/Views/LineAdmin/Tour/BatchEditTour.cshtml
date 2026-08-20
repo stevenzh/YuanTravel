@@ -1,0 +1,229 @@
+﻿@model Lvy.VModels.Product.BatchEditTourVModel
+@{
+    ViewBag.Title = "BatchEditTour";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+<form id="theForm" action="@Url.Action("SaveBatchEditTour")">
+    @Html.HiddenFor(m => m.Line.LineId)
+    <div class="station">批量修改团计划</div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:100%;">
+                <tbody>
+                    <tr>
+                        <td class="label">线路名称：</td>
+                        <td>@Model.Line.LineName</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">团计划名称：</td>
+                        <td>
+                            @{
+                                var items = Model.LineNameSignList.Select(item => new SelectListItem { Text = item.LineName, Value = item.LineName }).ToList();
+                                items.Add(new SelectListItem { Text = "请选择", Value = "", Selected = true });
+                            }
+                            @Html.DropDownListFor(m => m.Tour.LineName, items)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">出发日期：</td>
+                        <td>
+                            <input id="BeginDate" name="BeginDate" type="text" value="" class="Wdate text150"
+                                   onfocus="WdatePicker({doubleCalendar:true,minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\'EndDate\')}',readOnly:true,onpicked:function(){$('#EndDate').val($(this).val());$('#EndDate')[0].focus();CheckWeek();},oncleared:function (){clearDate();}})"
+                                   onclick="$(this).focus();" />
+                            &nbsp;--&nbsp;
+                            <input id="EndDate" name="EndDate" type="text" value="" class="Wdate text150" onfocus="WdatePicker({doubleCalendar:true,minDate:'#F{$dp.$D(\'BeginDate\')||\'%y-%M-%d\'}',readOnly:true,onpicked:function(){CheckWeek();},oncleared:function (){clearDate();}})"
+                                   onclick="$(this).focus();" />
+                        </td>
+                    </tr>
+                    <tr id="weekRow" style="display: none;">
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td>
+                            @Html.CheckboxGroup("SelectedDays", Model.DaysOfWeek, Model.SelectedDays.ToArray())
+                            <label style="margin-right: 15px; margin-left: 30px;">
+                                <input id="selectWeekend" type="checkbox" />周末
+                            </label>
+                            <label style="margin-right: 15px;">
+                                <input id="selectAll" type="checkbox" />全选
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            推荐类型：
+                        </td>
+                        <td>
+                            @Html.DropDownListFor(m => m.Tour.TuiJianType, new List<SelectListItem> { new SelectListItem { Text = "常规团", Value = "0", Selected = Convert.ToBoolean(Model.Tour.TuiJianType) }, new SelectListItem { Text = "特价团", Value = "1", Selected = Convert.ToBoolean(Model.Tour.TuiJianType) } })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="inform">
+        <div class="xbox">
+            <div id="priceContainer">
+                @Html.Partial("Tour/UCAddPrice", Model.PriceList)
+            </div>
+            <div style="margin-top: 4px;">
+                税:@Html.TextBoxFor(m => m.Tour.Tax, new { @class = "text150", contentlimit = "number" })
+                签证费:@Html.TextBoxFor(m => m.Tour.VisaPrice, new { @class = "text150", contentlimit = "number" })
+                单房差：@Html.TextBoxFor(m => m.SingleRoom, new { @class = "text150", contentlimit = "number" })
+                @*单房差：@Html.TextBoxFor(m => m.SingleRoom, new { @class = "text150", contentlimit = "number" })
+                        &nbsp;特价让利：
+                        @if (Model.Tour.TuiJianType == 0)
+                    {
+                            @Html.TextBoxFor(m => m.TeJiaFanLi, new { @class = "text150", disabled = "disabled" })
+                        }
+                        else
+                        {
+                            @Html.TextBoxFor(m => m.TeJiaFanLi, new { @class = "text150", contentlimit = "number" })
+                        }*@
+            </div>
+        </div>
+    </div>
+    <input class="btn btn1" id="submitBtn" type="button" value="保存" />
+    <input class="btn btn1" type="button" id="backBtn" value="返回" />
+</form>
+<script type="text/javascript">
+    $(function () {
+
+        $("#backBtn").click(function () {
+            window.location.href = "/Product/SearchLine";
+        });
+
+        //选择周末 事件
+        $("#selectWeekend").bind("change", function () {
+            if ($(this).prop("checked")) {
+                $('input[name=SelectedDays]:checkbox[value="Friday"]').prop("checked", true);
+                $('input[name=SelectedDays]:checkbox[value="Saturday"]').prop("checked", true);
+                if ($("input[name=SelectedDays]:checked").length == 7) {
+                    $("#selectAll").prop("checked", true);
+                }
+            } else {
+                $('input[name=SelectedDays]:checkbox[value="Friday"]').prop("checked", false);
+                $('input[name=SelectedDays]:checkbox[value="Saturday"]').prop("checked", false);
+                $("#selectAll").prop("checked", false);
+            }
+        });
+        //选择整个星期 事件
+        $("#selectAll").bind("change", function () {
+            if ($(this).prop("checked")) {
+                $("input[name=SelectedDays]:checkbox").prop("checked", true);
+                $("#selectWeekend").prop("checked", true);
+            } else {
+                $("input[name=SelectedDays]:checkbox").prop("checked", false);
+                $("#selectWeekend").prop("checked", false);
+            }
+        });
+        //星期选择 事件
+        $('input:checkbox[name="SelectedDays"]').bind('change', function () {
+            if ($(this).prop("checked")) {
+                if ($('input:checkbox[name="SelectedDays"]:checked').length == 7) {
+                    $("#selectAll").prop("checked", true);
+                }
+                if ($('input[name=SelectedDays][value="Friday"]').prop("checked") && $('input[name=SelectedDays][value="Saturday"]').prop("checked")) {
+                    $("#selectWeekend").prop("checked", true);
+                }
+            }
+            else {
+                $("#selectAll").prop("checked", false);
+                if ($(this).val() == 'Friday' || $(this).val() == 'Saturday')
+                    $("#selectWeekend").prop("checked", false);
+            }
+        });
+        //推荐类型变更
+        $('select[name="Tour.TuiJianType"]').change(function () {
+            if ($(this).val() == 1) {
+                $('#TeJiaFanLi').removeAttr('disabled');
+            } else {
+                $('#TeJiaFanLi').attr('disabled', 'disabled');
+            }
+        });
+
+        //提交
+        $('#submitBtn').click(function () {
+            var load_iii = Utils.layerLoad();
+            var param = $('#theForm').formSerialize();
+            $.post('/Product/SaveBatchEditTour', param, function (result) {
+                if (result) {
+                    if (result.State == 1) {
+                        window.location.href = result.Url;
+                    }
+                    else {
+                        Utils.alert(result.Msg);
+                        Utils.layerClose(load_iii);
+                    }
+                } else {
+                    Utils.alert('提交发生异常。');
+                    Utils.layerClose(load_iii);
+                }
+            });
+        });
+    });
+
+    //清空日期，隐藏星期选择
+    function clearDate() {
+        unCheckWeek();
+        $('#weekRow').hide();
+    }
+    //取消
+    function unCheckWeek() {
+        $('input:checkbox[name=SelectedDays]').each(function () {
+            $(this).prop("checked", false);
+        });
+        $('#selectAll').prop("checked", false);
+        $('#selectWeekend').prop("checked", false);
+    }
+    //验证星期范围
+    function CheckWeek() {
+        $('#weekRow').show();
+        unCheckWeek();
+        var $beginDate = $('#BeginDate');
+        var $endDate = $('#EndDate');
+        var $checkAllWeek = $('#selectAll');
+        var $checkWeekend = $('#selectWeekend');
+        var $weeks = $('input[name=SelectedDays]');
+
+        var startDate = $beginDate.val().replace(/-/g, "/");
+        var endDate = $endDate.val().replace(/-/g, "/");
+        var startValue = new Date(startDate);
+        var endValue = new Date(endDate);
+        var diff = (endValue - startValue) / 1000 / 60 / 60 / 24;
+        if (diff < 7) {
+            var arr = new Array();
+            $checkAllWeek.attr("disabled", "disabled");
+            $checkWeekend.attr("disabled", "disabled");
+            $weeks.attr("disabled", "disabled");
+            while (startValue <= endValue) {
+                switch (startValue.getDay()) {
+                    case 0: $weeks.filter('[value="Sunday"]').removeAttr("disabled"); break;
+                    case 1: $weeks.filter('[value="Monday"]').removeAttr("disabled"); break;
+                    case 2: $weeks.filter('[value="Tuesday"]').removeAttr("disabled"); break;
+                    case 3: $weeks.filter('[value="Wednesday"]').removeAttr("disabled"); break;
+                    case 4: $weeks.filter('[value="Thursday"]').removeAttr("disabled"); break;
+                    case 5: $weeks.filter('[value="Friday"]').removeAttr("disabled"); break;
+                    case 6: $weeks.filter('[value="Saturday"]').removeAttr("disabled"); break;
+                    default: break;
+                }
+                arr.push(startValue.getDay());
+                startValue = DateAdd('d', 1, startValue);
+            }
+            if (arr.indexOf(5) >= 0 && arr.indexOf(6) >= 0) {
+                $checkWeekend.removeAttr("disabled");
+            }
+        }
+        else {
+            $weeks.each(function () {
+                $(this).removeAttr("disabled");
+            });
+            $checkAllWeek.removeAttr("disabled");
+            $checkWeekend.removeAttr("disabled");
+        }
+    }
+</script>

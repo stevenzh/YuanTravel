@@ -1,0 +1,42 @@
+﻿@model Lvy.VModels.Ticket.BookingVModel
+<div class="row">
+    <div class="col-12">
+        <input id="showcustInfo" value="添加游客" type="button" class="btn btn-sm btn-success float-right" />
+    </div>
+</div>
+
+<table class="table table-sm mt-3">
+    <tr>
+        <th>姓名</th>
+        <th>拼音</th>
+        <th>性别</th>
+        <th>证件类型</th>
+        <th>证件号码</th>
+        <th>出生日期</th>
+        <th>联系电话</th>
+        @*<th>材料分类</th>*@
+        @*<th>状态</th>*@
+        <th>操作</th>
+    </tr>
+    @if (null != Model.TravellerList)
+    {
+        foreach (var travellerModel in Model.TravellerList)
+        {
+            <tr>
+                <td>@travellerModel.Name @Html.Raw(travellerModel.IsValid != 1 ? "<span style='color:red'>(已取消)</span>" : "")</td>
+                <td>@travellerModel.Pinyin</td>
+                <td>@(travellerModel.Sex == 1 ? "男" : "女")</td>
+                <td>@DictionaryTools.GetEnumValue(Enums.PassTypeEnum, travellerModel.CardType.ToString(), false)</td>
+                <td>@travellerModel.CardNo</td>
+                <td>@(travellerModel.Birthday != null ? travellerModel.Birthday.Value.ToString("yyyy-MM-dd") : "--")</td>
+                <td>@(string.IsNullOrEmpty(travellerModel.Phone) ? "--": travellerModel.Phone)</td>
+                @*<td>@(string.IsNullOrEmpty(travellerModel.CategoryName) ? "--" : travellerModel.CategoryName)</td>*@
+                @*<td>@travellerModel.VisaStateName</td>*@
+                <td>
+                    <button type="button" class="btn btn-sm btn-info" onclick="funModifyGuestInfo('@travellerModel.OrderCode','@travellerModel.Id')">编辑</button>
+                </td>
+            </tr>
+        }
+    }
+</table>
+

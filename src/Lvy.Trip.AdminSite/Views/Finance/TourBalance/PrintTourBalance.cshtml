@@ -1,0 +1,149 @@
+﻿@model Lvy.VModels.Finance.TourAccountVModel
+@{
+    ViewBag.Title = "PrintTourAccount";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>账单信息</title>
+    <link href="~/WebRes/css/manage.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+    <div id="divPrint" style="width: 700px; margin: 0 auto;">
+        <div class="station">
+            核算明细
+        </div>
+        <div align="center" class="xboxcontent">
+            <div class="sotable_tit">
+                &nbsp;团单基本信息
+            </div>
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label">团号：</td>
+                    <td style="width: 150px;">@Model.AccountInfoVModel.TourNo</td>
+                    <td class="label">线路名称：</td>
+                    <td>@Model.AccountInfoVModel.LineName</td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">出发日期：</td>
+                    <td style="width: 150px;">@Model.AccountInfoVModel.OutDate.ToDateFormat()</td>
+                    <td width="100" class="label">线路类型：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.AccountInfoVModel.LineType, false)</td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">总库存：</td>
+                    <td style="width: 150px;">@Model.AccountInfoVModel.PlanQuota</td>
+                    <td width="100" class="label">操作人：</td>
+                    <td>@Model.AccountInfoVModel.ModifiedBy</td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">已用库存：</td>
+                    <td style="width: 150px;">@Model.AccountInfoVModel.UsedQuota</td>
+                    <td width="100" class="label"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">剩余库存：</td>
+                    <td style="width: 150px;">@Model.AccountInfoVModel.UseQuota</td>
+                    <td width="100" class="label"></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div class="margintop15">
+            &nbsp;
+        </div>
+        <div align="center" class="xboxcontent">
+            <div class="sotable_tit">
+                &nbsp;结算明细
+            </div>
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td width="100" class="label">总应收：</td>
+                    <td style="width: 150px;">@Model.AccountDetailVModel.SumTolYsPrice</td>
+                    <td width="100" class="label">已收：</td>
+                    <td style="width: 150px;">@Model.AccountDetailVModel.SumTolPaid</td>
+                    <td width="100" class="label">未收：</td>
+                    <td>@Model.AccountDetailVModel.SumNoPaid</td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">
+                        结算人数：
+                    </td>
+                    <td style="width: 150px;">
+                        @Model.AccountDetailVModel.SumTravellerCount
+                    </td>
+                    <td width="100" class="label">
+                        @*成本合计：*@
+                    </td>
+                    <td colspan="3">
+                        @* ￥0.00*@
+                    </td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">
+                        @*    该团毛利：*@
+                    </td>
+                    <td style="width: 150px;">
+                        @*￥0.00*@
+                    </td>
+                    <td width="100" class="label">
+                        @*毛利率：*@
+                    </td>
+                    <td colspan="3">
+                        @* 0.00%*@
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="margintop15">
+            &nbsp;
+        </div>
+        <div align="center" class="xboxcontent">
+            @Html.Partial("TourBalance/UCBusinessIncome", Model)
+        </div>
+        <div class="margintop15">
+            &nbsp;
+        </div>
+        <div align="center" class="xboxcontent">
+            @Html.Partial("TourBalance/UCRevenueCost")
+        </div>
+        <div style="text-align: center;">
+            <input class="btn btn1" id="btnPrintTourAccount" type="button" value="打印" />
+            <input class="btn btn1" id="btnClose" type="button" value="关闭" />
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            printView();
+        };
+
+        $(function () {
+            //打印
+            $("#btnPrintTourAccount").click(function () {
+                printView();
+            });
+            //关闭
+            $("#btnClose").click(function () {
+                window.close();
+            });
+
+        });
+
+        //打印
+        function printView() {
+            document.title = "";
+            $("input[type=button]").hide();
+            window.print();
+            $("input[type=button]").show();
+            document.title = "核算明细";
+        }
+
+
+
+    </script>
+</body>
+</html>

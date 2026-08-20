@@ -1,0 +1,155 @@
+﻿@model Lvy.Models.SiteDB.SiteBannerModel
+@{ 
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "编辑景区";
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/jquery.validate.min.js"></script>
+    <script src="~/WebRes/scripts/jquery.validate.message.cn.js"></script>
+
+    <link href="@CDNServerUrl/elfinder/css/elfinder.full.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/elfinder/js/elfinder.min.js"></script>
+    <script src="@CDNServerUrl/elfinder/js/i18n/elfinder.zh_CN.js"></script>
+}
+
+
+<section class="content">
+    <div class="card">
+        @*<div class="card-header" data-original-title>
+                <h3 class="card-title"><i class="icon-edit"></i>@ViewBag.Title</h3>
+            </div>*@
+        <form id="editForm" enctype="multipart/form-data">
+            @Html.HiddenFor(m => m.BannerID)
+
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceName">标题</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.Subject, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceLevel">类型</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(m => m.Type, ViewData["BannerType"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceLevel">链接URL</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.LinkUrl, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="SimpleDesc">权重</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.SortOrder, new { @class = "form-control form-control-sm " })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="UploadFile">图片</label>
+                    <div class="col-sm-6">
+                        <img id="ImgUrl" class="img-fluid" src="@(picroot + Model.PicturePath)" />
+                        @Html.HiddenFor(m => m.PicturePath)
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-info" onclick="imageSelectDialog()">选择图片</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <button id="btnSave" type="submit" class="btn btn-success">保 存</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#editForm").validate({
+            submitHandler: function (form) {
+                $(form).ajaxSubmit({
+                    type: "post",
+                    url: "@Url.Action("Save")",
+                    success: function (data) {
+                        if (data.code == "1") {
+                            //Utils.alert("保存成功");
+
+                            parent.pageselectCallback();
+                            // 弹出框关闭
+                            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                            parent.layer.close(index);
+                        }
+                    }
+                });
+            },
+            rules: {
+                Subject: "required",
+                LinkUrl: "required",
+                SortOrder: "required",
+                PicturePath: "required"
+            },
+            messages: {
+                Subject: "请输入标题！",
+                LinkUrl: "请输入链接地址",
+                SortOrder: "请输入权重数字！",
+                PicturePath: "请选择图片"
+            }
+        });
+    });
+
+    function imageSelectDialog() {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'resize', 'help', 'select']; // Not yet implemented commands in ElFinder.Net
+        $.each(disabled, function (i, cmd) {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+
+        var fm = $('<div/>').dialogelfinder({
+            url: '@(picroot+"connector")', // change with the url of your connector
+            customData: { folder: 'Files/banner', subFolder: '/@Model.Type' }, // customData passed in every request to the connector as query strings. These values are used in FileController's Index method.
+            commands: myCommands,
+            rememberLastDir: false,
+            lang: 'zh_CN',
+            uiOptions: { // UI buttons available to the user
+                toolbar: [
+                    ['back', 'forward'],
+                    ['reload'],
+                    ['home', 'up'],
+                    //['mkdir', 'mkfile', 'upload'],
+                    ['open', 'download'],
+                    ['info'],
+                    ['quicklook'],
+                    ['copy', 'cut', 'paste'],
+                    ['rm'],
+                    ['duplicate', 'rename', 'edit'],
+                    ['view', 'sort']
+                ],
+                navbar: {
+                    minWidth: 150,
+                    maxWidth: 500
+                }
+            },
+            width: 840,
+            height: 450,
+            destroyOnClose: true,
+            getFileCallback: function (files, fm) {
+                $("#ImgUrl").attr("src", files.url);
+                $("#PicturePath").val(files.url);
+                // console.log("select file:" + files.url);
+            },
+            commandsOptions: {
+                getfile: {
+                    oncomplete: 'close',
+                    folders: false
+                }
+            }
+        }).dialogelfinder('instance');
+    }
+
+</script>

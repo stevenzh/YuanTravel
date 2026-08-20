@@ -1,0 +1,14 @@
+﻿@model System.Collections.Generic.List<Lvy.Models.ContractAdditions>
+<ul>
+    @if (Model != null)
+    {
+        foreach (var item in Model)
+        {
+            <li class="mt-checkbox mt-checkbox-outline" data-val="" title="@item.content">
+                <label class="mt-checkbox mt-checkbox-outline margin-none padding-none padding-10" style="padding: 5px!important;">
+                    <input type="checkbox" value="0">@item.content<span style="position: absolute;left: -20px;top:7px"></span>
+                </label>
+            </li>
+        }
+    }
+</ul>

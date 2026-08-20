@@ -1,0 +1,129 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var sales = ViewData["Sales"] as string;
+    var salesdata = ViewData["SalesCount"] as string;
+    var salesWdata = ViewData["SalesWCount"] as string;
+    List<TopWeb.Model.StatData> employee = ViewData["Salesman"] as List<TopWeb.Model.StatData>;
+}
+
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+    // 路径配置
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+</script>
+
+<div class="header">
+    <h1 class="page-title">销售员绑定统计</h1>
+    <ul class="breadcrumb">
+        <li><a href="/Admin/Index">首页</a> </li>
+        <li class="active">网站分类</li>
+    </ul>
+</div>
+<div class="main-content">
+    <div class="row">
+        <div class="col-md-3">
+            <table class="table table-bordered table-striped ">
+                <tr>
+                    <th style="width: 80px;">销售</th>
+                    <th style="width: 100px;">绑定总人数</th>
+                    <th style="width: 80px;">近一周</th>
+                </tr>
+                @foreach (var chatmodel in employee)
+                {
+                    <tr>
+
+                        <td>@chatmodel.UserName</td>
+                        <td>@chatmodel.AllFans</td>
+                        <td>@chatmodel.LastWeekFans</td>
+                    </tr>
+                }
+
+            </table>
+        </div>
+        <div class="col-md-9">
+            <div id="main" style="height:1500px"></div>
+            </div>
+        </div>
+</div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+    // 路径配置
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+
+    // 使用
+    require(
+        [
+            'echarts',
+            'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
+        ],
+        function (ec) {
+            // 基于准备好的dom，初始化echarts图表
+            var myChart = ec.init(document.getElementById('main'));
+
+            var option = {
+                tooltip : {
+                    trigger: 'axis',
+                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                        type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    data:['总数', '近一周']
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'value'
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'category',
+                        data :   @Html.Raw(sales)
+                        }
+                ],
+                series : [
+                    {
+                        name:'绑定总数',
+                        type:'bar',
+                        stack: '总量',
+                        itemStyle : { normal: {label : {show: true, position: 'insideRight'}}},
+                        data: @salesdata
+                        },
+                    {
+                        name:'近一周',
+                        type:'bar',
+                        stack: '总量',
+                        itemStyle : { normal: {label : {show: true, position: 'insideRight'}}},
+                        data:@salesWdata
+                        }
+                ]
+            };
+
+
+            // 为echarts对象加载数据
+            myChart.setOption(option);
+        }
+    );
+</script>
+

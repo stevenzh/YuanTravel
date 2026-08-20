@@ -1,0 +1,218 @@
+﻿@using Arch.Common
+@model Lvy.VModels.Order.GoNoticePrintVModel
+<!--startprint-->
+<table id="printTable" style="margin-top: 10px;width:100%;">
+    <tr>
+        <td>
+            <div>
+                <div style="float: right; padding: 5px 5px 0 0; text-align: right; height: 60px;">
+                    <b style="font-size: 24px; line-height: 30px;">订单详情</b>
+                    <div style="font-weight: 600; line-height: 30px;">
+                        欢迎参加“@DictionaryTools.GetCachedCustomer(Model.OrderModel.OwnerCode).Name”，祝您旅途愉快
+                    </div>
+                </div>
+                <div style="text-align: left;">
+                    @{
+                        string strImgSrc = AppSetting.Get("UploadFileRoot") + DictionaryTools.GetCachedCustomer(GlobalContext.Current.OwnerCode).LogoPath;
+                    }
+                    <img src="@strImgSrc" alt="" style="height: 60px;" />
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="station" style="height: 0px;"></div>
+<div class="in_box">
+    <div class="xboxcontent">
+        <div class="sotable_tit">基本信息</div>
+        <table class="edittbl" style="width:100%;">
+            <tr>
+                <td class="label">订单编号：</td>
+                <td>@Model.OrderModel.Id</td>
+                <td class="label">团&nbsp;&nbsp; &nbsp;&nbsp; 号：</td>
+                <td>@Model.TourPlanModel.Id</td>
+            </tr>
+            <tr>
+                <td class="label">线路名称：</td>
+                <td colspan="3" style="width: 500px;">@Model.TourPlanModel.LineName</td>
+            </tr>
+            <tr>
+                <td class="label">分销商：</td>
+                <td>@DictionaryTools.GetCachedCustomer(Model.OrderModel.BookingCustomer).Name</td>
+                <td class="label">联系电话：</td>
+                <td style="width: 220px;">@Model.OrderModel.ManagerPhone</td>
+            </tr>
+            <tr>
+                <td class="label">出行人数：</td>
+                <td>@Model.OrderModel.TravellerCount</td>
+                <td class="label">出团日期：</td>
+                <td>@Model.TourPlanModel.OutDate.ToDateFormat()</td>
+            </tr>
+            <tr>
+                <td class="label">游客姓名：</td>
+                <td>@Model.OrderModel.LinkMan</td>
+                <td class="label">游客电话：</td>
+                <td>@Model.OrderModel.LinkPhone</td>
+            </tr>
+            <tr>
+                <td class="label">应急电话：</td>
+                <td>@Model.LineModel.YingJiPhone</td>
+                <td class="label"></td>
+                <td> </td>
+            </tr>
+            <tr>
+                <td class="label">座位编号：</td>
+                <td colspan="3">@Model.SeatNums</td>
+            </tr>
+            <tr>
+                <td class="label">上车地点：</td>
+                <td colspan="3">
+                    @{
+                        string strBusPonint = Model.LineBusPointModel.BusPoint;
+                        if (Model.LineBusPointModel.JsType == 1)
+                        {
+                            strBusPonint += "（只接不送）";
+                        }
+                        if (Model.LineBusPointModel.JsType == 2)
+                        {
+                            strBusPonint += "（只送不接）";
+                        }
+                    }
+                    @strBusPonint  【@Model.LineBusPointModel.JsTime】
+                </td>
+            </tr>
+            <tr>
+                <td class="label">订单备注：</td>
+                <td colspan="3">@Model.OrderModel.Remark</td>
+            </tr>
+        </table>
+
+        <br />
+        @if (Model.LineModel.TrafficType == 1)
+        {
+            <div>
+                <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">报价种类</div>
+                @Html.Partial("UCBusPriceType", Model)
+            </div>
+            <br />
+        }
+        else
+        {
+            //长线
+        }
+        <div id="divXingCheng">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+                行程安排
+            </div>
+            <div style="padding: 10px; text-align: left;">
+                <table class="xingcheng" style="border: 0px;width:100%;">
+                    @foreach (var item in Model.LineRoutes)
+                    {
+                        <tr>
+                            <td colspan="2">
+                                <p class="day_step">
+                                    <font class="font2"> 第 @item.Days 天 </font> &nbsp;&nbsp;&nbsp;&nbsp; <font class="font3"> @item.Title </font>
+                                </p>
+                                <p class="day_introduction">
+                                    @Html.Raw(item.Contents)
+                                </p>
+                                <p class="catering"> </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <font class="font3">餐饮：</font><font class="font4">
+                                    @Html.Raw(item.Catering)
+                                </font>
+                            </td>
+                            <td>
+                                <font class="font3">住宿：</font><font class="font4"> @item.Hotel</font>
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td colspan="2">
+                            <table class="no_padding" style="width:100%;">
+                                <tr>
+                                    <td valign="top" width="80px;">
+                                        <font class="font3">购物点</font>
+                                    </td>
+                                    <td>
+                                        @Html.Raw(Model.LineModel.Shopping)
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <font class="font5">* 以上行程仅供参考，最终行程以出团通知为准。</font>
+                            <div style="padding-bottom: 10px;" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br />
+        <div id="divFeiYong">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+                费用描述
+            </div>
+            <div style="padding: 10px;">
+                <table class="no_padding price_contain " style="border: 0px;width:100%;">
+                    <tr valign="top">
+                        <td width="50%" style="padding-left: 15px;">
+                            <p class="font3">
+                                费用包含：
+                            </p>
+                            @Html.Raw(Model.LineModel.PriceContain)
+                        </td>
+                        <td>
+                            <p class="font3">
+                                费用不包含：
+                            </p>
+                            @Html.Raw(Model.LineModel.PriceNoContain)
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="divYuDing">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+                预定须知
+            </div>
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td style="padding: 5px 15px 10px 10px">
+                        @Html.Raw(Model.LineModel.BookingNodes)
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divTeBie">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+                出行提示
+            </div>
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td style="padding: 5px 15px 10px 10px">
+                        @Html.Raw(Model.LineModel.FootNotes)
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divCaoZuo">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+                操作说明
+            </div>
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td style="padding: 5px 15px 10px 10px">
+                        @Html.Raw(Model.LineModel.OpDesc)
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<!--startprint-->

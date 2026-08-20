@@ -1,0 +1,56 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="sidebar_section">
+
+    <div class="visacontent ovf">
+        <div class="sidebar_title">签证产品搜索</div>
+        <ul class="ovf">
+            <li class="ovf">
+                <label>国家/地区：</label><input type="text" value="国家/地区" id="txtcountryinfo" name="" keys="" style="color:gray;" />
+            </li>
+            <li class="ovf">
+                <label>签证类型：</label>
+                <select id="selvisatype">
+                    <option value="0">所有类型</option>
+                    <option value="1">旅游签证</option>
+                    <option value="2">商务签证</option>
+                    <option value="3">探访亲友</option>
+                </select>
+            </li>
+        </ul>
+        <div class="btn_search ovf">
+            <button type="button" id="btnVisaSearch" name="btnVisaSearch" onclick="searchv()">查询</button>
+        </div>
+    </div>
+</div>
+<div id="visaCityLayer" class="sidebar_section" style="display:none;">
+    <div id="visaCityList" class="city_pop">
+        <div class="city_title">国家或地区</div>
+        @{
+            var tempBkList = ViewData["HotCountryList"] as IList<Lvy.Visa.VModels.BanKuaiQModel>;
+        }
+        @if (tempBkList.Count > 0)
+        {
+            <ul class="city_tab ovf">
+                @foreach (var bkModel in tempBkList)
+                {
+                    <li>@bkModel.BanKuaiValue</li>
+                }
+            </ul>
+            foreach (var bkModel in tempBkList)
+            {
+                <div class="city_lists" style="display:none;" num="@bkModel.CountryList.Count">
+                    @foreach (var cityModel in bkModel.CountryList.OrderBy(a => a.CountryName))
+                    {
+                        <a title="@cityModel.CountryName.Trim()" href="javascript:void(0);" code="@cityModel.AreaId">@cityModel.CountryName.Trim()</a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+<script src="../../Scripts/search.js" type="text/javascript"></script>
+
+

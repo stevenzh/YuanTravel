@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "微信公众号";
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+    string pcode = (string)HttpContext.Current.Session["ProductCode"];
+    string pname = (string)HttpContext.Current.Session["ProductName"];
+}
+
+<div class="ui vertical segment">
+
+    <h4>分享产品</h4>
+
+    <div class="ui segment">
+        <p style="color:#d95c5c;">到微信消息页面，点击“上传企业Logo”菜单，选择手机相册的图片或拍下公司Logo标志，然后上传到微信。</p>
+        <img class="ui bordered image" src="~/images/help_log.png">
+        <div class="ui divider"></div>
+        <p style="color:#d95c5c;">以后再分享给朋友或朋友圈时，就会显示您的联系方式和公司LOGO了</p>
+        <img class="ui bordered image" src="~/images/help_share.png">
+        <div class="ui divider"></div>
+        <div class="ui button" id="btn_close">完成</div>
+        @if (string.IsNullOrEmpty(pcode))
+        {
+            <a class="ui btn" href="@("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fproduct%2Findex%2F" + pcode + "%3Fwxshare%3Dshare&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect")">继续分享 @pname</a>
+        }
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#btn_close").click(function () {
+                // 关闭窗口
+                wx.closeWindow();
+            })
+        });
+    </script>
+</div>
+

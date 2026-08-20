@@ -1,0 +1,57 @@
+﻿@model Lvy.Visa.VModels.HotProductQModel
+@{
+    Layout = null;
+}
+<table class="table table-sm">
+    <tr>
+        <th style=" width:20%;">产品编号</th>
+        <th style=" width:60%;">产品名称</th>
+        <th style=" width:20%;">操作</th>
+    </tr>
+    @foreach (var productmodel in Model.ProductList.Items)
+    {
+        <tr>
+            <td>@productmodel.InformationCode</td>
+            <td>@productmodel.InformationName</td>
+            <td><input type="checkbox" value="@productmodel.InformationCode" /></td>
+        </tr>
+    }
+</table>
+<div id="ProductPagination" class="digg"></div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#ProductPagination").pagination(
+            Number('@Model.ProductList.TotalCount'), {
+                callback: pageselectCallback1,
+                prev_text: '前一页',
+                next_text: '后一页',
+                items_per_page: 10,
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: propageIndex
+            });
+    });
+    //回调方法
+    function pageselectCallback1(page_id, jq) {
+        jQuery.ajaxSetup({ cache: false });
+        propageIndex = page_id;
+        page_id = page_id + 1;
+        var param = {
+            "ItemID": "@Model.ItemID",
+            "ProductInfo.InformationCode": $("#informationCode").val(),
+            "ProductInfo.InformationName": $("#informationName").val(),
+            "ProductInfo.VType": 1,
+            "ProductInfo.State": 5,
+            "ProductInfo.VisaType": $("#selVType").val(),
+            'PagedIndex': page_id,
+            'PagedSize': 10
+        }
+        $.post('/HotList/SearchVisaProduct/', param, function (data) {
+            $('#ProductListsDiv').html(data);
+        });
+    }
+    //分页控件 end
+
+</script>

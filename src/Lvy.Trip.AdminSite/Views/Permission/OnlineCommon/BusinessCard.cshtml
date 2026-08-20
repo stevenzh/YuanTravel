@@ -1,0 +1,98 @@
+﻿@using Arch.Common
+@model Lvy.VModels.Online.BusinessCardVModel
+@if (Model == null || (Model.CustomerAccount == null && Model.PlatAccount == null))
+{
+    <div>
+        <span>未找到信息！</span>
+    </div>
+}
+else
+{
+    string logoPath = string.Empty;
+    if (Model.CustomerAccount != null)
+    {
+        logoPath = AppSetting.Get("UploadFileRoot") + Model.CustomerAccount.Customer.LogoPath;
+        if (Model.CustomerAccount.Customer.LogoPath.IsNullOrEmpty())
+        {
+            logoPath = AppSetting.Get("UploadFileRoot") + GlobalContext.Current.OwnerBy.LogoPath;
+        }
+    }
+    else if (Model.PlatAccount != null)
+    {
+        logoPath = AppSetting.Get("UploadFileRoot") + Model.PlatAccount.Customer.LogoPath;
+    }
+ 
+    <div class="shadow" style="border: 1px solid #5DB9EC; background-color: white; padding: 5px;
+        z-index: 9999;">
+        <div class="bussinessCard">
+            <div>
+                <img src="@logoPath" alt="" class="logo"/>
+            </div>
+            <div>
+                <table>
+                    @if (Model.CustomerAccount != null)
+                    {
+                        <tr>
+                            <td class="label">
+                                 专管员：
+                            </td>
+                            <td>
+                                @Model.CustomerAccount.Name
+                            </td>
+                            <td class="label">
+                                电话：
+                            </td>
+                            <td style="width: 120px">
+                                @Model.CustomerAccount.Phone
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                QQ：
+                            </td>
+                            <td>
+                                <a href="tencent://message/?uin=@Model.CustomerAccount.QQ">@Model.CustomerAccount.QQ</a>
+                            </td>
+                            <td class="label">
+                                传真：
+                            </td>
+                            <td>@Model.CustomerAccount.Customer.Fax
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.PlatAccount != null)
+                    {
+                        <tr>
+                            <td class="label">
+                                 专管员：
+                            </td>
+                            <td>
+                                @Model.PlatAccount.Name
+                            </td>
+                            <td class="label">
+                                电话：
+                            </td>
+                            <td style="width: 120px">
+                                @Model.PlatAccount.Phone
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                QQ：
+                            </td>
+                            <td>
+                                <a href="tencent://message/?uin=@Model.PlatAccount.QQ">@Model.PlatAccount.QQ</a>
+                            </td>
+                            <td class="label">
+                                传真：
+                            </td>
+                            <td>
+                                @Model.PlatAccount.Customer.Fax
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+}

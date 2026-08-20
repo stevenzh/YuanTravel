@@ -1,0 +1,40 @@
+﻿@model TopWeb.Model.MemberModel
+@{
+    Layout = null;
+}
+<table class="table">
+    <tr>
+        <th></th>
+        <th>来源</th>
+        <th>内容</th>
+        <th>客服</th>
+        <th>创建时间</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Messages)
+    {
+        <tr>
+            <td>
+                <img src="@item.HeadImgUrl" style="height:48px; width:48px" />
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InOut)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Content)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedBy)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDate)
+            </td>
+            <td>
+                @Html.ActionLink("回复", "Edit", new { id = item.MessageID }) |
+                @Html.ActionLink("预留", "Location", new { id = item.OpenID })
+            </td>
+        </tr>
+    }
+
+</table>

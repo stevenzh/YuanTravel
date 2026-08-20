@@ -1,0 +1,118 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources{ }
+
+<section class="content">
+    <div class="card">
+        <form id="theForm">
+            @Html.HiddenFor(a => a.InvoiceModel.Id)
+            @Html.HiddenFor(a => a.InvoiceModel.OrderCode)
+            <div class="card-body p-2">
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:left"><b>客户名称：</b></td>
+                            <td>
+                                <select id="mySelect2" name="InvoiceModel.SettleCustomer" class="form-control form-control-sm">
+                                    @if (!string.IsNullOrEmpty(Model.InvoiceModel.SettleCustomer))
+                                    {
+                                        <option value="@Model.InvoiceModel.SettleCustomer">@DictionaryTools.GetCachedCustomer(Model.InvoiceModel.SettleCustomer).Name</option>
+                                    }
+                                </select>
+                            </td>
+                            <td><b>税号：</b></td>
+                            <td>@Html.TextBoxFor(a => a.InvoiceModel.TaxNumber, new { @class = "form-control form-control-sm" })</td>
+                        </tr>
+                        <tr>
+                            <td><b>地址： </b></td>
+                            <td>@Html.TextBoxFor(a => a.InvoiceModel.Address, new { @class = "form-control form-control-sm" })</td>
+                            <td><b>电话：</b></td>
+                            <td>@Html.TextBoxFor(a => a.InvoiceModel.Phone, new { @class = "form-control form-control-sm" })</td>
+                        </tr>
+                        <tr>
+                            <td><b>开户银行:</b></td>
+                            <td>@Html.TextBoxFor(a => a.InvoiceModel.BankName, new { @class = "form-control form-control-sm" })</td>
+                            <td><b>银行账户：</b></td>
+                            <td>@Html.TextBoxFor(a => a.InvoiceModel.BankAccount, new { @class = "form-control form-control-sm" })</td>
+                        </tr>
+                        <tr>
+                            <td><b>服务项目：</b></td>
+                            <td>  @Html.DropDownListFor(a => a.InvoiceModel.ServiceItems, ViewBag.InvoiceTitleEnum as List<SelectListItem>, new { @class = "form-control form-control-sm" })</td>
+                            <td><b>开票金额：</b></td>
+                            <td>@Html.TextBoxFor(a => a.InvoiceModel.Amount, new { @class = "form-control form-control-sm" })</td>
+                        </tr>
+                        <tr>
+                            <td><b>备注：</b></td>
+                            <td colspan="3">@Html.TextAreaFor(a => a.InvoiceModel.Remark, new { @row = "3", @class = "form-control form-control-sm" })</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-info" type="button" id="btnConfirm">提交</button>
+            </div>
+        </form>
+    </div>
+</section>
+<script>
+    $(function () {
+
+        $('#mySelect2').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        team: '@Model.Balance.SalesTeamId',
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            //templateResult: formatState
+        });
+
+        $("#btnConfirm").click(function() {
+            if ($.trim($("#mySelect2").val()) == "") {
+                Utils.alert("客户名称不能为空！");
+                return false;
+            }
+
+            if (!confirm('确定提交此单据？')) {
+                return false;
+            }
+
+            $('#theForm').ajaxSubmit({
+                type: 'post',
+                url: '@Url.Action("SaveInvoce", "Balance")',
+                success: function (data) {
+                    Utils.alert('提交成功!');
+                    // 弹出框关闭前调用父窗口方法
+                    parent.reloadPayIn();
+
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                },
+            });
+        });
+
+    });
+
+</script>

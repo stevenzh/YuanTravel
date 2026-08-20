@@ -1,0 +1,140 @@
+﻿@model Lvy.VModels.Finance.FinanceVModel
+@{
+    ViewBag.Title = "账务收款";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <style>
+        .select2-container--default .select2-selection--single { border-radius: 0; }
+    </style>
+}
+<form id="theForm" method="POST" action="@Url.Action("ExportExcel")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                账务收款查询
+            </div>
+            <table id="searchTable" class="edittbl" style="border-bottom: 0px;width:100%;">
+                <tr>
+                    <td class="label">产品类型：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.LineType, ViewBag.LineTypes as IEnumerable<SelectListItem>, new { @class = "text150" })
+                    </td>
+                    <td class="label">线路名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.LineName, new { @class = "text150" })
+                    </td>
+                    <td class="label">出发日期：</td>
+                    <td>
+                        <input type="text" name="Condition.StartOutDate" id="d4311" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4312\')||\'2020-10-01\'}'})" />
+                        &nbsp;--&nbsp;
+                        <input type="text" name="Condition.EndOutDate" id="d4312" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4311\')}'})" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">分销商：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.Condition.BookingCustomerName, new { @id = "Condition_BookingCustomerName" })
+                        <select id="mySelect1" name="Condition.BookingCustomer" class="text150">
+                            <option value=""></option>
+                        </select>
+                    </td>
+                    <td class="label">销售：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>)
+                    </td>
+                    <td class="label">付款日期：</td>
+                    <td>
+                        <input type="text" name="Condition.StartPayInTime" id="d4313" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4314\')||\'2020-10-01\'}'})" />
+                        &nbsp;--&nbsp;
+                        <input type="text" name="Condition.EndPayInTime" id="d4314" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4313\')}'})" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">团号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.TourNo, new { @class = "text150" })
+                    </td>
+                    <td class="label">结算状态：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SettlementState, ViewBag.SettlementStateBean as IEnumerable<SelectListItem>)
+                    </td>
+                    <td class="label">订单编号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.OrderId, new { @class = "text150" })
+                    </td>
+                </tr>
+                @*<tr>
+                        <td class="label">关联订单号：</td>
+                        <td>
+                            @Html.TextBoxFor(a => a.Condition.JoinOrderCode, new { @class = "text150" })
+                        </td>
+                    </tr>*@
+                <tr>
+                    <td colspan="6" style="text-align: center;">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="resetBtn" type="button" value="重置" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divFinanceList">
+        @Html.Partial("UCSearch", Model)
+    </div>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#mySelect1').select2({
+                ajax: {
+                    url: '/Customer/GetCustomerSelect2',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                            hasChild: true,
+                            page: params.page || 0,
+                            size: 10,
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 0;
+                        return {
+                            results: data.rows,
+                            pagination: {
+                                more: (params.page * 10) < data.total
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                allowClear: true
+                //templateResult: formatState
+            });
+            $('#mySelect1').on('select2:select', function (e) {
+                $("#Condition_BookingCustomerName").val(e.params.data.text);
+            });
+
+            //搜索
+            $("#btnSearch").click(function () {
+                pageselectCallback(0);
+            });
+
+            //重置
+            $("#resetBtn").click(function () {
+                $("#searchTable td input[type=text]").val("");
+                $("#searchTable td input[type=hidden]").val("");
+            });
+
+        });
+
+    </script>
+</form>
+<form style="display:none;" id="uploadForm" method="POST" action="@Url.Action("ImportDuiZhangDan")" enctype="multipart/form-data">
+    <div>
+        <input type="file" id="file" name="file" />
+    </div>
+</form>

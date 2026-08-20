@@ -1,0 +1,39 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Product.LineCostRuleVModel
+@{var index = ViewBag.RowIndex;}
+<tr>
+    <td height="40px">
+        @{var items = DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor();}
+        <select name="CostModels[@index].Item" class="form-control">
+            @foreach (var item in items)
+            {
+                <option value="@item.Value"> @item.Text</option>
+            }
+        </select>
+    </td>
+    <td>
+        <select name="CostModels[@index].SupplierId" class="form-control">
+            <option value="0">-- 请选择 --</option>
+            @foreach (var item in ViewBag.Suppliers as IEnumerable<KeyValueBean>)
+            {
+                <option value="@item.Key"> @item.Value</option>
+            }
+        </select>
+    </td>
+    <td>
+        <input type="text" name="CostModels[@index].Cost" class="form-control" value="0" />
+    </td>
+    <td>
+        <input type="text" name="CostModels[@index].Remark" class="form-control" />
+    </td>
+    <td>
+        <input type="hidden" name="CostModels[@index].ItemType" value="2" />
+        <input type="hidden" name="CostModels[@index].LineId" value="@Model.TpLine.LineId" />
+        <input type="hidden" name="CostModels[@index].IsValid" value="1" />
+        <a href="#" name="lnkDel">删除</a>
+    </td>
+</tr>
+
+<script type="text/javascript">
+    $("select[name$='.SupplierId']").select2({ language: "zh-CN" });
+</script>

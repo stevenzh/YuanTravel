@@ -1,0 +1,83 @@
+﻿@model Lvy.VModels.Crm.PermissionVModel
+@{
+    ViewBag.Title = "设置权限";
+}
+
+<form id="theForm">
+    <div class="btnlist fr role_tit">
+        <div class="fl" style="margin:1px 5px;">
+            <label id="lblRoleName"></label>
+        </div>
+        <div class="fr" style="margin:1px 5px;">  <input type="button" id="btnSave" class="btn btn1" value="保存" /></div>
+    </div>
+    <div class="role_right">
+        <!--  <div class="station">客户中心>产品管理</div> -->
+        <div class="r_left">
+            <ul>
+                @foreach (var item in Model.RoleBeans)
+                {
+                    <li><a href="javascript:void(0);" name="role" key="@item.Key">@item.Value</a>  </li>
+                }
+            </ul>
+        </div>
+
+        <div id="divSelectFuncs">@Html.Partial("RoleFunc/UCSelectFunctions", Model) </div>
+        <input type="hidden" name="RoleId" id="RoleId" />
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            var load_iii = Utils.layerLoad();
+            var params = decodeURIComponent($("#theForm").formSerialize());
+            $.post("@Url.Action("SavePermission")", params, function (flag) {
+                if (flag == "100") {
+                    Utils.alert("保存成功！");
+                } else {
+                    Utils.alert("保存失败！");
+                    document.URL = location.href;
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        $("a[name='role']").click(function () {
+            var obj = this;
+            $("#RoleId").val($(obj).attr("key"));
+            var params = { roleId: $(obj).attr("key") };
+            $("#lblRoleName").text($(obj).text());
+            $.post("@Url.Action("SelectedFunctionsByRoleId")", params, function (data) {
+                var obj = $("#divSelectFuncs input[type='checkbox']");
+                obj.prop("checked", false);
+                for (var i = 0 ; i < data.length ; i++) {
+                    var chk = $(obj.each(function () {
+                        if ($(this).attr("value") == data[i]) {
+                            $(this).prop("checked", true);
+                        }
+                    }));
+                }
+            });
+        });
+
+    });
+
+
+    function SelectCheckbox(chk) {
+        //将除头模板中的其它所有的CheckBox取反
+        var xState = chk.checked;
+        $("#divSelectFuncs input[group='" + $(chk).val() + "']").each(function () {
+            if ($(this).prop("checked") != xState) {
+                $(this).prop("checked", xState);
+            }
+        });
+    }
+    function SelectCheckbox2(chk) {
+        //将除头模板中的其它所有的CheckBox取反
+        var xState = chk.checked;
+        $("#divSelectFuncs input[group2='" + $(chk).val() + "']").each(function () {
+            if ($(this).prop("checked") != xState) {
+                $(this).prop("checked", xState);
+            }
+        });
+    }
+</script>

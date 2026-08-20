@@ -1,0 +1,116 @@
+﻿@model Lvy.Models.SiteDB.SiteBannerModel
+@{ 
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "创建景区";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/jquery.validate.min.js"></script>
+    <script src="~/WebRes/scripts/jquery.validate.message.cn.js"></script>
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+}
+
+@*<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Destop">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/Place/Index"> 景区管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>*@
+
+<section class="content">
+    <div class="card">
+        @*<div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+        </div>*@
+        <form role="form" id="editForm" class="form-horizontal" enctype="multipart/form-data">
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="Subject">标题</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.Subject, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="Type">类型</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(m => m.Type, ViewData["BannerType"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="LinkUrl">链接地址</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.LinkUrl, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="SortOrder">权重</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.SortOrder, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label" for="exampleInputFile">图片</label>
+                    <div class="input-group col-10">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" lang="zh-cn" id="exampleInputFile" name="exampleInputFile">
+                            <label class="custom-file-label" for="exampleInputFile" data-browse="选择文件">选择文件</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <button type="submit" class="btn btn-success">保 存</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        bsCustomFileInput.init();
+
+        $("#editForm").validate({
+            submitHandler: function (form) {
+                $(form).ajaxSubmit({
+                    type: "post",
+                    url: "@Url.Action("Save")",
+                    success: function (data) {
+                        if (data.code == "1") {
+                            Utils.alert("发送成功");
+                            parent.pageselectCallback();
+                            // 弹出框关闭
+                            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                            parent.layer.close(index); 
+                        }
+                    }
+                });
+            },
+            rules: {
+                Subject: "required",
+                LinkUrl: "required",
+                SortOrder: "required",
+                exampleInputFile: "required"
+            },
+            messages: {
+                Subject: "请输入标题！",
+                LinkUrl: "请输入链接地址",
+                SortOrder: "请输入权重数字！",
+                exampleInputFile: "请选择图片"
+            }
+        });
+    });
+
+</script>

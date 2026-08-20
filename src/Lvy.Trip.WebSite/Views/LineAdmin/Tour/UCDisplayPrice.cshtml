@@ -1,0 +1,76 @@
+﻿@model IEnumerable<Lvy.Models.ProductDB.TpPriceModel>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th style="text-align: left;">报价类型</th>
+            <th style="text-align: center;">市场价</th>
+            <th style="text-align: center;">同业结算</th>
+            <th style="text-align: center;">特价让利</th>
+            @*<th style="text-align: center;">自费</th>*@
+            @*<th style="text-align: center;">套餐</th>*@
+            <th style="text-align: center;">单房差</th>
+            <th style="text-align: center;">是否<br />有效</th>
+            <th style="text-align: center;">标准价</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Count() == 0)
+        {
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                    无数据
+                </td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td style="text-align: left;">
+                        <span title="@item.PriceRemark">@item.PriceRemark.TrimWithElipsis(15)</span>
+                    </td>
+                    <td style="text-align: center;">
+                        @item.Price.ToInteger()
+                    </td>
+                    <td style="text-align: center;">
+                        @item.SettlePrice.ToInteger()
+                    </td>
+                    <td style="text-align: center;">
+                        @item.TeJiaFanLi.ToInteger()
+                    </td>
+                    @*<td style="text-align: center;">
+                            @item.ZiFei.ToInteger()
+                        </td>*@
+                    @*<td style="text-align: center;">
+                            @item.SuitNum
+                        </td>*@
+                    <td style="text-align: center;">
+                        @item.SingleRoom.ToInteger()
+                    </td>
+
+                    <td style="text-align: center;">
+                        @if (item.IsValid == 1)
+                        {
+                            <span>有效</span>
+                        }
+                        else
+                        {
+                            <span>无效</span>
+                        }
+                    </td>
+                    <td style="text-align: center;">
+                        @if (item.IsStandard == 1)
+                        {
+                            <span>标准价</span>
+                        }
+                        else
+                        {
+                            <span>&nbsp;&nbsp;</span>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

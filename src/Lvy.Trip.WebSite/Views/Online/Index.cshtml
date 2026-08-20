@@ -1,0 +1,271 @@
+﻿@model Lvy.VModels.Online.IndexVModel
+@{
+    ViewBag.Title = "首页";
+    Layout = "~/Views/Shared/_FrontLayout.cshtml";
+}
+@section AdditionalResources
+{
+    <link href="~/styles/index.css" rel="stylesheet" type="text/css" />
+}
+<div class="m_left">
+    <div style="height: 1px; font-size: 1px; overflow: hidden;"></div>
+    <div class="m_left_2">
+        @{Html.RenderAction("OrderFlow"); }
+    </div>
+    <div class="m_left_2">
+        @{Html.RenderAction("HotTags"); }
+    </div>
+    <div class="clear"></div>
+    <div class="m_left_2">
+        @{Html.RenderAction("LoadDownload"); }
+    </div>
+</div>
+<!--m_left end-->
+<!--m_right start-->
+<div class="m_right">
+
+    <div class="notice">
+        @Html.Partial("Index/UCNotice", Model.NoticeModels)
+    </div>
+
+    <!--热卖团期-->
+    <div class="hot_tuan">
+        <span class="tips"></span>
+        <div class="right_title_box">
+            <p class="right_title">热卖团期</p>
+            <div class="nav_box">
+                <ul class="right_title_ul">
+                    <li name="nearby" class="on">周边游</li>
+                    <li name="inland">国内游</li>
+                    <li name="abroad">境外游</li>
+                    <li name="free">自助游</li>
+                </ul>
+            </div>
+            <p class="clear"></p>
+        </div>
+        <div class="hot_line_list">@*热卖团期*@</div>
+    </div>
+    <!--热卖团期-->
+    <!--特价团期-->
+    <div class="special_tuan">
+        <span class="tips"></span>
+        <div class="right_title_box">
+            <p class="right_title">特价团期</p>
+            <div class="nav_box">
+                <ul class="right_title_ul">
+                    <li name="nearby" class="on">周边游</li>
+                    <li name="inland">国内游</li>
+                    <li name="abroad">境外游</li>
+                    <li name="free">自助游</li>
+                </ul>
+            </div>
+            <p class="clear"></p>
+        </div>
+        <div class="special_line_list">@*特价团期*@</div>
+    </div>
+    <!--特价团期-->
+    <!--诚意推荐-->
+    <div class="recommend">
+        <div class="rec_title">
+            <span>王牌品质，值得信赖！</span>
+        </div>
+        <div class="rec_content">@*诚意推荐*@</div>
+    </div>
+    <!--诚意推荐-->
+</div>
+
+<div id="showPriceWin" class="shadow" style="position: absolute; background-color: white; display: none;"></div>
+<div id="showBusinessCardWin" class="shadow" style="position: absolute; background-color: white; display: none;"></div>
+<!--m_right end-->
+
+<script type="text/javascript">
+
+    //所点击价格的Id
+    var priceClickId = 0;
+
+    $(function () {
+
+        // 加载热卖团期
+        $.post("/Online/HotTour", function (data) {
+            $('.hot_line_list').html(data);
+            MouseOverHot();
+            AddPriceLink('.hot_line_list');
+        });
+
+        // 加载特价团期
+        //$.post("/Online/TeJiaTour", function (data) {
+        //    $('.special_line_list').html(data);
+        //    MouseOverSpecial();
+        //    AddPriceLink('.special_line_list');
+        //});
+
+        // 加载推荐线路
+        $.post("/Online/TuiJianLine", function (data) {
+            $('.rec_content').html(data);
+            BindShowMore();
+            showBusinessCard();
+        });
+
+        $('#showPriceWin').hover(function () {
+            $(this).hide();
+        });
+
+        $('#submitPlatComment').click(function () {
+            var $this = $(this);
+            var $content = $('#platCommentContent');
+            var content = $content.val();
+            if (content.length > 0 && content.trim().length > 0) {
+                $this.attr('disabled', 'disabled');
+                $.post('/PlatComment/Create', { content: content }, function (result) {
+                    if (result && result.State > 0) {
+                        Utils.alert('提交成功');
+                        $content.val('');
+                    }
+                    else {
+                        Utils.alert('提交失败');
+                    }
+                    $this.removeAttr('disabled');
+                });
+            }
+            else {
+                Utils.alert('提交内容为空');
+            }
+        });
+    });
+
+    // 添加价格链接
+    function AddPriceLink(className) {
+        $('' + className + ' a[name="priceLink"]').click(function () {
+            var $priceWin = $('#showPriceWin');
+            if ($priceWin.css("display") != "none") {
+                $priceWin.hide();
+                return false;
+            }
+            var x = $(this).position().left;
+            var y = $(this).position().top + $(this).height();
+            //$('#showPriceWin').hide();
+            //$('#showPriceWin').html('');
+            var tourId = $(this).attr('tourId');
+            if (tourId != priceClickId) {
+                priceClickId = tourId;
+                $.get("/Online/ShowPrice?tourId=" + tourId, function (data) {
+                    $('#showPriceWin').html(data);
+                    $('#showPriceWin').show();
+                    $('#showPriceWin').css("left", x).css("top", y);
+                });
+            }
+            else {
+                $('#showPriceWin').show();
+                $('#showPriceWin').css("left", x).css("top", y);
+            }
+            return false;
+        }
+            //        , function () {
+            //        $('#showPriceWin').hide();
+            //    }
+        );
+        $('#showPriceWin').hover(function () {
+        }, function () {
+            $('#showPriceWin').hide();
+        });
+    }
+
+    // 热卖团期标签鼠标经过事件
+    function MouseOverHot() {
+        // 显示不同类型的热卖团期
+        $('.hot_tuan .right_title_ul li').mouseover(function () {
+            var name = $(this).attr('name');
+            $('.hot_tuan .right_title_ul li').each(function () {
+                $(this).attr('class', '');
+            });
+            $('.hot_line_list table').each(function () {
+                $(this).attr('class', 'hidden');
+            });
+            $(this).attr('class', 'on');
+            $('.hot_line_list table[name="' + name + '"]').attr('class', 'nohidden');
+        });
+    }
+
+    // 特价团期标签鼠标经过事件
+    function MouseOverSpecial() {
+        // 显示不同类型的特价团期
+        $('.special_tuan .right_title_ul li').mouseover(function () {
+            var name = $(this).attr('name');
+            $('.special_tuan .right_title_ul li').each(function () {
+                $(this).attr('class', '');
+            });
+            $('.special_line_list table').each(function () {
+                $(this).attr('class', 'hidden');
+            });
+            $(this).attr('class', 'on');
+            $('.special_line_list table[name="' + name + '"]').attr('class', 'nohidden');
+        });
+    }
+
+    // 绑定显示更多推荐团期
+    function BindShowMore() {
+        // 显示更多推荐团期
+        $('.time_list a[name="moreRecommendTour"]').click(function () {
+            var $this = $(this);
+            var $table = $(this).parents('div').eq(0).find("table");
+            var lineId = $table.attr('name');
+
+            if ($table.css('display') == 'none') {
+                $.post("/Online/TuiJianTourList?lineId=" + lineId, function (result) {
+                    $table.html(result);
+
+                    $('.time_list_3').attr('style', '');
+                    $('.more_list').hide();
+                    $this.attr('style', 'position:relative; *position:absolute; height:25px; _height:26px; border:2px solid #339F8F; border-bottom:0px; margin-top:-1px; background-color:#fff;');
+                    AddPriceLink('.recommend');
+                    $table.show();
+                });
+            } else {
+                $(this).attr('style', '');
+                $table.hide();
+                $table.html('');
+            }
+        });
+    }
+
+    //显示名片
+    function showBusinessCard() {
+        //    $('.recommend').find('a[name="showBusinessCard"]').powerFloat({
+        //        eventType: "hover",
+        //        //target: "/Online/BusinessCard?lineId=0",
+        //        targetMode: "ajax"
+        //    });
+
+        var $link = $('.recommend').find('a[name="showBusinessCard"]');
+        var $containerDiv = $('#showBusinessCardWin');
+
+        $link.click(function () {
+            if ($containerDiv.css("display") != "none") {
+                $containerDiv.hide();
+                return false;
+            }
+            var $this = $(this);
+            var thisWidth = $this[0].offsetWidth;
+            var x = $this.position().left + thisWidth;
+            var y = $this.position().top + $(this).height();
+            var lineId = $this.attr('lineId');
+            //if (tourId != priceClickId) {
+            //    priceClickId = tourId;
+            $.get("/Online/BusinessCard?lineId=" + lineId, function (data) {
+                $containerDiv.html(data);
+                $containerDiv.show();
+                var width = $containerDiv[0].offsetWidth;
+                $containerDiv.css("left", x - width).css("top", y);
+            });
+            //}
+            //else {
+            //    $containerDiv.show();
+            //    $containerDiv.css("left", x).css("top", y);
+            //}
+            return false;
+        });
+        $containerDiv.hover(function () {
+            $containerDiv.hide();
+        });
+    }
+</script>

@@ -1,0 +1,88 @@
+﻿@model Lvy.Models.OrderDB.TpInvoiceModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources{
+    <script src="@CDNServerUrl/jquery-form/jquery.form.min.js"></script>
+}
+
+<section class="content">
+    <div class="card">
+        <form id="theForm">
+            @Html.HiddenFor(a => a.OrderCode)
+            @Html.HiddenFor(a => a.SettleCustomer)
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-2  col-form-label">客户名称：</label>
+                    <div class="col-5">@Model.CustomerName </div>
+                    <label class="col-2  col-form-label">发票号码：</label>
+                    <div class="col-3">@Html.TextBoxFor(a => a.InvoiceNo, new { @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2  col-form-label">税号：</label>
+                    <div class="col-5">@Html.TextBoxFor(a => a.TaxNumber, new { @class = "form-control form-control-sm" })</div>
+                    <label class="col-2  col-form-label">电话：</label>
+                    <div class="col-3">@Html.TextBoxFor(a => a.Phone, new { @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2  col-form-label">地址：</label>
+                    <div class="col-10">@Html.TextBoxFor(a => a.Address, new { @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2  col-form-label">开户银行:</label>
+                    <div class="col-5">@Html.TextBoxFor(a => a.BankName, new { @class = "form-control form-control-sm" })</div>
+                    <label class="col-2  col-form-label">银行账户：</label>
+                    <div class="col-3">@Html.TextBoxFor(a => a.BankAccount, new { @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">服务项目：</label>
+                    <div class="col-5"> @Html.DropDownListFor(a => a.ServiceItems, ViewBag.InvoiceTitleEnum as List<SelectListItem>, new { @class = "form-control form-control-sm" })</div>
+                    <label class="col-2  col-form-label">开票金额：</label>
+                    <div class="col-3">@Html.TextBoxFor(a => a.Amount, new { @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label">备注：</label>
+                    <div class="col-10">@Html.TextAreaFor(a => a.Remark, new { @class = "form-control form-control-sm" })</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-info" type="button" id="btnConfirm">提交</button>
+                <button class="btn btn-info" type="button" id="btnComplate">已开具发票</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    $(function () {
+
+        $("#btnConfirm").click(function () {
+            //if ($.trim($("#CustomerName").val()) == "") {
+            //    Utils.alert("客户名称不能为空！");
+            //    return false;
+            //}
+
+            if (!confirm('确定提交此单据？')) {
+                return false;
+            }
+
+            $('#theForm').ajaxSubmit({
+                type: 'post',
+                url: '@Url.Action("Edit", "Invoice")',
+                success: function (data) {
+                    Utils.alert('提交成功!');
+                    // 弹出框关闭前调用父窗口方法
+                    parent.pageselectCallback(1);
+
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                },
+            });
+
+        });
+
+    })
+
+</script>

@@ -1,0 +1,109 @@
+﻿@using Lvy.Models.BaseDB
+@using Lvy.Trip.Biz.Base
+@model Lvy.VModels.Online.SearchProductVModel
+
+@{
+    var linetype = Request.QueryString["linetype"].ToInt();
+    var dests = DestinationBiz.GetLineDestsCached().Where(a => a.LineType == linetype && a.IsHasTour == true);
+    <li style="margin-bottom: 5px">
+        <div class="search_title">
+            目&nbsp;的&nbsp;地
+        </div>
+        <div class="search_content">
+            <div class="zhuti_box_div">
+                <div class="dest_tips">
+                    @foreach (var item in dests)
+                    {
+                        <a href="javascript:void(0);" value="@item.ArriveDest">@item.ArriveDestName</a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </li>
+}
+<li style="margin-bottom: 5px">
+    <div class="search_title">
+        主&nbsp;&nbsp;&nbsp;&nbsp;题
+    </div>
+    @{
+        List<string> chosedList = Model.Themes == null ? new List<string>() : Model.Themes.Split('|').ToList();
+        List<BaseTagModel> themeList = ViewBag.ThemesList as List<BaseTagModel>;//默认查询20项热门主题
+        int tempIndex = 0;
+        int themeCount = themeList.Count();
+    }
+    <div class="search_content">
+        <div class="zhuti_box_div">
+            <div class="zhuti_tips">
+                <a href="javascript:void(0);" value="" style="color: red; width: 30px;">不限</a>
+                @if (themeCount > 0)
+                {
+                    int row = themeCount > 10 ? 10 : themeCount;
+                    for (int i = 0; i < row; i++)
+                    {
+                        <a href="javascript:void(0);" value="@themeList[i].Id">@themeList[i].TagName</a>
+                        tempIndex = i;
+                    }
+                    if (themeCount > 10)
+                    {
+                        <a class="time_list_3" href="javascript:void(0);">更多</a>
+                    }
+                }
+            </div>
+            @if (themeCount > 10)
+            {
+                <div class="zhuti_tips" style="padding-left: 40px; display: none;">
+                    @for (int i = tempIndex; i < themeCount; i++)
+                    {
+                        <a href="javascript:void(0);" value="@themeList[i].Id">@themeList[i].TagName</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="clear">
+    </div>
+</li>
+<li style="margin-bottom: 5px">
+    <div class="search_title">
+        出游天数
+    </div>
+    <div class="search_content">
+        <div class="zhuti_box_div date_box_div">
+            @Html.HiddenFor(m => m.TravelDays)
+            <div id="selectTravelDays">
+                <a href="javascript:void(0);" value="0" style="color: red; width: 30px;">不限 </a>
+                <a href="javascript:void(0);" value="1">一天 </a>
+                <a href="javascript:void(0);" value="2">二天 </a>
+                <a href="javascript:void(0);" value="3">三天 </a>
+                <a href="javascript:void(0);" value="4">四天 </a>
+                <a href="javascript:void(0);" value="5">五天 </a>
+                <a href="javascript:void(0);" value="6">六天 </a>
+                <a href="javascript:void(0);" value="7">七天以上</a>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+</li>
+<li style="margin-bottom: 5px">
+    <div class="search_title">
+        排&nbsp;&nbsp;&nbsp;&nbsp;序
+    </div>
+    <div class="search_content">
+        <div class="select_div_order" id="select_div_order">
+            <div class="select_input_order" id="select_input_order">
+                <span id="out_order_span">
+                    <font class="color_ccc">=== 请选择 ===</font>
+                </span>
+            </div>
+        </div>
+        <div class="select_option_order">
+            @foreach (var opetion in Model.OrderOption)
+            {
+                <p id="@opetion.Key">@opetion.Value.Value</p>
+            }
+        </div>
+    </div>
+    <div class="clear">
+    </div>
+</li>

@@ -1,0 +1,170 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+@using Lvy.Models
+@{
+    Layout = null;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+@if (Model.TpLine.Id > 0)
+{
+    <form class="form-horizontal" id="theForm" method="post">
+        @Html.HiddenFor(m => m.TpLine.LineId)
+        @Html.HiddenFor(m => m.TpLine.ArriveDest)
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">上传文件</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="fileNote" class="col-sm-2 col-form-label">文件说明</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="fileNote" placeholder="文件说明">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="FileSource" class="col-sm-2 col-form-label">文件类型</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownList("FileSource", (ViewBag.FileBusiList as List<KeyValueBean>).ToSelectListFor(), new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="lineFileName" class="col-sm-2 col-form-label">文件</label>
+                    <div class="col-sm-10 input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="lineFileName" name="lineFileName">
+                            <label class="custom-file-label" for="lineFileName" data-browse="选择文件">选择文件</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+                <button type="button" id="btnUpload" class="btn btn-info">上传文件</button>
+                <button type="button" id="btnPicture" class="btn btn-info">选择图片</button>
+                <a class="btn btn-info" href="/LineAdmin/SearchLine">返回列表</a>
+            </div>
+            <!-- /.card-footer -->
+        </div>
+        <div id="addGouWuContainer" class="card card-sold">
+            @Html.Partial("File/UCFileList", Model)
+        </div>
+    </form>
+}
+else
+{
+    <p style="text-align:center;padding-top: 100px;background: #fff;text-align: center;color: #121212; font-size: 14px;">
+        保存<strong> 基本信息</strong>后，可填写更多内容！
+    </p>
+}
+
+<div id="iviewer">
+    <div class="loader"></div>
+    <div class="viewer"></div>
+    <ul class="controls">
+        <li class="close"></li>
+        <li class="zoomin"></li>
+        <li class="zoomout"></li>
+        <li class="rotate_left"></li>
+        <li class="rotate_right"></li>
+    </ul>
+    <div class="info">
+        <a href="#" id="prevLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_prev.png" /></a>
+        <p id="imageCount"></p>
+        <a href="#" id="nextLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_next.png" /></a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        bsCustomFileInput.init();
+
+        $("#btnUpload").click(function () {
+            if ($.trim($("[name='lineFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+
+            if ($.trim($("#FileSource").val()) == "") {
+                Utils.alert("请选择上传的文件用途！");
+                return;
+            }
+            var formData = new FormData();
+            var name = $("[name='lineFileName']").val();
+            formData.append("lineFileName", $("[name='lineFileName']")[0].files[0]);
+            formData.append("fileName", name);
+            formData.append("fileNote", $("#fileNote").val());
+            formData.append("LineId", $("#TpLine_LineId").val());
+            formData.append("SourceType", $("#FileSource").val())
+            $.ajax({
+                url: '@Url.Action("AddUpLoadFile")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    $('#addGouWuContainer').html(data);
+                    Utils.alert("上传成功。");
+                }
+            });
+        });
+
+        //选择图片
+        $("#btnPicture").click(function () {
+            var parentStr = $("#TpLine_ArriveDest").val();
+            var url = "/Product/SearchImages/?ParentStr=" + $.trim(parentStr) + "&Rnd=" + Math.random();
+            layer.open({ type: 2, title: '选择图片', maxmin: true, shadeClose: true, area: ['900px', '400px'], content: url });
+        });
+
+    });
+
+    function SetPrimaryPic(Id, LineId) {
+        $.ajax({
+            url: '@Url.Action("SetPrimaryImage")',
+            type: 'POST',
+            data: { id: Id, lineId: LineId },
+            success: function (data) {
+                $('#addGouWuContainer').html(data);
+            }
+        });
+    }
+
+    function EditLineFile(obj, id) {
+        layer.open({ type: 2, title: '编辑图片', maxmin: true, shadeClose: false, area: ['600px', '300px'], content: '/Product/EditLineFile/'+id });
+    }
+
+    function DeleteLineFile(Id, LineId) {
+        layer.confirm('是否删除？', { btn: ['删除','取消']
+        }, function(index){
+            $.ajax({
+                url: '@Url.Action("DeleteLineFile")',
+                type: 'POST',
+                data: { id: Id, lineId: LineId },
+                success: function (data) {
+                    $('#addGouWuContainer').html(data);
+                     Utils.alert("删除完成。");
+                }
+            });
+            layer.close(index);
+        }, function(){
+
+        });
+    }
+
+    // 图库里选择好了图片 返回， 保存并刷新图片列表
+    function funSelectImageReturn(photoid, photourl) {
+        $.post("/Product/AddImage", {'LineId':$("#TpLine_LineId").val(), 'PhotoID': photoid, 'FilePath': photourl ,'SourceType':'12' }, function (data) {
+            $('#addGouWuContainer').html(data);
+        });
+    }
+
+    function ReloadUcLineVisa() {
+        var getTimestamp = new Date().getTime();
+        var url = "@Url.Action("UCAddFile")" + "?id=" + @Model.TpLine.LineId + "&timestamp=" + getTimestamp;
+        $("#tab-1 .ibox-content").remove();
+        $("#tab-1").load(url);
+    }
+
+</script>

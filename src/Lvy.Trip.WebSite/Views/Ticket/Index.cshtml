@@ -1,0 +1,248 @@
+﻿@model Lvy.VModels.Ticket.IndexVModel
+@{
+    ViewBag.Title = "景区门票";
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/lib/powerFloat/powerFloat.css" rel="stylesheet" />
+    <style>
+        .product_panel { margin-left: 0; }
+    </style>
+}
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="~/images/shop_background.jpg"></div>
+    <div class="home_overlay"></div>
+    <div class="home_content d-flex flex-column align-items-center justify-content-center">
+        <h2 class="home_title">@ViewBag.Title</h2>
+    </div>
+</div>
+
+<!-- Deals of the week -->
+<div class="shop">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <!-- Shop Sidebar -->
+                <div class="shop_sidebar">
+                    <div class="sidebar_section">
+                        <div class="sidebar_title">Categories</div>
+                        @{Html.RenderAction("HotTags", "Home", new { type = 2 }); }
+                    </div>
+
+                    <div class="sidebar_section">
+                        @{Html.RenderAction("LoadDownload", "Ticket"); }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="shop_content">
+                    @{Html.RenderPartial("Common/UCNotice", Model.Notices); }
+
+                    <!-- Product Panel -->
+                    @*
+                        <div class="product_panel panel active" id="divTeHui">
+                            <h3>特惠产品</h3>
+                            <div class="featured_slider slider">
+                                @foreach (var tempProduct in Model.TeHuiList)
+                                {
+                                    <!-- Slider Item -->
+                                    <div class="featured_slider_item">
+                                        <div class="border_active"></div>
+                                        <div class="product_item discount d-flex flex-column align-items-center justify-content-center text-center">
+                                            <div class="product_image d-flex flex-column align-items-center justify-content-center"><img src="@(picroot + tempProduct.ImgUrl)" style="width:115px;" alt=""></div>
+                                            <div class="product_content">
+                                                <div class="product_price">¥ @Math.Round(tempProduct.MarketPrice, 0)</div>
+                                                <div class="product_name"><div><a href="@("/ticket/details/" + tempProduct.ProductId)">@tempProduct.ProductName.TrimWithElipsis(7)</a></div></div>
+                                                <div class="product_extras">
+                                                     <div class="product_color">
+                                                            <input type="radio" checked name="product_color" style="background:#b19c83">
+                                                            <input type="radio" name="product_color" style="background:#000000">
+                                                            <input type="radio" name="product_color" style="background:#999999">
+                                                        </div>
+                                                    @if (DateTime.Now >= tempProduct.BeginBuyTime)
+                                                    {
+                                                        <a href="@Url.Action("Booking", "TktBooking", new { productId = tempProduct.ProductId })"><button class="product_cart_button active">立即预订</button></a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="javascript:;" title="@tempProduct.BeginBuyTime"> 预定时间 </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="product_fav"><i class="fas fa-heart"></i></div>
+                                            <ul class="product_marks">
+                                                <li class="product_mark product_discount">-25%</li>
+                                                <li class="product_mark product_new">new</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="featured_slider_dots_cover"></div>
+                        </div>
+                    *@
+                    <!-- Product Panel -->
+                    <div class="product_panel panel active" id="divTuiJian">
+                        <h3>推荐产品</h3>
+                        <div class="featured_slider slider">
+                            @foreach (var tempProduct in Model.TuiJianList)
+                            {
+                                <!-- Slider Item -->
+                                <div class="featured_slider_item">
+                                    <div class="border_active"></div>
+                                    <div class="product_item discount d-flex flex-column align-items-center justify-content-center text-center">
+                                        <div class="product_image d-flex flex-column align-items-center justify-content-center"><img src="@(picroot + tempProduct.ImgUrl)" style="width:115px;" alt=""></div>
+                                        <div class="product_content">
+                                            <div class="product_price">¥ @Math.Round(tempProduct.MarketPrice, 0)</div>
+                                            <div class="product_name"><div><a href="@("/ticket/details/" + tempProduct.ProductId)">@tempProduct.ProductName.TrimWithElipsis(7)</a></div></div>
+                                            <div class="product_extras">
+                                                @*  <div class="product_color">
+                                                        <input type="radio" checked name="product_color" style="background:#b19c83">
+                                                        <input type="radio" name="product_color" style="background:#000000">
+                                                        <input type="radio" name="product_color" style="background:#999999">
+                                                    </div>*@
+
+                                                <a href="@Url.Action("Booking", "TktBooking", new { productId = tempProduct.ProductId })" class="product_cart_button"><button class="product_cart_button active">立即预订</button></a>
+                                            </div>
+                                        </div>
+                                        <div class="product_fav"><i class="fas fa-heart"></i></div>
+                                        <ul class="product_marks">
+                                            <li class="product_mark product_discount">-25%</li>
+                                            <li class="product_mark product_new">new</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="featured_slider_dots_cover"></div>
+                    </div>
+
+                    <!-- Product Panel -->
+                    @*<div class="product_panel panel" id="divHengdian">
+                            <div class="hot_tuan">
+                                <h3 class="tab_big_title">产品专区</h3>
+                                <div class="hot_line_list">
+                                    <table width="100%" border="0">
+                                        <tr>
+                                            <th width="220px">产品名称</th>
+                                            <th width="80px">市场价</th>
+                                            <th width="80px">结算价</th>
+                                            <th width="110px">签单价</th>
+                                            <th width="70px">数量</th>
+                                            <th>预定须知</th>
+                                            <th width="60px"></th>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="hr1"></div>
+                                            </td>
+                                        </tr>
+                                        @foreach (var item in Model.ZhuanQuList)
+                                        {
+                                            <tr>
+                                                <td class="td_name" title="@item.ProductName"> @item.ProductName.TrimWithElipsis(12) </td>
+                                                <td><a name="priceLink" productid="@item.ProductId" href="javascript:void(0);"> @item.MarketPrice </a></td>
+                                                <td><a name="priceLink" productid="@item.ProductId" href="javascript:void(0);"> @item.SettlePrice</a> </td>
+                                                <td><a name="priceLink" productid="@item.ProductId" href="javascript:void(0);">@item.SysPriceDesc</a></td>
+                                                <td>@item.NumberDesc</td>
+                                                <td name="hdbookingdesc" rel="hddescShow-@item.Id" class="td_name">
+                                                    @item.BookingDesc.ToNoHTML().TrimWithElipsis(6)
+                                                    <div id="hddescShow-@item.Id" style="display: none; background-color:rgb(228, 241, 250);" class="shadow">
+                                                        @Html.Raw(item.BookingDesc)
+                                                    </div>
+                                                </td>
+                                                <td class="paddingtop5"><a href="@Url.Action("Booking", "TktBooking",new{productId=item.ProductId})">预定</a></td>
+                                            </tr>
+                                        }
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>*@
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div id="showPriceWin" class="shadow" style="position: absolute; background-color:rgb(228, 241, 250); display: none;">
+</div>
+@section PageScripts {
+    <script src="@CDNServerUrl/select2/js/select2.full.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/i18n/zh-CN.js"></script>
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/slick-1.8.0/slick.js"></script>
+    <script src="~/lib/powerFloat/jquery-powerFloat-min.js"></script>
+    <script src="~/js/home.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            LoadHotDest();  // 加载热门目的地and景区
+
+            $("table td[name='thbookingdesc']").powerFloat({ width: 250 });
+
+            SearchProduct(); // 查询产品
+
+        });
+
+        function SearchProduct() {
+            $("#btnSearch").click(function () {
+                if (Utils.Trim($("#txtSearchDest").val()) === "") {
+                    $("#txtSearchDest").focus();
+                    return false;
+                }
+
+                $.post('/Ticket/Search', { keyword: $("#searchKeyword").val() }, function (html) {
+                    $("#rightContent").html(html);
+                    AddPriceLink(".line_list");
+                });
+            });
+        }
+
+        // 添加价格链接
+        function AddPriceLink(className) {
+            $('' + className + ' a[name="priceLink"]').click(function () {
+                var $priceWin = $('#showPriceWin');
+                if ($priceWin.css("display") !== "none") {
+                    $priceWin.hide();
+                    return false;
+                }
+                var _this = this;
+                var productId = $(_this).attr('productId');
+                var x = $(this).position().left;
+                var y = $(this).position().top + $(this).height();
+                $.get("/Ticket/ShowPrice?productId=" + productId, function (data) {
+                    $('#showPriceWin').html(data);
+                    $('#showPriceWin').show();
+                    $('#showPriceWin').css("left", x).css("top", y);
+                });
+                return false;
+            });
+        }
+
+        function LoadHotDest() {
+            $.post('/Ticket/LoadHotDest', null, function (html) {
+                $("#divHotDest").html(html);
+            });
+        }
+
+        // 热门目的地
+        function HotDestLink(obj) {
+            var url = '/Ticket/Search';
+            var params = { keyword: "0-" + $(obj).attr("destId") };
+
+            $.post(url, params, function (html) {
+                $("#rightContent").html(html);
+                AddPriceLink(".line_list");
+            });
+        }
+    </script>
+}

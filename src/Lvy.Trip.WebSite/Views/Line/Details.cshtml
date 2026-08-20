@@ -1,0 +1,266 @@
+﻿@model Lvy.VModels.Booking.RouteVModel
+@{
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    var list = Model.FileList.Where(t => t.SourceType == "12");
+    var first = list.FirstOrDefault();
+}
+@section AdditionalResources {
+    <link href="~/lib/powerFloat/powerFloat.css" rel="stylesheet" />
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <link href="~/styles/calendarchange.css" rel="stylesheet" />
+    <style>
+        .fc-toolbar.fc-header-toolbar { font-size: 0.7em; }
+        .fc-toolbar, .fc-toolbar.fc-header-toolbar { padding: 0.3em; }
+        .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number { font-size: 1.2em; }
+        .fc .fc-daygrid-body-natural .fc-daygrid-day-events { margin-bottom: 0.4em; }
+        .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events { min-height: 1.5em; }
+        .fc .fc-daygrid-day-number { font-size: 12px; padding: 2px; }
+        .fc .fc-daygrid-event-harness { cursor: pointer; }
+    </style>
+}
+
+<!-- Single Product -->
+<div class="single_product">
+    <div class="container">
+        <div class="row">
+
+            <!-- Images -->
+            <div class="col-lg-2 order-lg-1 order-2">
+                <ul class="image_list">
+                    @foreach (var item in list)
+                    {
+                        <li data-image="@(picroot+ item.FilePath)"><img src="@(picroot+ item.FilePath)" alt=""></li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Selected Image -->
+            <div class="col-lg-5 order-lg-2 order-1">
+                <div class="image_selected"><img src="@(first == null ? "": picroot+ first.FilePath)" alt=""></div>
+            </div>
+
+            <!-- Description -->
+            <div class="col-lg-5 order-3">
+                <div class="product_description">
+                    <div class="product_category">@DictionaryTools.GetDestNameStr(Model.LineModel.ArriveDest)</div>
+                    <div class="product_name"> @Model.LineModel.LineName</div>
+                    <div class="rating_r rating_r_4 product_rating"><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="product_text"><p>@Html.Raw(Model.LineModel.LineSpecial)</p></div>
+                    <!--<div class="order_info d-flex flex-row">
+                        <form action="#">
+                            <div class="clearfix" style="z-index: 1000;">-->
+
+                                <!-- Product Quantity -->
+                                <!--<div class="product_quantity clearfix">
+                                    <span>Quantity: </span>
+                                    <input id="quantity_input" type="text" pattern="[0-9]*" value="1">
+                                    <div class="quantity_buttons">
+                                        <div id="quantity_inc_button" class="quantity_inc quantity_control"><i class="fas fa-chevron-up"></i></div>
+                                        <div id="quantity_dec_button" class="quantity_dec quantity_control"><i class="fas fa-chevron-down"></i></div>
+                                    </div>
+                                </div>-->
+
+                                <!-- Product Color -->
+                                <!--<ul class="product_color">
+                                    <li>
+                                        <span>Color: </span>
+                                        <div class="color_mark_container"><div id="selected_color" class="color_mark"></div></div>
+                                        <div class="color_dropdown_button"><i class="fas fa-chevron-down"></i></div>
+
+                                        <ul class="color_list">
+                                            <li><div class="color_mark" style="background: #999999;"></div></li>
+                                            <li><div class="color_mark" style="background: #b19c83;"></div></li>
+                                            <li><div class="color_mark" style="background: #000000;"></div></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="product_price">$2000</div>
+                            <div class="button_container">
+                                <button type="button" class="button cart_button">Add to Cart</button>
+                                <div class="product_fav"><i class="fas fa-heart"></i></div>
+                            </div>
+
+                        </form>
+                    </div>-->
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row pt-2">
+            <div class="col-lg-6">
+                <div id='calendar'></div>
+            </div>
+            <div class="col-lg-6">
+                <div class="product_price row">
+                    <div class=" col-auto">$2000</div>
+                    <div class=" col-auto">出游日期</div>
+                    <div class="col-auto">
+                        <input class="form-control " />
+                    </div>
+                </div>
+                <div class="button_container">
+                    <a href="/Order/Booking?lineId=@Model.LineModel.LineId&tourid=@Model.TpTourPlanModel.Id"><button type="button" class="button cart_button">立即预订</button></a>
+                    <div class="product_fav"><i class="fas fa-heart"></i></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row pt-2">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills" id="custom-tabs-two-tab">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-two-home-tab" data-toggle="pill" href="#custom-tabs-two-home" role="tab" aria-controls="custom-tabs-two-home" aria-selected="true">行程安排</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-two-profile-tab" data-toggle="pill" href="#custom-tabs-two-profile" role="tab" aria-controls="custom-tabs-two-profile" aria-selected="false">费用须知</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-two-messages-tab" data-toggle="pill" href="#custom-tabs-two-messages" role="tab" aria-controls="custom-tabs-two-messages" aria-selected="false">预定须知</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-two-settings-tab" data-toggle="pill" href="#custom-tabs-two-settings" role="tab" aria-controls="custom-tabs-two-settings" aria-selected="false">其他说明</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-two-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-two-home" role="tabpanel" aria-labelledby="custom-tabs-two-home-tab">
+                                <table>
+                                    @foreach (var item in Model.TpLineRoutes)
+                                    {
+                                        <tr>
+                                            <td colspan="2">
+                                                <span>第 @item.Days 天</span> &nbsp; @item.Title
+                                                <p class="catering">
+                                                    @Html.Raw(item.Contents)
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span>餐饮：</span> @item.Catering
+                                            </td>
+                                            <td>
+                                                <span>住宿：</span> @item.Hotel
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                                <div>* 以上行程仅供参考，最终行程以出团通知为准。</div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-two-profile" role="tabpanel" aria-labelledby="custom-tabs-two-profile-tab">
+                                <h4>费用包含</h4>
+                                <p> @Html.Raw(string.IsNullOrEmpty(Model.LineModel.PriceContain) ? "" : Model.LineModel.PriceContain.Replace("\n", "<br />"))</p>
+                                <h4>费用不包含</h4>
+                                <p> @Html.Raw(string.IsNullOrEmpty(Model.LineModel.PriceNoContain) ? "" : Model.LineModel.PriceNoContain.Replace("\n", "<br />"))</p>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-two-messages" role="tabpanel" aria-labelledby="custom-tabs-two-messages-tab">
+                                <h4>预定须知</h4>
+                                @Html.Raw(Model.LineModel.BookingNodes)
+                                <h4>出行提示</h4>
+                                @Html.Raw(Model.LineModel.FootNotes)
+                                <h4>签证说明</h4>
+                                @Html.Raw(Model.LineModel.VisaNote)
+                                <h4>退改规则</h4>
+                                @Html.Raw(Model.LineModel.OpDesc)
+                                <h4>购物点</h4>
+                                @Html.Raw(Model.LineModel.Shopping)
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-two-settings" role="tabpanel" aria-labelledby="custom-tabs-two-settings-tab">
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+
+        </div>
+
+        @Html.Partial("RecentlyViewed")
+
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="~/lib/greensock/TweenMax.min.js"></script>
+    <script src="~/lib/greensock/TimelineMax.min.js"></script>
+    <script src="~/lib/scrollmagic/ScrollMagic.min.js"></script>
+    <script src="~/lib/greensock/animation.gsap.min.js"></script>
+    <script src="~/lib/greensock/ScrollToPlugin.min.js"></script>
+    <script src="~/lib/easing/easing.js"></script>
+    <script src="~/lib/powerFloat/jquery-powerFloat.js"></script>
+    <script src="~/js/product_custom.js"></script>
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+    <script type="text/javascript">
+
+        function initImage() {
+            var images = $('.image_list li');
+            var selected = $('.image_selected img');
+
+            images.each(function () {
+                var image = $(this);
+                image.on('click', function () {
+                    var imagePath = new String(image.data('image'));
+                    selected.attr('src', imagePath);
+                });
+            });
+        }
+
+        $(function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                header: {
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                },
+                locale: 'zh-cn',
+                height: 360,
+                editable: false,
+                defaultView: 'dayGridMonth',//默认视图
+                buttonText: {
+                    today: '今天',
+                    dayGridMonth: '月',
+                    dayGridWeek: '周',
+                },
+                events: function(info, successCallback, failureCallback){
+                    $.ajax({
+                        type : "post",
+                        url : '/Line/GetCalendar/@Model.LineModel.LineId',
+                        data: {},
+                        dataType: "json",
+                        success : function(result) {
+                            successCallback(result);
+                        }
+                    });
+                },
+            });
+
+            calendar.render();
+            // $('#calendar').fullCalendar()
+
+            $(".trigger").powerFloat({
+                targetMode: "ajax"
+            });
+
+            initImage();
+
+            $(".sent_mail").click(function () {
+                layer.open({
+                    type: 2, title: '邮件发送', maxmin: false,
+                    shadeClose: false, area: ['400px', '300px'],
+                    content: '/Index/InitMailDialog',
+                });
+            });
+        });
+    </script>
+}

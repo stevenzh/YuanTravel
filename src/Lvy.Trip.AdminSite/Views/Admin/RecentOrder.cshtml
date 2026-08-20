@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Lvy.Models.OrderDB.TpOrderModel>
+@{
+    Layout = null;
+}
+<table class="table">
+    <thead>
+        <tr>
+            <td>出发日期</td>
+            <td>客户名称</td>
+            <td>产品</td>
+            <td>订单状态</td>
+            <td>跟单状态</td>
+            <td align="center">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.OutDate.ToString("MM-dd")</td>
+                <td>@item.CustomerName </td>
+                <td>@item.LineName</td>
+                <td>@Common.DisplayState(item.OrderState)</td>
+                <td>@Common.DisplayTraceState(item.TraceState)</td>
+                <td align="center" style="width:10%">
+                    <a class="J_menuItem" href="javascript:parent.openTabPage('/Order/OrderDetail?ordercode=@item.OrderCode','订单[@item.OrderCode]')" title="详情">详情</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

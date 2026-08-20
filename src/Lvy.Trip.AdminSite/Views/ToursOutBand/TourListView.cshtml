@@ -1,0 +1,146 @@
+﻿@using Lvy.VModels.Op
+@{
+}
+<style>
+
+    .listtbl thead td {
+        color: black;
+        font-weight: bold;
+        text-align: center;
+        background-color: #CDCDF5;
+    }
+</style>
+
+<form id="theForm" action="">
+    <div class="inform" id="content">
+
+        @{
+            int indx = 0;
+        }
+        @foreach (var tourModel in ViewBag.listTourOutBandHead as List<TourOutBandHeadVModel>)
+        {
+            <div class="inform">
+                <table width="100%" class="edittbl">
+                    <tr>
+                        <td class="label" width="90px">
+                            <span class="point"></span>线路编号：
+                        </td>
+                        <td>
+                            @tourModel.OutBandHeadModel.LineId
+                        </td>
+
+                        <td class="label" width="90px">
+                            <span class="point"></span>线路名称：
+                        </td>
+                        <td>
+                            @tourModel.OutBandHeadModel.LineName
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="label" width="90px">
+                            <span class="point"></span>团名称：
+                        </td>
+                        <td>
+                            @tourModel.OutBandHeadModel.TourNo
+                        </td>
+
+                        <td class="label" width="90px">
+                            <span class="point"></span>出发日期：
+                        </td>
+                        <td>
+                            @tourModel.OutBandHeadModel.OutDate
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="label" width="90px">
+                            <span class="point"></span>总人数：
+                        </td>
+                        <td colspan="3">@tourModel.OutBandHeadModel.TravellerCount 人 &nbsp;（男:@tourModel.OutBandHeadModel.ManCount 人、女:@tourModel.OutBandHeadModel.WomenCount 人、领队:@tourModel.OutBandHeadModel.LeaderCount 人)</td>
+
+
+                    </tr>
+                </table>
+                <table id="tbTrallers" width="100%" class="edittbl">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table class="listtbl" width="100%" style="border: 0px;">
+                                    <thead>
+                                        <tr>
+                                            <td align="center"> </td>
+                                            <td align="center">姓名</td>
+                                            <td align="center">性别</td>
+                                            <td align="center">英文名</td>
+                                            <td align="center">出生日期</td>
+                                            <td align="center">出生地</td>
+                                            <td align="center">证件种类</td>
+                                            <td align="left">证件号码</td>
+                                            <td align="center">签发日期、地点</td>
+                                            @*<td align="center">护照说明</td>*@
+                                            <td align="center">备注</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < tourModel.TpTravellerList.Count; i++)
+                                        {
+                                            var traveller = tourModel.TpTravellerList[i];
+
+                                            <tr>
+                                                <td align="center">
+                                                    @Html.CheckBox("TravellerCheckedList[" + indx + "].IsChecked", traveller.IsChecked)
+                                                    @Html.Hidden("TravellerCheckedList[" + indx + "].Id", traveller.Id)
+
+
+                                                </td>
+                                                <td align="center">@traveller.Name</td>
+                                                <td align="center">
+
+                                                    @DictionaryTools.GetEnumValue(Enums.SexEnum, traveller.Sex.ToString())
+                                                </td>
+                                                <td align="center">@traveller.PinYin</td>
+                                                <td align="center">@(traveller.DateOfBirth == null ? "" : traveller.DateOfBirth.Value.ToString("yyyy-MM-dd"))</td>
+                                                <td align="center">@traveller.PlaceOfBirth</td>
+                                                <td align="center">@DictionaryTools.GetEnumValue(Enums.PassTypeEnum, traveller.PassType.ToString())</td>
+                                                <td align="left">@traveller.PassNo</td>
+                                                <td align="center">@(traveller.DateOfExpiry == null ? "" : traveller.DateOfExpiry.Value.ToString("yyyy-MM-dd")) @traveller.PlaceOfIssue</td>
+                                                @*<td align="center"> </td>*@
+                                                <td align="center">@traveller.Remark</td>
+                                            </tr>
+
+                                            indx++;
+
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div>
+            <input id="printBtn" type="button" value="打印所选名单" class="btn btn1" style="width:100px" onclick="print()" />
+            <input id="backBtn" type="button" value="再加入名单" onclick="AddAgain()" class="btn btn1" style="width:100px" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+        function AddAgain() {
+            var fm=$("#theForm");
+            $(fm).attr("action","@Url.Action("BackTourListView")");
+            fm.submit();
+        }
+        function print() {
+
+            var fm=$("#theForm");
+            $(fm).attr("action","@Url.Action("PrintSet")");
+            fm.submit();
+
+        }
+</script>
+

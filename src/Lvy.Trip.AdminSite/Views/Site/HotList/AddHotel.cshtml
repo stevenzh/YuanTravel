@@ -1,0 +1,75 @@
+﻿@* 添加酒店弹出框 *@
+@model Lvy.Visa.VModels.HotProductQModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+@section AdditionalResources
+{
+    <script type="text/javascript">
+        var propageIndex = 0;
+    </script>
+}
+
+<div class="card" style="padding:3px;">
+    <div class="card-header">
+        <div class="card-tools">
+            <div class="input-group input-group-sm">
+                @Html.TextBoxFor(m => m.ProductCode, new { @class = "form-control float-right", @placeholder = "产品编号" })
+                @Html.TextBoxFor(m => m.ProductName, new { @class = "form-control float-right", @placeholder = "产品名称" })
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-default" onclick="funQueryPro()"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body" id="ProductListsDiv">
+        @Html.Partial("~/Views/Site/HotList/HotelList.cshtml")
+    </div>
+    <div class="card-footer">
+        <button type="button" id="btnAddProToHotVisa" class="btn btn-success">添加到推荐</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //查询
+    function funQueryPro() {
+        var param = {
+            "ItemID": "@Model.ItemID",
+            "ProductCode": $("#ProductCode").val(),
+            "ProductName": $("#ProductName").val(),
+            'PagedIndex': 1,
+            'PagedSize': 10
+        };
+        propageIndex = 0;
+        $.post('/HotList/SearchHotelProduct/', param, function (data) {
+            $('#ProductListsDiv').html(data);
+        });
+    }
+
+    $(function () {
+        //添加到推荐
+        $("#btnAddProToHotVisa").click(function () {
+            var length = $("#ProductListsDiv input[type=checkbox]:checked").length;
+            if (length > 0) {
+                var selPro = "";
+                $("#ProductListsDiv input[type=checkbox]:checked").each(function () {
+                    selPro += $(this).val() + ",";
+                });
+                var param = {"ItemID": "@Model.ItemID","SelProCodes": selPro};
+                $.post("/HotList/AddVisaToList/", param, function (data) {
+                    if (data == "") {
+                        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(index);
+                        parent.funAddSuccess();
+                    }
+                    else
+                        toastr.warning("线路" + data + "已经存在！！");
+                });
+            }
+            else
+                toastr.warning("请选择产品！！");
+        });
+
+    });
+</script>

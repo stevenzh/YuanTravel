@@ -1,0 +1,79 @@
+﻿@model Lvy.Visa.Models.CountryConsularDistrictQModel
+@{
+    Layout = null;
+    string pictureUrl = AppSetting.Get("UploadFileRoot");
+}
+@using Arch.Common
+<table class="table table-striped projects">
+    <tr>
+        <th style="width:150px;">国旗</th>
+        <th style="width:100px;">国家</th>
+        <th>领区详解</th>
+        <th style="width:100px;">操作</th>
+    </tr>
+    @if (Model.countryPagedList.Items.Count > 0)
+    {
+        foreach (var item in Model.countryPagedList.Items)
+        {
+            <tr>
+                <td>
+                    <img src="@(pictureUrl+ item.CountryImgPath)" width="100" height="40" style="margin: 3px; border: 1px solid #f0f0f0;" />
+                </td>
+                <td>@item.CountryName</td>
+                <td>@item.ConsularDistrictNotes</td>
+                <td>
+                    <a href="javascript:funModifyCountryDis('@item.VisaCountryCode')" class="btn btn-info btn-sm">
+                        <i class="fas fa-edit"></i>编辑
+                    </a>
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="4">
+                <div style="color: Red; font-size: 14px; text-align: center;"><b>对不起！没有找到您要的数据！</b></div>
+            </td>
+        </tr>
+    }
+    <tr>
+        <td colspan="4">
+            <div id="PaginationPaged" class="digg" />
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+0
+
+    //分页控件 begin
+    $(function () {
+        $("#PaginationPaged").pagination(
+            Number(@Model.countryPagedList.TotalCount), {
+                callback: pageselectCallbackCountry,
+                prev_text: '前一页',
+                next_text: '后一页',
+                items_per_page: 10,
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: pageIndex
+            });
+    });
+    //回调方法
+    function pageselectCallbackCountry(page_id, jq) {
+        jQuery.ajaxSetup({ cache: false });
+        pageIndex = page_id;
+        page_id = page_id + 1;
+        var param = {
+            'CountryCode': $('#CountryCode').val(),
+            'countryPagedList.PageIndex': page_id,
+            'countryPagedList.PageSize': 10
+        }
+        $.post('/District/SearchCountry/', param, function (data) {
+            $('#divCountry').html(data);
+        });
+    }
+
+</script>
+

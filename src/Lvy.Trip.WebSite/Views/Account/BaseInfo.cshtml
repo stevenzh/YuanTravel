@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    ViewBag.Title = "Index";
+    var userInfo = GlobalContext.Current.UserInfo;
+    var customerInfo = GlobalContext.Current.CustomerBy;
+}
+<div class="row">
+    <div class="col-md-9">
+        <div class="card card-widget">
+            <div class="card-header">
+                <h4 class="card-title">账户信息</h4>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">账户名</dt>
+                    <dd class="col-sm-9">@userInfo.Name</dd>
+                    <dt class="col-sm-3">商户类型</dt>
+                    <dd class="col-sm-9">签约供应商</dd>
+                    <dt class="col-sm-3">入驻时间</dt>
+                    <dd class="col-sm-9">@customerInfo.CreatedTime.ToDateFormat()</dd>
+                    <dt class="col-sm-3">签约周期</dt>
+                    <dd class="col-sm-9">一年</dd>
+                </dl>
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-3">公司名称</dt>
+                    <dd class="col-sm-9">@customerInfo.Name</dd>
+                    <dt class="col-sm-3">公司所在地</dt>
+                    <dd class="col-sm-9">@customerInfo.Address</dd>
+                    <dt class="col-sm-3">许可经营范围</dt>
+                    <dd class="col-sm-9">@customerInfo.BusinessPermit</dd>
+                    <dt class="col-sm-3">营业执照号</dt>
+                    <dd class="col-sm-9">@customerInfo.TaxNumber</dd>
+                </dl>
+                <hr />
+                <div class="form-group row">
+                    <label class="col-sm-3">联系方式</label>
+                    <div class="col-sm-9">@userInfo.Mobile</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3">电子邮箱</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="email" name="email" class="form-control" value="@userInfo.Email" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3">性别</label>
+                    <div class="col-sm-9">
+                        @Html.RadioGroup("Sex", DictionaryTools.GetEnumsBy(Enums.SexEnum), userInfo.Sex.ToString())
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3">微信绑定</label>
+                    <div class="col-sm-9">
+                        @if (string.IsNullOrEmpty(userInfo.OpenID))
+                        {
+                            <button type="button" class="btn btn-sm btn-success">绑定微信</button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+                <button type="button" id="btnSave" class="btn btn-info">保存</button>
+            </div>
+            <!-- /.card-footer -->
+
+        </div>
+        <!-- /.card -->
+    </div>
+
+    <!-- /.col -->
+    <div class="col-md-3">
+        @Html.Partial("_SellerHelp")
+    </div>
+</div>
+<!-- /.row -->
+
+
+@section PageScripts {
+    <script type="text/javascript">
+
+        $(function () {
+
+            $("#btnSave").click(function () {
+
+                var newPwd = $("#email").val();
+                if (newPwd == '') {
+                    Utils.alert("电子邮箱不能为空.");
+                    return;
+                }
+
+                var params = {
+                    Code: '@userInfo.Code',
+                    Email: $("#email").val(),
+                    Sex: $('input:radio[name=Sex]:checked').val()
+                };
+                $.post("@Url.Action("UpdateBaseInfo")", params, function (data) {
+                    if (data.Code == '1') {
+                        Utils.alert("更新成功！");
+                    } else {
+                        Utils.alert(data.Message);
+                    }
+                });
+            });
+        });
+    </script>
+}

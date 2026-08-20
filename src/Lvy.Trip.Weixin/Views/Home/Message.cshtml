@@ -1,0 +1,34 @@
+﻿@{
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+    ViewBag.Title = "首页";
+    string OutCityCode = (String)HttpContext.Current.Session["OutCity"];
+}
+@using TopWeb.Model;
+@section HeaderContent
+{
+    <style>
+        body { padding-top: 10px; }
+    </style>
+}
+<div class="ui blue inverted top fixed menu">
+    <a href="/Home?outcity=@OutCityCode" class="item">
+        <i class="chevron left icon"></i>
+    </a>
+    <div class="text item">精品线路</div>
+</div>
+
+<div class="ui divided segment items ">
+    @foreach (AdvertModel item in Model.MsgList)
+    {
+        <div class="item">
+            <a class="ui image" href="@item.LinkUrl">
+                <img src="@item.ShowPicUrl" alt="@item.Subject" />
+            </a>
+            <div class="content">
+                <a class="header" href="@item.LinkUrl">@item.Subject（@item.CreatedDate.ToString("M/d")）</a>
+                <div class="description">@item.ShowDesc</div>
+            </div>
+        </div>
+    }
+</div>
+

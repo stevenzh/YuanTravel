@@ -1,0 +1,20 @@
+﻿@model Lvy.VModels.Base.GuideVModel
+@{
+    ViewBag.Title = "ChoinceGuideInfo";
+}
+@section AdditionalResources
+{
+    <style>
+        .listtbl tr td { text-align: center; }
+    </style>
+}
+
+<input type="hidden" id="tourId" value="@ViewBag.TourId" />
+<form id="theForm">
+    <div id="divUCGuideInfoist">
+        @Html.Partial("UCChoiceGuide", Model)
+    </div>
+</form>
+
+
+

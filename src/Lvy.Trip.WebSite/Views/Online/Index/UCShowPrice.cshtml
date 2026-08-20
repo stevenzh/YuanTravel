@@ -1,0 +1,23 @@
+﻿@model IEnumerable<Lvy.Models.ProductDB.TpPriceModel>
+<table style="background-color: rgb(228, 241, 250); padding: 5px; font-size: 12px; width: 250px;">
+    @foreach (var price in Model)
+    {
+        <tr style="height: 30px;">
+            <td style="text-align: left;">
+                <span>@price.PriceRemark</span>
+            </td>
+            <td style="color: red; text-align: center;">
+                @price.Price.ToInteger()
+            </td>
+            <td>
+                &nbsp;
+            </td>
+            <td style="color: green; text-align: center;">
+                @if (GlobalContext.Current.UserInfo != null)
+                {
+                    @((price.SettlePrice - price.TeJiaFanLi).ToInteger())
+                }
+            </td>
+        </tr>
+    }
+</table>

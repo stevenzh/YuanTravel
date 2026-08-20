@@ -1,0 +1,155 @@
+﻿@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    ViewBag.Title = "Index";
+    var userInfo = GlobalContext.Current.UserInfo;
+    var customerInfo = GlobalContext.Current.CustomerBy;
+}
+<div class="row">
+    <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-4 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info"><i class="far fa-envelope"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">上线产品</span>
+                        <span class="info-box-number">10</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-4 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="far fa-flag"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">当月订单</span>
+                        <span class="info-box-number">40</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-4 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="far fa-copy"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">结算金额</span>
+                        <span class="info-box-number">￥13,648</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+        </div>
+
+        <div class="card card-widget">
+            <div class="card-header">
+                <div class="user-block">
+                    <img class="img-circle" src="~/images/user1-128x128.jpg" alt="User Image">
+                    <div class="username">
+                        <a href="#">@userInfo.Name</a>
+                        <span title="3 New Messages" class="badge bg-primary">供应商</span>
+                    </div>
+
+                    <span class="description"> @customerInfo.Name  - 签约商户</span>
+                </div>
+                <!-- /.user-block -->
+                @*<div class="card-tools">
+                        <button type="button" class="btn btn-tool" title="Mark as read">
+                            <i class="far fa-circle"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>*@
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="block block-summary">
+                    <div class="head">
+                        <span class="title">经营提示</span>
+                    </div>
+                    <div class="body">
+                        <dl>
+                            <dt>今日订单：</dt>
+                            <dd><em class="todayOrder">0</em>/0 (已付款/全部)</dd>
+                        </dl>
+                    </div>
+                    <div class="head">
+                        <span class="title">待办事项</span>
+                    </div>
+                    <div class="body">
+                        <div class="eventWrap">
+                            <a href="/order/seller/list" target="_blank">待付款 (<em>0</em>)</a>
+                            <a href="/order/seller/list" target="_blank">已付款未结算 (<em>0</em>)</a>
+                            <a href="/order/seller/list" target="_blank">下单待确认 (<em>0</em>)</a>
+                            <a href="/order/seller/list" target="_blank">出团通知书待上传 (<em>1</em>)</a>
+                        </div>
+                    </div>
+                    <div class="head">
+                        <span class="title">产品情况</span>
+                    </div>
+                    <div class="body">
+                        <div class="eventWrap">
+                            <a href="/product/sales/list" target="_blank">销售中产品 (<em>0</em>)</a>
+                            <a href="/product/unshelf/list" target="_blank">未上架产品 (<em>3</em>)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer card-comments">
+                <div class="card-comment">
+                    <!-- User image -->
+                    <img class="img-circle img-sm" src="~/images/user3-128x128.jpg" alt="User Image">
+
+                    <div class="comment-text">
+                        <span class="username">
+                            Maria Gonzales
+                            <span class="text-muted float-right">8:03 PM Today</span>
+                        </span><!-- /.username -->
+                        It is a long established fact that a reader will be distracted
+                        by the readable content of a page when looking at its layout.
+                    </div>
+                    <!-- /.comment-text -->
+                </div>
+                <!-- /.card-comment -->
+                <div class="card-comment">
+                    <!-- User image -->
+                    <img class="img-circle img-sm" src="~/images/user5-128x128.jpg" alt="User Image">
+
+                    <div class="comment-text">
+                        <span class="username">
+                            Nora Havisham
+                            <span class="text-muted float-right">8:03 PM Today</span>
+                        </span><!-- /.username -->
+                        The point of using Lorem Ipsum is that it hrs a morer-less
+                        normal distribution of letters, as opposed to using
+                        'Content here, content here', making it look like readable English.
+                    </div>
+                    <!-- /.comment-text -->
+                </div>
+                <!-- /.card-comment -->
+            </div>
+            <!-- /.card-footer -->
+
+        </div>
+        <!-- /.card -->
+    </div>
+
+    <!-- /.col -->
+    <div class="col-md-3">
+        @Html.Partial("_SellerHelp")
+    </div>
+</div>
+<!-- /.row -->

@@ -1,0 +1,287 @@
+﻿@{
+    var UserInfo = GlobalContext.Current.UserInfo;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewBag.Title - 测试站点</title>
+    <link rel="stylesheet" href="@CDNServerUrl/layer/theme/default/layer.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="~/styles/styles.css" />
+    <link rel="stylesheet" href="~/styles/responsive.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/pagination.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/select2-bootstrap4-theme/select2-bootstrap4.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/adminlte/css/adminlte.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/jquery-ui/jquery-ui.min.css" />
+    <style>
+        .main_nav_content { height: 90px; }
+        .logo_container { height: 90px; }
+            .logo_container img { height: 60px; }
+
+
+    </style>
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="@CDNServerUrl/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="@CDNServerUrl/adminlte/js/adminlte.min.js"></script>
+    <script src="@CDNServerUrl/layer/layer.js"></script>
+    <script src="@CDNServerUrl/jquery-form/jquery.form.min.js"></script>
+    <script src="@CDNServerUrl/jquery.pagination.js"></script>
+    <script src="@CDNServerUrl/select2/js/select2.full.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/i18n/zh-CN.js"></script>
+    @RenderSection("AdditionalResources", false)
+</head>
+<body>
+    <div class="super_container">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- Top Bar -->
+            <div class="top_bar">
+                <div class="container">
+                    <div class="row">
+                        <div class="col d-flex flex-row">
+                            <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="~/images/phone.png" alt=""></div>400-620-7888</div>
+                            <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="~/images/mail.png" alt=""></div><a href="mailto:help@sh-cct.com">help@sh-cct.com</a></div>
+                            <div class="top_bar_content ml-auto">
+                                <div class="top_bar_menu">
+
+                                </div>
+                                <div class="top_bar_menu">
+                                    <ul class="index_top_nav ">
+                                        <li class="nav_item item_weibo">
+                                            <a onclick="_gaq.push(['_trackEvent','首页_sz','点击','顶部按钮_微博___'])" class="header_icon icon_weibo vm" rel="nofollow" target="_blank" href="https://weibo.com/u/3069447335"></a>
+                                        </li>
+                                        <li class="nav_item item_weixin has_dropdown">
+                                            <a class="header_icon icon_weixin vm" rel="nofollow" href="#"></a>
+                                            <div class="dropdown_panel weixin_panel">
+                                                <img src="~/images/qrcode_for_weixin.png" />
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="top_bar_user">
+                                    <div class="user_icon"><img src="~/images/user.svg" alt=""></div>
+                                    @if (UserInfo != null)
+                                    {
+                                        <div>
+                                            @Html.ActionLink(UserInfo.Name, "Index", "Seller", routeValues: null, htmlAttributes: new { title = "商户中心" })
+                                        </div>
+                                        <div><a href="/User/Logout">登出</a></div>
+                                    }
+                                    else
+                                    {
+                                        <div>@Html.ActionLink("登陆", "Login", "User", routeValues: null, htmlAttributes: new { id = "loginLink" })</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main_nav">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <div class="main_nav_content d-flex flex-row">
+                                <!-- Categories Menu -->
+                                <div class="logo_container">
+                                    <div class="logo">
+                                        <a href="/home"><img src="@GlobalContext.Current.CustomerLogoPath" /></a>
+                                    </div>
+                                </div>
+                                <!-- Main Nav Menu -->
+                                <div class="main_nav_menu ml-auto">
+                                    <ul class="standard_dropdown main_nav_dropdown">
+                                        <li><a href="/seller">交易管理<i class="fas fa-chevron-right"></i></a></li>
+                                        <li><a href="/account/BaseInfo">账户信息<i class="fas fa-chevron-right"></i></a></li>
+                                        <li><a href="/account/ModifyPwd">修改密码<i class="fas fa-chevron-right"></i></a></li>
+                                    </ul>
+                                </div>
+                                <!-- Menu Trigger -->
+                                @*<div class="menu_trigger_container ml-auto">
+                                        <div class="menu_trigger d-flex flex-row align-items-center justify-content-end">
+                                            <div class="menu_burger">
+                                                <div class="menu_trigger_text">menu</div>
+                                                <div class="cat_burger menu_burger_inner"><span></span><span></span><span></span></div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+        </header>
+
+        <div class="seller">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="card card-outline card-primary">
+                            <div class="card-body">
+                                <ul class="nav nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                                    @if (GlobalContext.Current.CustomerBy.IsSupplier)
+                                    {
+                                        <li class="nav-item has-treeview menu-open">
+                                            <a href="#" class="nav-link">
+                                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                                <p>
+                                                    产品管理
+                                                    <i class="right fas fa-angle-left"></i>
+                                                </p>
+                                            </a>
+                                            <ul class="nav nav-treeview">
+                                                <li class="nav-item ">
+                                                    <a href="/ProductAdmin/SearchTicket" class="nav-link">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        产品管理
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item ">
+                                                    <a href="/LineAdmin/SearchLine" class="nav-link">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        线路管理
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item ">
+                                                    <a href="/LineAdmin/SearchTour" class="nav-link">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        开班管理
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    }
+                                    <li class="nav-item has-treeview menu-open">
+                                        <a href="#" class="nav-link">
+                                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                                            <p>
+                                                交易管理
+                                                <i class="right fas fa-angle-left"></i>
+                                            </p>
+                                        </a>
+                                        <ul class="nav nav-treeview">
+                                            <li class="nav-item ">
+                                                <a href="/Seller/OrderSearch" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>团队游订单</p>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item ">
+                                                <a href="/Seller/TktOrderSearch" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>门票订单</p>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item ">
+                                                <a href="/Seller/SearchTimerOrder" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>退单倒计时</p>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li class="nav-item has-treeview menu-open">
+                                        <a href="#" class="nav-link">
+                                            <i class="nav-icon fas fa-retweet "></i>
+                                            <p>财务管理</p>
+                                            <i class="right fas fa-angle-left"></i>
+                                        </a>
+                                        <ul class="nav nav-treeview">
+                                            <li class="nav-item ">
+                                                <a href="/finance/seller-trade/index" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    交易对账
+                                                </a>
+                                            </li>
+                                            <li class="nav-item ">
+                                                <a href="/finance/seller-details/index" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    收支明细
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    @*<li class="nav-item has-treeview menu-open">
+                                            <a href="#" class="nav-link">
+                                                <i class="nav-icon fas fa-user"></i>
+                                                <p>账户管理</p>
+                                                <i class="right fas fa-angle-left"></i>
+                                            </a>
+                                            <ul class="nav nav-treeview">
+                                                <li class="nav-item ">
+                                                    <a href="/Account/BaseInfo" class="nav-link">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        修改个人信息
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item ">
+                                                    <a href="/Account/ModifyPwd" class="nav-link">
+                                                        <i class="far fa-circle nav-icon"></i>
+                                                        修改密码
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>*@
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="copyright">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+
+                        <div class="copyright_container d-flex flex-sm-row flex-column align-items-center justify-content-start">
+                            <div class="copyright_content">
+                                Copyright &copy; 2002- @DateTime.Today.Year 上海新康辉国际旅行社有限责任公司 旅行社业务经营许可证编号：L-SH-GJ00042
+                                <a href="https://beian.miit.gov.cn">沪ICP备09073213号-10</a>
+                            </div>
+                            @*<div class="logos ml-sm-auto">
+                                    <ul class="logos_list">
+                                        <li><a href="#"><img src="~/images/logos_1.png" alt=""></a></li>
+                                        <li><a href="#"><img src="~/images/logos_2.png" alt=""></a></li>
+                                        <li><a href="#"><img src="~/images/logos_3.png" alt=""></a></li>
+                                        <li><a href="#"><img src="~/images/logos_4.png" alt=""></a></li>
+                                    </ul>
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/greensock/TweenMax.min.js"></script>
+    <script src="~/lib/greensock/TimelineMax.min.js"></script>
+    <script src="~/lib/scrollmagic/ScrollMagic.min.js"></script>
+    <script src="~/lib/greensock/animation.gsap.min.js"></script>
+    <script src="~/lib/greensock/ScrollToPlugin.min.js"></script>
+    <script src="~/lib/easing/easing.js"></script>
+    <script src="~/js/main.js"></script>
+    <script src="~/js/common.js"></script>
+    @RenderSection("PageScripts", required: false)
+</body>
+</html>
+

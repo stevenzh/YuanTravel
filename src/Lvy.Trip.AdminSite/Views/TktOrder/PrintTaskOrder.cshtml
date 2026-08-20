@@ -1,0 +1,168 @@
+﻿@using Arch.Common
+@model Lvy.VModels.Ticket.EditTaskOrderVModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link href="~/WebRes/css/reset.css" rel="stylesheet" type="text/css" />
+    <style type="text/css" media="print">
+        input { display: none; }
+    </style>
+    <style type="text/css">
+        html { font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        tr { height: 40px; }
+        td { border: 1px solid black; padding: 2px; }
+        .station { border-bottom: 1px solid #E5EAF0; text-align: left; height: 24px; line-height: 24px; margin: 5px 0px; color: gray; font-size: 12px; font-family: SimSong; }
+        .title { font-size: 24px; font-family: SimHei; padding: 5px 0 5px 0; text-align: center; }
+        .label { font-size: 18px; font-weight: bold; text-align: center; width: 120px; }
+    </style>
+    <script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+    <div style="width: 650px; margin: 0 auto;">
+        <div class="station">
+            @Model.CustomerName
+        </div>
+        <div class="title">
+            @(Model.CustomerName)任务单
+        </div>
+        <table>
+            <tr>
+                <td class="label">
+                    团号：
+                </td>
+                <td style="width: 33%;">
+                    @Model.TaskOrder.TourCode
+                </td>
+                <td class="label">
+                    人数：
+                </td>
+                <td>
+                    @Model.TaskOrder.TouristNumber
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    出团时间：
+                </td>
+                <td>
+                    @Model.TaskOrder.StartDate.ToDateFormat()
+                    --
+                    @Model.TaskOrder.EndDate.ToDateFormat()
+                </td>
+                <td class="label">
+                    导游：
+                </td>
+                <td>
+                    @Model.TaskOrder.GuideName
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    游程安排：
+                </td>
+                <td colspan="3">
+                    @Html.Raw(Model.TaskOrder.RouteDetail)
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    交通：
+                </td>
+                <td colspan="3">
+                    @Model.TaskOrder.Traffic
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    门票：
+                </td>
+                <td colspan="3">
+                    @Html.Raw(Model.TaskOrder.Product)
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    住宿：
+                </td>
+                <td colspan="3">
+                    @Model.TaskOrder.Hotel
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    餐费：
+                </td>
+                <td colspan="3">
+                    @Model.TaskOrder.Catering
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    其他：
+                </td>
+                <td colspan="3">
+                    @Model.TaskOrder.Other
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    景区备注：
+                </td>
+                <td colspan="3">
+                    @Html.Raw(Model.TaskOrder.Description)
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    预支团款：
+                </td>
+                <td>
+                    @Model.TaskOrder.PreMoney
+                </td>
+                <td class="label">
+                    业务签发单位
+                    <br />
+                    （盖章有效）:
+                </td>
+                <td style="vertical-align: central;">
+                    @{
+                        string strImgSrc = AppSetting.Get("UploadFileRoot") + DictionaryTools.GetCachedCustomer(GlobalContext.Current.OwnerCode).ElecCertifyPath;
+                    }
+                    <img style="position:relative;width:110px;height:110px;" alt="公章" src="@strImgSrc" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    联系方式：
+                </td>
+                <td colspan="3">
+                    @Html.Raw(Model.ConnectInfo)
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div style="text-align: center; margin-top: 10px;">
+        <input type="button" id="printBtn" value="打印" />
+        <span style="margin: 0 5px 0 5px;">&nbsp;</span>
+        <input type="button" id="closeBtn" value="关闭" />
+    </div>
+    <script type="text/javascript">
+        window.onload = function () {
+            window.print();
+
+            $('#printBtn').click(function () {
+                window.print();
+            });
+            $('#closeBtn').click(function () {
+                window.close();
+            });
+        };
+
+    </script>
+</body>
+</html>

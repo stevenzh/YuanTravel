@@ -1,0 +1,98 @@
+﻿@model  Lvy.Visa.VModels.OrderQModel
+@{
+    ViewData["Title"] = "签证订单详细";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+@section AdditionalResources
+{
+    <link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript">
+        var orderCode = '@Model.OrderCode';
+        var isModifyPage = false;
+    </script>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/OrderAdmin/Search">签证订单管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8">
+                @Html.Partial("~/Views/Visa/OrderAdmin/ProductBaseInfo.cshtml")
+
+
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="tabs-four-contact-tab" data-toggle="pill" href="#tabs-four-contact" role="tab" aria-controls="tabs-four-contact" aria-selected="true">联系人信息</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-four-home-tab" data-toggle="pill" href="#tabs-four-home" role="tab" aria-controls="tabs-four-home" aria-selected="true">申请人列表</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-four-profile-tab" data-toggle="pill" href="#tabs-four-profile" role="tab" aria-controls="tabs-four-profile" aria-selected="false">子订单列表</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-four-messages-tab" data-toggle="pill" href="#tabs-four-messages" role="tab" aria-controls="tabs-four-messages" aria-selected="false">操作历史记录</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="tabs-four-contact" role="tabpanel" aria-labelledby="tabs-four-contact-tab">
+                                <!--联系人信息-->
+                                @Html.Partial("~/Views/Visa/OrderAdmin/LinkManInfo.cshtml")
+                            </div>
+                            <div class="tab-pane fade show" id="tabs-four-home" role="tabpanel" aria-labelledby="tabs-four-home-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/TouristList.cshtml")
+                            </div>
+                            <div class="tab-pane fade" id="tabs-four-profile" role="tabpanel" aria-labelledby="tabs-four-profile-tab">
+                                @{ Html.RenderPartial("~/Views/Visa/OrderAdmin/ChildOrderInfoDetail.cshtml"); }
+                            </div>
+                            <div class="tab-pane fade" id="tabs-four-messages" role="tabpanel" aria-labelledby="tabs-four-messages-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/OperateHistory.cshtml")
+                            </div>
+                            </di>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <!--订单信息-->
+                @Html.Partial("~/Views/Visa/OrderAdmin/OrderBaseInfo.cshtml")
+            </div>
+        </div>
+    </div>
+</section>
+@*<script src="../../Scripts/VisaOrders.js" type="text/javascript"></script>*@
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#spanshowkuan").hide();
+        $("#tabOrderBaseInfo input[type='button']").remove();
+        $("#tabOrderBaseInfo input[type=checkbox]").attr("disabled", "disabled")
+        $("#orderprice_info a").remove();
+    });
+
+</script>
+

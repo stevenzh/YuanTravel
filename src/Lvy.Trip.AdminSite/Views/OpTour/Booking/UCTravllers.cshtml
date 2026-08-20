@@ -1,0 +1,44 @@
+﻿@model Lvy.VModels.Booking.BookingVModel
+<table class="table table-sm ">
+    <thead>
+        <tr>
+            <th>报价类型</th>
+            <th>姓名</th>
+            @if (Model.LineModel.LineScope == 3 || Model.LineModel.LineScope == 4)
+            {
+                <th>英文名</th>
+            }
+            <th>性别</th>
+            <th>联系电话</th>
+            <th>证件类型</th>
+            <th>证件号码</th>
+            @if (Model.LineModel.TrafficType == 3)
+            {
+                <th><input type="checkbox" id="tax" group="tax" onclick="SelectGroup(this);" /><label for="tax">税</label></th>
+            }
+            @if (Model.LineModel.LineScope == 3 || Model.LineModel.LineScope == 4)
+            {
+                <th><input type="checkbox" id="visaPrice" group="visaPrice" onclick="SelectGroup(this);" /><label for="visaPrice">签证费</label></th>
+            }
+            <th><input type="checkbox" id="chkAll" group="chkAll" onclick="SelectGroup(this);" /><label for="chkAll">保证自费</label></th>
+            <th><input type="checkbox" id="chkAll2" group="chkAll2" onclick="SelectGroup(this);" /><label for="chkAll2">单房差</label></th>
+            <th>价格调整</th>
+            <th>应收</th>
+        </tr>
+    </thead>
+    <tbody id="tbTravellers"></tbody>
+    <tfoot>
+        <tr>
+            <td colspan="13" align="right">
+                <span class="fr">子订单费用合计：<font id="totalOtherPrice">0 </font>元</span>
+                <span class="fr">税：<font id="totaltax">0 </font>元</span>
+                <span class="fr">自费：<font id="totalZifei">0 </font>人</span>
+                <span class="fr">房差：<font id="totalSingleRoom">0 </font>人</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="13" align="right"><span class="total_money fr">总金额：<font id="totalPrice">0 </font>元</span></td>
+        </tr>
+    </tfoot>
+</table>
+

@@ -1,0 +1,178 @@
+﻿@model Lvy.Models.BaseDB.BaseTaskModel
+@using Lvy.Models.JModels
+@{
+    ViewBag.Title = "任务详情";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section HeaderContent
+{
+    <link href="@CDNServerUrl/json-browse/jquery.json-browse.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/json-browse/jquery.json-browse.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1">
+                    @Html.HiddenFor(m => m.TaskID)
+                    @Html.HiddenFor(m => m.JsonData)
+                    <div class="row post">
+                        <div class="col-12">
+                            <h4>申请原因</h4>
+
+                            <p> @Html.Raw(Model.Contents)</p>
+
+                        </div>
+                    </div>
+
+                    @if (Model.WorkFlowID == 6001 || Model.WorkFlowID == 6002 || Model.WorkFlowID == 6004)
+                    {
+                        TaskJModel m = Model.JsonData.ToJsonDeserialize<TaskJModel>();
+                        <div class="row post">
+                            待审核联系人: <a href="/Saler/ContactDetails/@m.ContactCode"><i class="fas fa-link mr-1"></i> @DictionaryTools.GetCachedAccount(m.ContactCode).Name</a>
+                        </div>
+                    }
+
+
+                    @if (Model.SubTasks.Count > 0)
+                    {
+                        <div class="row post">
+                            <div class="col-12">
+                                <h4>子任务</h4>
+                                <table class="table table-sm table-bordered ">
+                                    <thead>
+                                        <tr>
+                                            <td align="left">流程名称</td>
+                                            <td align="left">状态</td>
+                                            <td align="left">审核部门</td>
+                                            <td align="left">审核人</td>
+                                            <td align="center">操作时间</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.SubTasks)
+                                        {
+                                            <tr>
+                                                <td align="left">@DictionaryTools.GetEnumValue(Enums.WorkFlowEnum, item.WorkFlowID.ToString())</td>
+                                                <td align="left">@DictionaryTools.GetEnumValue(Enums.TaskStatusEnum, item.Status.ToString(), false)</td>
+                                                <td align="left">@(item.WorkmanTeam == null ? "" : DictionaryTools.GetCachedTeam(item.WorkmanTeam).TeamName)</td>
+                                                <td align="left">@(item.Workman == null ? "" : DictionaryTools.GetCachedAccount(item.Workman).Name)</td>
+                                                <td align="center">@(item.OperateTime == null ? "" : item.OperateTime.Value.ToString("yyyy-MM-dd HH:mm:ss"))</td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-12">
+                            <pre id="json-renderer" class="json-body"></pre>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-12 col-md-12 col-lg-4 order-1 order-md-2">
+                    <h3 class="text-primary"><i class="fas fa-list-alt"></i> @DictionaryTools.GetEnumValue(Enums.WorkFlowEnum, Model.WorkFlowID.ToString())</h3>
+                    <div class="text-muted">
+                        <p class="text-sm">
+                            提出部门
+                            <b class="d-block">@DictionaryTools.GetCachedTeam(Model.TeamID).TeamName</b>
+                        </p>
+                        <p class="text-sm">
+                            提出人
+                            <b class="d-block">@DictionaryTools.GetCachedAccount(Model.Originator).Name</b>
+                        </p>
+                        <p class="text-sm">
+                            提出时间
+                            <b class="d-block">@Model.CreatedTime.ToString()</b>
+                        </p>
+                        <p class="text-sm">
+                            审核部门
+                            <b class="d-block">@DictionaryTools.GetCachedTeam(Model.WorkmanTeam).TeamName</b>
+                        </p>
+                        <p class="text-sm">
+                            审核人
+                            <b class="d-block">@DictionaryTools.GetCachedAccount(Model.Workman).Name</b>
+                        </p>
+                        <p class="text-sm">
+                            状态
+                            <b class="d-block">@DictionaryTools.GetEnumValue(Enums.TaskStatusEnum, Model.Status.ToString(), false)</b>
+                        </p>
+                        @if (GlobalContext.Current.UserInfo.Code == Model.Workman)
+                        {
+                            <div class="text-center mt-5 mb-3">
+                                <a href="#" id="btnOK" class="btn btn-primary"> 通过 </a>
+                                <a href="#" id="btnNot" class="btn btn-warning"> 驳回 </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    $(function () {
+        try {
+            var input = eval('(' + $('#JsonData').val() + ')');
+        }
+        catch (error) {
+            //return alert("Cannot eval JSON: " + error);
+        }
+        var options = {
+            collapsed: $('#collapsed').is(':checked'),
+            withQuotes: $('#with-quotes').is(':checked')
+        };
+        $('#json-renderer').jsonBrowse(input, options);
+
+
+        $("#btnOK").click(function () {
+            Send("10");
+        });
+        $("#btnNot").click(function () {
+            Send("20");
+        });
+        function Send(st) {
+            $.ajax({
+                url: '/Task/SetStatus',
+                data: { id: $("#TaskID").val(), status: st },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data.Code == "0") {
+                        Utils.alert("设置成功");
+                    } else {
+                        Utils.alert(data.Message);
+                    }
+                }
+            });
+        }
+    });
+
+</script>

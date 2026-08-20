@@ -1,0 +1,132 @@
+﻿@model Lvy.VModels.OpTour.GatheringVModel
+
+<div class="xbox">
+    <div class="xboxcontent clear">
+        <table width="100%" class="edittbl" style="background-color:lightgoldenrodyellow;">
+            <tr>
+                <td><b>仅累计缴款单</b></td>
+                <td style="text-align: right;">
+                    应收总金额：
+                </td>
+                <td style="color: red;">
+                    @Model.TotalModel.SumTolYsPrice
+                </td>
+                <td style="text-align: right;">
+                    已收总金额：
+                </td>
+                <td>
+                    ￥@Model.TotalModel.SumTolPaid
+                </td>
+                <td style="text-align: right;">
+                    剩余总额：
+                </td>
+                <td>
+                    ￥@Model.TotalModel.SumNoPaid
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="xbox clear">
+    <div class="btnlist">
+        @*<div class="fl">
+                排序方式：@Html.DropDownListFor(m => m.Condition.SortKey, Model.Condition.SortKeyValueBean.ToSelectListFor(Model.Condition.SortKey))
+                @if (Model.OrderModels.Items.Count > 0)
+                {
+                    <label>&nbsp;&nbsp; &nbsp;</label>
+                    <input type="button" class="btn btn1" id="btnBatchFinance" value="批量收款" style="margin: 0px;" />
+                    <input type="submit" class="btn btn1" value="导出对账单" style="margin: 0px; width: 90px;" />
+                }
+                else
+                {
+                    <label>&nbsp;&nbsp; &nbsp;</label>
+                    <input type="button" disabled="disabled" class="btn btn1" id="btnBatchFinance" value="批量收款" style="margin: 0px;" />
+                    <input type="submit" disabled="disabled" class="btn btn1" value="导出对账单" style="margin: 0px;" />
+                }
+            </div>*@
+    </div>
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                @*<td align="center" style="width: 10px;"><input type="checkbox" id="chkAll" /></td>*@
+                <td align="center">订单号</td>
+                <td align="center">缴款单号</td>
+                <td align="center">产品部门</td>
+                <td align="center">团号</td>
+                <td align="left">分销商</td>
+                <td align="center">缴款人</td>
+                <td align="center">订单金额</td>
+                <td align="center">缴款金额</td>
+                <td align="center">创建时间</td>
+                <td align="center">状态</td>
+                <td align="center" style="width: 110px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.TourPayInList.Items)
+            {
+                <tr>
+                    <td>@item.OrderCode </td>
+                    <td>@item.Id </td>
+                    <td>@DictionaryTools.GetCachedTeam(item.TeamId).TeamName</td>
+                    <td>@item.TourNo </td>
+                    <td title="@item.CustomerName">@item.CustomerName.TrimWithElipsis(15)</td>
+                    <td>@DictionaryTools.GetCachedAccount(item.PayInBy).Name </td>
+                    <td style="text-align:right;">@item.YingShou </td>
+                    <td style="text-align:right;">@item.Amount</td>
+                    <td>@item.CreatedTime.ToDateFormat()</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.PayInStateEnum, item.State.ToString(), false)</td>
+                    <td>
+                        @Html.Hidden("hiddenPayInId", item.Id)
+                        @if (item.State < 20)
+                        {
+                            <button type="button" onclick="ConfirmPayIn(@item.Id)" class="btn btn1"> 确认</button>
+                        }
+                        &nbsp;
+                        <a href="@Url.Action("PayInDetail",new { OrderCode=item.OrderCode,id=item.Id})" name="payInDetail"> 详情</a>&nbsp;
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(m => m.TourPayInList.PageIndex, new { id = "hiddenIndex" })
+    @Html.HiddenFor(m => m.TourPayInList.PageSize)
+    <div id="divPagination" class="digg"></div>
+</div>
+<script>
+    $(function () {
+        //分页控件 begin
+        $("#divPagination").pagination(
+            Number('@Model.TourPayInList.TotalCount'), {
+            callback: pageselectCallback,
+            items_per_page: (@Model.TourPayInList.PageSize),
+            num_display_entries: 5,
+            num_edge_entries: 2,
+            current_page: (@Model.TourPayInList.PageIndex - 1)
+
+        });
+
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+
+        var load_iii = Utils.layerLoad();
+
+        $("#TourPayInList_PageIndex").val(page_id + 1);
+
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divPayInList').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+
+</script>

@@ -1,0 +1,142 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+<div class="xbox clear">
+    <table id="tbllist" class="table table-sm">
+        <thead>
+            <tr>
+                <td align="center">订单号</td>
+                <td align="left">线路名称</td>
+                <td align="center">出发<br />日期</td>
+                <td align="center">联系人</td>
+                <td align="center">人数</td>
+                <td align="center">订单<br />状态</td>
+                <td align="center">金额</td>
+                <td align="center">联系人</td>
+                <td align="center" style="width: 150px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="height: 1px;">
+                <td colspan="9">
+                    距出发日期
+                    还有<span style="color: red; font-weight: bold;">1</span>天
+                </td>
+            </tr>
+            @Html.Partial("OrderTimer/UCOneDayOrders", Model)
+            <tr>
+                <td colspan="9">
+                    距出发日期
+                    还有<span style="color: red; font-weight: bold;">2</span>天
+                </td>
+            </tr>
+            @Html.Partial("OrderTimer/UCTwoDayOrders", Model)
+            <tr>
+                <td colspan="9">
+                    距出发日期
+                    还有<span style="color: red; font-weight: bold;">3</span>天
+                </td>
+            </tr>
+            @Html.Partial("OrderTimer/UCThreeDayOrders", Model)
+            <tr>
+                <td colspan="9">
+                    距出发日期
+                    还有<span style="color: red; font-weight: bold;">3</span>天以外
+                </td>
+            </tr>
+            @Html.Partial("OrderTimer/UCMoreDayOrders", Model)
+        </tbody>
+    </table>
+    @*删除订单*@
+    <div id="DeleteOrderAffirmDiv" style="display: none;">
+        产生费用：<input id="money" type="text" value="0" class="text150" /><br />
+        <br />
+        订单备注：<textarea id="OrderRemark" cols="100" rows="30" class="text150" style="height: 60px;"></textarea>
+    </div>
+
+    <script type="text/javascript">
+        var timer;
+        $(function () {
+               // 刷新 5min刷新一次
+                setInterval(function () {
+                    window.location.reload();
+                },1000*60*5);
+            //删除订单
+            $("#tbllist .delete").click(function () {
+                var objParentTr = $(this).parents("tr");
+
+                //订单编号
+
+                var orderId = $.trim($(objParentTr).find("td[name='orderCode']").html());
+                var orderCode = $.trim($(objParentTr).find("td[name='orderCode']").attr("orderCode"));
+                //订单备注
+                var orderRemark = $.trim($(this).find("span[name='remark']").text());
+                var createdTime = $.trim($(this).find("span[name='createdTime']").text());
+                var dayFlag = $(objParentTr).attr("name");
+                //验证执行规则
+                if (!CheckLimit(dayFlag, createdTime))
+                    return false;
+
+                $("#hiddenOrderCode").val("").val(orderCode);
+                $("#OrderRemark").val("").val(orderRemark);
+                layer.open({
+                    type: 1, title: '删 除 订 单', maxmin: true, shadeClose: false
+                    , area: ['800px', '500px']
+                    , content: "您确定要取消订单【" + orderId + "】吗？"
+                    , btn: ["确定", "取消"]
+                    , yes: function (index, layero) {
+                        var remark = document.getElementById('OrderRemark');
+                        $("#hiddenTolYsPrice").val("0");
+                        $("#OrderModel_Remark").val(remark.value);
+                        $.post('@Url.Action("CancelOrder","Order")', {'OrderCode': orderCode}, function (data) {
+                            $('#divOrderSearch').html(data);
+                            layer.close(index);
+                        });
+                    }
+                    , btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+            });
+        });
+
+        //验证执行规则
+        function CheckLimit(dayFlag, createdTime) {
+            createdTime = createdTime.toString("yyyy/MM/dd HH:mm:ss");
+            //暂用客户端测试一下
+            var nowTime = "@DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")";
+            var time3 = new Date(createdTime);
+            var time4 = new Date(nowTime);
+            var ShiCha = (time4.getTime() - time3.getTime()) / 1000 / 3600;
+
+            switch (dayFlag) {
+                case "1": //距出团日期还有1天
+                    if (ShiCha > 2) {
+                        Utils.alert("已经超出规定时间，若仍要取消请联系工作人员！", 2000);
+                        return false;
+                    }
+
+                    break;
+                case "2": //距出团日期还有2天
+                    if (ShiCha > 4) {
+                        Utils.alert("已经超出规定时间，若仍要取消请联系工作人员！", 2000);
+                        return false;
+                    }
+                    break;
+                case "3": //距出团日期还有3天
+                    if (ShiCha > 6) {
+                        Utils.alert("已经超出规定时间，若仍要取消请联系工作人员！", 2000);
+                        return false;
+                    }
+                    break;
+                case "4": //距出团日期3天以外
+                    if (ShiCha > 72) {
+                        Utils.alert("已经超出规定时间，若仍要取消请联系工作人员！", 2000);
+                        return false;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+    </script>
+</div>

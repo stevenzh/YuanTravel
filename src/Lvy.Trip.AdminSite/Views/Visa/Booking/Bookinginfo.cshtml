@@ -1,0 +1,461 @@
+﻿@model Lvy.Visa.VModels.BookingQModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+    <script src="~/Scripts/Validation.js"></script>
+}
+
+<section class="content">
+    <form id="frmorders" method="post" action="/Booking/BookingConfirm" role="form">
+        @Html.HiddenFor(a => a.ProductModel.InformationId, new { @id = "productid" })
+        @Html.HiddenFor(a => a.ProductModel.InformationCode, new { @id = "productcode" })
+        @Html.HiddenFor(a => a.ProductModel.InformationName, new { @id = "productName" })
+        @Html.HiddenFor(a => a.ProductModel.SellPrice, new { @id = "hidSalePrice" })
+        @Html.HiddenFor(a => a.ProductModel.TeamID)
+        @Html.HiddenFor(a => a.AudltNum, new { @id = "hidAudltNum" })
+        @Html.HiddenFor(a => a.ChildNum, new { @id = "hidChildNum" })
+        @Html.HiddenFor(a => a.TotAmount, new { @id = "hidTotAmount" })
+
+        <div id="bookinginfos" class="row">
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">预定信息</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            产品名称：<a href="javascript:void(0);" onclick="ShowInfomation(@Model.ProductModel.InformationId,'@Model.ProductModel.InformationName');">@Model.ProductModel.InformationName</a>
+                        </p>
+                        <p>填写联系人信息</p>
+                        <table class="table table-sm table-borderless mt-10">
+                            <tbody>
+                                <tr>
+                                    <td><span class="text-danger">*</span>联系人姓名：</td>
+                                    <td>
+                                        @Html.TextBoxFor(a => a.LinkName, new { @id = "LinkManName", @class = " form-control form-control-sm" })
+                                    </td>
+                                    <td><span class="text-danger">*</span>手机号码：</td>
+                                    <td>
+                                        @Html.TextBoxFor(a => a.LinkPhone, new { @id = "LinkManMobile", @class = " form-control form-control-sm" })
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="text-danger"></span>邮箱：</td>
+                                    <td>
+                                        @Html.TextBoxFor(a => a.LinkEmail, new { @id = "LinkManEmail", @class = " form-control form-control-sm" })
+                                    </td>
+                                    <td>寄送地址：</td>
+                                    <td>
+                                        @Html.TextBoxFor(a => a.Adress, new { @id = "txtInvoiceaddress", @class = " form-control form-control-sm" })
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td>
+                                    <span class="text-danger">*</span>预约出行日期：
+                                </td>
+                                <td>
+                                    @Html.TextBox("ReadyDate", (Model.ReadyDate != null ? Model.ReadyDate.Value.ToString("yyyy-MM-dd") : ""), new { @id = "txtOutDate", @class = "Wdate form-control form-control-sm", @onclick = "WdatePicker({minDate:'" + DateTime.Now.AddDays(Model.ProductModel.AdvanceDays.Value) + "'})" })
+                                </td>
+                                <td>
+                                    <span class="text-danger">*</span> 单价： <span id="price" style="color: #ff0000; font-size: 14px;">@Math.Round(Model.ProductModel.SellPrice, 0)</span>元/人
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(a => a.TotPeopleNum, new { @id = "totPeopleCount", @class = "form-control form-control-sm", @maxlength = "3" })
+                                </td>
+                            </tr>
+                        </table>
+
+
+                        <p>签约/付款方式</p>
+
+                        <table class="table table-sm table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td style="width:150px;">
+                                        <input type="radio" id="ContractType1" value="1" name="ContractType" @(String.IsNullOrEmpty(Model.ContractType) ? "checked" : (Model.ContractType == "1" ? "checked" : "")) />网上签约
+                                    </td>
+                                    <td>
+                                        <input type="radio" id="ContractType2" value="2" name="ContractType" @(String.IsNullOrEmpty(Model.ContractType) ? "" : (Model.ContractType == "2" ? "checked" : "")) />门市签约
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p>申请人信息</p>
+                        <table class="table table-sm table-borderless mt-10" id="guestlists">
+                            <tr>
+                                <th style="width:80px;"><span class="text-danger">*</span>姓名</th>
+                                <th style="width:80px;"><span class="text-danger">*</span>类型</th>
+                                <th style="width:80px;"><span class="text-danger"></span>性别</th>
+                                <th><span class="text-danger"></span>证件类型</th>
+                                <th><span class="text-danger"></span>证件号码</th>
+                                <th>手机号码</th>
+                            </tr>
+                            @if (null != Model.TripModels)
+                            {
+                                for (var i = 0; i < Model.TripModels.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" id="txtGuestName_@i" name="TripModels[@i].Name" value="@Model.TripModels[i].Name" />
+                                        </td>
+                                        <td>
+                                            <select id="selGuestType_@i" name="TripModels[@i].Type" class="form-control form-control-sm">
+                                                <option value="1" @(Model.TripModels[i].Type == 1 ? "selected" : "")>成人</option>
+                                                <option value="2" @(Model.TripModels[i].Type == 2 ? "selected" : "")>儿童</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="TripModels[@i].Sex" class="form-control form-control-sm">
+                                                <option value="1" @(Model.TripModels[i].Sex == 1 ? "selected" : "")>男</option>
+                                                <option value="0" @(Model.TripModels[i].Sex == 0 ? "selected" : "")>女</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="TripModels[@i].CardType" class="form-control form-control-sm">
+                                                <option value="2" selected>护照</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="txtGuestCardNo_@i" name="TripModels[@i].CardNo" class="form-control form-control-sm" value="@Model.TripModels[i].CardNo" />
+                                        </td>
+                                        <td>
+                                            <input type="text" name="TripModels[@i].Phone" class="form-control form-control-sm" value="@Model.TripModels[i].Phone" />
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">订单明细</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td style="border-bottom: 1px dashed #ddd; height: 32px;">
+                                    成人：<span class="spTolCor" id="mannum">0</span>人
+                                </td>
+                                <td style="border-bottom: 1px dashed #ddd;">
+                                    儿童：<span class="spTolCor" id="childnum">0</span>人
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    成人应收：<span class="spTolCor">¥</span><span class="spTolCor" id="manmoney">0</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    儿童应收：<span class="spTolCor">¥</span><span class="spTolCor" id="childmoney">0</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span style="color: #ff0000; margin-right: 3px;">合 计：¥</span><span class="spHjCor" id="totalAmount">0</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>备注：</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    @Html.TextAreaFor(a => a.CustMessage, new { @id = "remark", @style = "width: 90%" })
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="title">
+                            <input type="checkbox" value="1" name="IsneedInvoice" id="IsInvoice" onclick="AddInvoivce(this)" @(Model.IsneedInvoice == 1 ? "checked" : "") />&nbsp;索取发票
+                        </div>
+                        <table class="table table-sm">
+                            <tr>
+                                <td>
+                                    预订来源：
+                                    <input id="zhike" type="radio" checked="checked" name="OrderSource" value="2" @(Model.OrderSource == 0 ? "checked" : (Model.OrderSource == 2 ? "checked" : "")) />直客400
+                                    <input id="taobao" type="radio" name="OrderSource" value="6" @(Model.OrderSource == 0 ? "" : (Model.OrderSource == 6 ? "checked" : "")) />淘宝
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    <input type="button" value="[下一步]" id="Button1" onclick="CheckSubmit()" class="btn btn-info" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+
+@section PageScripts
+{
+    <script type="text/javascript">
+
+    $(function () {
+        $("#totPeopleCount").val(@(Model.TotPeopleNum == 0 ? 1 : Model.TotPeopleNum));
+        @if (null == Model.TripModels || Model.TripModels.Count() <= 0) {
+            Html.Raw(" funAddGuestTr(0);");
+        }
+
+        SetOrderTotalAmount();
+    });
+    //产品详细
+    function ShowInfomation(id, name) {
+        var url = "/Booking/ProductInfo?InformationId=" + id;
+        layer.open({ type: 2, title: '[' + name + '] 产品详细', maxmin: true, shadeClose: true, area: ['900px', '600px'], content: url });
+    }
+    //成人人数失去焦点事件
+    $("#totPeopleCount").blur(function () {
+        if ($(this).val() == "" || !new RegExp("^[0-9]{1,4}$").test($(this).val())) {
+            $(this).val("0");
+        }
+        funBathAddGuestTr($(this).val());
+        SetOrderTotalAmount();
+    });
+    //选择签约方式事件
+    $("input[name='ContractType']").click(function () {
+        if ($(this).val() != 1) {
+            // 签约方式说明
+        } else {
+            // 签约方式说明
+        }
+    });
+    //合计金额
+    function SetOrderTotalAmount() {
+        var _salePrice = $("#hidSalePrice").val();
+        var _totNum = $("#totPeopleCount").val();
+        var _adultNum = 0;
+        var _childNum = 0;
+        $("#guestlists select[id^='selGuestType_'] option:selected").each(function () {
+            if ($(this).val() == "1") {
+                _adultNum++;
+            } else {
+                _childNum++;
+            }
+        });
+        var _totAmount = _totNum * _salePrice;
+
+        $("#mannum").text(_adultNum);
+        $("#childnum").text(_childNum);
+        $("#manmoney").text(_adultNum * _salePrice);
+        $("#childmoney").text(_childNum * _salePrice);
+        $("#totalAmount").text(_totAmount);
+        $("#hidAudltNum").val(_adultNum);
+        $("#hidChildNum").val(_childNum);
+        $("#hidTotAmount").val(_totAmount);
+        $("#hidfpAmount").val(_totAmount);
+    }
+    // 是否索取发票
+    function AddInvoivce(obj) {
+        if (obj.checked) {
+            $("#tabInvoice").show();
+        }
+        else {
+            $("#tabInvoice").hide();
+        }
+    }
+    function funBathAddGuestTr(Num) {
+        var tabObj = document.getElementById("guestlists");
+        var tabLen = tabObj.rows.length - 1;
+        if (tabLen < Num) {
+            for (var i = tabLen; i < Num; i++) {
+                funAddGuestTr(i);
+            }
+        } else if (tabLen > Num) {
+            for (var i = tabLen; i > Num; i--) {
+                funDelGuestTr(i);
+            }
+        }
+    }
+    function funAddGuestTr(i) {
+        var tabObj = document.getElementById("guestlists");
+        var newTR = tabObj.insertRow(i + 1);
+        $(newTR).attr("align", "left");
+        //姓名
+        var guestNameTD = newTR.insertCell(0);
+        guestNameTD.innerHTML = "<input type=\"text\" class=\"form-control form-control-sm\" id=\"txtGuestName_" + i + "\" name=\"TripModels[" + i + "].Name\" />";
+        //类型
+        var guestTypeTD = newTR.insertCell(1);
+        guestTypeTD.innerHTML = "<select id=\"selGuestType_" + i + "\" name=\"TripModels[" + i + "].Type\" class=\"form-control form-control-sm\" >"
+            + "<option value=\"1\" selected>成人</option>"
+            + "<option value=\"2\">儿童</option>"
+            + "</select>";
+        //性别
+        var guestSexTD = newTR.insertCell(2);
+        guestSexTD.innerHTML = "<select name=\"TripModels[" + i + "].Sex\" class=\"form-control form-control-sm\" >"
+            + "<option value=\"1\" selected>男</option>"
+            + "<option value=\"0\">女</option>"
+            + "</select>";
+        //证件类型
+        var guestCardTypeTD = newTR.insertCell(3);
+        guestCardTypeTD.innerHTML = "<select name=\"TripModels[" + i + "].CardType\" class=\"form-control form-control-sm\" >"
+            + "<option value=\"2\" selected>护照</option>"
+            + "</select>";
+        //证件号码
+        var guestCardNoTD = newTR.insertCell(4);
+        guestCardNoTD.innerHTML = "<input type=\"text\" id=\"txtGuestCardNo_" + i + "\" name=\"TripModels[" + i + "].CardNo\" class=\"form-control form-control-sm\" />";
+        //手机号码
+        var guestPhoneTD = newTR.insertCell(5);
+        guestPhoneTD.innerHTML = "<input type=\"text\" name=\"TripModels[" + i + "].Phone\" class=\"form-control form-control-sm\" />";
+        funGuestTypeChange();
+    }
+    function funDelGuestTr(i) {
+        var tabObj = document.getElementById("guestlists");
+        tabObj.deleteRow(i);
+    }
+    function funGuestTypeChange() {
+        $("#guestlists select[id^='selGuestType_']").each(function () {
+            $(this).change(function () {
+                SetOrderTotalAmount();
+            });
+        });
+    }
+    @*var guestArray = '@Url.Action("GetGuestListByMember", "CCBooking", new { id = 222})';
+    //常用联系人
+    function GetGuests() {
+        $("#guestlists input[id^='txtGuestName_']").each(function () {
+            $(this).autocomplete(guestArray, {
+                defaultCaption: "请输入申请人姓名或↓↑选择",
+                dataType: "json",
+                matchContains: true,
+                minChars: -1,
+                width: 170,
+                autoFill: false,
+                scrollHeight: 140,
+                parse: function (data) {
+                    if (data.length > 0) {
+                        return $.map(eval(data), function (row) {
+                            return {
+                                data: row,
+                                value: row.Name,
+                                result: row.Name
+                            }
+                        });
+                    }
+                },
+                formatItem: function (row, i, max) {
+                    return row.Name;
+                },
+                formatMatch: function (row, i, max) {
+                    return row.Name;
+                },
+                formatResult: function (row) {
+                    return row.Name;
+                }
+
+            }).result(function (event, row) {
+                if (row != undefined) {
+                    var index = $(this).attr("id").split('_')[1];
+                    $(this).val(row.Name);
+                }
+            });
+        });
+    }*@
+    //提交信息
+    function CheckSubmit() {
+        if (!ValidateFormData())
+            return;
+        //var url = "/Booking/BookingConfirm";
+        //layer.open({ type: 2, title: '【签证】 - 确认订单', maxmin: true, shadeClose: true, area: ['1000px', '600px'], content: url });
+        $("#frmorders").submit();
+    }
+
+    function ValidateFormData() {
+        //订单联系人
+        if ($.trim($("#LinkManName").val()) == "") {
+            toastr.warning('联系人不能为空！');
+            $("#LinkManName").focus();
+            return false;
+        }
+        if ($.trim($("#LinkManMobile").val()) == "") {
+            toastr.warning("手机号码不能为空！");
+            $("#LinkManMobile").focus();
+            return false;
+        } else if (!ValidationData('mobilephone', $.trim($("#LinkManMobile").val()))) {
+            toastr.warning("手机号码格式错误！");
+            $("#LinkManMobile").focus();
+            return false;
+        }
+        /*if ($.trim($("#LinkManNumber").val()) != "") {
+            if (!ValidationData('phone', $("#LinkManNumber").val())) {
+                toastr.warning("联系电话格式不正确！");
+                $("#LinkManNumber").focus();
+                return false;
+            }
+        }
+        if ($.trim($("#LinkManEmail").val()) == "") {
+            toastr.warning("邮件不能为空！");
+            $("#LinkManEmail").focus();
+            return false;
+        }
+        else if (!ValidationData('email', $("#LinkManEmail").val())) {
+            toastr.warning("邮件格式不正确！");
+            $("#LinkManEmail").focus();
+            return false;
+        }
+        if ($.trim($("#txtInvoiceaddress").val()) == "") {
+            toastr.warning("地址不能为空！");
+            $("#txtInvoiceaddress").focus();
+            return false;
+        }
+        */
+        //出行日期
+        if ($.trim($("#txtOutDate").val()) == "") {
+            toastr.warning("预约出行日期不能为空！");
+            $("#txtOutDate").focus();
+            return false;
+        }
+        //人数
+        if ($.trim($("#totPeopleCount").val()) == "" || !new RegExp("^[0-9]{1,3}$").test($("#totPeopleCount").val())) {
+            $("#totPeopleCount").val("0");
+        }
+        if ($("#totPeopleCount").val() <= 0) {
+            toastr.warning("请输入申请人数！");
+            $("#totPeopleCount").focus();
+            return false;
+        }
+
+        //申请人
+        var _tempGuestFlag = true;
+        $("#guestlists tr").not(":first").each(function (i) {
+            if ($("#txtGuestName_" + i).val() == "") {
+                $("#txtGuestName_" + i).css({ "background-color": "#ffffdf", "border": "1px solid #ff3300" });
+                _tempGuestFlag = false;
+            } else {
+                $("#txtGuestName_" + i).css({ "background-color": "#fff", "border": "1px solid #ddd" })
+            }
+            /*if ($("#txtGuestCardNo_" + i).val() == "") {
+                $("#txtGuestCardNo_" + i).css({ "background-color": "#ffffdf", "border": "1px solid #ff3300" });
+                _tempGuestFlag = false;
+            } else {
+                $("#txtGuestCardNo_" + i).css({ "background-color": "#fff", "border": "1px solid #ddd" })
+            }*/
+        });
+        if (!_tempGuestFlag) {
+            toastr.warning("请检查申请人信息是否输入完整！");
+            return false;
+        }
+        SetOrderTotalAmount();
+        return true;
+    }
+    </script>
+
+}

@@ -1,0 +1,30 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+<div class="sotable_tit">
+    &nbsp;团队基本信息
+</div>
+<table class="edittbl" style="width:100%;">
+    <tr>
+        <td class="label">团名称：</td>
+        <td>@Model.Tour.TourNo</td>
+        <td class="label">线路名称：</td>
+        <td colspan="3"> @Model.Line.LineName</td>
+    </tr>
+    <tr>
+        <td class="label">出发日期：</td>
+        <td style="width: 150px;">@Model.Tour.OutDate.ToDateFormat()</td>
+        <td class="label">线路类型：</td>
+        <td style="width: 150px;">@DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.Line.LineType.ToString(), false)</td>
+        <td width="100" class="label">天数：</td>
+        <td style="width: 150px;">@Model.Line.TravelDays</td>
+    </tr>
+    <tr>
+        <td width="100" class="label">出团人数：</td>
+        <td style="width: 150px;">@Model.Balance.Num</td>
+        <td width="100" class="label">领队/导游：</td>
+        <td>@Model.Balance.GuideName</td>
+        <td width="100" class="label">团状态：</td>
+        <td>@DictionaryTools.GetEnumValue(Enums.AuditStateEnum, Model.Tour.AuditState.ToString())</td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>

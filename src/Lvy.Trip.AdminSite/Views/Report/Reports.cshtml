@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Reports";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+
+<form id="theForm2">
+    <fieldset title="账龄分析">
+        <legend></legend>
+        <div>
+            截止日期： @Html.DropDownList("Month", ViewBag.MonthBeans as IEnumerable<SelectListItem>, new { @class = "text150" })
+        </div>
+        <div style="height: 30px;"></div>
+        <button id="btnZhangLing" class="btn btn1">账龄分析</button>
+    </fieldset>
+
+    <div style="height: 30px;"></div>
+
+    <fieldset title="供应商年底返利">
+        <legend></legend>
+        <div style="height: 30px;"></div>
+        <div>
+            出发日期：<input type="text" id="sDate" name="sDate" class="Wdate" onfocus="WdatePicker()" /> - <input id="eDate" name="eDate" type="text" class="Wdate" onfocus="WdatePicker()" />
+            供应商：<select id="mySelect1" name="CustomerCode" class="text220">
+                <option></option>
+            </select>
+        </div>
+        <div style="height: 30px;"></div>
+        <button id="btncaozuo" class="btn btn2">平台操作费明细</button>
+        <button id="btnSkqk" class="btn btn2">供应商收客情况</button>
+        <button id="btnfxsskqk" class="btn btn2">分销商收客情况</button>
+        <div style="height: 30px;"></div>
+    </fieldset>
+
+    <fieldset title="日期预定量">
+        出发日期：<input type="text" id="sDate1" name="sDate1" class="Wdate" onfocus="WdatePicker()" /> - <input id="eDate1" name="eDate1" type="text" class="Wdate" onfocus="WdatePicker()" />
+        <div style="height: 30px;"></div>
+        <button id="btnOrderReport" class="btn btn2">统计日期预定量</button>
+    </fieldset>
+
+</form>
+
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnOrderReport").click(function () {
+            this.form.action = '@Url.Action("OrderReportByDate")';
+            $("#theForm2").submit();
+        });
+
+        $("#btnZhangLing").click(function () {
+            if ($("#Month").val() == "") {
+                Utils.alert("请选着日期！");
+                return;
+            }
+
+            this.form.action = '@Url.Action("ZhangLing")';
+            $("#theForm2").submit();
+        });
+
+        $("#btncaozuo").click(function () {
+            if (!CheckControls()) {
+                return;
+            }
+            this.form.action = '@Url.Action("ShoukeInfo1")';
+            $("#theForm2").submit();
+        });
+
+        $("#btnSkqk").click(function () {
+
+            if (!CheckControls()) {
+                return;
+            }
+            if ($("#CustomerCode").val() == "") {
+                Utils.alert("请选择供应商！");
+                return;
+            }
+            this.form.action = '@Url.Action("ShoukeInfo2")';
+
+            $("#theForm2").submit();
+        });
+
+        $("#btnfxsskqk").click(function () {
+
+            if (!CheckControls()) {
+                return;
+            }
+            this.form.action = '@Url.Action("ShoukeInfo3")';
+
+            $("#theForm2").submit();
+        });
+
+        $('#mySelect1').select2({
+            ajax: {
+                url: function (params) {
+                    return '/Customer/GetSupplierSelect2?keyword=' + params.term;
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+            allowClear: true
+        });
+    });
+
+    function CheckControls() {
+        if (Utils.Trim($("#sDate").val()) == "") {
+            Utils.alert("请输入出发日期！");
+            $("#sDate").focus().select();
+            return false;
+        }
+        if (Utils.Trim($("#eDate").val()) == "") {
+            Utils.alert("请输入出发日期！");
+            $("#eDate").focus().select();
+            return false;
+        }
+        return true;
+    }
+
+</script>

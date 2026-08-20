@@ -1,0 +1,164 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+@using System.Globalization
+@using Lvy.Models
+@{
+    ViewBag.Title = "出境游客名单打印";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+<form id="theForm" action="">
+    <div id="TourSearchContainer" class="xbox">
+        <div align="center" class="xboxcontent">
+            <div class="sotable_tit">
+                出境游客名单查询
+            </div>
+            <table id="searchTable" align="center" class="sotable" style="width:80%;">
+                <tr>
+                    <td width="100" class="label">产品部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">线路编号：</td>
+                    <td>@Html.TextBoxFor(m => m.Condition.LineId, new { @class = "text150" })</td>
+                    <td class="label">线路名称：</td>
+                    <td>@Html.TextBoxFor(m => m.Condition.LineName, new { @class = "text150" })</td>
+
+                </tr>
+                <tr>
+                    <td class="label">团号：</td>
+                    <td>@Html.TextBoxFor(m => m.Condition.TourNo, new { @class = "text150" })</td>
+                    <td width="100" class="label">团队性质：</td>
+                    <td>
+                        @Html.DropDownListFor(m => m.Condition.TourType, DictionaryTools.GetEnumsBy(Enums.TourTypeEnum).ToSelectListFor(Model.Condition.TourType.ToString()))
+                    </td>
+                    <td class="label">出发日期：</td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.Condition.OutDateRange, new { @id = "OutDateRange", @class = "text220" })
+                    </td>
+                </tr>
+                <tr>
+                    <td width="100" class="label">目的地：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.Condition.ArriveDestName, new { id = "Condition_ArriveDestName" })
+                        <select id="mySelect1" name="Condition.ArriveDest" class="text150">
+                            <option></option>
+                        </select>
+                    </td>
+                    <td width="100" class="label">推荐类型：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.Condition.RecommendType, new { id = "hiddenRecommendType" })
+                        @Html.RadioGroup("RecommendType", ViewBag.RecommendType as IEnumerable<KeyValueBean>, Model.Condition.RecommendType.ToString(CultureInfo.InvariantCulture))
+                    </td>
+                </tr>
+            </table>
+            <input class="btn btn1" id="searchBtn" type="button" value="搜索" />
+            <input class="btn btn1" id="resetBtn" type="button" value="清空" />
+        </div>
+    </div>
+    <div id="TourListContainer" class="xbox">
+        @Html.Partial("UCSearchList", Model)
+    </div>
+
+</form>
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#mySelect1').select2({
+                ajax: {
+                    url: function (params) {
+                        return ApiServerUrl + '/Dest/GetDestSelect2';
+                    },
+                    dataType: 'json',
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                        var arr = data.items
+                        for (item in arr) {
+                            itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                        }
+                        return {
+                            results: itemList,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                templateResult: formatState,
+                allowClear: true
+            });
+            $('#mySelect1').on('select2:select', function (e) {
+                $("#Condition_ArriveDestName").val(e.params.data.text);
+            });
+
+            $('#OutDateRange').daterangepicker({
+                autoUpdateInput: true,
+                ranges: {
+                    '今天': [moment(), moment()],
+                    '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '本周': [moment().startOf('week'), moment()],
+                    '上周': [moment().subtract(6, 'days'), moment()],
+                    '本月': [moment().startOf('month'), moment().endOf('month')],
+                    '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: "YYYY/MM/DD", //设置显示格式
+                    applyLabel: '确定', //确定按钮文本
+                    cancelLabel: '清空', //取消按钮文本
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    customRangeLabel: "自定义",
+                    firstDay: 1
+                }
+            }, function (start, end) {
+                $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+            });
+            $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+                //do something, like clearing an input
+                $('#OutDateRange').val('');
+            });
+
+            // 初始
+            $('#OutDateRange').val('');
+
+
+            $("input:radio[name=RecommendType]").click(function () {
+                var recommendType = $("input:radio[name=RecommendType]:checked").first().val();
+                $("#hiddenRecommendType").val(recommendType);
+            });
+
+            $("#searchBtn").click(function () {
+                pageselectCallback(0);
+            });
+            $("#resetBtn").click(function () {
+                $("#TourSearchContainer").clearForm();
+                $("#searchTable td select").each(function () {
+                    $(this).children('option:first').attr('selected', 'selected');
+                });
+                $("#hiddenArriveDest").val('');
+                $("#hiddenRecommendType").val('-1');
+            });
+        });
+
+
+        function formatState(state) {
+            if (!state.id) { return state.text; }
+            var $state = $(
+                '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+            );
+            return $state;
+        };
+    </script>
+}

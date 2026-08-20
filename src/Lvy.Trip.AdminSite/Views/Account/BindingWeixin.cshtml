@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "我的个人信息";
+    var ticket = TempData["ticket"] as string;
+}
+
+<form id="theForm" action="@Url.Action("UpdateMyAccount", "Account")" method="POST">
+    <div class="station">
+        修改我的个人资料
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td>
+                        <img class="ui small image" src="~/WebRes/images/qrcode_for_weixin.png" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><span style="color:orangered;font-size:20px;">※务必先关注微信公众号（上图），然后再扫描下方二维码， 根据提示信息绑定你的账号。</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img class="ui small image" style="width:208px; height:208px;" src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=@ticket" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</form>

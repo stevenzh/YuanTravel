@@ -1,0 +1,383 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    ViewBag.Title = "单团核算明细";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@using Lvy.Web.Common
+@section AdditionalResources
+{
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <link href="@CDNServerUrl/jquery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.js"></script>
+
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" />
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/Balance/Search">报团管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    @using (Html.BeginForm("Edit", "Balance", FormMethod.Post, new { id = "theForm" }))
+    {
+        @Html.HiddenFor(t => t.Balance.MasterOrderCode)
+        <div class="row">
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">团队信息</h4>
+                    </div>
+                    <div class="card-body p-2">
+                        <!-- 团队基本信息 -->
+                        @Html.Partial("EditTourInfo")
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <!-- 应收 -->
+                <div id="divPayIn" class="card">
+                    @Html.Partial("UCPayIn", Model)
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div id="divInvoices" class="card">
+                    <!-- 发票记录 -->
+                    @Html.Partial("UCInvoice", Model)
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <!-- 成本列表 -->
+                    @Html.Partial("UCCosts", Model)
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div id="divFile" class="card">
+                    <!-- 附件列表 -->
+                    @Html.Partial("UCFile", Model)
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <tr>
+                                <td width="200px">创建人：@DictionaryTools.GetCachedAccount(Model.Balance.CreatedBy).Name</td>
+                                <td width="200px">操作人：@DictionaryTools.GetCachedAccount(Model.Balance.ModifiedBy).Name</td>
+                                <td width="200px">
+                                    提交人：@if (!Model.Balance.OPAuditBy.IsNullOrEmpty())
+                                    {
+                                        @DictionaryTools.GetCachedAccount(Model.Balance.OPAuditBy).Name
+                                    }
+                                </td>
+                                <td width="200px">
+                                    审核人：@if (!Model.Balance.CWAuditBy.IsNullOrEmpty())
+                                    {
+                                        @DictionaryTools.GetCachedAccount(Model.Balance.CWAuditBy).Name
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>创建时间：@Model.Balance.CreatedTime.ToDateFormat()</td>
+                                <td>操作时间：@Model.Balance.ModifiedTime.ToDateFormat()</td>
+                                <td>提交时间：@Model.Balance.OPAuditTime.ToDateFormat()</td>
+                                <td>审核时间：@Model.Balance.CWAuditTime.ToDateFormat()</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-success" id="btnSave" type="button">保存</button>
+                        @if (Model.Balance.AuditState < 3)
+                        {
+                            <input class="btn btn-info" id="btnComplete" type="button" value="单团核算完成" />
+                            <input class="btn btn-info" id="btnOpToCaiWu" type="button" value="提交财务" style="display: none;" url="/Optour/AuditTour?orderCode=@Model.Balance.MasterOrderCode" />
+                        }
+                        <input class="btn btn-info" id="btnPrint" type="button" value="打印单团核算" />
+                        <a class="btn btn-secondary" href="@Url.Action("Search")">返回列表</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    }
+</section>
+@section PageScripts
+{
+    <script src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/main.js"></script>
+    <script src="@CDNServerUrl/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="@CDNServerUrl/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            bsCustomFileInput.init();
+        //打印单团核算
+        $("#btnPrint").click(function () {
+            window.open('@Url.Action("PrintTourBalance", "Finance", new { orderCode = Model.Balance.MasterOrderCode })');
+        });
+
+        $("#btnComplete").click(function () {
+            if (confirm("单团核算完成。 ")) {
+                $("#btnComplete").hide();
+                $("#btnOpToCaiWu").show();
+            }
+        });
+
+        $('#btnOpToCaiWu').click(function () {
+            var $link = $(this);
+            if (!confirm("提交财务!")) {
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            $.post($link.attr("url"), function (data) {
+                if (data == "no") {
+                    Utils.alert("您无权限进行审核。");
+                }
+                else if (data == "1") {
+                    Utils.alert("该团期仍未成团，无法执行审核。");
+                }
+                else if (data == "2") {
+                    Utils.alert("已审核。");
+                    $link.hide();
+                } else {
+                    Utils.alert("请求发生异常。");
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+        $("#btnSave").click(function () {
+            var flag = true;
+            $("select[name$='.Item']").each(function () {
+                if ($(this).val() == "") {
+                    Utils.alert("必须选择项目名称！");
+                    $(this).focus().select();
+                    return flag = false;
+                }
+            });
+            if (!flag) { return false; }
+            $("select[name$='.SupplierId']").each(function () {
+                if ($(this).val() == "0") {
+                    Utils.alert("必须选择供应商名称！");
+                    $(this).focus().select();
+                    return flag = false;
+                }
+            });
+            if (!flag) { return false; }
+            $("input[name$='.Cost']").each(function () {
+                if ($(this).val() == "") {
+                    Utils.alert("必须填写单位成本！");
+                    $(this).focus().select();
+                    return flag = false;
+                } else if (!Utils.Check.IsMoney($(this).val())) {
+                    Utils.alert("必须填写金额类型！");
+                    $(this).focus().select();
+                    return flag = false;
+                }
+            });
+            if (!flag) { return false; }
+            if (flag) {
+                $("#theForm").submit();
+            }
+        });
+
+        $('#mySelect2').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        team: '@Model.Balance.SalesTeamId',
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            //templateResult: formatState
+        });
+
+        // 添加成本
+        $("#addItem2").click(function () {
+            var cnt = $("#costtable tbody tr").length;
+            $.post("@Url.Action("AddRowCost")", { rowIndex: cnt, orderCode: '@Model.Balance.MasterOrderCode' }, function (html) {
+                $("#costtable tbody").append(html);
+            });
+        });
+
+        // 添加发票
+        $("#btnAddInvoice").click(function () {
+            var url = '@Url.Action("CreateInvoice",new { Id = 0, orderCode = Model.Balance.MasterOrderCode})';
+            layer.open({ type: 2, title: '添加发票', maxmin: true, shadeClose: true, area: ['800px', '360px'], content: url });
+        });
+
+        // 添加缴款单
+        $("#btnAddPayInfo").click(function () {
+            var url = '@Url.Action("EditPayIn",new { id=0, type=Model.Balance.Type, orderCode = Model.Balance.MasterOrderCode})';
+            layer.open({ type: 2, title: '添加缴款单', maxmin: true, shadeClose: true, area: ['950px', '500px'], content: url });
+        });
+
+        $("#OutDate").datepicker({
+            language: 'zh-CN', //语言
+            autoclose: true, //选择后自动关闭
+            clearBtn: true,//清除按钮
+            format: "yyyy-mm-dd"//日期格式
+        });
+    });
+
+    function reloadInvoice() {
+        $.get("/Balance/ReLoadInvoice?orderCode=" + $("#Balance_MasterOrderCode").val(), function (result) {
+            $("#divInvoices").html(result);
+        });
+    }
+    function reloadPayIn() {
+        $.get("/Balance/ReLoadPayIn?orderCode=" + $("#Balance_MasterOrderCode").val(), function (result) {
+            $("#divPayIn").html(result);
+        });
+    }
+
+    // 缴款单详情
+    function payInfoDetail(id, orderCode) {
+        var url = "/Balance/EditPayIn?id=" + id + "&orderCode=" + orderCode;
+        layer.open({ type: 2, title: '缴款单详情', maxmin: true, shadeClose: true, area: ['950px', '450px'], content: url });
+    }
+    function invoiceDetail(id, orderCode) {
+        var url = "/Balance/CreateInvoice?id=" + id + "&orderCode=" + orderCode;
+        layer.open({ type: 2, title: '发票详情', maxmin: true, shadeClose: true, area: ['800px', '380px'], content: url });
+    }
+    </script>
+    <script>
+        $(function () {
+            $("button[name='lnkDel']").on("click", function () {
+                var obj = $(this).parent("td").parent("tr")
+                $(obj).remove();
+            })
+
+            $("select[name$='SupplierId']").on("change", function () {
+
+                ////付款方式text 显示
+                //var obj = $(this).parent("td").parent("tr").find("span[name='payment']");
+                ////付款方式 value
+                //var obj2 = $(this).parent("td").parent("tr").find("input[name$='PaymentType']");
+                //var payment = $(this).find("option:selected").attr("payment");
+                //var paymentType = $(this).find("option:selected").attr("paymentType");
+                //$(obj).text(payment);
+                //$(obj2).val(paymentType);
+
+                calcCost(this);
+            })
+
+            $("input[name$='Cost']").on("keyup", function () {
+                calcCost(this);
+            })
+            $("input[name$='Num']").on("keyup", function () {
+                calcCost(this);
+            })
+        })
+
+        function calcCost(_this) {
+
+            var obj = $(_this).parent("td").parent("tr");
+            ///////计算单行金额////////////////////////////////////////////
+            var Num = parseFloat($(obj).find("input[name$='Num']").val());
+            var Cost = parseFloat($(obj).find("input[name$='Cost']").val());
+            var Amount = Num * Cost;
+
+            //成本
+            var xinajie = 0.0;
+            var qiandan = 0.0;
+            var zongji = 0.0;
+            var a = $(obj).find("input[name$='ItemCost']");
+            if (a != undefined && a != null && a.length > 0) {
+                $(a).val(Amount);
+                ////////////////////计算现结，签单，总计////////////////////////////////////
+                $(_this).parents("tbody").find("tr").each(function (index, item) {
+
+                    // Num=parseFloat($(item).find("input[name$='Num']").val());
+                    var ItemCost = parseFloat($(item).find("input[name$='ItemCost']").val());
+                    Amount = ItemCost;
+                    var PaymentType = $(item).find("input[name$='PaymentType']").val();
+                    if (PaymentType > 0) {
+                        if (PaymentType == 1) {
+                            xinajie += Amount;
+                        }
+                        else {
+                            qiandan += Amount;
+                        }
+                    }
+                });
+
+                zongji = xinajie + qiandan;
+            }
+            xinajie = 0;
+            qiandan = 0;
+            zongji = 0;
+            Amount = 0;
+            //其他收入
+            var b = $(obj).find("span[name='ItemCost']");
+            if (b != undefined && b != null && b.length > 0) {
+
+                $(b).text(Amount);
+                ////////////////////计算现结，签单，总计////////////////////////////////////
+                $(_this).parents("tbody").find("tr").each(function (index, item) {
+
+                    Num = parseFloat($(item).find("input[name$='Num']").val());
+                    Cost = parseFloat($(item).find("input[name$='Cost']").val());
+                    Amount = Num * Cost;
+                    var PaymentType = $(item).find("input[name$='PaymentType']").val();
+                    if (PaymentType > 0) {
+
+                        if (PaymentType == 1) {
+                            xinajie += Amount;
+                        }
+                        else {
+                            qiandan += Amount;
+                        }
+                    }
+                });
+
+                zongji = xinajie + qiandan;
+            }
+            $(_this).parents("table").find("span[name='xianjie']").text(xinajie);
+            $(_this).parents("table").find("span[name='qiandan']").text(qiandan);
+            $(_this).parents("table").find("span[name='zongji']").text(zongji);
+        }
+
+    </script>
+}

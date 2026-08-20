@@ -1,0 +1,222 @@
+﻿@model CCT.NewModels.QModel.CollectionSearchQModel
+@using CCT.Biz.Logic
+@{
+    if (Model.ArrivalList != null && Model.ArrivalList.Count > 0)
+    {
+        <table class="h30 tab" style="width: 100%;" border="0">
+            <tr class="financetitle">
+                <td width="8%">收款编号</td>
+                <td width="6%">订单类型</td>
+                <td width="8%">订单编号</td>
+                <td width="8%">联系人</td>
+                <td width="6%">收款方式</td>
+                <td width="8%">收款人</td>
+                <td width="6%">收款渠道</td>
+                <td width="6%">收款金额</td>
+                <td width="10%">收款时间</td>
+                <td width="6%">到账状态</td>
+                <td width="8%">到账确认人</td>
+                <td width="10%">到账确认时间</td>
+                <td width="">团号</td>
+                <td width="10%"></td>
+            </tr>
+            @int i = 0;
+
+            foreach (var item in Model.ArrivalList)
+            {
+            i++;
+
+            <tr style='@if(i%2==0){ background-color: #EAFAFF; } text-align: center;' id="cf_@item.ProceedsRefundCode">
+                <td width="8%">@item.ProceedsRefundCode</td>
+                <td width="6%">@CCT.Core.Dictionary.GetNode("BusinessType", item.BussinessType.ToString()).Value</td>
+                <td width="8%">
+                    @if (item.BussinessType == 3)
+                    {
+                        <a href="/OrderDetail/IndexInFreeTour?orderCode=@item.OrdersCode&flag=@ViewData["flag"]">@item.OrdersCode</a>
+                    }
+                    else if (item.BussinessType == 5)
+                    {
+                        <a href="/OrderDetail/Index?orderCode=@item.OrdersCode&flag=@ViewData["flag"]">@item.OrdersCode</a>
+                    }
+                    else
+                    {
+                        <a href="/OrderDetail/Index?orderCode=@item.OrdersCode&flag=@ViewData["flag"]">@item.OrdersCode</a>
+                    }
+                <td width="8%" style="padding: 5px 0;">
+                    @item.LinkManName<br />
+                    @item.LinkManMobile
+                </td>
+                <td width="6%">
+                    @if (item.ProceedsChannel.HasValue && item.ProceedsChannel.Value == 1)
+                    {
+
+                        @if (item.OnlinePayType.IsNullOrEmpty())
+                        {<span class="red">数据不完整</span>}
+                        else
+                        { @CCT.Core.Dictionary.GetNode("OnlineCollectionType", item.OnlinePayType).Value
+                        }<br />
+                        <div style="background-color: green">
+                            交易号：<br />
+                            @new FlProceedsRefundService().GetOnlinePayTradeNo(item.OrdersCode)
+                        </div>
+                    }
+                    else
+                    {
+
+                        @CCT.Core.Dictionary.GetNode("CollectionType", item.Type.HasValue ? item.Type.ToString() : "--").Value
+                    }
+                </td>
+                <td width="8%">@(item.ProceedsChannel.HasValue && item.ProceedsChannel.Value == 1) ? "网银" : item.ChargerName</td>
+                <td width="6%">
+                    @CCT.Core.Dictionary.GetNode("CollectionChannel", item.ProceedsChannel.HasValue ? item.ProceedsChannel.Value.ToString() : "").Value
+                </td>
+                <td width="6%">￥@decimal.Round(item.ReceiveRefundSum.Value, 2)</td>
+                <td width="10%">@item.ProceedsRefundDate.Value == null ? null : item.ProceedsRefundDate.Value.ToString("yyyy-MM-dd HH:mm")</td>
+                @{
+                    var isArrival = false;
+                    if (item.IsReceive == 1 || item.IsReceiveNew == 1)
+                        isArrival = true;
+                }
+                <td width="6%" @if (!isArrival) { style = ' background-color:red' }>
+
+                    @CCT.Core.Dictionary.GetNode("IsReceiveState", item.IsReceive.HasValue ? item.IsReceive.Value.ToString() : "").Value
+
+                </td>
+                <td width="8%">@isArrival ? (item.CheckName.IsNullOrEmpty() ? "--" : item.CheckName) : "--"</td>
+                <td width="10%">@isArrival ? (item.GetMoneyDate.HasValue? item.GetMoneyDate.Value.ToString("yyyy-MM-dd HH:mm") : "--") : "--"</td>
+                <td>@item.TeamNum</td>
+                <td width="10%">
+                    @if (isArrival)
+                    {
+
+                        <a href="javascript:void(0)" onclick="CollectionPrint('@item.ProceedsRefundCode')">查看/打印</a>
+                        @}
+                    else
+                    {
+                        if (item.ProceedsChannel.HasValue && item.ProceedsChannel.Value == 1)
+                        {
+                            if ((item.OnlinePayType == "alipaydanbao" && item.OnlineIsReceive == 3) || (item.OnlinePayType != "alipaydanbao" && item.OnlineIsReceive == 1))  //支付宝担保，值为3时，支付宝付款给康辉，财务开始审核是否到账，IsReceive置为1即到账
+                            {
+
+                                <a href="javascript:void(0)" onclick="ConfirmCollection('@item.ProceedsRefundCode')"><span style="font-weight: bold; font-size: 14px;">确认到账</span></a>
+                            }
+                            else
+                            {
+
+
+                                @if (!isArrival && item.ProceedsChannel.Value == 1)
+                                {
+                                    if (item.OnlinePayType == "alipaydanbao")
+                                    {
+                                        if (item.OnlineIsReceive.HasValue && item.OnlineIsReceive.Value == 1)
+                                        {
+                                            <span style="background: yellow; padding: 10px 0; display: block">支付宝中介已收款 </span>
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        -----
+                                             }
+                                }
+
+                            }
+                        }
+                        else if (item.ProceedsChannel.HasValue && item.ProceedsChannel.Value == 2)
+                        {
+                            <a href="javascript:void(0)" onclick="ConfirmCollection('@item.ProceedsRefundCode')"><span style="font-weight: bold; font-size: 14px;">确认到账</span></a>
+                        }
+                    }
+                </td>
+            </tr>
+            } }
+        </table>
+        <table width="100%" border="0" style="margin-top: 10px;">
+            <tr class="table_title">
+                <td colspan="12" style="padding-left: 5px;">
+                    <div id="queryPageDiv" class="digg"></div>
+                </td>
+            </tr>
+            }
+            else
+            {
+            <table class="h30 tab" align="center" width="100%" border="0">
+                <tr>
+                    <td align="center">没有符合条件的记录</td>
+                </tr>
+            </table>
+            }
+        </table>
+
+        <script type="text/javascript">
+
+            $(function () {
+                $("#queryPageDiv").pagination(
+                    Number(<%:Model.PagedSetting.PagedCount %>), {
+                        callback: pageQueryRefund,
+                        prev_text: '前一页',
+                        next_text: '后一页',
+                        items_per_page: Number(<%:Model.PagedSetting.PagedSize %>),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: index
+            });
+
+            });
+
+            //回调方法
+            function pageQueryRefund(page_id, jq) {
+                index = page_id;
+                page_id = page_id + 1;
+                var channel = $("#CollectionChannel").val();
+                var param = {
+                    "OrderType": $("#OrderType").val(),
+                    "PayStatus": $("#PayStatus").val(),
+                    "ProductName": $("#ProductName").val(),
+                    "OrderCode": $("#OrderCode").val(),
+                    "CollectionType": (channel == "1" ? $("#OnlineCollectionType").val() : $("#CollectionType").val()),
+                    "CollectedDateFrom": $("#CollectedDateFrom").val(),
+                    "CollectedDateTo": $("#CollectedDateTo").val(),
+                    "OrderLinkman": $("#OrderLinkman").val(),
+                    "OrderLinkmanMobile": $("#OrderLinkmanMobile").val(),
+                    "CollectedMan": $("#CollectedMan").val(),
+                    "CollectedConfirmMan": $("#CollectedConfirmMan").val(),
+                    "ConfirmDateFrom": $("#ConfirmDateFrom").val(),
+                    "ConfirmDateTo": $("#ConfirmDateTo").val(),
+                    "CollectionChannel": channel,
+                    "CollectedStatus": $("#CollectedStatus").val(),
+                    "pagedIndex": page_id
+                }
+                $.post('/Collection/Arrival', param, function (data) {
+                    $('#CollectionQueryList').html(data);
+                });
+            }
+
+            function GoCollection(obj, title, orderCode, businessType) {
+                JqueryDialog.Open(obj, title, '/Collection/GoCollection?orderCode=' + orderCode + '&businessType=' + businessType, 700, 400);
+            }
+
+            function ConfirmCollection(code) {
+                JqueryDialog.init(300, '订单到账确认', '/Collection/CollectionConfirm?collectionCode=' + code, 700, 400, true, true, true, 0);
+            }
+
+            function RefreshCollection(code, tradeNo) {
+                var currLine = $("#cf_" + code);
+                currLine.children("td:eq(9)").css("background-color", "white").html("已到账");
+                currLine.children("td:eq(7)").html(tradeNo);
+                var url = "<a onclick=\"CollectionPrint(\"" + code + "\")\" href=\"javascript:void(0)\">查看/打印</a>";
+                currLine.children("td:eq(13)").html(url);
+
+            }
+
+            function RefreshCollection1(result) {
+                var currLine = $("#cf_" + result.ProceedsRefundCode);
+                currLine.children("td:eq(9)").css("background-color", "#EAFAFF").html("已到账");
+                currLine.children("td:eq(10)").html(result.CheckName);
+                currLine.children("td:eq(11)").html(result.GetMoneyDate);
+
+                var url = "<a onclick=CollectionPrint('" + result.ProceedsRefundCode + "') href=\"javascript:void(0)\">查看/打印</a>";
+                currLine.children("td:eq(13)").html(url);
+            }
+        </script>
+

@@ -1,0 +1,98 @@
+﻿@model Lvy.Models.BaseDB.VTProceedsModel
+@{
+    Layout = null;
+    var owner = GlobalContext.Current.OwnerInfo;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        * { margin: 0; padding: 0; }
+        td { padding: 1px; }
+        .tab td { border: 1px solid #ddd; font-size: 12px; }
+        .tab { border-collapse: collapse; }
+            .tab * { border-collapse: collapse; }
+        .h25 tr { height: 25px; }
+    </style>
+    <style type="text/css" media="print">
+        .printBtn { display: none; }
+        .tab td { border: 1px solid #000; }
+    </style>
+</head>
+<body>
+    <table width="100%" style="font-size: 12px;">
+        <tr>
+            <td style="text-align: center;"><span style="font-size: 20px; font-weight: bold;">@(owner.Name + "收款收据")</span></td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">收款日期：@string.Format("{0:yyyy年MM月dd日}", Model.ProceedsDate)</td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">NO：@Model.ProceedsCode</td>
+        </tr>
+        <tr>
+            <td style="padding: 15px; text-align: center" class="table-b">
+                <table class="h25 tab" align="center" width="100%">
+                    <tr>
+                        <td width="20%" align="right">缴款单位名称或个人：</td>
+                        <td width="35%" align="left">&nbsp;@Model.ChargerHost</td>
+                        <td width="15%" align="right">收款方式：</td>
+                        <td width="30%" align="left">&nbsp;@Model.MultiType</td>
+                    </tr>
+                    <tr>
+                        <td align="right">人民币（大写）</td>
+                        <td align="left">&nbsp;@Model.ReceiveSumChina</td>
+                        <td align="right">￥：</td>
+                        <td align="left">&nbsp;@decimal.Round(Model.ReceiveSum.Value, 2)</td>
+                    </tr>
+                    <tr style="height: 50px;">
+                        <td align="right">收款事由：</td>
+                        <td colspan="3" align="left">&nbsp;@Model.Purpose</td>
+                    </tr>
+                    <tr style="height: 50px;">
+                        <td align="right">收款单位盖章：</td>
+                        <td align="left">&nbsp;</td>
+                        <td align="right">收款人备注：</td>
+                        <td align="left">&nbsp;@Model.Remark</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width: 100%; border: none; padding: 0; margin: 0;">
+                    <tr>
+                        <td width="16%" align="right">业务部门：</td>
+                        <td width="16%" align="left">@Model.ChargerDept&nbsp;</td>
+                        <td width="16%" align="right">业务员：</td>
+                        <td width="16%" align="left">@Model.ChargerName&nbsp;</td>
+                        <td width="16%" align="right">收款人：</td>
+                        <td align="left">@Model.CheckName&nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table class="printBtn h25" align="center" width="95%">
+        <tr>
+            <td align="center">
+                <input type="button" value="打印收款单" class="btn_2" style="cursor: pointer;" onclick="window.print()" />&nbsp;&nbsp;&nbsp;
+                <input type="button" value="关 闭" id="btnClose" class="btn_2" />
+            </td>
+        </tr>
+    </table>
+    <script>
+        $(function () {
+
+            $("#btnClose").click(function () {
+                // 弹出框关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            });
+
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,68 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+@{
+    Layout = null;
+}
+
+<table class="table ">
+    <tr>
+        <td style="min-width:80px;">
+            <strong>线路名称</strong>
+        </td>
+        <td>@Model.LineModel.LineName</td>
+    </tr>
+    <tr>
+        <td><strong> 出团时间</strong></td>
+        <td>@Model.Order.OutDate.ToDateFormat()</td>
+    </tr>
+    <tr>
+        <td><strong>客户</strong></td>
+        <td>@Model.Order.CustomerName</td>
+    </tr>
+    <tr>
+        <td><strong>分销商联系人</strong></td>
+        <td>@Model.Order.Managers </td>
+    </tr>
+    <tr>
+        <td><strong>分销商联系电话</strong></td>
+        <td>@Model.Order.ManagerPhone </td>
+    </tr>
+    <tr>
+        <td><strong>游客联系人</strong></td>
+        <td>@Model.Order.LinkMan </td>
+    </tr>
+    <tr>
+        <td><strong>游客联系电话</strong></td>
+        <td>@Model.Order.LinkPhone </td>
+    </tr>
+
+    <tr>
+        <td><strong>游客人数</strong> </td>
+        <td>@Model.Order.TravellerCount 人</td>
+    </tr>
+    <tr>
+        <td><strong> 团费</strong></td>
+        <td>￥@Model.Order.TolYsPrice.ToString("#0")</td>
+    </tr>
+    <tr>
+        <td><strong>计调操作</strong></td>
+        <td>@Model.Order.Managers</td>
+    </tr>
+    <tr>
+        <td><strong> 订单状态</strong></td>
+        <td>
+            @if (Model.Order.IsCancel > 0)
+            {
+                <span style="color:orangered">取消</span> @DictionaryTools.GetEnumValue("OrderCancelStateEnum", Model.Order.CancelState.ToString())
+            }
+            else
+            {
+                @DictionaryTools.GetEnumValue("OrderStateEnum", Model.Order.OrderState.ToString())
+            }
+        </td>
+    </tr>
+    <tr>
+        <td><strong> 跟单状态</strong></td>
+        <td id="tdTraceStatus">@DictionaryTools.GetEnumValue("OrderTraceStateEnum", Model.Order.TraceState.ToString())</td>
+    </tr>
+</table>
+

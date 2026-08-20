@@ -1,0 +1,259 @@
+﻿@model Lvy.Models.SiteDB.SiteNavItemModel
+@using Arch.Common
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string picroot = AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/elfinder/css/elfinder.full.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/elfinder/js/elfinder.min.js"></script>
+    <script src="@CDNServerUrl/elfinder/js/i18n/elfinder.zh_CN.js"></script>
+
+    <!-- Bootstrap Color Picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+    <script src="@CDNServerUrl/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+
+    <!-- Bootstrap Switch -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" />
+    <script src="@CDNServerUrl/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+}
+<section class="content">
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-body">
+            <form role="form" class="form-horizontal" id="editform">
+                @Html.HiddenFor(a => a.NavCode, new { @id = "navid" })
+                @Html.HiddenFor(a => a.ItemID)
+                @Html.HiddenFor(a => a.ParentID)
+
+                @if (Model.ParentID != default(int))
+                {
+                    <div class="form-group row">
+                        <label class="col-4 control-label">父节点名称：</label>
+                        <div class="col-8">@Model.ParentName</div>
+                    </div>
+                }
+                <div class="form-group row">
+                    <label class="col-3 control-label">标题：</label>
+                    <div class="col-3">
+                        @Html.TextBoxFor(a => a.Name, new { @id = "navname", @class = "form-control form-control-sm" })
+                    </div>
+                    <label class="col-3 control-label">编码：</label>
+                    <div class="col-3">
+                        @Html.TextBoxFor(a => a.Code, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">备注：</label>
+                    <div class="col-9">
+                        @Html.TextBoxFor(a => a.Remarks, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">链接URL：</label>
+                    <div class="col-9">
+                        @Html.TextBoxFor(a => a.LinkUrl, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">出发城市：</label>
+                    <div class="col-3">
+                        @Html.DropDownListFor(a => a.OutCity, ViewBag.OutCityEnum as IEnumerable<SelectListItem>, new { @id = "outcity", @class = "form-control" })
+                    </div>
+                    <label class="col-3 control-label">区域ID（逗号分隔）：</label>
+                    <div class="col-3">
+                        @Html.TextBoxFor(a => a.Region, new { @id = "region", @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">是否叶子节点：</label>
+                    <div class="col-3">@Html.CheckBoxFor(a => a.IsLeaf, new { @class = "js-switch" })</div>
+                    <label class="col-3 control-label">级别：</label>
+                    <div class="col-3">@Html.TextBoxFor(a => a.Level, new { @id = "level", @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">是否有效：</label>
+                    <div class="col-3">@Html.CheckBoxFor(a => a.IsValid, new { @class = "js-switch" })</div>
+                    <label class="col-3 control-label">权重：</label>
+                    <div class="col-3">@Html.TextBoxFor(a => a.SortOrder, new { @id = "SortOrder", @class = "form-control form-control-sm" })</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">九宫格贴图：</label>
+                    <div class="col-7">
+                        @Html.TextBoxFor(a => a.WapImageUrl, new { @id = "WapImageUrl", @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-info" onclick="wapimageSelectDialog();">选择</button>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">底色：</label>
+                    <div class="col-9">
+                        <div class="input-group my-colorpicker">
+                            @Html.TextBoxFor(a => a.BgColor, new { @id = "BgColor", @class = "form-control form-control-sm " })
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-square" style="color: @Model.BgColor"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">二级页面首图：</label>
+                    <div class="col-7">
+                        @Html.TextBoxFor(a => a.ImageUrl, new { @id = "ImageUrl", @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-info" onclick="imageSelectDialog();">选择</button>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-3 control-label">是否产品组：</label>
+                    <div class="col-3">@Html.CheckBoxFor(a => a.IsGroup, new { @class = "js-switch" })</div>
+                    <label class="col-3 control-label">产品类型：</label>
+                    <div class="col-3">
+                        @Html.DropDownListFor(a => a.ProductType, ViewBag.ProductType as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+            </form>
+        </div><!-- /.box-body -->
+        <div class="card-footer">
+            <input type="button" value="保存" onclick="SaveNav()" class="btn btn-success" />
+        </div>
+    </div><!-- /.box -->
+</section>
+
+<script type="text/javascript">
+    $(function () {
+        //color picker with addon
+        $('.my-colorpicker').colorpicker()
+        $('.my-colorpicker').on('colorpickerChange', function (event) {
+            $('.my-colorpicker .fa-square').css('color', event.color.toString());
+        });
+
+        $(".js-switch").each(function () {
+            $(this).bootstrapSwitch({ 'state': $(this).prop('checked'), onText: "是", offText: "否" });
+        });
+        $("#ProductType").val('@Model.ProductType');
+    });
+
+    //保存
+    function SaveNav() {
+        if (ValidData()) {
+
+            var param = decodeURIComponent($("#editform").formSerialize());
+
+            $.post("/SiteNav/SaveNavItem/", param, function (data) {
+                if (data == 0) {
+                    Utils.alert("编码重复！");
+                    $("#code").focus();
+                } else {
+                    //Utils.alert("保存成功！");
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                    parent.refreshTree();
+                }
+            });
+        }
+    }
+
+    //验证数据
+    function ValidData() {
+        return true;
+    }
+
+    function wapimageSelectDialog() {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'resize', 'help', 'select', 'upload']; // Not yet implemented commands in ElFinder.Net
+        $.each(disabled, function (i, cmd) {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+
+        var fm = $('<div />').dialogelfinder({
+            url: '@(picroot+"connector")', // change with the url of your connector
+            customData: { folder: 'Files/wechat', subFolder: 'nav' }, // customData passed in every request to the connector as query strings. These values are used in FileController's Index method.
+            commands: myCommands,
+            rememberLastDir: false,
+            lang: 'zh_CN',
+            uiOptions: { // UI buttons available to the user
+                toolbar: [
+                    ['back', 'forward'],
+                    ['reload'],
+                    ['home', 'up'],
+                    // ['mkdir', 'mkfile', 'upload'],
+                    ['open', 'download'],
+                    ['info'],
+                    ['quicklook'],
+                    ['copy', 'cut', 'paste'],
+                    ['rm'],
+                    ['duplicate', 'rename', 'edit'],
+                    ['view', 'sort']
+                ],
+                navbar: {
+                    minWidth: 150,
+                    maxWidth: 500
+                }
+            },
+            width: 840,
+            height: 450,
+            destroyOnClose: true,
+            getFileCallback: function (files, fm) {
+                $("#WapImageUrl").val(files.url);
+            },
+            commandsOptions: {
+                getfile: {
+                    oncomplete: 'close',
+                    folders: false
+                }
+            }
+        }).dialogelfinder('instance');
+    }
+
+    function imageSelectDialog() {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'resize', 'help', 'select', 'upload']; // Not yet implemented commands in ElFinder.Net
+        $.each(disabled, function (i, cmd) {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+
+        var fm = $('<div />').dialogelfinder({
+            url: '@(picroot+"connector")', // change with the url of your connector
+            customData: { folder: 'Files/wechat', subFolder: 'head' }, // customData passed in every request to the connector as query strings. These values are used in FileController's Index method.
+            commands: myCommands,
+            rememberLastDir: false,
+            lang: 'zh_CN',
+            uiOptions: { // UI buttons available to the user
+                toolbar: [
+                    ['back', 'forward'],
+                    ['reload'],
+                    ['home', 'up'],
+                    // ['mkdir', 'mkfile', 'upload'],
+                    ['open', 'download'],
+                    ['info'],
+                    ['quicklook'],
+                    ['copy', 'cut', 'paste'],
+                    ['rm'],
+                    ['duplicate', 'rename', 'edit'],
+                    ['view', 'sort']
+                ],
+                navbar: {
+                    minWidth: 150,
+                    maxWidth: 500
+                }
+            },
+            width: 840,
+            height: 450,
+            destroyOnClose: true,
+            getFileCallback: function (files, fm) {
+                $("#ImageUrl").val(files.url);
+            },
+            commandsOptions: {
+                getfile: {
+                    oncomplete: 'close',
+                    folders: false
+                }
+            }
+        }).dialogelfinder('instance');
+    }
+</script>

@@ -1,0 +1,51 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+<!--订单处理进度-->
+@Html.Partial("~/Views/FitVisaOrder/OrderProcessLayer.cshtml")
+<!--订单信息-->
+@Html.Partial("~/Views/FitVisaOrder/OrderBaseInfo.cshtml")
+<!--联系人信息-->
+
+@Html.Partial("ShowContactInfo")
+
+@Html.Partial("~/Views/FitVisaOrder/LinkManInfo.cshtml")
+
+<div class="manual">
+    <div id="Tabs">
+        <div class="menuDiv">
+            <ul id="menu1">
+                <li id="tab_menu_li_0" class="hover" onclick="setTab(1,0)" style="font-size: 12px;">申请人信息</li>
+                <li id="tab_menu_li_5" onclick="setTab(1,5)" style="font-size: 12px;">子订单信息</li>
+                <li id="tab_menu_li_8" onclick="setTab(1,8)" style="font-size: 12px;">操作历史</li>
+            </ul>
+        </div>
+        <div class="mainDiv">
+            <div id="main1">
+                <ul id="tab_main_ul_0" class="block">
+                    <li>
+                        <div>
+                            @Html.Partial("~/Views/Visa/OrderAdmin/TouristList.cshtml")
+                        </div>
+                    </li>
+                </ul>
+                <ul id="tab_main_ul_5">
+                    <li>
+                        <div>
+                            @Html.Partial("~/Views/FitVisaOrder/ShowChildOrderInfo.cshtml")
+                        </div>
+                    </li>
+                </ul>
+                <ul id="tab_main_ul_8">
+                    <li>
+                        <div>
+                            @Html.Partial("~/Views/FitVisaOrder/OperateHistory.cshtml")
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--订单处理-->
+@Html.Partial("~/Views/FitVisaOrder/OrderFlowLayer.cshtml")
+

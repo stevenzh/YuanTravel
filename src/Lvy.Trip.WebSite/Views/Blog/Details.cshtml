@@ -1,0 +1,39 @@
+﻿@model Lvy.Models.BaseDB.BaseArticleModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+@section AdditionalResources{}
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="@Model.ImgUrl" data-speed="0.8"></div>
+</div>
+
+<!-- Single Blog Post -->
+<div class="single_post">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="single_post_title">@Model.Title</div>
+                <div class="single_post_text">
+                    @Html.Raw(Model.Contents)
+
+                    @*<div class="single_post_quote text-center">
+                            <div class="quote_image"><img src="images/quote.png" alt=""></div>
+                            <div class="quote_text">Quisque sagittis .</div>
+                            <div class="quote_name">Liam Neeson</div>
+                        </div>
+
+                        <p>neirong. </p>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section PageScripts
+{
+    <script src="~/lib/parallax-js-master/parallax.min.js"></script>
+}

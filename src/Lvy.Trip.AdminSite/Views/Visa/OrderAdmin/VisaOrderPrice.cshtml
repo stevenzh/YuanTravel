@@ -1,0 +1,154 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+
+<div class="title01">
+        订单成本
+    </div>
+<div class="" id="orderprice_info">
+    <table width="100%" class="tab02" border="0" cellspacing="0" cellpadding="0">
+        <tr class="tabletitle">
+            <td style=" width:5%;">
+                类型
+            </td>
+            <td style=" width:14%;">
+                供应商
+            </td>
+            <td style=" width:10%;">
+                供应商联系人
+            </td>
+            <td style=" width:10%;">
+                供应商联系电话
+            </td>
+            <td style=" width:10%;">
+                供应商手机
+            </td>
+            <td style=" width:8%;">
+                成人人数
+            </td>
+            <td style=" width:8%;">
+                儿童人数
+            </td>
+            <td style=" width:10%;">
+                成人成本价
+            </td>
+            <td style=" width:10%;">
+                儿童成本价
+            </td>
+            <td style=" width:5%;">
+                状态
+            </td>
+            <td style=" width:10%;">
+                操作
+            </td>
+        </tr>
+        @{ foreach (var item in Model.FlResCheckList)
+            {
+                var price_index = Model.FlResCheckList.IndexOf(item);
+                <tr id="@("detailprice_tr_"+price_index)">
+                    <td>@(item.ResourceTypeValue == null ? "" : item.ResourceTypeValue.Value)</td>
+                    @*<td>@item.SupplierModel.SupplierName</td>
+                    <td>@item.SupplierModel.ChargerName</td>
+                    <td>@item.SupplierModel.Phone</td>
+                    <td>@item.SupplierModel.MobilePhone</td>*@
+                    <td>@item.AdultManNum</td>
+                    <td>@item.ChildNum</td>
+                    <td>@(item.AdultAdjustPrice == null ? "" : item.AdultAdjustPrice.Value.ToString("0.##"))</td>
+                    <td>@(item.ChildAdjustPrice == null ? "" : item.ChildAdjustPrice.Value.ToString("0.##"))</td>
+                    <td>@(item.BalanceStateValue == null ? "" : item.BalanceStateValue.Value)</td>
+                    <td>
+                        @if (item.BalanceState == 0 || item.BalanceState == 1)
+                        {
+                            <a href="javascript:funUpdatePrice(@price_index,'@item.ResourceCheckCode')">调整</a>
+                        }
+                        else
+                        {
+                            <span> --</span>
+                        }
+                    </td>
+                </tr>
+                <tr id="modifyprice_tr_@price_index" style=" display:none;">
+                    <td>@item.ResourceTypeValue == null ? "" : item.ResourceTypeValue.Value</td>
+                    @*<td>@item.SupplierModel.SupplierName</td>
+                    <td>@item.SupplierModel.ChargerName</td>
+                    <td>@item.SupplierModel.Phone</td>
+                    <td>@item.SupplierModel.MobilePhone</td>*@
+                    <td>@item.AdultManNum</td>
+                    <td>@item.ChildNum</td>
+                    <td>@Html.TextBoxFor(a => item.AdultAdjustPrice, new { id = "adultadjustprice_" + price_index })</td>
+                    <td>@Html.TextBoxFor(a => item.ChildAdjustPrice, new { id = "childadjustprice_" + price_index })</td>
+                    <td>@item.BalanceStateValue == null ? "" : item.BalanceStateValue.Value</td>
+                    <td>
+                        <a href="javascript:funSavePrice(@price_index,'@item.ResourceCheckCode')">保存</a>
+                        <a href="javascript:funExistPrice(@price_index,'@item.ResourceCheckCode')">取消</a>
+                    </td>
+                </tr>
+            } }
+        <tr>
+            <td colspan="7" align="right">总人数：@Model.FlResCheckList.Sum(a => a.Number)</td>
+            <td colspan="2" align="right">总成本：@Model.FlResCheckList.Sum(a => a.TotalPayable).Value.ToString("0.##")</td>
+            <td colspan="2"></td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+
+    //调整
+    function funUpdatePrice(p_index, rescheckcode) {
+        var param = {
+            "ResourceCheckCode": rescheckcode,
+            "Index": p_index
+        };
+        $.post("/FitVisaOrder/ModifyAdjustPrice/", param, function (data) {
+            $("#modifyprice_tr_" + p_index).html(data);
+            $("#detailprice_tr_" + p_index).hide();
+            $("#modifyprice_tr_" + p_index).show();
+        });
+    }
+    //保存
+    function funSavePrice(p_index, rescheckcode) {
+        var _adultprice = $("#adultadjustprice_" + p_index).val();
+        var _childprice = $("#childadjustprice_" + p_index).val();
+        if ($.trim(_adultprice) == "") {
+            alert("请输入成人结算价！");
+            $("#adultadjustprice_" + p_index).focus();
+            return;
+        }
+        if (isNaN(_adultprice)) {
+            alert("成人结算价格式错误，必须为数字！");
+            $("#adultadjustprice_" + p_index).select();
+            return;
+        }
+        if ($.trim(_childprice) == "") {
+            alert("请输入儿童结算价！");
+            $("#childadjustprice_" + p_index).focus();
+            return;
+        }
+        if (isNaN(_childprice)) {
+            alert("儿童结算价格式错误，必须为数字！");
+            $("#childadjustprice_" + p_index).select();
+            return;
+        }
+        var param = {
+            "OrdersCode": orderCode,
+            "ResourceCheckCode": rescheckcode,
+            "Index": p_index,
+            "AdultAdjustPrice": _adultprice,
+            "ChildAdjustPrice": _childprice
+        };
+        $.post("/FitVisaOrder/SaveAdjustPrice/", param, function () {
+            alert("保存成功！");
+            window.location.reload();
+        });
+    }
+    //取消
+    function funExistPrice(p_index, rescheckcode) {
+        var param = {
+            "ResourceCheckCode": rescheckcode,
+            "Index": p_index
+        };
+        $.post("/FitVisaOrder/ExistModifyAdjustPrice/", param, function (data) {
+            $("#detailprice_tr_" + p_index).html(data);
+            $("#modifyprice_tr_" + p_index).hide();
+            $("#detailprice_tr_" + p_index).show();
+        });
+    }
+</script>

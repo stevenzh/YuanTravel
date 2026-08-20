@@ -1,0 +1,176 @@
+﻿@{
+    Layout = null;
+    string CDNServerUrl = AppSettings.GetAppSeting("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - 上海新康辉</title>
+    <link href="@CDNServerUrl/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    @*<link href="~/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" />*@
+    <link href="~/lib/linericon/style.css" rel="stylesheet" />
+    <link href="@CDNServerUrl/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link href="~/lib/nice-select/css/nice-select.css" rel="stylesheet" />
+    <link href="~/lib/lightbox/simpleLightbox.css" rel="stylesheet" />
+    <link href="~/css/style.css" rel="stylesheet" />
+    <link href="~/css/responsive.css" rel="stylesheet" />
+    <style>
+        .home_banner_area .banner_inner .home_left_img { padding-top: 50px; padding-bottom:50px;}
+    </style>
+</head>
+<body>
+    <!--================Header Menu Area =================-->
+    <header class="header_area">
+
+        <div class="main_menu">
+
+            <!--  Top Bar -->
+            <div class="top_bar">
+                <div class="container">
+                    <div class="row">
+                        <div class="col d-flex flex-row">
+                            <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="/images/phone.png" alt=""></div>400-620-7888</div>
+                            <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="/images/mail.png" alt=""></div><a href="mailto:help@sh-cct.com">help@sh-cct.com</a></div>
+
+                            <div class="top_bar_content ml-auto">
+
+                                <div class="top_bar_menu">
+                                    <div class="top_bar_icon">
+                                        <ul class="index_top_nav ">
+                                            <li class="nav_item item_weibo">
+                                                <a onclick="_gaq.push(['_trackEvent','首页_sz','点击','顶部按钮_微博___'])" class="header_icon icon_weibo vm" rel="nofollow" target="_blank" href="https://weibo.com/u/3069447335"></a>
+                                            </li>
+                                            <li class="nav_item item_weixin has_dropdown">
+                                                <a class="header_icon icon_weixin vm" rel="nofollow" href="#"></a>
+                                                <div class="dropdown_panel weixin_panel">
+                                                    <img src="/images/qrcode_for_weixin.png">
+                                                </div>
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Top Bar -->
+
+        </div>
+    </header>
+    <!--================Header Menu Area =================-->
+
+    <!--================Home Banner Area =================-->
+    <section class="home_banner_area">
+        <div class="banner_inner">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-5">
+                        <div class="banner_content">
+                            <img src="~/images/logo.png" />
+                            <h2>网站维护中...</h2>
+                            <p>请访问 康辉旅游唯一官方网站 </p>
+                            <a class="banner_btn" href="http://www.cct.cn">CCT.CN</a>
+                            @*<a class="banner_btn2" href="#">Download</a>*@
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="home_left_img">
+                            <img class="img-fluid" src="~/images/banner/home-left-1.png" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+
+    <!--================Footer Area =================-->
+    <footer class="footer_area p_60">
+        <div class="container">
+            <div class="row footer_inner">
+                <div class="col-lg-5 col-sm-6">
+                    <aside class="f_widget ab_widget">
+                        <div class="f_title">
+                            <h3>康辉旅游</h3>
+                        </div>
+                        <p>周一至周五 08:45-17:30</p>
+                        <p style="font-size:24px;">400-620-7888</p>
+                        <p>上海市武定路458号12-13楼</p>
+                        <p>
+                            Copyright &copy; 2002-
+                            <script>document.write(new Date().getFullYear());</script> 上海新康辉国际旅行社有限责任公司
+                        </p>
+                        <p>旅行社业务经营许可证编号：<a href="https://beian.miit.gov.cn/">沪ICP备09073213号</a></p>
+                    </aside>
+                </div>
+                @*<div class="col-lg-5 col-sm-6">
+                    <aside class="f_widget news_widget">
+                        <div class="f_title">
+                            <h3>Newsletter</h3>
+                        </div>
+                        <p>Stay updated with our latest trends</p>
+                        <div id="mc_embed_signup">
+                            <form target="_blank" action="https://spondonit.us12.list-manage.com/subscribe/post?u=1462626880ade1ac87bd9c93a&amp;id=92a4423d01" method="get" class="subscribe_form relative">
+                                <div class="input-group d-flex flex-row">
+                                    <input name="EMAIL" placeholder="Enter email address" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Email Address '" required="" type="email">
+                                    <button class="btn sub-btn"><span class="lnr lnr-arrow-right"></span></button>
+                                </div>
+                                <div class="mt-10 info"></div>
+                            </form>
+                        </div>
+                    </aside>
+                </div>
+                <div class="col-lg-2">
+                    <aside class="f_widget social_widget">
+                        <div class="f_title">
+                            <h3>Follow Me</h3>
+                        </div>
+                        <p>Let us be social</p>
+                        <ul class="list">
+                            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                            <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
+                            <li><a href="#"><i class="fa fa-behance"></i></a></li>
+                        </ul>
+                    </aside>
+                </div>*@
+            </div>
+        </div>
+    </footer>
+    <!--================End Footer Area =================-->
+
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="~/js/jquery.ajaxchimp.min.js"></script>
+    <script src="~/lib/nice-select/js/jquery.nice-select.min.js"></script>
+    <script src="~/lib/lightbox/simpleLightbox.min.js"></script>
+    <script src="~/lib/counter-up/jquery.waypoints.min.js"></script>
+    <script src="~/lib/counter-up/jquery.counterup.min.js"></script>
+    <script src="~/js/stellar.js"></script>
+    <script src="~/js/theme.js"></script>
+    <script>
+
+        /*----------------------------------------------------*/
+        /*  Top Bar
+        /*----------------------------------------------------*/
+        function onNavItemHoverIn(e) {
+            $(this).addClass("item_hover");
+            //if (utility.isIELte(8)) { $(this).find(".icon_arrow").addClass("icon_arrow_rotate"); }
+        }
+        function onNavItemHOverOut(e) {
+            $(this).removeClass("item_hover");
+            //if (utility.isIELte(8)) { $(this).find(".icon_arrow").removeClass("icon_arrow_rotate"); }
+        }
+        $(".index_top_nav .has_dropdown").hover(this.onNavItemHoverIn, this.onNavItemHOverOut);
+        $(".index_top_nav .item_weixin, .index_top_nav .item_weibo").hover(function () {
+            $(this).find(".header_icon").toggleClass("hover");
+        });
+
+    </script>
+</body>
+</html>

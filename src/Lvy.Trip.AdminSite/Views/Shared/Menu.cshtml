@@ -1,0 +1,25 @@
+﻿<div class="cd_t">
+    功能菜单
+</div>
+<div class="cd_m">
+    @*如果不是系统客户下的用户，显示【分销中心】*@
+    @if (GlobalContext.Current.OwnerCode != GlobalContext.Current.UserInfo.CustomerCode)
+    {
+        <div class="sidebar_nav">
+            <h2>
+                <img src="~/WebRes/images/manage/l_tit1.gif" alt="" /><span>我的订单</span>
+            </h2>
+            <ul>
+                <li><a href="@Url.Action("SearchTimerOrder", "Saler")">退单倒计时</a></li>
+                @* <li><a href="@Url.Action("SearchOrder", "Saler")">团队游订单</a></li>*@
+                <li><a href="@Url.Action("OrderStatistic", "Saler")">团队游订单</a></li>
+                @*<li><a href="@Url.Action("SearchTickets", "Saler")">团队门票订单</a></li>*@
+                <li><a href="@Url.Action("TktOrderStatistic", "Saler")">团队门票订单</a></li>
+            </ul>
+        </div>
+    }
+
+    @HtmlHelperEx.MenuBuild(null)
+
+</div>
+<div class="cd_b"></div>

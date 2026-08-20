@@ -1,0 +1,36 @@
+﻿@model Lvy.Models.WeixinDB.Member
+@{
+    ViewBag.Title = "微信公众号";
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+    var accountModel = TempData["AccountModel"] as CrmAccountModel;
+}
+@using Lvy.Models.CrmDB
+
+<div class="ui vertical segment">
+    <h4>系统账号绑定</h4>
+    @using (Html.BeginForm("AccountSubmit", "Member", FormMethod.Post, new { id = "frm" }))
+    {
+        <div class="ui form segment">
+            <input type="hidden" name="openID" value='@Model.OpenID' />
+            <input type="hidden" name="accountCode" value='@accountModel.Code' />
+            <div class="inline field">
+                <label>微信昵称</label>
+                @Model.NickName
+            </div>
+            <div class="inline field">
+                <label>联系电话</label>
+                @Model.PhoneNumber
+            </div>
+            <div class="inline field">
+                <label>账号所属企业</label>
+                @accountModel.CustomerName
+            </div>
+            <div class="inline field">
+                <label>账号：</label>
+                @accountModel.LoginName
+            </div>
+            <button type="submit" class="ui submit button">绑定</button>
+        </div>
+    }
+
+</div>

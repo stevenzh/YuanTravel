@@ -1,0 +1,59 @@
+﻿@charset "utf-8";
+/* no page used */
+/* main */
+.main { width: 1190px; margin: auto; }
+
+.listTourInput { background: none repeat scroll 0 0 #FCFCFC; border: 1px solid #CCCCCC; height: 25px; width: 150px; }
+.listTourInput_1 { background: none repeat scroll 0 0 #FCFCFC; border: 1px solid #5BB9EC; height: 25px; width: 164px; }
+
+.m_left { width: 241px; float: left; }
+.m_right { width: 938px; margin-left: 10px; float: left; display: inline; background-color: #FCFCFC; }
+
+.m_left_1 { width: 239px; border: 2px solid #5DB9EC; border-right: none; background: #DBF4F9; float: left; }
+.m_left_2 { width: 239px; margin-top: 10px; }
+
+/*m_right*/
+.m_right_1 { width: 918px; /*height:264px;*/ padding: 20px; padding-bottom: 0px; padding-right: 0px; line-height: 200%; }
+
+.search_title { width: 60px; margin-right: 15px; font-size: 12px; float: left; }
+.font_area { font-size: 14px; color: #FE6601; font-weight: bold; }
+
+.search_content { float: left; width: 630px; }
+    .search_content dl { float: left; }
+    .search_content dd { float: left; margin-right: 33px; *margin-right: 16px; _margin-right: 16px; }
+    .search_content .checkall span { float: left; display: block; line-height: 20px; font-size: 12px; margin-left: 10px; *margin-left: 5px; _margin-left: 5px; }
+    .search_content .checkall input { margin-top: 4px; margin-top: 3px\9; *margin-top: 0px; _margin-top: -2px; }
+
+.week_list { width: 500px; float: left; font-size: 12px; margin-top: 5px; }
+    .week_list span { float: left; display: block; line-height: 20px; font-size: 12px; margin-left: 10px; *margin-left: 5px; _margin-left: 5px; }
+    .week_list input { margin-top: 4px; margin-top: 3px\9; *margin-top: 0px; _margin-top: -2px; }
+
+.searchButton { float: left; margin-left: 6px; *margin-left: 4px; _margin-left: 4px; cursor: pointer; }
+.zhuti_box_div { float: left; /*height:26px;*/ border: 1px solid #F3F3F3; background: #F3F3F3; }
+    .zhuti_box_div div { /*float:left;*/ height: 25px; border-right: 1px solid #E6E6E6; /*border-bottom:1px solid #E6E6E6;*/ }
+.zhuti_tips a { cursor: pointer; display: block; float: left; line-height: 200%; margin-left: 10px; *margin-left: 5px; _margin-left: 5px; }
+.dest_tips a { cursor: pointer; display: block; float: left; line-height: 200%; margin-left: 10px; *margin-left: 5px; _margin-left: 5px; }
+.zhuti_tips a.time_list_3 { width: 50px; height: 23px; background: url(../images/more_0.png) no-repeat 38px center #F4F4F4; text-indent: 1em; color: #666666; }
+.date_box_div a { margin-left: 12px; *margin-left: 7px; _margin-left: 7px; cursor: pointer; }
+.date_box_div div { padding-right: 12px; *padding-right: 7px; _padding-right: 12px; }
+
+/*div select */
+.select_div_order { width: 174px; height: 28px; border: 1px solid #CCCCCC; cursor: pointer; }
+.select_div_order_1 { width: 174px; height: 28px; border: 1px solid #5BB9EC; cursor: pointer; }
+.select_input_order { border-right: 1px solid #ccc; height: 28px; width: 146px; overflow: hidden; line-height: 28px; }
+.select_input_order_1 { border-right: 1px solid #5BB9EC; height: 28px; width: 146px; overflow: hidden; line-height: 28px; }
+.select_input_order input { border: none; border: 0px; cursor: pointer; height: 26px; }
+.select_option_order { display: none; position: absolute; background: blue; width: 174px; border: 1px solid #5BB9EC; overflow: auto; margin-left: 0px; /**margin-left:0px;*/ /*_margin-left:0px;*/ margin-top: 0px; }
+    .select_option_order p { background: #fff; font-size: 14px; color: #000; font-weight: normal; cursor: default; }
+        .select_option_order p.option_bac { background: #00BFFB; color: #fff; }
+/*div select*/
+.line_name { margin-top: 10px; width: 938px; padding: 2px; }
+.line_name_title { background-color: #CCCCCC; }
+    .line_name_title th { color: #fff; }
+th.textIndent10 { text-align: left; color: #676769; }
+.search_result a { font-size: 14px; font-weight: bold; }
+.search_result_td_border { border-bottom: 1px dotted #ccc; }
+
+.backToTop { display: none; width: 18px; line-height: 1.2; padding: 5px 0; background-color: #000; color: #fff; font-size: 12px; text-align: center; position: fixed; _position: absolute; right: 10px; bottom: 100px; _bottom: "auto"; cursor: pointer; opacity: .6; filter: Alpha(opacity=60); }
+/*m_right*/
+/* main */

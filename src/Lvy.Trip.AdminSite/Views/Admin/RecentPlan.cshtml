@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Lvy.VModels.Product.TourInfoVModel>
+@{
+    Layout = null;
+}
+<table class="table">
+    <thead>
+        <tr>
+            <td>出发日期</td>
+            <td>总机位</td>
+            <td>团号</td>
+            <td>余位</td>
+            <td>锁定位</td>
+            <td align="center">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td style="text-align: center;">@item.OutDate</td>
+                <td style="text-align: center;">@item.PlanQuota </td>
+                <td style="text-align: center;">@item.TourNo</td>
+                <td style="text-align: center;">@item.UseQuota</td>
+                <td style="text-align: center;">@item.HoldQuota</td>
+                <td align="center" style="width:10%">
+                    <a href="#" class="edit" name="editContactInfo" title="详情" bindId="@item.TourId">详情</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

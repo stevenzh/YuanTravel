@@ -1,0 +1,17 @@
+﻿@model Lvy.VModels.Crm.CustomerPolicyVModel
+@{
+    ViewBag.Title = "折让规则";
+}
+@section AdditionalResources { }
+
+@Html.Partial("UCTabTitle", Model.CustomerCode)
+<form id="theForm" action="@Url.Action("ProductPolicy")">
+    <div id="divEditPolicy">
+        @Html.Partial("UCSearchPolicy", Model)
+    </div>
+
+    <div id="divPolicyList">
+        @Html.Partial("UCPolicyList", Model)
+    </div>
+</form>
+

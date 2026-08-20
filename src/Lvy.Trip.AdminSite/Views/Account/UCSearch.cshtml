@@ -1,0 +1,127 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+
+<style>
+    .listtbl tbody td { text-align: center; }
+</style>
+<div class="btnlist">
+    <div class="fl">
+        排序方式：@Html.DropDownListFor(m => m.SortKey, Model.SortKeyValueBean.ToSelectListFor(Model.SortKey.ToString()))
+    </div>
+    <div class="fr">
+        <a href="@Url.Action("Create")" class="btn btn1">新 增</a>
+    </div>
+</div>
+@if (Model.Accounts.Items.Count > 0)
+{
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                <td>编码</td>
+                <td>登录名</td>
+                <td>姓名</td>
+                <td>座机</td>
+                <td>联系手机</td>
+                @*<td>QQ</td>*@
+                <td>有效</td>
+                <td align="center" style="width: 50px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Accounts.Items)
+            {
+                <tr style="background-color: @(item.IsValid == 1 ?"#fff":"#e4e8eb");">
+                    <td>@item.Code</td>
+                    <td>@item.LoginName</td>
+                    <td>@item.Name</td>
+                    <td>@item.Phone</td>
+                    <td>@item.Mobile</td>
+                    @*<td>@item.QQ</td>*@
+                    <td>
+                        @if (item.IsValid == 1)
+                        {<span style='color:green;'>有效</span>}
+                        else
+                        {<span style='color:gray;'>无效</span>}
+                    </td>
+
+                    <td>
+                        <table class="toolbar">
+                            <tr>
+                                <td>@Html.IconActionLink("编辑", "Edit", "Account", "fa fa-edit", new { code = item.Code })</td>
+                                <td>
+                                    @if (item.IsValid == 1)
+                                    {
+                                        <a href="###" onclick="SetValidState('@item.Code','确认需要删除吗？')" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="###" onclick="SetValidState('@item.Code','确认需要恢复吗？')" title="恢复">
+                                            <i class="fa fa-recycle"></i>
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @Html.HiddenFor(a => a.Accounts.PageIndex)
+    <div id="Pagination" class="digg"></div>
+}
+else
+{
+    <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+        <br />
+        对不起，没有查找到数据！请重新输入查询条件 ！
+    </div>
+}
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Accounts.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Accounts.PageSize'),
+                current_page: @Model.Accounts.PageIndex-1
+            });
+
+        $('select[name="SortKey"]').change(function () {
+            pageselectCallback(0);
+        });
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#Accounts_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    function SetValidState(code, msg) {
+        if (confirm(msg)) {
+            var params = { 'code': code};
+            $.post('@Url.Action("SetValidState")', params, function (data) {
+                if (data == "1") {
+                    Utils.alert("设置成功！");
+                    pageselectCallback(page_index);
+                }
+            });
+        }
+    }
+
+</script>

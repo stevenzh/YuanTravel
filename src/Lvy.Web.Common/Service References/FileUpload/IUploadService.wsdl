@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:http="http://schemas.microsoft.com/ws/06/2004/policy/http" xmlns:tns="http://tempuri.org/" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="IUploadService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import namespace="http://schemas.datacontract.org/2004/07/System" />
+      <xsd:element name="UploadFile">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="inputModel" type="tns:UploadFileRequest" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="UploadFileResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="UploadFileResult" type="tns:UploadFileResponse" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="UploadPicture">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="request" type="tns:UploadFileRequest" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="UploadPictureResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="UploadPictureResult" type="tns:UploadFileResponse" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="CreateFolder">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="request" type="tns:UploadFileRequest" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="CreateFolderResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="CreateFolderResult" type="tns:UploadFileResponse" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="GetFileSize">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="sourceFile" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="GetFileSizeResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="1" maxOccurs="1" name="GetFileSizeResult" type="xsd:long" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="DelelteFileByFileName">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="fileName" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="DelelteFileByFileNameResponse">
+        <xsd:complexType />
+      </xsd:element>
+      <xsd:complexType name="UploadFileRequest">
+        <xsd:sequence>
+          <xsd:element minOccurs="0" maxOccurs="1" name="FileName" type="xsd:string" />
+          <xsd:element minOccurs="0" maxOccurs="1" name="FileStream" type="xsd:base64Binary" />
+          <xsd:element minOccurs="0" maxOccurs="1" name="VirtualPath" type="xsd:string" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="UploadFileResponse">
+        <xsd:sequence>
+          <xsd:element minOccurs="0" maxOccurs="1" name="FileName" type="xsd:string" />
+          <xsd:element minOccurs="0" maxOccurs="1" name="FilePath" type="xsd:string" />
+          <xsd:element minOccurs="1" maxOccurs="1" name="RetCode" type="xsd:int" />
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IUploadService_UploadFile_InputMessage">
+    <wsdl:part name="parameters" element="tns:UploadFile" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_UploadFile_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UploadFileResponse" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_UploadPicture_InputMessage">
+    <wsdl:part name="parameters" element="tns:UploadPicture" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_UploadPicture_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UploadPictureResponse" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_CreateFolder_InputMessage">
+    <wsdl:part name="parameters" element="tns:CreateFolder" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_CreateFolder_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CreateFolderResponse" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_GetFileSize_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetFileSize" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_GetFileSize_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetFileSizeResponse" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_DelelteFileByFileName_InputMessage">
+    <wsdl:part name="parameters" element="tns:DelelteFileByFileName" />
+  </wsdl:message>
+  <wsdl:message name="IUploadService_DelelteFileByFileName_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DelelteFileByFileNameResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IUploadService">
+    <wsdl:operation name="UploadFile">
+      <wsdl:input message="tns:IUploadService_UploadFile_InputMessage" />
+      <wsdl:output message="tns:IUploadService_UploadFile_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadPicture">
+      <wsdl:input message="tns:IUploadService_UploadPicture_InputMessage" />
+      <wsdl:output message="tns:IUploadService_UploadPicture_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateFolder">
+      <wsdl:input message="tns:IUploadService_CreateFolder_InputMessage" />
+      <wsdl:output message="tns:IUploadService_CreateFolder_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetFileSize">
+      <wsdl:input message="tns:IUploadService_GetFileSize_InputMessage" />
+      <wsdl:output message="tns:IUploadService_GetFileSize_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DelelteFileByFileName">
+      <wsdl:input message="tns:IUploadService_DelelteFileByFileName_InputMessage" />
+      <wsdl:output message="tns:IUploadService_DelelteFileByFileName_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding" type="tns:IUploadService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="UploadFile">
+      <soap:operation soapAction="http://tempuri.org/IUploadService/UploadFile" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadPicture">
+      <soap:operation soapAction="http://tempuri.org/IUploadService/UploadPicture" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateFolder">
+      <soap:operation soapAction="http://tempuri.org/IUploadService/CreateFolder" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetFileSize">
+      <soap:operation soapAction="http://tempuri.org/IUploadService/GetFileSize" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DelelteFileByFileName">
+      <soap:operation soapAction="http://tempuri.org/IUploadService/DelelteFileByFileName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="IUploadService">
+    <wsdl:port name="BasicHttpBinding" binding="tns:BasicHttpBinding">
+      <soap:address location="http://yuanfile.sh-cct.cn/upload.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

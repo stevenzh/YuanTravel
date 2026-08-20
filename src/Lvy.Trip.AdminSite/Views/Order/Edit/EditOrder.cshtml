@@ -1,0 +1,1138 @@
+﻿@model  Lvy.VModels.Order.OrderEditVModel
+@using Lvy.Models.CrmDB
+
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+    <script>
+        var defaultPolicy = {
+            RebateType: 1,  // 1 固定金额； 2百分比
+            Percent: 0,
+            MaxAmount: 0,
+            Amount: 0
+        }
+    </script>
+}
+<form id="theForm" action="@Url.Action("SaveOrder", "Order")" method="POST">
+    @Html.HiddenFor(a => a.Order.Id)
+    @Html.HiddenFor(a => a.Order.OrderCode, new { id = "textOrderCode" })
+    @Html.HiddenFor(a => a.Order.TolYsPrice, new { id = "textTolYsPrice" })
+    @Html.HiddenFor(a => a.Order.InvoiceAmount, new { id = "textInvoiceAmount" })
+    @Html.HiddenFor(a => a.Order.TourId)
+    @Html.HiddenFor(a => a.Order.TravellerCount)
+    @Html.HiddenFor(m => m.Order.Managers)
+    @Html.HiddenFor(a => a.Order.CustomerName, new { @id = "BookingCustomerName" })
+
+    @Html.HiddenFor(a => a.LineModel.LineType)
+    @Html.HiddenFor(a => a.TourPlan.SingleRoom, new { id = "hidSingleRoom" })
+    @Html.HiddenFor(a => a.TourPlan.ZiFei, new { id = "hidZiFei" })
+    @Html.HiddenFor(a => a.TourPlan.VisaPrice, new { id = "hidVisaPrice" })
+    @Html.HiddenFor(a => a.TourPlan.Tax, new { id = "hidTax" })
+    @Html.HiddenFor(a => a.TourPlan.Tips, new { id = "hidTips" })
+
+    @Html.HiddenFor(m => m.IsEditPric, new { id = "IsEditPric" })
+    <div class="station">
+        编辑订单(EditOrder)
+    </div>
+    <div class="in_box">
+        <div align="center" class="xboxcontent">
+            <div class="sotable_tit">订单基本信息</div>
+            <table id="orderInfo" class="edittbl">
+                <tbody>
+                    <tr>
+                        <td class="label">订单编号：</td>
+                        <td>@Model.Order.OrderCode</td>
+                        <td class="label">线路名称：</td>
+                        <td>@Model.LineModel.LineName</td>
+                        <td class="label">订单状态：</td>
+                        <td style="color: red;">@DictionaryTools.GetEnumValue(Enums.OrderStateEnum, Model.Order.OrderState.ToString())</td>
+                    </tr>
+                    <tr>
+                        <td class="label">线路类型：</td>
+                        <td>
+                            @DictionaryTools.GetEnumValue(Enums.LineScopeEnum, Model.LineModel.LineScope.ToString()) -
+                            @DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.LineModel.LineType.ToString())
+                        </td>
+                        <td class="label">行程天数：</td>
+                        <td style="text-align:left">@Model.Order.Line.Night 晚 @Model.Order.Line.TravelDays 天</td>
+                        <td class="label">目的地：</td>
+                        <td>@DictionaryTools.GetDestNameStr(Model.Order.Line.ArriveDest)</td>
+                    </tr>
+                    <tr>
+                        <td class="label">订单人数：</td>
+                        <td style="text-align:left">@Model.Order.TravellerCount</td>
+                        <td class="label">出发日期：</td>
+                        <td>@Model.Order.OutDate.ToDateFormat()</td>
+                    </tr>
+                    @if (Model.Order.SalerCode == GlobalContext.Current.UserInfo.Code)
+                    {
+                        <tr>
+                            <td class="label"><span class="text-danger">*</span>客户：</td>
+                            <td>
+                                @Html.DropDownListFor(m => m.Order.BookingCustomer, ViewBag.CustomerList as List<SelectListItem>, new { @id = "BookingCustomer" })
+                            </td>
+                            <td class="label"><span class="text-danger">*</span>结算方式：</td>
+                            <td>
+                                <select id="BookingName" name="Order.SettlePlatForm" style="width:200px">
+                                    <option value=""></option>
+                                    <option value='1'>自行结算</option>
+                                    <option value='2'>平台结算</option>
+                                    <option value='3'>父公司结算</option>
+                                </select>&nbsp;&nbsp;
+                            </td>
+                            <td class="label"><span class="text-danger">*</span>结算客户：</td>
+                            <td><select id="SettleCustomer" name="Order.SettleCustomer" style="width:200px"></select></td>
+                        </tr>
+                        <tr>
+                            <td class="label">分销商联系人：</td>
+                            <td style="text-align:left">
+                                <select id="ContactCode" name="Order.ContactCode" style="width:100px">
+                                    <option value=""></option>
+                                    @foreach (var item in ViewBag.LinkMan as List<CrmAccountModel>)
+                                    {
+                                        if (item.Code == Model.Order.ContactCode)
+                                        {
+                                            <option value='@item.Code' phone='@item.Mobile' selected="selected"> @item.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value='@item.Code' phone='@item.Mobile'> @item.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td class="label">分销商联系电话：</td>
+                            <td style="text-align:left">
+                                <input type="text" value="@Model.Order.ManagerPhone" id="ManagerPhone" name="Order.ManagerPhone" />
+                            </td>
+                            <td class="label">对应销售：</td>
+                            <td>
+                                @Html.DropDownListFor(a => a.Order.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "post_table_input", @readonly = "readonly" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">游客联系人：</td>
+                            <td style="text-align:left"><input type="text" value="@Model.Order.LinkMan" id="LinkMan" name="Order.LinkMan" /></td>
+                            <td class="label">游客联系电话：</td>
+                            <td style="text-align:left;">
+                                <input type="text" value="@Model.Order.LinkPhone" id="LinkPhone" name="Order.LinkPhone" />
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="label">客户：</td>
+                            <td>
+                                @Model.Order.CustomerName
+                                @Html.HiddenFor(m => m.Order.BookingCustomer, new { @id = "BookingCustomer" })
+                            </td>
+                            <td class="label">结算方式：</td>
+                            <td>
+                                @{
+                                    var settleType = "自行结算";
+                                    if (Model.Order.SettlePlatForm == 2)
+                                    {
+                                        settleType = "平台结算";
+                                    }
+                                    else if (Model.Order.SettlePlatForm == 3)
+                                    {
+                                        settleType = "父公司结算";
+                                    }
+                                }
+                                @settleType
+
+                                @Html.HiddenFor(m => m.Order.SettlePlatForm)
+                            </td>
+                            <td class="label">结算客户：</td>
+                            <td>
+                                @(Model.Order.SettleCustomer==null?"": DictionaryTools.GetCachedCustomer(Model.Order.SettleCustomer).Name)
+                                @Html.HiddenFor(m => m.Order.SettleCustomer, new { @id = "SettleCustomer" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">分销商联系人：</td>
+                            <td style="text-align:left">
+                                @(Model.Order.ContactCode==null?"": DictionaryTools.GetCachedAccount(Model.Order.ContactCode).Name)
+                                @Html.HiddenFor(m => m.Order.ContactCode)
+                            </td>
+                            <td class="label">分销商联系电话：</td>
+                            <td style="text-align:left">
+                                @Model.Order.ManagerPhone
+                                @Html.HiddenFor(m => m.Order.ManagerPhone)
+                            </td>
+                            <td class="label"><span class="point">*</span>对应销售：</td>
+                            <td>
+                                @DictionaryTools.GetCachedAccount(Model.Order.SalerCode).Name
+                                @Html.HiddenFor(m => m.Order.SalerCode)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">游客联系人：</td>
+                            <td style="text-align:left">
+                                @Model.Order.LinkMan
+                                @Html.HiddenFor(m => m.Order.LinkMan)
+                            </td>
+                            <td class="label">游客联系电话：</td>
+                            <td style="text-align:left;">
+                                @Model.Order.LinkPhone
+                                @Html.HiddenFor(m => m.Order.LinkPhone)
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td class="label">折让规则：</td>
+                        <td id="tdPolicy"></td>
+                        <td class="label">应收款(折让前)：</td>
+                        <td name="InvoiceAmount">@Model.Order.InvoiceAmount</td>
+                        <td class="label">应收款(折让后)：</td>
+                        <td name="TolYsPrice">@Model.Order.TolYsPrice</td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="label">关联订单号：</td>
+                        <td colspan="3">
+                            @Html.TextBoxFor(a => a.Order.JoinOrderCode, new { @Class = "text150" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">子订单合计金额：</td>
+                        <td>@Model.ChildOrderList.Where(m => m.IsCancel == 0).Sum(m => m.Amount)</td>
+                        <td class="label">已收款：</td>
+                        <td style="text-align:left">@Model.Order.TolPaid</td>
+                        <td class="label">账单是否显示折让：</td>
+                        <td>@(Model.Order.RebateInBill ? "显示" : "不显示")</td>
+                    </tr>
+                    @if (Model.LineModel.TrafficType == 1)
+                    {
+                        <tr>
+                            <td class="label">
+                                <span class="point">*</span>上车点：
+                            </td>
+                            <td colspan="3">
+                                @*@if (Model.Order.OrderState == 1)
+                                    {*@
+                                @Html.DropDownListFor(a => Model.LineBusPointId, Model.LineBusPointBeans.ToSelectListFor(), new { @class = "text400", @id = "ddlLineBusPoint" })
+                                <span></span>
+                                <input id="btnSaveLineBusPoint" value="保存上车点" type="button" />
+                                @Html.HiddenFor(a => a.JiePrice, new { id = "hiddenJiePrice" })
+                                @Html.HiddenFor(a => a.SongPrice, new { id = "hiddenSongPrice" })
+                                @Html.HiddenFor(a => a.LineBusPointView, new { id = "selectKey", value = Model.LineBusPointId })
+                                @*}
+                                    else
+                                    {
+                                        @Model.LineBusPointBeans.Where(a => a.Key == Model.LineBusPointId).FirstOrDefault().Value
+                                    }*@
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td class="label">备注：</td>
+                        <td colspan="5">
+                            @Html.TextAreaFor(a => a.Order.Remark, new { @Class = "textarea440" })
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+
+            @{
+                var optionStr = "";
+                foreach (var item in Model.Prices)
+                {
+                    if (item.IsStandard == 1)
+                    {
+                        optionStr += string.Format("<option value=\"{0}\" price=\"{2}\" tejia=\"{3}\" selected>{1}-{4}</option>", item.Id, item.PriceRemark, item.SettlePrice, item.TeJiaFanLi, item.SettlePrice - item.TeJiaFanLi);
+                    }
+                    else
+                    {
+                        optionStr += string.Format("<option value=\"{0}\" price=\"{2}\" tejia=\"{3}\">{1}-{4}</option>", item.Id, item.PriceRemark, item.SettlePrice, item.TeJiaFanLi, item.SettlePrice - item.TeJiaFanLi);
+                    }
+                }
+            }
+            <div style="display:none" id="optionStr">
+                @Html.Raw(optionStr)
+            </div>
+            @if (Model.IsOP == 1)
+            {
+                <div style="float:right;"><button id="btnAddtraveler" type="button" class="btn btn1">添加游客</button></div>
+            }
+            <div id="divTravellers"></div>
+
+            <div id="divChildOrder">
+                <!---子订单信息-->
+                @Html.Partial("Edit/UCChildOrders", Model)
+            </div>
+
+            @Html.HiddenFor(a => a.TravellerId, new { id = "hiddenTravellerId" })
+            @Html.HiddenFor(a => a.CancelMoney, new { id = "hiddenCancelMoney" })
+        </div>
+        <table class="sotable" style="width:100%;">
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+                <td align="center">
+                    <input class="btn btn1" id="checkBtn" type="button" value="核对游客信息" />
+                    <input class="btn btn1" id="btnSave" type="button" value="保存" />
+                    @if (ViewBag.Title == "编辑订单")
+                    {
+                        <input class="btn btn1" onclick="location.href='@Url.Action("SearchOrder")'" type="button" value="返回列表" />
+                    }
+                    else
+                    {
+                        <input class="btn btn1" onclick="location.href='@Url.Action("SearchFinance", "Finance")'" type="button" value="返回列表" />
+                    }
+                </td>
+            </tr>
+        </table>
+    </div>
+</form>
+<script type="text/javascript">
+    var strHref = '@Url.Action("SearchOrder")';
+
+    $(function () {
+
+        //修改
+        $("#btnSave").click(function () {
+            //var winTitle = $.trim('@ViewBag.Title');
+            //if(winTitle!="编辑订单")
+            //  strHref = '@Url.Action("SearchFinance", "Finance")';
+
+            if (!CheckControl()) {
+                return false;
+            }
+
+            var params = decodeURIComponent($("#theForm").formSerialize()) ;
+            var load_iii = Utils.layerLoad();
+            $.post('@Url.Action("SaveOrder")', params, function (data) {
+
+                if (data.StateCode == 100) {
+                    // 预定成功
+                    if (confirm("保存成功！是否跳转到列表页？")) {
+                        window.location.href=strHref;
+                    }
+                } else if (data.StateCode  == 101) {
+                    // 车位已经占了的场合，刷新车位数据，提示客户重新选择车位
+                    Utils.alert("保存失败。已经有客人吧车位占了，请重新选择车位！");
+                } else if (data.StateCode  == 102) {
+                    // 车位已经被锁定的场合，刷新车位数据，提示客户重新选择车位
+                    Utils.alert("保存失败。车位已经被万恶的Op锁定了，请联系Op！");
+                } else if (data.StateCode  == 103) {
+                    // 可用名额小于预定名额
+                    Utils.alert("保存失败。你要预定的名额数超过了我们的可用名额，拿起你的电话，请与op协调！");
+                } else {
+                    Utils.alert("保存失败。这个错误我也不知道该怎么形容了！请联系技术支持！");
+                }
+
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        //设置当前的接价和送价
+        LineBusPointChanage($("#ddlLineBusPoint"));
+
+        //上车点change事件
+        $("#ddlLineBusPoint").change(function () {
+            LineBusPointChanage($(this));
+        });
+
+        //加载游客信息
+        LoadTravellers();
+
+        $("#btnAddtraveler").click(function () {
+            var html = AddTravellersHtml();
+            $("#tbTravellers").append(html);
+            // 修改人数
+            $("#Order_TravellerCount").val(Number($("#Order_TravellerCount").val())+1 );
+
+            IsZiFei();
+            IsSingleRoom();
+            IsTax();
+            IsVisaPrice();
+
+            // 计算报价
+            SetYsPrice(null);
+        });
+
+        // 核对游客信息
+        $("#checkBtn").click(function () {
+            layer.open({ type: 2, title: '游客信息核对', maxmin: true, shadeClose: false, area: ['800px', '550px'], content: '@Url.Action("CheckTourists", new { ordercode=Model.Order.OrderCode })' });
+        });
+
+        //保存上车点
+        $("#btnSaveLineBusPoint").click(function () {
+            var lineBusPointId = $("#ddlLineBusPoint").val();
+            if (lineBusPointId.length == 0) {
+                Utils.alert("上车点不得为空！");
+                return;
+            }
+            var params = decodeURIComponent($("#theForm").formSerialize());
+            $.post('/Order/UpdateLineBusPoint', params, function (data) {
+                if (data >= 1) {
+                    Utils.alert("保存成功！");
+                    //document.location.href ='@Url.Action("EditTimerOrder", "Order")'+'?orderCode=@Model.Order.OrderCode';
+                }
+            });
+        });
+    });
+
+    //加载游客信息
+    function LoadTravellers() {
+        console.log("trigger LoadTravellers(). ");
+        var params = {
+            orderCode: '@Model.Order.OrderCode',
+            tourId: '@Model.Order.TourId'
+        };
+        $.post('/Order/LoadTravellers', params, function (html) {
+            $("#divTravellers").html(html);
+
+            //OtherPrice_keyup();
+            IsZiFei();
+            IsSingleRoom();
+            IsTax();
+            IsVisaPrice();
+
+            // 取得客户折扣规则
+            //SettlePolicy('@Model.Order.SettleCustomer','@Model.Order.Line.ArriveDest', false);
+        });
+    }
+
+    function SettlePolicy(customerCode, arriveDest, loadContact) {
+        console.log("trigger SettlePolicy(). ");
+
+        // 取得规则
+        $.ajax({
+            type: 'post',
+            url: '/Order/GetCustomerInfo',
+            data: { custcode: customerCode, lineDest: arriveDest },
+            async: false,
+            success: function (data) {
+
+                if (loadContact) {
+                    $("#ContactCode").empty();
+                    $("#ManagerPhone").val("");
+                    $("#ContactCode").append("<option value='' Phone=''></option>");
+                    $(data.contacts).each(function (index, item) {
+                        $("#ContactCode").append("<option value='" + item.Code + "' phone='" + item.Mobile + "'>" + item.Name + "</option>");
+                    });
+                }
+
+                var tolYsPrice = Number($("#textInvoiceAmount").val());
+                var pax = Number($("#Order_TravellerCount").val());
+
+                // 协议折让规则
+                if (data.policy != null){
+                    defaultPolicy.RebateType = data.policy.RebateType;
+                    defaultPolicy.Amount = data.policy.Amount;
+                    defaultPolicy.Percent = data.policy.Percent;
+                    defaultPolicy.MaxAmount = data.policy.MaxAmount;
+
+                    if(defaultPolicy.RebateType == 1){
+                        $("#tdPolicy").text("固定折让，每人" + defaultPolicy.Amount + "元");
+                        tolYsPrice = tolYsPrice - pax * defaultPolicy.Amount;
+                    }else{
+                        $("#tdPolicy").text("百分比， " + defaultPolicy.Percent + "%");
+                        tolYsPrice = tolYsPrice * (1 - (defaultPolicy.Percent / 100));
+                    }
+                }else{
+                    defaultPolicy.RebateType = 0;
+                    defaultPolicy.Amount = 0;
+                    $("#tdPolicy").text("无协议折让");
+                }
+
+                // 重新计算
+                $("#textTolYsPrice").val(tolYsPrice);
+                $("#orderInfo tr td[name='TolYsPrice']").text(tolYsPrice);
+            }
+        });
+    }
+
+    //计算应收金额
+    function SetYsPrice(obj) {
+        console.log("trigger SetYsPrice(). ");
+
+        var listTr = $("#tbTrallers").find("tr");
+        //console.log(objTr.attr("name"));
+
+        if (obj != null) {
+            var model = new Object();
+            var objTr = $(obj).parents("tr");
+            var objGroupTd = objTr.children("td[name='gpOtherPrice']");
+            var IsEditPric = ($("#IsEditPric").val() == "False" ? false : true);
+
+            //获取报价类型的价格信息
+            var SelectPrice = objTr.find("select[name$='PriceId']");
+            // var PriceId = SelectPrice.val();
+            model.Price = Number(SelectPrice.find("option:selected").attr("price"));
+            model.TeJiaFanLi = Number(SelectPrice.find("option:selected").attr("tejia"));
+            model.JiePrice = 0;// Number($.trim(objTr.find("input[name$='JiePrice']").val()));     //接价
+            model.SongPrice = 0;// Number($.trim(objTr.find("input[name$='SongPrice']").val()));   //送价
+            //model.FanLi = Number($.trim(objTr.find(".fanli").val()));                       //返利
+            model.ZiFei = Number($("#hidZiFei").val());                                     // 自费
+            model.IsZiFei = objTr.find("input[name='chkZiFei']").prop('checked');           // 自费
+            model.SingleRoom = Number($("#hidSingleRoom").val());                           // 房差
+            model.IsSingleRoom = objTr.find("input[name='chkSingleRoom']").prop('checked'); // 房差
+            model.Tax = Number($("#hidTax").val());                                         // 税
+            model.IsTax = objTr.find("input[name='chkTax']").prop('checked');               // 税
+            model.VisaPrice = Number($("#hidVisaPrice").val());                             // 签证费
+            model.IsVisaPrice = objTr.find("input[name='chkVisaPrice']").prop('checked');  // 签证费
+            model.YsPrice = Number(objTr.find("input[name$='YsPrice']").val());
+
+            //应收=(价格+单房差+接价+送价+自费+税+签证费+小费)-特价让利-OP让利
+            model.ChaPrice = 0;
+            if (model.IsZiFei) {
+                model.ChaPrice += model.ZiFei;
+                objGroupTd.find("input[name$='ZiFei']").val(model.ZiFei);
+            } else {
+                objGroupTd.find("input[name$='ZiFei']").val("0");
+            }
+
+            if (model.IsSingleRoom) {
+                model.ChaPrice += model.SingleRoom;
+                objGroupTd.find("input[name$='SingleRoom']").val(model.SingleRoom);
+            }
+            else {
+                objGroupTd.find("input[name$='SingleRoom']").val("0");
+            }
+
+            if (model.IsTax) {
+                model.ChaPrice += model.Tax;
+                objGroupTd.find("input[name$='Tax']").val(model.Tax);
+            } else {
+                objGroupTd.find("input[name$='Tax']").val("0");
+            }
+
+            if (model.IsVisaPrice) {
+                model.ChaPrice += model.VisaPrice;
+                objGroupTd.find("input[name$='VisaPrice']").val(model.VisaPrice);
+            } else {
+                objGroupTd.find("input[name$='VisaPrice']").val("0");
+            }
+
+            model.FanLi = model.YsPrice - model.Price - model.ChaPrice - model.JiePrice - model.SongPrice + model.TeJiaFanLi; //应收
+
+            objTr.find(".price").val(model.Price);
+            objGroupTd.find("input[name$='TeJiaFanLi']").val(model.TeJiaFanLi);
+            if (IsEditPric == false) {
+                objTr.children("td[name='YsPrice']").html(model.YsPrice);
+            }
+            objTr.find(".fanli").val(model.FanLi);
+        }
+
+        //订单的应收款
+        var tolYsPrice = 0;
+        var invoiceAmount = 0;
+        var pax = 0;
+        // 游客应收累加
+        $(listTr).find("input[name$='YsPrice']").each(function () {
+            // 累加未取消游客
+            if ($(this).attr("data-cancel") == "false") {
+                pax += 1;
+            }
+            invoiceAmount += Number($(this).val());
+        });
+
+        // 子订单累加
+        invoiceAmount += Number($("#Order_ChildTotalAmount").val());
+        tolYsPrice = invoiceAmount;
+
+        //0：不折扣，1：固定让价，2：折扣百分比
+        if (defaultPolicy.RebateType == 1) {
+            tolYsPrice = invoiceAmount - pax * defaultPolicy.Amount;
+        } else if (defaultPolicy.RebateType == 2) {
+            tolYsPrice = invoiceAmount * ( 1 - (defaultPolicy.Percent/100));
+        }
+
+        //console.log("distract:"+ model.RabateAmount);
+
+        $("#orderInfo tr td[name='InvoiceAmount']").text(invoiceAmount);
+        $("#orderInfo tr td[name='TolYsPrice']").text(tolYsPrice);
+        $("#textTolYsPrice").val(tolYsPrice);
+        $("#textInvoiceAmount").val(invoiceAmount);
+    }
+
+    //取消游客
+    function cancel_click(travellerId) {
+        $("#hiddenTravellerId").val(travellerId);
+        layer.open({
+            type: 1, title: '取消游客', maxmin: false
+            , shadeClose: false, area: ['300px', '200px']
+            , content: '产生费用：<input id="txtYsPrice" type="text" value="0" class="text150" /><br />'
+            , btn: ["提交", "关闭"]
+            , yes: function (index, layero) {
+                var pw = document.getElementById('txtYsPrice');
+
+                if (!Utils.Check.IsMoney(pw.value)) {
+                    Utils.alert("请输入正确格式的费用！");
+                    $("#txtYsPrice").focus().select();
+                    layer.close(index);
+                }
+                $("#hiddenCancelMoney").val($.trim(pw.value));
+                var params = $("#theForm").formSerialize();
+                $.post('/Order/CancelTraveller', params, function (data) {
+                    if (data >= 1) {
+                        $("#txtYsPrice").val("0");
+                        window.location.href = '/Order/EditOrder?orderCode=@Model.Order.OrderCode';
+                    }
+                });
+            }
+            , btn2: function (index, layero) {
+                // 取消
+            }
+        });
+    }
+
+    //恢复游客
+    function restore_click(travellerId) {
+        $("#hiddenTravellerId").val(travellerId);
+        layer.confirm('确定恢复此游客？', {
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+               //var pw = document.getElementById('txtYsPrice');
+
+                //if (!Utils.Check.IsMoney(pw.value)) {
+                //    Utils.alert("请输入正确格式的费用！");
+                //    $("#txtYsPrice").focus().select();
+                //    return false;
+                //}
+                //$("#hiddenCancelMoney").val($.trim(pw.value));
+                var params = $("#theForm").formSerialize();
+                $.post('/Order/RestoreTraveller', params, function (data) {
+                    if (data.Code == "yes") {
+                        // $("#txtYsPrice").val("0");
+                        window.location.href = '/Order/EditOrder?orderCode=@Model.Order.OrderCode';
+                    } else {
+                        Utils.alert("恢复失败" + data.Message);
+                    }
+                });
+        }, function () {
+            // 取消
+        });
+    }
+
+    //单房差
+    function IsSingleRoom() {
+        //单房差全选
+        $("input[name='chkAllSingleRoom']").change(function () {
+
+            var obj = $("input[name='chkSingleRoom']");
+            if ($(this).prop("checked"))
+                obj.prop("checked", true);
+            else
+                obj.prop("checked", false);
+
+            obj.each(function () {
+                chkSingleRoom_Change(this);
+            });
+        });
+
+        //单房差单选
+        $("input[name='chkSingleRoom']").change(function () {
+            chkSingleRoom_Change(this);
+        });
+    }
+
+    //自费
+    function IsZiFei() {
+        //自费全选
+        $("input[name='chkAllZiFei']").change(function () {
+            if ($(this).prop("checked"))
+                $("input[name='chkZiFei']").prop("checked", true);
+            else
+                $("input[name='chkZiFei']").prop("checked", false);
+
+            $("input[name='chkZiFei']").each(function () {
+                chkZiFei_Chanage(this);
+            });
+        });
+
+        //自费单选
+        $("input[name='chkZiFei']").change(function () {
+            chkZiFei_Chanage(this);
+        });
+    }
+
+    //获取选中的上车点接价和送价
+    function LineBusPointChanage(obj) {
+        $(obj).find("option:selected").each(function () {
+            //var selectHtml = $.trim($(this).html());
+            var isHasBusPoint = $.trim($(obj).val()).length;
+            var selectKey = $(this).val();
+            //var jiePrice, songPrice;
+            if (isHasBusPoint != 0) {
+                //var strTemp = selectHtml.split('|');
+                //switch (selectKey.split('|')[1]) {
+                //    case "1"://只接不送
+                //        jiePrice = $.trim(strTemp[2].split('：')[1]);
+                //        $("#hiddenJiePrice").val(jiePrice);
+                //        break;
+                //    case "2"://只送不接
+                //        songPrice = $.trim(strTemp[2].split('：')[1]);
+                //        $("#hiddenSongPrice").val(songPrice);
+                //        break;
+                //    default://接送
+                //        jiePrice = $.trim(strTemp[2].split('：')[1]);
+                //        $("#hiddenJiePrice").val(jiePrice);
+                //        songPrice = $.trim(strTemp[3].split('：')[1]);
+                //        $("#hiddenSongPrice").val(songPrice);
+                //        break;
+                //}
+                $("#selectKey").val(selectKey);
+            }
+            else {
+                $("#hiddenJiePrice").val("0");
+                $("#hiddenSongPrice").val("0");
+            }
+        });
+    }
+
+    //税
+    function IsTax() {
+        //税全选
+        $("input[name='chkAllTax']").change(function () {
+            if ($(this).prop("checked"))
+                $("input[name='chkTax']").prop("checked", true);
+            else
+                $("input[name='chkTax']").prop("checked", false);
+
+            $("input[name='chkTax']").each(function () {
+                chkTax_Chanage(this);
+            });
+        });
+
+        //税单选
+        $("input[name='chkTax']").change(function () {
+            chkTax_Chanage(this);
+        });
+    }
+
+    //签证费
+    function IsVisaPrice() {
+        //签证费全选
+        $("input[name='chkAllVisaPrice']").change(function () {
+            if ($(this).prop("checked"))
+                $("input[name='chkVisaPrice']").prop("checked", true);
+            else
+                $("input[name='chkVisaPrice']").prop("checked", false);
+
+            $("input[name='chkVisaPrice']").each(function () {
+                chkVisaPrice_Chanage(this);
+            });
+        });
+
+        //签证费单选
+        $("input[name='chkVisaPrice']").change(function () {
+            chkVisaPrice_Chanage(this);
+        });
+    }
+
+    //报价类型选择
+    function PriceTypeChange(obj){
+        //重新计算价格
+        SetYsPrice(obj);
+    }
+
+    function CalcPrice(obj){
+        //var objTr = $(obj).parents("tr");
+        //objTr.find("input[name$='XXXXXXX']").val("");
+        SetYsPrice(obj);
+    }
+
+    //单房差选择事件
+    function chkSingleRoom_Change(obj) {
+        SetYsPrice(obj);
+    }
+
+    //自费选择事件
+    function chkZiFei_Chanage(obj) {
+        SetYsPrice(obj);
+    }
+    //税选择事件
+    function chkTax_Chanage(obj) {
+        SetYsPrice(obj);
+    }
+    //签证费事件
+    function chkVisaPrice_Chanage(obj) {
+        SetYsPrice(obj);
+    }
+
+    //验证输入数据
+    function CheckControl() {
+
+        if ($("[name='Order.BookingCustomer']").val()=="") {
+            Utils.alert("请选择下单客户！");
+            return false;
+        }
+
+        if($("[name='Order.SettlePlatForm']").val()=="") {
+            Utils.alert("请选择结算人！");
+            return false;
+        }
+
+        if($("[name='Order.SettleCustomer']").val()=="") {
+            Utils.alert("请选择结算人！");
+            return false;
+        }
+
+        // 姓名不能为空
+        var returnvalue = true;
+        var touristName = new Array()
+        $("#tbTravellers").find("input[name$='Name']").each(function (index, item) {
+            touristName[index] = $(this).val();
+            if (Utils.Trim($(this).val()) == "") {
+                Utils.alert("第"+(index+1)+"行游客姓名不能为空！");
+                $(this).focus().select();
+                returnvalue = false;
+                return false;
+            }
+        });
+        //$("#tbTravellers").find("select[name$='Sex']").each(function (index,item) {
+        //    if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+        //        Utils.alert("第"+(index+1)+"行请选择性别！");
+        //        $(this).focus().select();
+        //        returnvalue = false;
+        //        return false;
+        //    }
+        //});
+        if (!returnvalue) {
+            return returnvalue;
+        }
+
+        $("#tbTravellers").find("select[name$='PassType']").each(function (index, item) {
+            if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+                Utils.alert("第" + (index + 1) + "行请选择证件类型！");
+                $(this).focus().select();
+                returnvalue = false;
+                return false;
+            }
+        });
+        if (!returnvalue) {
+            return returnvalue;
+        }
+
+        //$("#tbTravellers").find("input[name$='PassNo']").each(function (index, item) {
+        //    if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+        //        Utils.alert("第" + (index + 1) + "行证件号码不能为空！");
+        //        $(this).focus().select();
+        //        returnvalue = false;
+        //        return false;
+        //    }
+        //});
+        //if (!returnvalue) {
+        //    return returnvalue;
+        //}
+
+        //$("#tbTravellers").find("input[name$='DateOfExpiry']").each(function (index, item) {
+        //    if (Utils.Trim($(this).val()) == "" && touristName[index] != "") {
+        //        Utils.alert("第" + (index + 1) + "行证件有效期不能为空！");
+        //        // $(this).focus().select();
+        //        returnvalue = false;
+        //        return false;
+        //    }
+        //});
+        //if (!returnvalue) {
+        //    return returnvalue;
+        //}
+
+        var OutDate = new Date('@Model.Order.OutDate.AddDays(Model.LineModel.TravelDays)');
+        $("#tbTravellers").find("input[name$='DateOfExpiry']").each(function (index, item) {
+            if (touristName[index] != "") {
+                var date2 = new Date($(this).val());
+                var d = ((date2 - OutDate) / (1000 * 60 * 60 * 24))
+                if (d < 180) {
+                    Utils.alert("第" + (index + 1) + "行证件有效期应大于【团返回日期】+180天");
+                    returnvalue = false;
+                    return false;
+                }
+            }
+        });
+
+        if (!returnvalue) {
+            return returnvalue;
+        }
+
+        return true;
+    }
+
+    // 添加游客
+    function AddTravellersHtml() {
+        var model = new Object();
+        var trafficType = '@Model.LineModel.TrafficType';
+        if ($("#trNodata").length > 0) {
+            $("#trNodata").remove();
+        }
+
+        var IsEditPric = ($("#IsEditPric").val() == "False"? false:true) ;
+        var selectHtml = "";
+        var i = $("#tbTravellers tr[name='travellerTr']").length; // 游客信息的索引
+        var html = "<tr name=\"newline\">";
+
+        if (trafficType != '1') {
+            html += " <td align=\"left\"><input type=\"text\" name=\"Travellers2[" + i + "].Name\" class=\"text50\" value=\"游客\" /></td>"; //姓名
+            html += SexHtml(i);  //性别
+            html += " <td align=\"left\"><input type=\"text\" name=\"Travellers2[" + i + "].PinYin\" class=\"text70\" value=\"You Ke\" /></td>"; //英文名
+            html += " <td align=\"left\"><input type=\"text\" name=\"Travellers2[" + i + "].DateOfBirth\"  class=\"Wdate text100\" onfocus=\"WdatePicker({isShowClear:false,readOnly:true})\"> </td>";//出生日期
+            html += " <td align=\"left\"><input type=\"text\" value=\"\" class=\"text70\" name=\"Travellers2[" + i + "].PlaceOfBirth\">  </td>";//出生地
+            html += GetPassportTypeHtml(i);  //证件类型
+            html += " <td align=\"left\"><input type=\"text\" name=\"Travellers2[" + i + "].PassNo\" class=\"text70\"> </td>"; //证件号
+            html += " <td align=\"left\"><input type=\"text\" name=\"Travellers2[" + i + "].DateOfIssue\" value=\"\" class=\"Wdate text100\" onfocus=\"WdatePicker({isShowClear:false,readOnly:true})\"> </td>";//签发时间
+            html += " <td align=\"left\"><input type=\"text\" class=\"text70\" name=\"Travellers2[" + i + "].PlaceOfIssue\">";//签发地
+            html += " <td align=\"left\"><input type=\"text\" name=\"Travellers2[" + i + "].DateOfExpiry\" class=\"Wdate text100\" onfocus=\"WdatePicker({isShowClear:false,readOnly:true})\"> </td>";//证件有效期
+            html += " <td align=\"left\"><input type=\"text\" class=\"text100\" name=\"Travellers2[" + i + "].Phone\" /></td>"; //联系电话
+        } else {
+            html += " <td align=\"center\"><input type=\"text\" name=\"Travellers2[" + i + "].Name\" class=\"text150\" value=\"游客\" /></td>"; //姓名
+            html += " <td align=\"left\"><input type=\"text\" class=\"text100\" name=\"Travellers2[" + i + "].Phone\" /></td>"; //联系电话
+            html += "<td align=\"center\"><input type=\"text\" class=\"text50\" name=\"Travellers2["+i+"].SeatNum\"></td>";
+        }
+
+        html += " <td align=\"left\" name=\"gpOtherPrice\">"; //报价类型
+        selectHtml = " <select name=\"Travellers2[" + i + "].PriceId\" class=\"text150\" onchange=\"PriceTypeChange(this)\">" + $("#optionStr").html() + "</select> ";
+
+        var select = $(selectHtml).find("option:selected");
+        if (select != null && select != undefined) {
+            model.Price = Number($(select).attr("price"));
+            model.TeJiaFanLi = Number($(select).attr("tejia"));
+        }
+        html += selectHtml;
+        html += "<input type=\"hidden\" value=\"@Model.TourPlan.ZiFei\" name=\"Travellers2[" + i + "].ZiFei\" />";
+        html += "<input type=\"hidden\" value=\"@Model.TourPlan.SingleRoom\" name=\"Travellers2[" + i + "].SingleRoom\" />";
+        html += "<input type=\"hidden\" value=\"" + model.TeJiaFanLi + "\" name=\"Travellers2[" + i + "].TeJiaFanLi\" />";
+        html += "<input type=\"hidden\" value=\"@Model.TourPlan.Tax\" name=\"Travellers2[" + i + "].Tax\" />";
+        html += "<input type=\"hidden\" value=\"@Model.TourPlan.VisaPrice\" name=\"Travellers2[" + i + "].VisaPrice\" />  ";
+
+        if (IsEditPric) {
+            html += "</td>";
+            html += " <td align=\"left\" name=\"gpOtherPrice\"><input type=\"text\" class=\"text50 fanli\" name=\"Travellers2[" + i + "].FanLi\" onkeypress=\"InputLimitMoney();\"></td >";
+            if (trafficType != '1') {
+                html += " <td align=\"center\"><input type=\"checkbox\" name=\"chkTax\" /> <label>@Model.TourPlan.Tax</label></td>";                //税
+                html += " <td align=\"center\"><input type=\"checkbox\" name=\"chkVisaPrice\" /> <label>@Model.TourPlan.VisaPrice</label></td>";    //签证费用
+            }
+            html += " <td align=\"center\"><input type=\"checkbox\" name=\"chkZiFei\" /> <label>@Model.TourPlan.ZiFei</label></td>";            //保证自费
+            html += " <td align=\"center\"><input type=\"checkbox\" name=\"chkSingleRoom\" /> <label>@Model.TourPlan.SingleRoom</label></td>";  //房差
+            if (trafficType != '1') {
+                html += " <td align=\"center\"></td>";
+            }
+            html += " <td align=\"center\" name=\"YsPrice\">";
+            html += "<input type=\"text\" class=\"text50\" value=\"" + (model.Price - model.TeJiaFanLi) + "\" data-cancel=\"false\" name=\"Travellers2[" + i + "].YsPrice\" onblur=\"SetYsPrice(this);\" />"; // 客人应收款
+        } else {
+            html += "<input type=\"hidden\" class=\"fanli\" name=\"Travellers2[" + i + "].FanLi\"> ";
+            html += "<input type=\"hidden\" class=\"text50\" value=\"" + (model.Price - model.TeJiaFanLi) + "\" data-cancel=\"false\" name=\"Travellers2[" + i + "].YsPrice\" />"; // 客人应收款
+            html += "</td>";
+            html += " <td align=\"center\">0.00 </td >";
+            html += " <td align=\"center\" name=\"YsPrice\">" + (model.Price - model.TeJiaFanLi);
+        }
+        html += " </td><td align=\"center\"></td>";
+        html += "</tr>";
+
+        return html;
+    }
+
+    // 生成证件类型html
+    function GetPassportTypeHtml(i) {
+        var html = "<td align=\"left\"><select class=\"txt_input\"  name=\"Travellers2[" + i + "].PassType\">";
+        var linescope = $("#LineModel_LineType").val();
+        if (linescope == "3") {
+            html += "<option value=\"1\">身份证</option>";
+            html += "<option value=\"2\">护照</option>";
+            html += "<option value=\"3\" selected=\"selected\">港澳通行证</option>";
+        } else if (linescope == "4") {
+            html += "<option value=\"1\">身份证</option>";
+            html += "<option value=\"2\" selected=\"selected\">护照</option>";
+            html += "<option value=\"3\">港澳通行证</option>";
+        }  else {
+            html += "<option value=\"1\" selected=\"selected\">身份证</option>";
+            html += "<option value=\"2\">护照</option>";
+            html += "<option value=\"3\">港澳通行证</option>";
+        }
+
+        html += "<option value=\"9\">其他</option>";
+        html += "</select></td>";
+        return html;
+    }
+
+    //性别
+    function SexHtml(i) {
+        var html = "<td align=\"left\"><select class=\"text70\" name=\"Travellers2[" + i + "].Sex\" ";
+        html += "<option value=\"1\">男</option>";
+        html += "<option value=\"2\">女</option>";
+        //html += "<option value=\"3\">其他</option>";
+        html += "</select></td>";
+        return html;
+    }
+</script>
+
+@if (Model.Order.SalerCode == GlobalContext.Current.UserInfo.Code)
+{
+    <script type="text/javascript">
+
+    $(function () {
+
+        //Initialize Select2 Elements
+        $('#BookingCustomer').select2({ language: "zh-CN"})
+
+        $('#BookingCustomer').on("select2:select", function (evt) {
+            //console.log(evt.params.data);
+            var code = evt.params.data.id;
+            var name = evt.params.data.text;
+            if (code != "") {
+                $("#BookingCustomerName").val(name);
+                $("#BookingName").val("1");
+                $("#BookingName").change();
+
+                // 获取联系人列表
+                if ($("#ContactCode") != null && $("#ContactCode") != undefined) {
+                    // 获得客户折扣
+                    SettlePolicy(code, '@Model.Order.Line.ArriveDest', true);
+                }
+            }
+        });
+
+        // 付款单位修改
+        $("#BookingName").change(function () {
+            console.log("trigger BookingName change ");
+            var selectVal = $(this).val();
+            if (selectVal == "1") {
+                $("#SettleCustomer").empty();
+                var BookingName = $("#BookingCustomer").val();
+                var text = $("#BookingCustomerName").val();
+                $("#SettleCustomer").append("<option selected='selected' value='" + BookingName + "'>" + text + "</option>");
+
+                // 取得父客户折扣
+                SettlePolicy(BookingName, '@Model.Order.Line.ArriveDest', false);
+            }
+            else if (selectVal == "2") {
+                //平台
+                $("#SettleCustomer").empty();
+                $.ajax({
+                    type: 'post',
+                    url: '@Url.Action("GetPinCompany", "Customer")',
+                    async:false,
+                    success: function (data) {
+                        $("#SettleCustomer").append("<option value=''></option>");
+                        $(data).each(function (index,item) {
+                            if (@Model.Order.SettlePlatForm == 2 && item.Code=="@Model.Order.SettleCustomer") {
+                                $("#SettleCustomer").append("<option selected='selected' value='" + item.Code + "'>" + item.Name + "</option>");
+                            } else {
+                                $("#SettleCustomer").append("<option value='" + item.Code + "'>" + item.Name + "</option>");
+                            }
+                        });
+                        $("#SettleCustomer").change();
+                    }
+                });
+            } else if (selectVal == "3") {
+                //父公司
+                $("#SettleCustomer").empty();
+                $("#SettleCustomer").append("<option value=''></option>");
+                $.ajax({
+                    type: 'post',
+                    url: '@Url.Action("GetParentCompany", "Online")',
+                    data: { custCode: $("#BookingCustomer").val() },
+                    success: function (data) {
+                        if (data!=null) {
+                            $("#SettleCustomer").append("<option selected='selected' value='" + data.ParentCode + "'>" + data.ParentName + "</option>");
+
+                            // 取得父客户折扣
+                            SettlePolicy(data.ParentCode, '@Model.Order.Line.ArriveDest', false);
+                        }
+                    }
+                });
+
+            }else {
+                $("#SettleCustomer").empty();
+            }
+        });
+
+        //
+        $("#BookingName").val("@Model.Order.SettlePlatForm");
+        $("#BookingName").change();
+    });
+
+    // 结算平台修改
+    $("#SettleCustomer").change(function () {
+        console.log("trigger SettleCustomer change ");
+
+        var selectVal = $(this).val();
+        if (selectVal != '') {
+            // 取得平台折扣
+            SettlePolicy(selectVal, '@Model.Order.Line.ArriveDest',false);
+        }
+    });
+
+    $("#ContactCode").change(function(){
+        var option = $("#ContactCode").find("option:selected");
+        $("#ManagerPhone").val($(option).attr("Phone"));
+        $("#Order_Managers").val($("#ContactCode").find("option:selected").text());
+    });
+    </script>
+}
+else
+{
+    <script type="text/javascript">
+
+        $(function () {
+            var selectVal = $("#SettleCustomer").val();
+            if (selectVal != '') {
+                // 取得平台折扣
+                SettlePolicy(selectVal, '@Model.Order.Line.ArriveDest',false);
+            }
+        });
+    </script>
+}
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#addChildOrder").click(function () {
+            layer.open({ type: 2, title: '添加子订单', maxmin: true, shadeClose: false, area: ['900px', '450px'], content: '@Url.Action("AddChildOrder", new { Id=0,LineId=Model.Order.LineId,OrderCode=Model.Order.OrderCode,teamCode=Model.LineModel.TeamID })' });
+        });
+
+    });
+
+    function ReloadChildOrders(){
+        $.ajax({
+            url:'@Url.Action("UcChildOrer")',
+            data:{orderCode:@Model.Order.OrderCode},
+            success:function(data){
+                $("#divChildOrder").empty();
+                $("#divChildOrder").append(data);
+
+                SetYsPrice(null);
+            }
+        })
+    }
+
+    function editChildOrder(Id) {
+        var url="/Order/AddChildOrder/?Id="+Id+"&OrderCode=@Model.Order.OrderCode&lineId=@Model.Order.LineId&teamcode=@Model.Order.Line.TeamID" ;
+        layer.open({ type: 2, title: '编辑子订单', maxmin: true, shadeClose: false, area: ['900px', '450px'], content: url });
+    }
+
+    function CancelChidOrder(id) {
+        if (!confirm("确定取消此订单？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("CancelChidOrder")',
+            data: { id: id, orderCode:'@Model.Order.OrderCode' },
+            type: 'post',
+            success: function () {
+                window.location.reload();
+            }
+        });
+    }
+
+    function RecoverChidOrder(id) {
+        if (!confirm("确定恢复此订单？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("RecoverChidOrder")',
+            data: { id: id, orderCode:'@Model.Order.OrderCode' },
+            type: 'post',
+            success: function () {
+                window.location.reload();
+            }
+        });
+    }
+</script>

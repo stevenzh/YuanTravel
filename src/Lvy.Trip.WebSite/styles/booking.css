@@ -1,0 +1,94 @@
+﻿@charset "utf-8";
+/* Online/BusBooking.cshtml  Online/LBooking.cshtml TktBooking/Booking.cshtml TktBooking/Edit/EditOrder.cshtml */
+.now_position { color: #BABABA; font-size: 14px; text-indent: 0.5em; float: left; width: 100%; }
+    .now_position span { float: left; }
+        .now_position span.sport { float: right; }
+
+
+.scenic_info { width: 1184px; border: 1px solid #CFDEF3; margin-bottom: 10px; font-size: 14px; }
+    .scenic_info p { color: #369DEA; font-weight: bold; font-size: 14px; background: #FFF; height: 28px; /*line-height:28px;*/ }
+    .scenic_info b { text-indent: 1.2em; float: left; padding-top: 3px; }
+    .scenic_info span { /*padding-top:5px;*/ float: left; margin-left: 5px; display: inline; }
+        .scenic_info span.tj { width: 32px; height: 15px; font-size: 12px; color: #fff; font-weight: normal; text-indent: 6px; line-height: 15px; *line-height: 13px; _line-height: 17px; margin-top: 5px; overflow: hidden; }
+        .scenic_info span.gq { width: 33px; height: 15px; font-size: 12px; color: #fff; font-weight: normal; text-indent: 4px; line-height: 15px; *line-height: 13px; _line-height: 17px; margin-top: 5px; overflow: hidden; }
+        .scenic_info span.maisong { width: 57px; height: 15px; font-size: 12px; color: #fff; font-weight: normal; text-indent: 6px; line-height: 15px; *line-height: 13px; _line-height: 17px; margin-top: 5px; overflow: hidden; }
+        .scenic_info span.pl { width: 33px; height: 15px; font-size: 12px; color: #fff; font-weight: normal; text-indent: 6px; line-height: 15px; *line-height: 13px; _line-height: 17px; margin-top: 5px; overflow: hidden; }
+
+.info_con { height: 100px; border-top: 1px solid #37A9E7; font-size: 14px; padding: 20px; }
+.title_b { color: #0F598A; }
+.info_con_money { border-top: 1px solid #37A9E7; padding: 6px; }
+    .info_con_money table { text-indent: 1em; border: 1px #F0F0F2 solid; border-bottom: none; }
+        .info_con_money table td { border-bottom: 1px dotted #CCCCCC; }
+
+tr.td_noborder td { border: none; }
+.bac_money_table { height: 4px; background: url(../images/bac_11.png); font-size: 1px; overflow: hidden; }
+.total_money { color: #000; font-size: 16px; }
+    .total_money font { color: #FF8F27; font-size: 26px; margin: 0px 10px; }
+
+
+/*mingdan*/
+.md_left { width: 274px; border: 1px solid #CFDEF3; margin-bottom: 10px; }
+.md_left_box { float: left; }
+.md_left_mem { padding: 6px; }
+.md_right { width: 886px; border: 1px solid #CFDEF3; float: right; margin-left: 22px; display: inline; padding-bottom: 10px; overflow: hidden; }
+.md_content { border: 1px solid #CFDEF3; margin-left: 22px; margin: auto; padding-bottom: 10px; }
+.mingdan { font-size: 14px; }
+    .mingdan p { color: #369DEA; font-weight: bold; font-size: 14px; border-top: 1px solid #fff; border-bottom: 1px solid #fff; background: #E4F7FE; height: 28px; /*line-height:28px;*/ }
+    .mingdan b { text-indent: 1.2em; float: left; padding-top: 3px; }
+.mem_list { border-top: 2px solid #37A9E7; padding-top: 15px; padding-left: 10px; padding-right: 10px; }
+
+.txt_input { border: 1px solid #CCCCCC; height: 23px; background: #FCFCFC; }
+
+.mem_num_input { width: 80px; border: 1px solid #CCCCCC; height: 23px; background: #FCFCFC; text-align: center; }
+
+.post_table { border-top: 1px solid #CFE0F4; background: #F5F5F5; margin-top: 10px; }
+    .post_table table { border-top: 1px solid #fff; font-size: 14px; }
+        .post_table table td { height: 30px; padding-bottom: 5px; }
+.post_table_input { border: 1px solid #CCCCCC; height: 23px; background: #FCFCFC; margin-left: 1.2em; }
+.post_button { width: 91px; height: 31px; background: #5BB9EC; color: #FFF; border: none; cursor: pointer; }
+.post_button_hover { width: 91px; height: 31px; background: #5BB9EC; color: #FFF; border: none; cursor: pointer; }
+
+.some_tips { color: #38A8E7; margin-left: 20px; }
+    .some_tips p { height: auto; }
+    .some_tips br { height: auto; }
+
+.md_left_mem table td { cursor: pointer; width: 45px; font-size: 12px; text-indent: 3px; }
+    .md_left_mem table td.noborder { border: none; cursor: default; }
+    .md_left_mem table td.gray { background: url(../images/men_tips.png) no-repeat right top #EEEEEE; height: 17px; }
+    .md_left_mem table td.red { background: url(../images/men_tips.png) no-repeat right -19px #FCF8DB; height: 17px; }
+    .md_left_mem table td.blue { background: url(../images/men_tips.png) no-repeat right -38px #DBEDFB; height: 17px; }
+    .md_left_mem table td.org { background: url(../images/men_tips.png) no-repeat right bottom #FCF8DB; height: 17px; }
+
+.zuowei_explain { float: left; font-size: 12px; }
+    .zuowei_explain td { text-indent: 0.5em; }
+    .zuowei_explain .gray { background: url(../images/men_tips.png) no-repeat right top #EEEEEE; height: 17px; border: 1px solid #CDCDCD; cursor: default; width: 45px; font-size: 1px; overflow: hidden; }
+    .zuowei_explain .red { background: url(../images/men_tips.png) no-repeat right -19px #FCF8DB; height: 17px; border: 1px solid #CDCDCD; cursor: default; width: 45px; font-size: 1px; overflow: hidden; }
+    .zuowei_explain .blue { background: url(../images/men_tips.png) no-repeat right bottom #DBEDFB; height: 17px; border: 1px solid #CDCDCD; cursor: default; width: 45px; font-size: 1px; overflow: hidden; }
+/*mingdan*/
+
+/*div select*/
+.select_div_tr div { float: left; }
+
+.font_1 { height: 30px; line-height: 30px; }
+
+.select_div_time { width: 174px; height: 28px; border: 1px solid #CCCCCC; cursor: pointer; }
+.select_input_time { border-right: 1px solid #ccc; height: 28px; width: 146px; overflow: hidden; line-height: 28px; }
+.select_div_time_1 { width: 174px; height: 28px; border: 1px solid #5BB9EC; cursor: pointer; }
+.select_input_time_1 { border-right: 1px solid #5BB9EC; height: 28px; width: 146px; overflow: hidden; line-height: 28px; }
+.select_input_time input { border: none; border: 0px; cursor: pointer; height: 26px; }
+.select_option_time { display: none; position: absolute; background: blue; height: 200px; width: 174px; border: 1px solid #5BB9EC; overflow: auto; margin-left: 70px; *margin-left: -176px; _margin-left: -176px; margin-top: 30px; }
+    .select_option_time p { background: #fff; font-size: 14px; color: #000; font-weight: normal; cursor: default; }
+        .select_option_time p.option_bac { background: #00BFFB; color: #fff; }
+
+
+
+.select_div_address { width: 330px; height: 28px; border: 1px solid #ccc; cursor: pointer; }
+.select_input_address { border-right: 1px solid #ccc; height: 28px; width: 302px; overflow: hidden; line-height: 28px; }
+.select_div_address_1 { width: 330px; height: 28px; border: 1px solid #5BB9EC; cursor: pointer; }
+.select_input_address_1 { border-right: 1px solid #5BB9EC; height: 28px; width: 302px; overflow: hidden; line-height: 28px; }
+.select_input_address input { border: none; border: 0px; cursor: pointer; height: 26px; }
+.select_option_address { display: none; position: absolute; background: white; min-width: 330px; border: 1px solid #5BB9EC; overflow: auto; margin-left: 70px; *margin-left: -332px; _margin-left: -332px; margin-top: 30px; min-height: 150px; _height: expression((document.documentElement.clientHeight||document.body.clientHeight)<150?"150px":""); overflow: hidden; }
+    .select_option_address p { background: #fff; font-size: 14px; color: #000; font-weight: normal; cursor: default; }
+        .select_option_address p.option_bac { min-width: 330px; background: #00BFFB; color: #fff; }
+
+/*div select*/

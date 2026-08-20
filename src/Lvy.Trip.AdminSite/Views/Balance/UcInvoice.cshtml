@@ -1,0 +1,48 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+<div class="card-header">
+    <h4 class="card-title"><i class="ion ion-clipboard mr-1"></i>开票记录</h4>
+    <div class="card-tools">
+        <button id="btnAddInvoice" type="button" class="btn btn-success"><i class="fa fa-plus"></i> 填写发票记录</button>
+    </div>
+</div>
+<div class="card-body">
+    <table id="tbTrallers" class="edittbl" style="width:100%;">
+        <thead>
+            <tr>
+                <th align="center" style="width:100px;">编号</th>
+                <th align="center">客户名称</th>
+                <th align="center">项目名称</th>
+                <th align="center">开票金额</th>
+                <th align="center">出纳</th>
+                <th align="center">状态</th>
+                <th align="center">开票日期</th>
+                <th align="center" style="width:100px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Invoices)
+            {
+                <tr>
+                    <td align="center">@item.Id</td>
+                    <td align="center">@item.CustomerName</td>
+                    <td align="center">@item.ServiceItems</td>
+                    <td align="center">@item.Amount</td>
+                    <td align="center">@item.CheckedBy</td>
+                    <td align="center">@(item.State== 0?"初始":"已开具")</td>
+                    <td align="center">@(item.CreatedTime.ToString("yyyy-MM-dd"))</td>
+                    <td align="center">
+                        @if (item.State < 1)
+                        {
+                            <button onclick="invoiceDetail('@item.Id','@Model.Balance.MasterOrderCode')" type="button" class="btn btn-sm btn-info"><i class="fa fa-pencil-alt"></i> 编辑</button>
+                        }
+                        else
+                        {
+                            <button onclick="invoiceDetail('@item.Id','@Model.Balance.MasterOrderCode')" type="button" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i> 详情</button>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

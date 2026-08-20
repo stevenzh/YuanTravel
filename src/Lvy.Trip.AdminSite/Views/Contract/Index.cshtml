@@ -1,0 +1,70 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Contract.ConditionVModel
+@{
+    ViewBag.Title = "合同列表查询";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+
+<form id="theForm" method="POST" action="@Url.Action("")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                @ViewBag.Title
+            </div>
+
+            <table class="sotable" align="center">
+                <tr>
+                    <td width="80px">合同编号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.contractNumber, new { @Class = "text150", @id = "contractNumber" })
+                    </td>
+                    <td width="80px">订单号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.orderCode, new { @Class = "text150" })
+                    </td>
+                    <td width="80px">线路名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.routeName, new { @Class = "text150", @id = "routeName" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="6">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="btnReset" name="" type="button" value="清空" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="xbox clear">
+        <div id="divContractSearch">
+            @Html.Partial("UCSearchContract", Model)
+        </div>
+        @*隐藏域*@
+        @Html.HiddenFor(a => a.orderCode, new { id = "orderCode" })
+    </div>
+</form>
+
+
+
+<script type="text/javascript">
+    $(function () {
+
+        //搜索
+        $("#btnSearch").click(function () {
+            pageselectCallback(0);
+        });
+
+        //重置
+        $("#btnReset").click(function () {
+            $(".sotable td input[type='text']").val("");
+        });
+
+    });
+
+</script>
+

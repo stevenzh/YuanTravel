@@ -1,0 +1,127 @@
+﻿@model Lvy.VModels.Base.EditBusPointVModel
+@using Lvy.Models
+@{ 
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "添加上车点";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+@section AdditionalResources
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="@CDNServerUrl/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <script src="@CDNServerUrl/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+}
+
+<section class="content">
+    <form id="theForm">
+        <div class="form-group row">
+            <label class="col-3">
+                <span class="point">*</span>上车地点：
+            </label>
+            <div class="col-9">
+                @Html.TextBoxFor(model => model.BusPoint.BusPoint, new { id = "BusPoint", @class = "form-control form-control-sm", @maxlength = "100" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-3">
+                <span class="point">*</span>城市：
+            </label>
+            <div class="col-9">
+                @Html.DropDownListFor(m => m.BusPoint.OutCity, ViewData["CityList"] as List<SelectListItem>, new { @class = "form-control form-control-sm" } )
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-3">
+                <span class="point">*</span>接送时间：
+            </label>
+            <div class="col-9 input-group date" id="timepicker" data-target-input="nearest">
+                <input type="text" id="JieSongTime" name="BusPoint.JieSongTime" class="form-control form-control-sm datetimepicker-input" data-target="#timepicker" />
+                <div class="input-group-append" data-target="#timepicker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="far fa-clock"></i></div>
+                </div>
+            </div>
+            <!-- /.input group -->
+        </div>
+        <div class="form-group row">
+            <label class="col-3">
+                <span class="point">*</span>接送类型：
+            </label>
+            <div class="col-9">
+                @Html.DropDownListFor(p => p.BusPoint.JsType, Model.JsTypeList.ToSelectListFor(Model.BusPoint.JsType.ToString()), new { @class = "form-control form-control-sm" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-3">
+                <span class="point">*</span>组别：
+            </label>
+            <div class="col-9">
+                @Html.CheckboxGroup("GroupIds", ViewBag.GroupList as IEnumerable<KeyValueBean>, Model.BusPoint.GroupId == null ? null : Model.BusPoint.GroupId.Split('|'))
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input class="btn btn-success" id="submitBtn" type="button" value="保存" />
+            </div>
+        </div>
+    </form>
+</section>
+<script type="text/javascript">
+    $(function () {
+        //Timepicker
+        $('#timepicker').datetimepicker({
+            format: 'LT'
+        });
+
+
+        // 提交
+        $("#submitBtn").click(function () {
+
+            var $busPoint = $('#BusPoint');
+            if ($busPoint.val().length == 0) {
+                Utils.alert('请输入上车点。');
+                $busPoint.focus().select();
+                return false;
+            }
+
+            var $JieSongTime = $('#JieSongTime');
+            if ($JieSongTime.val().length == 0) {
+                Utils.alert('请输入发车时间。');
+                $JieSongTime.focus().select();
+                return false;
+            }
+
+            var $jsType = $('select[name="BusPoint.JsType"]');
+            if ($jsType.val().length == 0) {
+                Utils.alert("接送类型不能为空！");
+                $jsType.focus().select();;
+                return false;
+            }
+
+            var $checkedGroup = $(':checkbox[name="GroupIds"]:checked');
+            if ($checkedGroup.length <= 0) {
+                Utils.alert('请选择组别。');
+                $(':checkbox[name="GroupIds"]').first().focus().select();
+                return false;
+            }
+
+            var load_iii = Utils.layerLoad();
+            var params = $('#theForm').formSerialize();
+            $.post('@Url.Action("CreateBusPoint")', params, function (data) {
+                if (data.Code == "1") {
+                    parent.ReloadBusPoint();
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                }
+
+                Utils.layerClose(load_iii);
+            });
+
+        });
+
+    });
+
+</script>

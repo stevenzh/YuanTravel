@@ -1,0 +1,127 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+<div class="btnlist">
+    <div class="fr">
+
+        <input class="btn btn1" id="printBtn" type="button" value="打 印" style="margin: 0px; width: 80px;" />
+
+    </div>
+
+</div>
+<style>
+    .listtbl tr td { text-align: center; }
+</style>
+<table class="listtbl" width="100%">
+    <thead>
+        <tr>
+            <td style="text-align: center;">选择</td>
+            <td style="text-align: center;">团号</td>
+            <td style="text-align: center;">团名称</td>
+            <td style="text-align: center;">线路名称</td>
+            <td style="text-align: center;">出发日期</td>
+            <td style="text-align: center;">计划</td>
+            <td style="text-align: center;">推荐<br />类型</td>
+            <td style="text-align: center;">团队<br />性质</td>
+            <td style="text-align: center;">出发-目的地</td>
+            <td style="text-align: center;">截止日</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TourList.Items)
+        {
+            <tr>
+                <td><input type="checkbox" name="tourChecked" id="tourChecked@(item.TourId)" value="@item.TourId" /></td>
+                <td>
+                    @item.TourNo
+                </td>
+                <td>
+                    @item.LineName
+                    @*@Html.ActionLink(item.LineName.TrimWithElipsis(20), "TourRouteDetail", "Online", new { tourId = item.TourId }, new { title = item.LineName, target = "_blank" })*@
+                </td>
+                <td>
+                    @item.LineName
+                </td>
+                <td style="text-align: center;">
+                    @item.OutDate.ToDateFormat()
+                </td>
+                <td style="text-align: center;">
+                    @item.PlanQuota
+                </td>
+
+                <td style="text-align: center;">
+                    @item.RecommendType
+                </td>
+                <td style="text-align: center;">
+                    @DictionaryTools.GetEnumValue(Enums.TourTypeEnum, item.TourType.ToString())
+                </td>
+                <td style="text-align: center;">
+                    @item.DepartArrive
+                </td>
+                <td style="text-align: center;">
+                    @item.BookingLastDays.ToString("MM-dd")
+
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+@Html.HiddenFor(m => m.TourList.PageIndex, new { id = "hiddenIndex" })
+@Html.HiddenFor(m => m.TourList.PageSize)
+<div id="divPagination" class="digg">
+</div>
+<script type="text/javascript">
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post(
+	        '@Url.Action("Search")',
+	        params,
+	        function (data) {
+	            $('#TourListContainer').html(data);
+	            hoverChangeStyle();
+	            Utils.layerClose(load_iii);
+	        });
+    }
+    $(function () {
+
+        $("#divPagination").pagination(
+            Number('@Model.TourList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page:(@Model.TourList.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.TourList.PageIndex-1)
+            });
+
+        $("#printBtn").click(function(){
+
+            var chkList= $(".listtbl").find("input[type='checkbox']input[checked='checked']");
+            if (chkList.length==0) {
+
+                Utils.alert("请选择团！");
+                return;
+            }
+            //var params=[];
+            var fm=$("#theForm");
+            for (var i = 0; i < chkList.length; i++) {
+
+                var val=$(chkList[i]).val();
+
+                $(fm).append('<input  type="hidden" name="TourIdsList" value="'+val+'"/>')
+            }
+
+            $(fm).attr("action","@Url.Action("TourListView")");
+            fm.submit();
+
+
+        })
+
+
+    });
+
+
+</script>

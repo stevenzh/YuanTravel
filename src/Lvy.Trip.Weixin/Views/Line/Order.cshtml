@@ -1,0 +1,269 @@
+﻿@model ProductModel
+@using TopWeb.Model
+@using TopWeb.DAL.Model
+@{
+    Layout = null;
+    MemberModel cuser = (MemberModel)HttpContext.Current.Session["CurrentMember"]; //当前用户
+    MemberAddress adr = cuser.AddressList.Where(t => t.IsDefault == 1).FirstOrDefault();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>直接购买商品</title>
+    @Styles.Render("~/Content/adminlte/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <link href="@CDNServerUrl/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/wan-spinner/wan-spinner.css" rel="stylesheet" />
+    <script src="~/Content/wan-spinner/wan-spinner.js"></script>
+    <link href="~/Content/jQuery-faloading/jquery.faloading.css" rel="stylesheet" />
+    <script src="~/Content/jQuery-faloading/jquery.faloading.js"></script>
+    <link href="~/Content/iCheck/all.css" rel="stylesheet" />
+    <script src="~/Content/iCheck/icheck.min.js"></script>
+    <style>
+        .wrapper { padding-bottom: 30px; }
+        .btn-app { border-radius: 0px; margin: 0px; padding: 10px 5px; min-width: 65px; height: 47px; height: 50px; background-color: #fff; border: none; }
+        .product-list-in-box > .item { display: list-item; }
+        .products-list .product-info { margin-left: 0; }
+        .products-list .product-title { margin-left: 60px; }
+        .label { font-size: 14px; }
+    </style>
+</head>
+<body class="skin-blue">
+    @using (Html.BeginForm("OrderSubmit", "Line", FormMethod.Post, new { id="theForm"}))
+    {
+        @Html.Hidden("Price", Model.Price, new { @id = "Price" })
+        @Html.Hidden("NumIid", Model.ProductId)
+        @Html.Hidden("Title", Model.ProductTitle)
+        <div class="wrapper">
+            <div class="content-wrapper">
+                <section class="content">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="box box-widget no-padding">
+                                <div class="box-body box-profile">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-aqua"><img src="@Model.ImageMain" height="90" width="90" style="vertical-align:baseline;" /></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">@Model.ProductTitle</span>
+                                            <span id="pprice" class="info-box-number">￥0</span>
+                                        </div>
+                                    </div>
+
+                                    @if (Model.Items.Count() > 0)
+                                    {
+                                        <strong>选择套餐</strong><br />
+                                        <div>
+                                            @for (int i = 0; i <= Model.Items.Count - 1; i++)
+                                            {
+                                                var item = Model.Items[i];
+                                                <button name="btn_item" onclick="changeItem(this,'@(cuser.Approved == 1 ? item.TradePrice : item.Price)')" type="button" style="margin:3px;" class="btn btn-default">@item.ProductTitle</button>
+                                            }
+                                        </div><br />
+                                    }
+                                    <strong>购买数量</strong><br />
+                                    <div class="form-group wan-spinner wan-spinner-1">
+                                        <a href="javascript:void(0)" class="btn minus">-</a>
+                                        <input id="Num" name="Num" type="text" class="form-control" style="height:34px;" value="1">
+                                        <a href="javascript:void(0)" class="btn plus">+</a>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input name="NeedInvoice" type="checkbox" value="true"> 是否索要发票
+                                                </label>
+                                                <input type="hidden" value="false" name="NeedInvoice" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>发票抬头</label>
+                                        <input type="text" class="form-control" name="InvoiceTitle">
+                                    </div>
+                                    <strong>备注</strong>
+                                    <textarea rows="3" name="Remarks" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="box box-widget box-success">
+                                <div class="box-header">
+                                    <h3 class="box-title">收货人地址</h3>
+                                </div>
+                                <div class="box-body box-profile">
+                                    <div class="label label-info">* 以下地址为签证结果出来后护照的寄回地址</div>
+                                    <div class="form-group">
+                                        <label for="ReceiverName">收货人姓名<span class="required">*</span></label>
+                                        <input type="text" id="ReceiverName" name="ReceiverName" class="form-control" value="@(adr != null? adr.ConsigneeName: "")" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>收货人电话号码<span class="required">*</span></label>
+                                        <input type="text" id="ReceiverPhone" name="ReceiverPhone" class="form-control" value="@(adr != null? adr.ConsigneeMobile: "")" />
+                                    </div>
+
+                                    <strong>收货人地址(含省、市详细地址)<span class="required">*</span></strong>
+                                    <input type="text" id="ReceiverAddress" name="ReceiverAddress" class="form-control" value="@(adr != null? adr.ConsigneeAddress: "")" />
+                                </div>
+                            </div>
+
+                            @if (cuser.WxCardList.Count() > 0)
+                            {
+                                <div class="box box-widget box-success">
+                                    <div class="box-header">
+                                        <h3 class="box-title">我的卡券</h3>
+                                    </div>
+                                    <div class="box-body box-profile" id="card-list">
+                                        @foreach (var card in cuser.WxCardList)
+                                        {
+                                            <label>
+                                                <input type="checkbox" class="minimal" id="@("code_" +card.code)" value="@card.code" data-content="@card.cardInfo.LeastCost" data-bind="@card.cardInfo.ReduceCost">
+                                                @card.cardInfo.Title
+                                            </label>
+                                        }
+                                        <input type="hidden" value="" name="WeixinCardCode" id="WeixinCardCode" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="main-footer " style="position:fixed;bottom:0;width:100%;padding:2px;">
+                <a class="btn btn-app btn-default" href="/Line/List"><i class="fa fa-home"></i>首页</a>
+                <div class="pull-right">
+                    <span style="font-size:20px;">合计：<span id="amount">@String.Format("{0:0}", Model.Price)</span></span>
+                    <input type="hidden" name="Payment" id="Payment" value="0" />
+                    <button id="btn-submit" type="submit" class="btn btn-app bg-maroon"><i class="fa fa-check"></i>提交订单</button>
+                </div>
+            </footer>
+        </div>
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var options = {
+                maxValue: 2000,
+                minValue: 1,
+                step: 1,
+                inputWidth: 100,
+                start: -2,
+                plusClick: function (val) {
+                    //console.log(val);
+                },
+                minusClick: function (val) {
+                    //console.log(val);
+                },
+                exceptionFun: function (val) {
+                    //console.log("excep: " + val);
+                },
+                valueChanged: function (val) {
+                    //console.log('change: ' + val);
+                    ReNum();
+                }
+            }
+            $(".wan-spinner-1").WanSpinner(options);
+
+            ReNum();
+
+            //$("#btn-submit").click(function () {
+            //$("body").faLoading('fa-cog');
+            //setTimeout(function () { $("body").faLoading(false); }, 30000);
+            //});
+            $("#theForm").submit(function () {
+                if (!CheckControls()) {
+                    return false;
+                }
+                $("body").faLoading('fa-cog');
+                setTimeout(function () { $("body").faLoading(false); }, 30000);
+            });
+
+            //iCheck for checkbox and radio inputs
+            $('input[type="checkbox"].minimal').iCheck({
+                checkboxClass: 'icheckbox_minimal-blue'
+            });
+            $('input[type="checkbox"].minimal').on('ifChanged', function (event) {
+                if ($(this).prop('checked') == true) {
+                    var iid = $(this).attr('id');
+                    // 取消其他的选中
+                    $("#card-list input[type='checkbox']").each(function () {
+                        var iiid = $(this).attr('id');
+                        if (iid != iiid)
+                            $(this).iCheck('uncheck');
+                    });
+                } else {
+                    // $(this).iCheck('check');//如果没选择，可以用iCheck美化选择
+                }
+                ReNum();
+            });
+        });
+
+        function changeItem(btn, price) {
+            $(btn).parent().find('button').removeClass("btn-success");
+            $(btn).addClass("btn-success");
+
+            $("#Price").val(price);
+            $("#pprice").html('￥' + price);
+            ReNum();
+        }
+
+        // 重新计算
+        function ReNum() {
+            var al = Number($("#Price").val()) * Number($("#Num").val());
+            $("#WeixinCardCode").val("");
+
+            $("#card-list input[type='checkbox']").each(function () {
+
+                var leastCost = Number($(this).attr("data-content"));
+                var reduceCost = Number($(this).attr("data-bind"));
+
+                if (leastCost > al) {
+                    $(this).iCheck('disable');
+                    $(this).iCheck('uncheck');
+                }
+                else {
+                    $(this).iCheck('enable');
+                }
+
+
+                if ($(this).prop('checked') == true) {
+                    al = al - reduceCost;
+
+                    // 记录保存
+                    var itemname = $(this).attr('id');
+                    $("#WeixinCardCode").val(itemname.substring(5));
+                }
+            });
+
+            $("#amount").html('￥' + al);
+            $("#Payment").val(al);
+        }
+
+        function MyTrim(str) {
+            return str.replace(/(^\s*)|(\s*$)/g, "");
+        };
+
+        //验证用户输入
+        function CheckControls() {
+            if (MyTrim($("#ReceiverName").val()) == "") {
+                Utils.alert("收货人姓名不得为空！");
+                $("#ReceiverName").focus().select();
+                return false;
+            }
+            if (MyTrim($("#ReceiverPhone").val()) == "") {
+                Utils.alert("收货人电话号码不得为空！");
+                $("#ReceiverPhone").focus().select();
+                return false;
+            }
+            if (MyTrim($("#ReceiverAddress").val()) == "") {
+                Utils.alert("收货人地址不得为空！");
+                $("#ReceiverAddress").focus().select();
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

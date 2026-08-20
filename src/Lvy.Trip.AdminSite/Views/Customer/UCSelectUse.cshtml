@@ -1,0 +1,16 @@
+﻿@model Lvy.VModels.Crm.CustomerVModel
+@{
+    ViewBag.Title = "查询客户";
+}
+@section AdditionalResources { }
+<form id="theForm">
+
+    <div id="divUCSelectList">
+        @Html.Partial("UCSelectUseList", Model)
+    </div>
+    <div id="divUCSelectUseShaList">
+        @Html.Partial("UCSelectUseShaList", Model)
+    </div>
+</form>
+
+

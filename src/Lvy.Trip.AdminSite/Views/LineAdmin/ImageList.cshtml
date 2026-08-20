@@ -1,0 +1,88 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+@using Arch.Common
+@{
+    Layout = null;
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+@if (Model.PhotoInfoList.Items != null && Model.PhotoInfoList.Items.Count > 0)
+{
+    <table id="table_ImageList" width="100%" style="font-size: 12px;">
+        @foreach (var photoModel in Model.PhotoInfoList.Items)
+        {
+            var cellNumber = Model.PhotoInfoList.Items.IndexOf(photoModel);
+
+            if (cellNumber % 5 == 0)
+            {
+                Html.Raw("  <tr>");
+            }
+            <td width="20%" valign="top">
+                <img alt="" title='@photoModel.Caption' src='@(picroot+ photoModel.Url)' style="width: 130px; height: 65px; margin: 2px; cursor: pointer;" /><br />
+                <input type="radio" name="radioImage" id="cellNumber@cellNumber" data-url="@photoModel.Url" value='@photoModel.PhotoId' />&nbsp;&nbsp;@photoModel.Caption<span style="white-space: nowrap;">(@photoModel.PhotoWidth px,@photoModel.PhotoHeight px)</span>
+            </td>
+            if ((cellNumber + 1) % 5 == 0)
+            {
+                Html.Raw("  </tr>");
+            }
+        }
+
+        @if (Model.PhotoInfoList.Items.Count % 5 != 0)
+        {
+            int tempCount = 5 - Model.PhotoInfoList.Items.Count % 5;
+            for (var i = 0; i < tempCount; i++)
+            {
+                <td width="20%"></td>
+            }
+            Html.Raw("  </tr>");
+        }
+    </table>
+}
+else
+{
+    <div style="width: 100%; color: Red; text-align: center; font-size: 12px; font-weight: bold;">对不起！没有数据！</div>
+}
+<table style="width: 100%;">
+    <tr>
+        <td style="text-align: center;">
+            <div id="ImagePagging" class="digg" />
+        </td>
+    </tr>
+</table>
+<script type="text/javascript">
+$(function () {
+    //分页控件 begin
+    $("#ImagePagging").pagination(
+        Number('@Model.PhotoInfoList.TotalCount'), {
+            callback: pageselectCallback1,
+            prev_text: '前一页',
+            next_text: '后一页',
+            items_per_page: 10,
+            num_display_entries: 5,
+            num_edge_entries: 2,
+            current_page: imageIndex
+    });
+
+    //确认选择图片
+    $("#table_ImageList input[type='radio']").click(function () {
+        var photoid = $(this).val();
+        var image_url = $(this).attr("data-url");
+        parent.funSelectImageReturn(photoid, image_url);
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        parent.layer.close(index);
+    });
+});
+
+//回调方法
+function pageselectCallback1(page_id, jq) {
+    jQuery.ajaxSetup({ cache: false });
+    imageIndex = page_id;
+    page_id = page_id + 1;
+    var param = {
+        'VisaCountryParentStr': '@Model.CountryCode',
+        'ImagePagedIndex': page_id
+    }
+    $.post('/LineAdmin/SearchImages/', param, function (data) {
+        $('#select_city_img_lists').html(data);
+    });
+}
+
+</script>

@@ -1,0 +1,187 @@
+﻿@model  List<Lvy.Models.ProductDB.TpPriceModel>
+
+<table id="priceList" class="table table-sm">
+    <thead>
+        <tr>
+            <th>报价类型</th>
+            <th>报价说明</th>
+            <th>市场价</th>
+            <th>同业价</th>
+            <th>特价折让</th>
+            <th>结算价</th>
+            @*<th>套餐</th>*@
+            <th>有效</th>
+            <th>标准价</th>
+            @*<th>删除</th>*@
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var priceList = Model;
+            var priceTypes = DictionaryTools.GetEnumsBy(Enums.TpPriceTypeEnum);
+            var optionStr = string.Empty;
+            optionStr = "<option value=\"" + priceTypes[0].Key + "\" checked=\"checked\">" + priceTypes[0].Value + "</option>";
+            for (var i = 1; i < priceTypes.Count; i++)
+            {
+                optionStr += "<option value=\"" + priceTypes[i].Key + "\">" + priceTypes[i].Value + "</option>";
+            }
+        }
+        @for (int i = 0; i < priceList.Count; i++)
+        {
+            <tr row-index="@i">
+                <td>
+                    @Html.DropDownListFor(m => priceList[i].PriceType, priceTypes.ToSelectListFor(priceList[i].PriceType.ToString()), new { @class = "text150", onchange = "javascript:ChangePriceType(this);" })
+                </td>
+                <td>
+                    @Html.HiddenFor(m => priceList[i].Id)
+                    @Html.TextBoxFor(m => priceList[i].PriceRemark, new { @class = "text150" })
+                </td>
+                <td>
+                    @Html.TextBoxFor(m => priceList[i].Price, new { @class = "text70", contentlimit = "number" })
+                </td>
+                <td>
+                    @Html.TextBoxFor(m => priceList[i].SettlePrice, new { @class = "text70", contentlimit = "number" })
+                </td>
+                <td>
+                    @Html.TextBoxFor(m => priceList[i].TeJiaFanLi, new { @class = "text70", contentlimit = "number" })
+                </td>
+                <td>
+                    @Html.TextBoxFor(m => priceList[i].Cost, new { @class = "text70", contentlimit = "number" })
+                </td>
+                @*<td>
+                        @Html.TextBoxFor(m => priceList[i].SuitNum, new { @class = "text50", contentlimit = "number" })
+                    </td>*@
+                <td>
+                    @Html.HiddenFor(m => priceList[i].IsValid)
+                    @if (priceList[i].IsValid == 0)
+                    {
+                        <label>
+                            <input type="checkbox" name="priceList[@i].IsValid" id="priceList[@{ @i }].IsValid" />有效
+                        </label>
+                    }
+                    else
+                    {
+                        <label>
+                            <input type="checkbox" name="priceList[@i].IsValid" id="priceList[@{ @i }].IsValid" checked="checked" />有效
+                        </label>
+                    }
+                </td>
+                <td>
+                    @Html.HiddenFor(m => priceList[i].IsStandard)
+                    @if (priceList[i].IsStandard == 0)
+                    {
+                        <label>
+                            <input type="radio" name="IsStandard" id="priceList[@{@i }].IsStandard" row-index="@i" />标准价
+                        </label>
+                    }
+                    else
+                    {
+                        <label>
+                            <input type="radio" name="IsStandard" id="priceList[@{ @i }].IsStandard" row-index="@i" checked="checked" />标准价
+                        </label>
+                    }
+                </td>
+                @*<td>
+                        @if (priceList[i].IsStandard == 0)
+                        {
+                            <a href="javascript:;" name="deletePrice" class="delete" row-index="@i">删除</a>
+                        }
+                    </td>*@
+            </tr>
+        }
+    </tbody>
+</table>
+
+<span id="priceTypeOptionString" style="display: none;">@optionStr</span>
+<script type="text/javascript">
+    $(function () {
+        PriceIsValidChange();
+        PriceIsStandard();
+        DeletePrice();
+
+        //添加报价
+        $("#addPrice").click(function () {
+            var rowCount = $("#priceList>tbody>tr").length;
+            var optionStr = $('#priceTypeOptionString').text();
+            var rouNumber = rowCount;
+            var newRow = '<tr row-index="' + rouNumber + '" style="text-align: center;">';
+            newRow += '<td><select name="priceList[' + rouNumber + '].PriceType" class="text150" onchange="javascript:ChangePriceType(this);">' + optionStr + '</select></td>';
+            newRow += '<td><input name="priceList[' + rouNumber + '].PriceRemark" type="hidden" value="0"/><input name=priceList[' + rouNumber + '].PriceRemark class="text150" type="text" value=""/></td>';
+            newRow += '<td><input name=priceList[' + rouNumber + '].Price class="text70" type="text" value="0" contentlimit = "number"/></td>';
+            newRow += '<td><input name=priceList[' + rouNumber + '].SettlePrice class="text70" type="text" value="0" contentlimit = "number"/></td>';
+            newRow += '<td><input name=priceList[' + rouNumber + '].TeJiaFanli class="text70" type="text" value="0" contentlimit = "number"/></td>';
+            newRow += '<td><input name=priceList[' + rouNumber + '].Cost class="text70" type="text" value="0" contentlimit = "number"/></td>';
+            //newRow += '<td><input name=priceList[' + rouNumber + '].SuitNum class="text50" type="text" value="1" contentlimit = "number"/></td>';
+            newRow += '<td><input name=priceList[' + rouNumber + '].IsValid type="hidden" value="1"/><label><input type="checkbox" name="priceList[' + rouNumber + '].IsValid" id="priceList[' + rouNumber + '].IsValid" checked="checked" />有效</label></td>';
+            newRow += '<td><input name=priceList[' + rouNumber + '].IsStandard type="hidden" value="0"/><label><input type="radio" name="IsStandard" id="priceList[' + rouNumber + '].IsStandard" row-index="' + rouNumber + '" />标准价</label></td>';
+            //newRow += '<td><a href="javascript:;" name="deletePrice" class="delete" row-index="' + rouNumber + '">删除</a></td>';
+            newRow += "</tr>";
+            $("#priceList>tbody").append(newRow);
+
+            PriceIsValidChange();
+            PriceIsStandard();
+            DeletePrice();
+            //限定输入内容为数字
+            $('form input[contentlimit="number"]').keypress(function () {
+                InputLimitNumber();
+            });
+        });
+
+    });
+
+    function DeletePrice() {
+        $('a[name="deletePrice"]').unbind('click');
+        $('a[name="deletePrice"]').click(function () {
+            var index = Number($(this).attr('row-index'));
+            $('#priceList>tbody>tr[row-index="' + index + '"]').hide();
+            $('input:hidden[name="priceList[' + index + '].Id"]').val('-1');
+        });
+    }
+
+    function ChangePriceType(obj) {
+        var typeName = $(obj).attr("name");     // 价格类型
+        var remarkColumn = typeName.substr(0, typeName.length - 9) + "PriceRemark";   // 价格说明
+
+        var rem = $("input[name='" + remarkColumn + "']");
+        //if ($(rem).val() == "") {
+        var typeValue = $(obj).find("option:selected").text();
+        $(rem).val(typeValue);
+        // }
+    }
+
+    //是否有效
+    function PriceIsValidChange() {
+        $("input[name=PriceIsValid]").bind("change", function () {
+            if ($(this).prop("checked")) {
+                $(this).parent().prev().val(1);
+            }
+            else {
+                $(this).parent().prev().val(0);
+            }
+        });
+    }
+    //是否标准价
+    function PriceIsStandard() {
+        $("input[name=IsStandard]").unbind('change');
+        $("input[name=IsStandard]").bind("change", function () {
+            $("input[name=IsStandard]").each(function () {
+                $(this).parent().prev().val(0);
+            });
+            if ($(this).prop("checked")) {
+                $(this).parent().prev().val(1);
+            }
+            var rowIndex, deleteLink, $lastTd;
+            $('#priceList>tbody>tr').each(function () {
+                rowIndex = $(this).attr('row-index');
+                $lastTd = $(this).children('td').last();
+                if ($lastTd.children('a').length == 0) {
+                    deleteLink = '<a href="javascript:;" name="deletePrice" class="delete" row-index="' + rowIndex + '">删除</a>';
+                    $lastTd.html(deleteLink);
+                    DeletePrice();
+                }
+            });
+            var index = Number($(this).attr('row-index'));
+            $('#priceList>tbody>tr[row-index="' + index + '"]').children().last().children().remove();
+        });
+    }
+</script>

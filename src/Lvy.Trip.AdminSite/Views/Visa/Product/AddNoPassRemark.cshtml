@@ -1,0 +1,52 @@
+﻿@model Lvy.Visa.Models.VisaInformationRemarkModel
+@{
+    Layout = null;
+}
+<div class="pop_box" style="width:280px; position:relative;">
+    <div class="pop_title">
+        <div style="float:left;">备注</div>
+        <div style="float:right; padding:5px;"><a class="close" href="####" onclick="javascript:$('#div_Add_P_Remark').hide();$('#pRemarkTitle').show();"><img src="../../Images/icon_close.gif" title="关闭" /></a></div>
+    </div>
+    <div style="margin-left:10px;margin-right:10px;">
+        @Html.HiddenFor(a => a.InformationCode, new { @id = "hid_p_nopass_pcode" })
+        @Html.HiddenFor(a => a.State, new { @id = "hid_p_nopass_sate" })
+        <table style="width:100%">
+            <tr>
+                <td>@Html.TextAreaFor(a => a.Remarks, new { @id = "txt_p_nopass_remarks", style = "width:255px;height:80px;border:1px #c5c5c5 solid" })</td>
+            </tr>
+            <tr>
+                <td style="text-align:center; padding:5px;">
+                    <input type="button" id="btnSavePRemarks" name="btnSavePRemarks" class="btn_1" value="保存" onclick="funSaveProductRemark()" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" language="javascript">
+    function funSaveProductRemark() {
+        var p_remarks = $("#txt_p_nopass_remarks").val();
+        if (p_remarks == "") {
+            alert("请填写备注！！");
+            $("#txt_p_nopass_remarks").focus();
+            return;
+        }
+
+        var param = {
+            "InformationCode": $("#hid_p_nopass_pcode").val(),
+            "State": $("#hid_p_nopass_sate").val(),
+            "Remarks": $("#txt_p_nopass_remarks").val()
+        };
+        $.post("/Product/SaveProductRemarksNoHistory/", param, function (data) {
+            alert("保存成功！");
+            $("#txt_p_nopass_remarks").val("");
+            $("#txt_p_nopass_remarks").css("border", "1px #c5c5c5 solid");
+            $('#div_Add_P_Remark').hide();
+            $('#pRemarkTitle').show();
+            //更新备注
+            $.post("/Product/SearchProductRemark/", { "InformationCode": $("#hid_p_nopass_pcode").val() }, function (data) {
+                $("#showRemarksDiv").html(data);
+                $("#showRemarksDiv").show();
+            });
+        });
+    }
+</script>

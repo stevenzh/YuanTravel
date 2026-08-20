@@ -1,0 +1,181 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "查询团计划";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>开班计划</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">开班计划</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <form id="theForm" action="">
+                @Html.HiddenFor(m => m.Condition.TourId)
+                <div class="card">
+                    <div class="card-body p-2">
+                        <table id="searchTable" class="table table-borderless table-sm">
+                            <tr>
+                                <td style="width:100px;">产品部门：</td>
+                                <td>
+                                    @Html.DropDownListFor(a => a.Condition.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "form-control form-control-sm" })
+                                </td>
+                                <td style="width:90px;">线路编号：</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.Condition.LineId, new { @class = "form-control form-control-sm" })
+                                </td>
+                                <td style="width:90px;">线路名称：</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.Condition.LineName, new { @class = "form-control form-control-sm" })
+                                </td>
+                                <td>目的地：</td>
+                                <td>
+                                    <select id="mySelect1" name="Condition.ArriveDest" class="form-control form-control-sm ">
+                                        <option></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width:90px;">团号：</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.Condition.TourNo, new { @class = "form-control form-control-sm" })
+                                </td>
+                                <td>出发日期：</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.Condition.OutDateRange, new { @id = "OutDateRange", @class = "form-control form-control-sm" })
+                                </td>
+                                <td width="100" class="label">推荐类型：</td>
+                                <td>
+                                    @Html.HiddenFor(m => m.Condition.RecommendType, new { id = "hiddenRecommendType" })
+                                    @Html.RadioGroup("RecommendType", ViewBag.RecommendType as IEnumerable<KeyValueBean>, Model.Condition.RecommendType.ToString())
+                                </td>
+                                <td>团队性质：</td>
+                                <td>
+                                    @Html.DropDownListFor(m => m.Condition.TourType, DictionaryTools.GetEnumsBy(Enums.TourTypeEnum).ToSelectListFor(Model.Condition.TourType.ToString()), new { @class = "form-control form-control-sm" })
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-default" id="searchBtn" type="button">搜索</button>
+                        <button class="btn btn-default" id="resetBtn" type="button">清空</button>
+                    </div>
+                </div>
+
+                <div class="card ">
+                    <div id="TourListContainer" class="card-body table-responsive p-0">
+                        @Html.Partial("Tour/UCTourList", Model)
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#mySelect1').select2({
+                ajax: {
+                    url: function (params) {
+                        return ApiServerUrl + '/Dest/GetDestSelect2';
+                    },
+                    dataType: 'json',
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                        var arr = data.items
+                        for (item in arr) {
+                            itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                        }
+                        return {
+                            results: itemList,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                //templateResult: formatState
+                allowClear: true
+            });
+
+            $('#OutDateRange').daterangepicker({
+                autoUpdateInput: true,
+                ranges: {
+                    '今天': [moment(), moment()],
+                    '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '本周': [moment().startOf('week'), moment()],
+                    '上周': [moment().subtract(6, 'days'), moment()],
+                    '本月': [moment().startOf('month'), moment().endOf('month')],
+                    '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: "YYYY/MM/DD", //设置显示格式
+                    applyLabel: '确定', //确定按钮文本
+                    cancelLabel: '清空', //取消按钮文本
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    customRangeLabel: "自定义",
+                    firstDay: 1
+                }
+            }, function (start, end) {
+                $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+            });
+            $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+                //do something, like clearing an input
+                $('#OutDateRange').val('');
+            });
+
+
+            $("input:radio[name=RecommendType]").click(function () {
+                var recommendType = $("input:radio[name=RecommendType]:checked").first().val();
+                $("#hiddenRecommendType").val(recommendType);
+            });
+
+            $("#searchBtn").click(function () {
+                pageselectCallback(1);
+            });
+            $("#resetBtn").click(function () {
+                $("#TourSearchContainer").clearForm();
+                $("#searchTable td select").each(function () {
+                    $(this).children('option:first').attr('selected', 'selected');
+                });
+                $("#hiddenArriveDest").val('');
+                $("#hiddenRecommendType").val('-1');
+            });
+
+        });
+    </script>
+
+}

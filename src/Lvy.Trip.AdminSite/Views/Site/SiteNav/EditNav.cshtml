@@ -1,0 +1,123 @@
+﻿@model Lvy.Models.SiteDB.SiteNavModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewData["Title"] = "编辑网站分类";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+@section AdditionalResources
+{
+    <!-- Bootstrap Switch -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" />
+    <script src="@CDNServerUrl/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/SiteNav/Index">网站项目</a> </li>
+                    <li class="breadcrumb-item active">@Model.Name</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+
+<section class="content">
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">模块列表</h3>
+            <div class="card-tools pull-right">
+                
+            </div>
+        </div>
+        <div class="card-body">
+            <form role="form" id="editform" method="post">
+                @Html.HiddenFor(a => a.NavID, new { @id = "navid" })
+                <div class="form-group row">
+                    <label class="control-label col-3">编码</label>
+                    <div class="col-9">
+                        @Html.TextBoxFor(a => a.Code, new { @id = "code", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="control-label col-3">项目名称：</label>
+                    <div class="col-9">
+                        @Html.TextBoxFor(a => a.Name, new { @id = "navname", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="control-label col-3">出发城市：</label>
+                    <div class="col-9">
+                        @Html.DropDownListFor(a => a.OutCity, ViewBag.OutCityEnum as IEnumerable<SelectListItem>, new { @id = "outcity", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="control-label col-3">说明</label>
+                    <div class="col-9">
+                        @Html.TextBoxFor(a => a.Remarks, new { @id = "remarks", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="control-label col-3">是否有效：</label>
+                    <div class="col-9">
+                        @Html.CheckBoxFor(a => a.IsValid, new { @class = "form-control js-switch" })
+                    </div>
+                </div>
+            </form>
+        </div><!-- /.box-body -->
+        <div class="card-footer">
+            <button type="button" onclick="SaveNav()" class="btn btn-success">保存</button>
+            <a class="btn btn-secondary float-right" href="/SiteNav/Index">返回列表</a>
+        </div><!-- /.box-footer-->
+    </div><!-- /.box -->
+</section>
+
+@section PageScripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+
+            $(".js-switch").each(function () {
+                $(this).bootstrapSwitch({ 'state': $(this).prop('checked'), onText: "是", offText: "否" });
+            });
+        });
+
+
+        //保存
+        function SaveNav() {
+            if (ValidData()) {
+                var strop = "";
+                $("#navop option:selected").each(function (i, item) {
+                    strop += $(item).val() + ",";
+                });
+
+                var param = decodeURIComponent($("#editform").formSerialize());
+
+                $.post("/SiteNav/SaveNav/", param, function (data) {
+                    if (data == 0) {
+                        Utils.alert("编码重复！");
+                        $("#code").focus();
+                    } else {
+                        document.location.href = "/SiteNav/Index/";
+                    }
+                });
+            }
+        }
+
+        //验证数据
+        function ValidData() {
+            return true;
+        }
+    </script>
+}

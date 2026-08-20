@@ -1,0 +1,16 @@
+﻿@model List<Lvy.Models.BaseDB.BasePlacePhotoModel>
+
+@foreach (var item in Model)
+{
+    var fullPath = Arch.Common.AppSetting.Get("UploadFileRoot") + item.Path;
+    <div class="col-3">
+        <img src="@fullPath" title="@item.FileName" class="img-fluid" alt="@item.FileName" />
+        <div class="text-center">
+            <strong>@item.FileName</strong>
+            <p>
+                文件大小: @item.FileSize 字节
+                <button type="button" class="btn btn-sm delimg" data-bind="@item.Id">删除</button>
+            </p>
+        </div>
+    </div>
+}

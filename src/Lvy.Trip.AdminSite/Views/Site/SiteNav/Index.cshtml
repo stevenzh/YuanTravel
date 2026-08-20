@@ -1,0 +1,78 @@
+﻿@model Lvy.VModels.Online.NavQModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewData["Title"] = "网站项目管理";
+}
+@section AdditionalResources { }
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">项目列表</h3>
+            <div class="card-tools pull-right">
+                <div class="input-group input-group-sm">
+                    <input type="text" id="inputName" class="form-control float-right" placeholder="名称" />
+                    <div class="input-group-append">
+                        <button id="searchBtn" class="btn btn-default"><i class="fas fa-search"></i> 搜索</button>
+                        <a href="/SiteNav/EditNav/0" class="btn btn-success"><i class="fas fa-plus"></i> 添加</a>
+                        <a href="/SiteNav/Search/0" class="btn btn-primary"><i class="fas fa-sitemap"></i> 结构</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="navListsDiv" class="card-body p-0">
+            @Html.Partial("~/Views/Site/SiteNav/PageList.cshtml", Model)
+        </div> <!-- /.card-body -->
+        <div class="card-footer">
+            <ul id="pagination-demo" class="pagination-sm"></ul>
+        </div>
+    </div><!-- /.card -->
+
+</section>
+
+<script type="text/javascript">
+
+    //查询
+    $("#searchBtn").click(function () {
+        $.post("/SiteNav/PageList", { "Name": $("#inputName").val() }, function (data) {
+            $('#navListsDiv').html(data);
+        });
+    });
+
+    //编辑问题
+    function EditNav(navId) {
+        window.location = "/SiteNav/EditNav/" + navId;
+    }
+
+    //删除问题
+    function DeleteNav(navId) {
+        if (confirm("确定要删除数据吗？")) {
+            $.post("/SiteNav/DeleteNav/", { "ID": navId }, function () {
+                window.location.href = "/SiteNav/Index/";
+            });
+        }
+    }
+</script>
+
+
+
+
+

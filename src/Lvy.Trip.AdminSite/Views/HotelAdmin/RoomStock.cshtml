@@ -1,0 +1,201 @@
+﻿@model Lvy.VModels.Hotel.RoomVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "添加团期";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <link href="~/WebRes/css/calendarchange.css" rel="stylesheet" />
+
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+}
+<style>
+    .fc-toolbar.fc-header-toolbar { font-size: 0.7em; }
+    .fc-toolbar, .fc-toolbar.fc-header-toolbar { padding: 0.2em; }
+    .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number { font-size: 1.2em; }
+</style>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <form id="popupForm">
+                <div class="card-body p-2">
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <div id='calendar'></div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-2">结算价：</label>
+                        <div class="col-2">
+                            @Html.TextBoxFor(m => m.RoomStock.SettlePrice, new { @class = "form-control form-control-sm", contentlimit = "number" })
+                        </div>
+
+                        <label class="col-2">市场价：</label>
+                        <div class="col-2">
+                            @Html.TextBoxFor(m => m.RoomStock.MarketPrice, new { @class = "form-control form-control-sm", contentlimit = "number" })
+                        </div>
+
+                        <label class="col-2">库存数量：</label>
+                        <div class="col-2">
+                            @Html.TextBoxFor(m => m.RoomStock.Quota, new { @class = "form-control form-control-sm", contentlimit = "number" })
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    @Html.HiddenFor(m => m.RoomStock.HotelCode)
+                    @Html.HiddenFor(m => m.RoomStock.RoomID)
+                    <input type="hidden" id="SelectedDays" name="SelectedDays" />
+                    <button type="button" class="btn btn-success" id="submitBtn">保存</button>
+                    <button type="button" class="btn btn-secondary" id="btnClear">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+@section PageScripts
+{
+    <script type="text/javascript">
+
+        var selectdt = Array();
+        var selectEl = Array();
+
+        $(function () {
+
+            //提交
+            $('#submitBtn').bind('click', function () {
+                if (selectdt.length == 0) {
+                    Utils.alert('请选择出发日期！');
+                    return false;
+                } else {
+                    $("#SelectedDays").val(selectdt);
+                }
+
+                //var $plan = $('#Quota');
+                //if (Number($plan.val()) <= 0) {
+                //    Utils.alert('库存须大于零');
+                //    $plan.focus().select();
+                //    return false;
+                //}
+
+                var load_iii = Utils.layerLoad();
+                $('#popupForm').ajaxSubmit({
+                    type: 'post',
+                    url: '@Url.Action("UpdateStock")',
+                    success: function (data) {
+                        if (data.Code == "1") {
+                            console.log('calendar.rerenderEvents');
+                            calendar.refetchEvents();
+                        } else {
+                            Utils.alert(data.Message);
+                        }
+                        Utils.layerClose(load_iii);
+                    },
+                });
+
+                return true;
+            });
+
+            $("#btnClear").click(function () {
+                // 弹出框关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            });
+
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                header: { left: 'prev', center: 'title', right: 'next' },
+                locale: 'zh-cn',
+                height: 370,
+                defaultView: 'dayGridMonth',//默认视图
+                buttonText: { today: '今天', dayGridMonth: '月', dayGridWeek: '周', },
+                //navLinks: true, // can click day/week names to navigate views
+                dateClick: function (info) {
+                    //alert('Clicked on: ' + info.dateStr);
+                    //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+                    //alert('Current view: ' + info.view.type);
+                    var pid = selectdt.indexOf(info.dateStr);
+                    if (pid > -1) {
+                        // change the day's background color just for fun
+                        info.dayEl.style.backgroundColor = 'white';
+                        selectdt.splice(pid, 1);
+                        selectEl.splice(pid, 1);
+                    }
+                    else {
+                        // change the day's background color just for fun
+                        info.dayEl.style.backgroundColor = '#C8DFF3';
+                        selectdt.push(info.dateStr);
+                        selectEl.push(info.dayEl);
+                    }
+                },
+                events: function(info, successCallback, failureCallback){
+                    $.ajax({
+                        type : "post",
+                        url : '/HotelAdmin/GetCalendar/@Model.RoomStock.RoomID',
+                        data: {},
+                        dataType: "json",
+                        success : function(result) {
+                            successCallback(result);
+                        }
+                    });
+                },
+                eventClick: function (info) {
+                    // alert('Event: ' + info.event.title);
+                    // alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+                    // alert('View: ' + info.view.type);
+
+                    // change the border color just for fun
+                    // info.el.style.borderColor = 'red';
+                    $("#RoomStock_SettlePrice").val(info.event.extendedProps.SettlePrice);
+                    $("#RoomStock_MarketPrice").val(info.event.extendedProps.MarketPrice);
+                    $("#RoomStock_Quota").val(info.event.extendedProps.Quota);
+                },
+                customButtons: {
+                    prev: {
+                        text: 'Prev',
+                        click: function () {
+                            selectEl = Array();  // clear Array.
+                            selectdt = selectdt.sort();
+                            calendar.prev();
+                        }
+                    },
+                    next: {
+                        text: 'Next',
+                        click: function () {
+                            selectEl = Array();  // clear Array.
+                            selectdt = selectdt.sort();
+                            calendar.next();
+                        }
+                    },
+                },
+                dayCellDidMount: function (info) {
+                    var item = moment(info.date).format('YYYY-MM-DD');
+                    if (selectdt.indexOf(item) > -1) {
+                        // change the day's background color just for fun
+                        info.el.style.backgroundColor = '#C8DFF3';
+                        selectEl.push(info.el);
+                        console.log("selectEl.length:" + selectEl.length);
+                    }
+                }
+            });
+            calendar.render();
+        });
+
+        function DelCal(item) {
+            var dateStr = $(item).attr("data-cal");
+            var pid = selectdt.indexOf(dateStr);
+            if (pid > -1) {
+                selectdt.splice(pid, 1);
+                selectEl[pid].style.backgroundColor = 'white';
+                selectEl.splice(pid, 1);
+            }
+        }
+    </script>
+}

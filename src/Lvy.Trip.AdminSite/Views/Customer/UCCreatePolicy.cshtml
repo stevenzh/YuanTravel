@@ -1,0 +1,164 @@
+﻿@model Lvy.VModels.Crm.CustomerPolicyVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "添加折让规则";
+    var customerName = DictionaryTools.GetCachedCustomer(Model.PolicyEntity.CustomerCode).Name;
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("AddPolicy")" method="post">
+    <div class="station">
+        @if (Model.PolicyEntity.Id == 0)
+        {
+            @:添加规则
+        }
+        else
+        {
+            @:编辑规则
+        }
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:auto">
+                <tr>
+                    <td class="label">所属商户：</td>
+                    <td>
+                        @customerName
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label"><span class="point">*</span>产品类型：</td>
+                    <td>
+                        @Html.RadioGroup("PolicyEntity.ProductType", ViewBag.BusinessItems as List<KeyValueBean>, Model.PolicyEntity.ProductType)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">目的地：</td>
+                    <td>
+                        @Html.HiddenFor(a => a.PolicyEntity.Id)
+                        @Html.HiddenFor(a => a.PolicyEntity.CustomerCode)
+
+                        @Html.HiddenFor(a => a.PolicyEntity.RegionName)
+                        <select id="mySelect1" name="PolicyEntity.Code" class="form-control " style="width:90%;">
+                            @if (!Model.PolicyEntity.Code.IsNullOrEmpty())
+                            {
+                                <option value="@Model.PolicyEntity.Code">@DictionaryTools.GetDestNameStr(Model.PolicyEntity.Code)</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>折让方式：</td>
+                    <td>
+                        @Html.RadioGroup("PolicyEntity.RebateType", Model.RebateBeans, Model.PolicyEntity.RebateType.ToString())
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">折让金额（每人）：</td>
+                    <td>@Html.TextBoxFor(a => a.PolicyEntity.Amount, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">折让百分比：</td>
+                    <td>@Html.TextBoxFor(a => a.PolicyEntity.Percent, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">最大折让金额（每人）：</td>
+                    <td>@Html.TextBoxFor(a => a.PolicyEntity.MaxAmount, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="button" value="保存" />
+                        <input class="btn btn1" name="btnClear" type="button" value="返回" onclick="location.href='@Url.Action("ProducPolicy",new { code= Model.PolicyEntity.CustomerCode })'" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSave").click(function () {
+
+            //if ($.trim($("#Account_Name").val()) == "") {
+            //    Utils.alert("姓名不能为空！");
+            //    return false;
+            //}
+            var load_iii = Utils.layerLoad();
+            var params = $("#theForm").formSerialize();
+            $.post('@Url.Action("AddPolicy")', params, function (data) {
+                if (Number(data) > 0) {
+                    window.location.href = "@Url.Action("ProducPolicy", new { code= Model.PolicyEntity.CustomerCode })";
+                }
+
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        //新途经城市或者景点
+        $('#mySelect1').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+        });
+
+        $('#mySelect1').on('select2:select', function (e) {
+            $("#PolicyEntity_RegionName").val(e.params.data.text);
+        });
+    });
+
+    var pageSize = 10;
+
+    function get_look_suggs1(key, pageIndex, cont) {
+        $.post("/Dest/GetAreaList/", { "keyword": key, "pageIndex": pageIndex, "pageSize": pageSize }, function (data) {
+            var res = [];
+            var recordCount = 0;
+            if (data.ReturnMsg != null && data.ReturnMsg == "0000") {
+                recordCount = parseInt(data.TotalCount);
+                if (data.List != null && data.List.length > 0) {
+                    for (var i = 0; i < data.List.length; i++) {
+                        res.push(new Array(data.List[i]["Id"], data.List[i]["Name"], data.List[i]["PinYin"], data.List[i]["ParentStr"]));
+                    }
+                }
+            } else {
+                Utils.alert(data.ReturnMsg);
+            }
+            cont(res, pageIndex, pageSize, recordCount);
+        });
+    }
+
+    function ValidLoginEmail(obj) {
+        var loginName = $.trim($(obj).val());
+        $.post('/Contact/CheckLoginEmail?email=' + encodeURIComponent(loginName), function (result) {
+            if (result == "1") {
+                Utils.alert("Email已存在!", 1000);
+                $(obj).focus().select();
+            }
+        });
+    }
+
+</script>
+

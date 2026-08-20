@@ -1,0 +1,526 @@
+﻿@*
+    修改团计划与复制团计划共用该视图
+*@
+@using System.Globalization
+@using Lvy.Models
+@model Lvy.VModels.Product.EditTourVModel
+@{
+    ViewBag.Title = Model.IsCopy == 0 ? "编辑团计划" : "复制出团计划";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <link href="~/lib/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+    <style>
+        .text150 { width: 150px; }
+        .text70 { width: 70px; }
+    </style>
+    <script src="~/lib/My97DatePicker/WdatePicker.js"></script>
+}
+
+<div class="content">
+
+    <form id="theForm" action="" method="post" onsubmit="return false;">
+        @Html.HiddenFor(m => m.IsCopy, new { id = "hiddenIsCopy" })
+        @Html.HiddenFor(m => m.Tour.Id)
+        @Html.HiddenFor(m => m.Line.LineId)
+        @Html.HiddenFor(m => m.Line.LineName)
+        @Html.HiddenFor(m => m.Line.TrafficType, new { id = "hiddenTraffic" })
+        @Html.HiddenFor(m => m.Quota.Id)
+        <input type="hidden" id="initPlanQuota" value="@Model.Quota.PlanQuota" />
+
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-md-2">团号：</label>
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(m => m.Tour.TourNo, new { @class = "form-control form-control-sm", @maxlength = "50" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-2">总库存：</label>
+                    <div class="col-md-2">
+                        @Html.TextBoxFor(m => m.Quota.PlanQuota, new { id = "unSharePlanQuota", @class = "form-control form-control-sm", @onkeyup = "$('#unShareUseQuota').text(Number($(this).val())-Number($('#unShareHoldQuota').val())-Number($('#unShareUsedQuota').text()));", contentlimit = "number" })
+                    </div>
+                    <label class="col-md-2" style="display:none;">预留库存：</label>
+                    <div class="col-md-2" style="display:none;">
+                        <input type="hidden" id="initHoldQuota" value="@Model.Quota.HoldQuota" />
+                        @Html.TextBoxFor(m => m.Quota.HoldQuota, new { id = "unShareHoldQuota", @class = "form-control form-control-sm", @onkeyup = "$('#unShareUseQuota').text(Number($('#unSharePlanQuota').val())-Number($(this).val())-Number($('#unShareUsedQuota').text()));", contentlimit = "number" })
+                    </div>
+                    <label class="col-md-2">已用库存：</label>
+                    <div class="col-md-2">
+                        <span id="unShareUsedQuota">@Model.Quota.UsedQuota</span>
+                    </div>
+
+                    <label class="col-md-2">剩余库存：</label>
+                    <div class="col-md-2">
+                        <span id="unShareUseQuota">@Model.Quota.UseQuota</span>
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">选择巴士：</label>
+                    <div class="col-md-10"><div id="busSeatContainer"></div></div>
+                </div>
+                <div class="form-group row">
+                    @*<label class="col-md-2"><span class="point">*</span>最小成团：</label>
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(m => m.Tour.MixedNum, new { @class = "form-control form-control-sm", contentlimit = "number" })
+                        </div>*@
+                    <label class="col-md-2">报名截止日期：</label>
+                    <div class="col-md-4">
+                        <input type="text" name="Tour.BookingLastDays" value="@Model.Tour.BookingLastDays.ToDateFormat()" class="Wdate form-control form-control-sm" onfocus="WdatePicker({isShowClear:false,readOnly:true,maxDate:'@Model.Tour.OutDate.ToDateFormat()'})" />
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">最后开票日期：</label>
+                    <div class="col-md-10">
+                        <input type="text" name="Tour.LastKaiPiaoDate" value="@(Model.Tour.LastKaiPiaoDate == null ? "" : Model.Tour.LastKaiPiaoDate.Value.ToString("yyyy-MM-dd"))" class="Wdate form-control" onfocus="WdatePicker({isShowClear:false})" />
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">推荐方式：</label>
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.Tour.TuiJianType, new List<SelectListItem> { new SelectListItem { Text = "常规团", Value = "0", Selected = Convert.ToBoolean(Model.Tour.TuiJianType) }, new SelectListItem { Text = "特价团", Value = "1", Selected = Convert.ToBoolean(Model.Tour.TuiJianType) } })
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">团队性质：</label>
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.Tour.TourType, DictionaryTools.GetEnumsBy(Enums.TourTypeEnum).ToSelectListFor(Model.Tour.TourType.ToString()), new { @class = "form-control" })
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">是否销售：</label>
+                    <div class="col-md-10">
+                        @Html.RadioGroup("Tour.TourState", new List<KeyValueBean> { new KeyValueBean { Key = "2", Value = "否" }, new KeyValueBean { Key = "3", Value = "是" } }, Model.Tour.TourState.ToString(CultureInfo.InvariantCulture))
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">附加信息：</label>
+                    <div class="col-md-10">
+                        <span style="color: red;">主要描述航班信息、行程变化等。</span>
+                        <br />
+                        @Html.TextAreaFor(m => m.Tour.AdditionInfo, new { @class = "form-control", @row = "3" })
+                    </div>
+                </div>
+                <div style="display:none;" class="form-group row">
+                    <label class="col-md-2">备注：</label>
+                    <div class="col-md-10">
+                        @Html.TextAreaFor(m => m.Tour.Remarks, new { @class = "form-control", @row = "3" })
+                    </div>
+                </div>
+
+                @if (Model.Line.TrafficType == 3)
+                {
+                    <hr />
+                    <input type="hidden" name="TourFlightListCount" id="TourFlightListCount" value="@Model.TourFlightList.Count" />
+                    <h3 class="card-title">航班信息</h3>
+                    <div class="card-tools">
+                        <button type="button" id="AddTourFlight" class="btn btn-sm btn-success" onclick="AddTourFlightRow()">增加航班</button>
+                    </div>
+
+                    <table id="flightTable" class="table table-sm listtbl">
+                        <thead>
+                            <tr>
+                                <td>序号</td>
+                                <td>航班类型</td>
+                                <td>航空公司</td>
+                                <td>航班号</td>
+                                <td>出发时间</td>
+                                <td>抵达时间</td>
+                                @*<td>飞行时间</td>*@
+                                <td>操作</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.TourFlightList.Count > 0)
+                            {
+                                for (int i = 0; i < Model.TourFlightList.Count; i++)
+                                {
+                                    <tr id="rowidx_@i">
+                                        <td>
+                                            <input type="hidden" name="TourFlightList[@i].TourId" id="TourFlightList[@i].TourId" value="@Model.Tour.Id" />
+                                            <label id="index_@i" name="lblIndex">@(i + 1)</label>
+                                        </td>
+                                        <td class="data" valign="top">
+                                            <select name="TourFlightList[@i].FlightType" id="TourFlightList[@i].FlightType" style="width:100%">
+                                                <option value="G" @(Model.TourFlightList[i].FlightType == "G" ? "selected=selected" : "")>去程</option>
+                                                <option value="C" @(Model.TourFlightList[i].FlightType == "C" ? "selected=selected" : "")>途中</option>
+                                                <option value="R" @(Model.TourFlightList[i].FlightType == "R" ? "selected=selected" : "")>返程</option>
+                                            </select>
+                                        </td>
+                                        <td name="FlightCompany" valign="top">
+                                            <select name="TourFlightList[@i].AirlineCode" id="TourFlightList[@i].AirlineCode" style="width:100%">
+                                                <option value=""></option>
+                                                @foreach (var item in Model.AirlineList)
+                                                {
+                                                    if (item.Code == Model.TourFlightList[i].AirlineCode)
+                                                    {
+                                                        <option value="@item.Code" selected="selected">@item.Code    @item.ShortName</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.Code">@item.Code    @item.ShortName</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td class="data" valign="top">
+                                            <input type="text" name="TourFlightList[@i].FlightNum" size="6" maxlength="6" value="@Model.TourFlightList[i].FlightNum" id="TourFlightList[@i].FlightNum" style="width:100%">
+                                        </td>
+                                        <td class="data" valign="top">
+                                            <input type="text" name="TourFlightList[@i].StartingTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="@Model.TourFlightList[i].StartingTime" id="TourFlightList[@i].StartingTime" style="width:80px;">
+                                        </td>
+                                        <td class="data" valign="top">
+                                            <input type="text" name="TourFlightList[@i].ArrivaTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="@Model.TourFlightList[i].ArrivaTime" id="TourFlightList[@i].ArrivaTime" style="width:80px;">
+                                        </td>
+                                        @*<td class="data" valign="top">
+                                                <input type="text" name="TourFlightList[@i].TotalTravelTime" size="5" maxlength="5" value="@Model.TourFlightList[i].TotalTravelTime" id="TourFlightList[@i].TotalTravelTime">小时
+                                            </td>*@
+                                        <td class="data" valign="top"><a href="javascript:SubmitDeleteFlight('@i')">删除</a></td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr id="rowidx_0">
+                                    <td>
+                                        <input type="hidden" name="TourFlightList[0].TourId" id="TourFlightList[0].TourId" value="@Model.Tour.Id" />
+                                        <label id="index_0" name="lblIndex">1</label>
+                                    </td>
+
+                                    <td class="data" valign="top">
+                                        <select name="TourFlightList[0].FlightType" id="TourFlightList[0].FlightType" style="width:70px;">
+                                            <option value="G" selected="selected">去程</option>
+                                            <option value="C">途中</option>
+                                            <option value="R">返程</option>
+                                        </select>
+                                    </td>
+                                    <td name="FlightCompany" valign="top">
+                                        <select name="TourFlightList[0].AirlineCode" id="TourFlightList[0].AirlineCode" style="width:100%">
+                                            <option value=""></option>
+                                            @foreach (var item in Model.AirlineList)
+                                            {
+                                                <option value="@item.Code">@item.Code  @item.ShortName</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <input type="text" name="TourFlightList[0].FlightNum" size="6" maxlength="6" value="" id="TourFlightList[0].FlightNum" style="width: 80px;">
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <input type="text" name="TourFlightList[0].StartingTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="" id="TourFlightList[0].StartingTime" style="width:80px;">
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <input type="text" name="TourFlightList[0].ArrivaTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="" id="TourFlightList[0].ArrivaTime" style="width:80px;">
+                                    </td>
+                                    @*<td class="data" valign="top">
+                                            <input type="text" name="TourFlightList[0].TotalTravelTime" size="5" maxlength="5" value="" id="TourFlightList[0].TotalTravelTime">小时
+                                        </td>*@
+                                    <td class="data" valign="top"><a href="javascript:SubmitDeleteFlight('0')">删除</a></td>
+                                </tr>
+                                <tr id="rowidx_1">
+                                    <td>
+                                        <input type="hidden" name="TourFlightList[1].TourId" id="TourFlightList[1].TourId" value="@Model.Tour.Id" />
+                                        <label id="index_1" name="lblIndex">2</label>
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <select name="TourFlightList[1].FlightType" id="TourFlightList[1].FlightType" style="width:100%">
+                                            <option value="G">去程</option>
+                                            <option value="C">途中</option>
+                                            <option value="R" selected="selected">返程</option>
+                                        </select>
+                                    </td>
+                                    <td name="FlightCompany" valign="top">
+                                        <select name="TourFlightList[1].AirlineCode" id="TourFlightList[1].AirlineCode" style="width:100%">
+                                            <option value=""></option>
+                                            @foreach (var item in Model.AirlineList)
+                                            {
+                                                <option value="@item.Code">@item.Code    @item.ShortName</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <input type="text" name="TourFlightList[1].FlightNum" size="6" maxlength="6" value="" id="TourFlightList[1].FlightNum" style="width: 80px;">
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <input type="text" name="TourFlightList[1].StartingTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="" id="TourFlightList[1].StartingTime" style="width:80px;">
+                                    </td>
+                                    <td class="data" valign="top">
+                                        <input type="text" name="TourFlightList[1].ArrivaTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="" id="TourFlightList[1].ArrivaTime" style="width:80px;">
+                                    </td>
+                                    @*<td class="data" valign="top">
+                                            <input type="text" name="TourFlightList[1].TotalTravelTime" size="5" maxlength="5" value="" id="TourFlightList[1].TotalTravelTime">小时
+                                        </td>*@
+                                    <td class="data" valign="top"><a href="javascript:SubmitDeleteFlight('1')">删除</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <hr />
+                <h3 class="card-title">添加报价</h3>
+                <div class="card-tools">
+                    <button id="addPrice" type="button" class="btn btn-sm btn-success">添加报价</button>
+                </div>
+
+                <div id="addPriceContainer">
+                </div>
+            </div>
+            <div class="card-footer">
+                税：@Html.TextBoxFor(m => m.Tour.Tax, new { @class = "text70", contentlimit = "number" })
+                签证费：@Html.TextBoxFor(m => m.Tour.VisaPrice, new { @class = "text70", contentlimit = "number" })
+                单房差：@Html.TextBoxFor(m => m.Tour.SingleRoom, new { @class = "text70", contentlimit = "number" })
+                自费：@Html.TextBoxFor(m => m.Tour.ZiFei, new { @class = "text70", contentlimit = "number" })
+                <hr />
+                <button class="btn btn-info" id="submitBtn" type="button">保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div style="display:none">
+    <table id="tempTb">
+        <tbody>
+            <tr id="rowidx_0">
+                <td>
+                    <input type="hidden" name="TourFlightList[0].TourId" id="TourFlightList[0].TourId" value="@Model.Tour.Id" />
+                    <label id="index_0" name="lblIndex">0</label>
+                </td>
+                <td class="data" valign="top">
+                    <select name="TourFlightList[0].FlightType" id="TourFlightList[0].FlightType" style="width:70px;">
+                        <option value="G">去程</option>
+                        <option value="C" selected="selected">途中</option>
+                        <option value="R">返程</option>
+                    </select>
+                </td>
+                <td name="FlightCompany" valign="top">
+                    <select name="TourFlightList[0].AirlineCode" id="TourFlightList[0].AirlineCode" style="width:100%">
+                        <option value=""></option>
+                        @foreach (var item in Model.AirlineList)
+                        {
+                            <option value="@item.Id">@item.Code    @item.ShortName</option>
+                        }
+                    </select>
+                </td>
+                <td class="data" valign="top">
+                    <input type="text" name="TourFlightList[0].FlightNum" size="6" maxlength="6" value="" id="TourFlightList[0].FlightNum" style="width:80px;">
+                </td>
+                <td class="data" valign="top">
+                    <input type="text" name="TourFlightList[0].StartingTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="" id="TourFlightList[0].StartingTime" style="width:80px;">
+                </td>
+                <td class="data" valign="top">
+                    <input type="text" name="TourFlightList[0].ArrivaTime" class="Wdate" onfocus="WdatePicker({ dateFmt: 'HH:mm' })" value="" id="TourFlightList[0].ArrivaTime" style="width:80px;">
+                </td>
+                @*<td class="data" valign="top">
+                        <input type="text" name="TourFlightList[0].TotalTravelTime" size="5" maxlength="5" value="" id="TourFlightList[0].TotalTravelTime">小时
+                    </td>*@
+                <td class="data" valign="top"><a href="javascript:SubmitDeleteFlight('0')">删除</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section PageScripts
+{
+    <script type="text/javascript">
+
+    $(function () {
+
+        //限定输入内容为数字
+        $('form input[contentlimit="number"]').keypress(function () {
+            InputLimitNumber();
+        });
+
+        // 加载报价画面
+        $.post('/LineAdmin/EditPrice/@Model.Tour.Id', function (data) {
+            $('#addPriceContainer').html(data);
+        });
+
+        $('select[name="Tour.TuiJianType"]').change(function () {
+            if ($(this).val() == 1) {
+                $('input[name="Tour.TeJiaFanLi"]').removeAttr('disabled');
+            } else {
+                $('input[name="Tour.TeJiaFanLi"]').attr('disabled', 'disabled');
+            }
+        });
+
+        //提交
+        $('#submitBtn').bind('click', function () {
+            if (!validSubmit())
+                return false;
+            var load_iii = Utils.layerLoad();
+            $('#theForm').ajaxSubmit({
+                type: 'post',
+                url: '@Url.Action("SaveTour", "LineAdmin")',
+                success: function (data) {
+                    Utils.alert('提交成功!');
+                    // 弹出框关闭前调用父窗口方法
+                    //parent.reloadInvoice();
+
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                },
+            });
+
+            return true;
+        });
+
+    });
+
+    //显示车位
+    function BindShowBusSeat() {
+        var load_iii = Utils.layerLoad();
+        var params = $("#theForm").formSerialize();
+        $('input[disabled]').each(function () {
+            params = params + '&' + $(this).attr('name') + '=' + $(this).val();
+        });
+        $.post("/LineAdmin/ReCreateBusSeat", params, function (data) {
+            $("#busSeatContainer").children().remove();
+            $("#busSeatContainer").html(data);
+            Utils.layerClose(load_iii);
+        });
+        return false;
+    }
+
+    //提交验证
+    function validSubmit() {
+        var IsCopy = Number($('#hiddenIsCopy').val());
+        //原始计划库存
+        var initPlan = Number($('#initPlanQuota').val());
+        //原始预留库存
+        var initHold = Number($('#initHoldQuota').val());
+        //当前计划库存
+        var curPlan = Number($('#unSharePlanQuota').val());
+        //当前预留库存
+        var curHold = Number($('#unShareHoldQuota').val());
+        //交通类型
+        var trafficType = Number($('#hiddenTraffic').val());
+        //座位表
+        var busSeat = $("#busSeatContainer").children();
+
+        if (curPlan <= 0) {
+            Utils.alert('计划库存必须大于零。');
+            return false;
+        }
+        if (trafficType == 1) {
+            if (busSeat.length == 0) {
+                //                    if (IsCopy == 1)
+                //                        return true;    //若为复制，则不必须显示座位表
+                if (initPlan != curPlan || initHold != curHold) {
+                    //Ps.此处可改成弹窗确认。
+                    Utils.alert('请显示座位表并确认。');
+                    return false;
+                }
+            } else {
+                //座位数
+                var seatCount = Number($('#hiddenSeatCount').val());
+                //预留座位数
+                var holdCount = $(".seat_box .blue").length;
+                if (seatCount != curPlan) {
+                    Utils.alert('请重新显示座位表并确认。');
+                    return false;
+                }
+                if (holdCount != curHold) {
+                    Utils.alert('请确认预留座位是否一致。');
+                    return false;
+                }
+            }
+        }
+
+        var $tourType = $("#Tour_TourType");
+        if($tourType.val()==0)
+        {
+            Utils.alert('团队性质不可为空');
+            $tourType.focus().select();
+            return false;
+        }
+
+        //航班信息
+        var flightCheck=true;
+        var flightCompanty=$("#flightTable td[name='FlightCompany']");
+        flightCompanty.each(function() {
+            var flight = $(this).children('select');
+            if(flight.val()=="") {
+                Utils.alert('请选择航空公司！');
+                flight.focus().select();
+                flightCheck = false;
+                return false;
+            }
+        });
+        if (!flightCheck) {
+            return false;
+        }
+
+        var priceCheck = true;
+        var $priceTypes = $('#priceList td[name="priceTypeTd"]');
+        $priceTypes.each(function() {
+            var $priceTypeDpl = $(this).children('select');
+            if(!$priceTypeDpl.val()>0) {
+                Utils.alert('价格类型不能为空');
+                $priceTypeDpl.focus().select();
+                priceCheck = false;
+                return false;
+            }
+        });
+        if(priceCheck) {
+            var load_iii = Utils.layerLoad();
+            return true;
+        }
+        return false;
+    }
+
+    function SubmitDeleteFlight(rowidx){
+
+        $("#rowidx_"+rowidx).remove();
+        var rowCount=$("#flightTable tbody").eq(1).find("tr").length;
+        $("#flightTable tbody").eq(1).find("tr").each(function(index,item){
+
+            //改变行的index
+            $(this).attr("id",$(this).attr("id").replace(/\d+/, index));
+
+            var ctr=$(this).find("input[type='text'],input[type='hidden'],select,label[name='lblIndex'],a");//$("#flightTable tr")[index].find("input[type='text']");//$(item).find("td").children("input[type='text'],select,label[name='lblIndex']");
+            ctr.each(function(){
+                if ($(this).prop("tagName")=="A") {
+                    $(this).attr("href",$(this).attr("href").replace(/\d+/, index));
+                }else {
+                    $(this).attr("id",$(this).attr("id").replace(/\d+/, index));
+                    $(this).attr("name",$(this).attr("name").replace(/\d+/, index));
+                    if ($(this).prop("tagName")=="LABEL") {
+
+                        $(this).text(index+1);
+                    }
+                }
+            });
+        });
+    }
+
+    function AddTourFlightRow(){
+
+        var tr=$("#tempTb tr").clone();
+        $("#flightTable tbody").eq(0).append(tr)
+        var rowCount=$("#flightTable tbody").eq(1).find("tr").length;
+        $("#flightTable tbody").eq(1).find("tr").each(function(index,item){
+
+            //改变行的index
+            $(this).attr("id",$(this).attr("id").replace(/\d+/, index));
+
+            var ctr=$(this).find("input[type='text'],input[type='hidden'],select,label[name='lblIndex'],a");//$("#flightTable tr")[index].find("input[type='text']");//$(item).find("td").children("input[type='text'],select,label[name='lblIndex']");
+            ctr.each(function(){
+                if ($(this).prop("tagName")=="A") {
+                    $(this).attr("href",$(this).attr("href").replace(/\d+/, index));
+                }else {
+                    $(this).attr("id",$(this).attr("id").replace(/\d+/, index));
+                    $(this).attr("name",$(this).attr("name").replace(/\d+/, index));
+                    if ($(this).prop("tagName")=="LABEL") {
+
+                        $(this).text(index+1);
+                    }
+                }
+            });
+        });
+    }
+    </script>
+}

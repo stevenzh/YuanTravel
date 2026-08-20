@@ -1,0 +1,253 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@{
+    ViewData["Title"] = "签证订单处理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+@section AdditionalResources
+{
+    <link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <script type="text/javascript" language="javascript">
+        var orderCode = '@Model.OrderCode';
+        var isModifyPage = true;
+    </script>
+    <style>
+        .bgo01 { background-color: #ff6600; color: #fff; }
+        .bgo02 { background-color: #e6e6e6; }
+    </style>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/OrderAdmin/Search">签证订单管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-8">
+                <div class="callout callout-info">
+                    <h5><i class="fas fa-info"></i> 订单处理进度:</h5>
+                    <!--订单处理进度-->
+                    @Html.Partial("~/Views/Visa/OrderAdmin/OrderProcessLayer.cshtml")
+                </div>
+                @Html.Partial("~/Views/Visa/OrderAdmin/ProductBaseInfo.cshtml")
+
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-two-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="tabs-two-contact-tab" data-toggle="pill" href="#tabs-two-contact" role="tab" aria-controls="tabs-two-home" aria-selected="true">联系人信息</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-two-home-tab" data-toggle="pill" href="#tabs-two-home" role="tab" aria-controls="tabs-two-home" aria-selected="true">申请人列表</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-two-profile-tab" data-toggle="pill" href="#tabs-two-profile" role="tab" aria-controls="tabs-two-profile" aria-selected="false">子订单列表</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-two-payin-tab" data-toggle="pill" href="#tabs-two-payin" role="tab" aria-controls="tabs-two-payin" aria-selected="false">缴款列表</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-two-files-tab" data-toggle="pill" href="#tabs-two-files" role="tab" aria-controls="tabs-two-fies" aria-selected="false">附件列表</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tabs-two-messages-tab" data-toggle="pill" href="#tabs-two-messages" role="tab" aria-controls="tabs-two-messages" aria-selected="false">操作历史记录</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="tabs-two-tabContent">
+                            <div class="tab-pane fade show active" id="tabs-two-contact" role="tabpanel" aria-labelledby="tabs-two-contact-tab">
+                                <!--联系人信息-->
+                                @Html.Partial("~/Views/Visa/OrderAdmin/ShowContactInfo.cshtml")
+                            </div>
+                            <div class="tab-pane fade show" id="tabs-two-home" role="tabpanel" aria-labelledby="tabs-two-home-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/TouristList.cshtml")
+                            </div>
+                            <div class="tab-pane fade" id="tabs-two-profile" role="tabpanel" aria-labelledby="tabs-two-profile-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/ShowChildOrderInfo.cshtml")
+                            </div>
+                            <div class="tab-pane fade" id="tabs-two-payin" role="tabpanel" aria-labelledby="tabs-two-payin-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/UCPayIn.cshtml")
+                            </div>
+                            <div class="tab-pane fade" id="tabs-two-files" role="tabpanel" aria-labelledby="tabs-two-files-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/UCFile.cshtml")
+                            </div>
+                            <div class="tab-pane fade" id="tabs-two-messages" role="tabpanel" aria-labelledby="tabs-two-messages-tab">
+                                @Html.Partial("~/Views/Visa/OrderAdmin/OperateHistory.cshtml")
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                    <!--订单处理-->
+                    @Html.Partial("~/Views/Visa/OrderAdmin/OrderFlowLayer.cshtml")
+                </div>
+            </div>
+
+            <div class="col-4">
+                <!--订单信息-->
+                @Html.Partial("~/Views/Visa/OrderAdmin/OrderBaseInfo.cshtml")
+            </div>
+
+        </div>
+
+    </div>
+    <div id="showCancelHtml" style="display: none;">
+        <table style="margin: 10px;">
+            <tr>
+                <td rowspan="3">
+                    <img src="../../Images/alert.gif" />
+                </td>
+                <td style="text-align: left; padding-left: 10px;">
+                    <h3>提示：</h3>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left; padding-left: 10px;">
+                    <h3>订单【<span style="color: Red;">已取消</span>】！！</h3>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: left; padding-left: 10px;">
+                    <h3>请及时处理相关操作。。。</h3>
+                </td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        bsCustomFileInput.init();
+
+        //添加申请人（单签）
+        $("#showcustInfo").click(function () {
+            var url = "/OrderAdmin/AddTouristInfo/?ordercode=" + orderCode;
+            layer.open({ type: 2, title: '添加申请人', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+        });
+
+        $("#btnAddChildOrder").click(function () {
+            var url = "/OrderAdmin/AddChildOrderInfo/0?ordercode=@Model.OrderCode";
+            layer.open({ type: 2, title: '添加子订单', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+        });
+
+        $('#mySelect2').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        team: '',
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            //templateResult: formatState
+        });
+
+        $("#MasterOrder_SalesTeamId").change(function () {
+            var teamId = $(this).val();
+            $("#MasterOrder_SalerCode").empty();
+            if (teamId == "") {
+                $("#MasterOrder_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#MasterOrder_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#MasterOrder_SalerCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                    });
+                }
+            });
+        });
+
+        // 添加缴款单
+        $("#btnAddPayInfo").click(function () {
+            var url = '@Url.Action("EditPayIn","Balance",new { id=0, type=3, orderCode = Model.OrderCode})';
+            layer.open({ type: 2, title: '添加缴款单', maxmin: true, shadeClose: true, area: ['950px', '500px'], content: url });
+        });
+    });
+
+
+    //修改申请人（单签）
+    function UpdateAppInfo(code) {
+        var url = "/OrderAdmin/UpdateAppInfo/?id=" + code;
+        layer.open({ type: 2, title: '修改申请人', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+    }
+    //修改申请人（团队游，自助游）
+    function funModifyGuestInfo(orderCode, applicanterId) {
+        var url ="/OrderAdmin/EditTouristInfo?OrderCode=" + orderCode + "&ID=" + applicanterId;
+        layer.open({ type: 2, title: '修改申请人', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+    }
+    //取消申请人（单签）
+    function DeleteTouristInfo(id) {
+        if (confirm("确定要取消申请人吗！")) {
+            $.post("/OrderAdmin/DeleteTouristInfo/", { "id": id }, function (data) {
+                window.location.href = "/OrderAdmin/ModifyOrder?OrderCode=" + orderCode;
+            });
+        }
+    }
+
+    // 修改子订单
+    function UpdateChild(code) {
+        var url = "/OrderAdmin/AddChildOrderInfo/" + code + "?orderCode=" + orderCode;
+        layer.open({ type: 2, title: '修改子订单', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+    }
+
+    // 缴款单详情
+    function payInfoDetail(id, orderCode) {
+        var url = "/Balance/EditPayIn?id=" + id + "&orderCode=" + orderCode;
+        layer.open({ type: 2, title: '缴款单详情', maxmin: true, shadeClose: true, area: ['950px', '450px'], content: url });
+    }
+
+    function reloadPayIn() {
+        $.get("/OrderAdmin/ReLoadPayIn?orderCode=" + orderCode, function (result) {
+            $("#tabs-two-payin").html(result);
+        });
+    }
+
+    function reloadFiles() {
+        $.get("/OrderAdmin/ReloadFile?orderCode=" + orderCode, function (result) {
+            $("#tabs-two-files").html(result);
+        });
+    }
+</script>
+
+

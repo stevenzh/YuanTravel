@@ -1,0 +1,180 @@
+﻿@model IEnumerable<Lvy.Models.BaseDB.BaseDestinationModel>
+@{
+    ViewBag.Title = "目的地管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link rel="stylesheet" href="~/Content/jstree/themes/default/style.min.css" />
+    <link href="@CDNServerUrl/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h3>
+                    @ViewData["Title"]
+                    <small>系统使用的列表数据</small>
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">目的地管理</h3>
+            <div class="card-tools">
+                <div class="input-group" style="width:100px;">
+                    <button onclick="javascript: UpdateData();" class="btn btn-success">更新数据</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div id="jstree" style="width: 100%;"></div>
+        </div>
+    </div>
+</section>
+@section PageScripts{
+    <script src="~/Content/jstree/jstree.min.js"></script>
+    <script src="~/Content/jstree/jstreegrid.js"></script>
+}
+<script type="text/javascript">
+    var treeData, menu, actionNodeText, actionNodeId, parentNode;
+
+    $(function () {
+
+        $("div#jstree").jstree({
+            plugins: ["themes", "json", "grid", "contextmenu", "sort"],
+            core: {
+                data: {
+                    "url": "/Destination/GetJsTreeData",
+                    "dataType": "json"
+                }
+            },
+            grid: {
+                columns: [
+                    { width: 300, header: "名称", title: "_DATA_" },
+                    { width: 110, cellClass: "col1", value: "jpinyin", header: "简拼", title: "jpinyin", valueClass: "spanclass" },
+                    { width: 110, cellClass: "col1", value: "pinyin", header: "拼音", title: "pinyin", valueClass: "spanclass" },
+                    { width: 110, cellClass: "col2", value: "level", header: "等级", title: "level", valueClass: "spanclass" },
+                    { width: 110, cellClass: "col2", value: "RegionCode", header: "国标", title: "RegionCode", valueClass: "spanclass" },
+                    { width: 110, cellClass: "col2", value: "ParentStr", header: "STR", title: "ParentStr", valueClass: "spanclass" }
+                ],
+                resizable: true,
+                draggable: false,
+                contextmenu: false,
+                gridcontextmenu: function (grid, tree, node, val, col, t, target) {
+                    return {
+                        "edit": {
+                            label: "编辑",
+                            icon: "fas fa-edit",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                var url = '/Destination/Edit?id=' + obj.data["id"];
+                                layer.open({ type: 2, title: '修改目的地', maxmin: true, shadeClose: false, area: ['800px', '450px'], content: url });
+                            }
+                        }, "addroot": {
+                            label: "添加根",
+                            icon: "fas fa-plus",
+                            "action": function (data) {
+                                var url = '/Destination/Edit?id=0';
+                                layer.open({ type: 2, title: '添加根目的地', maxmin: true, shadeClose: false, area: ['800px', '450px'], content: url });
+                            }
+                        }, "addchild": {
+                            label: "添加子目的地",
+                            icon: "fas fa-plus-square",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                var url = '/Destination/EditChild?id=' + obj.data["id"];
+                                layer.open({ type: 2, title: '添加子目的地', maxmin: true, shadeClose: false, area: ['800px', '500px'], content: url });
+                            }
+                        }, "delete": {
+                            label: "删除",
+                            icon: "fas fa-trash",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                if (t.is_leaf(obj) == false) {
+                                    Utils.alert("包含子节点，无法删除");
+                                    return;
+                                }
+                                if (window.confirm("你确定要删除目的地【" + obj.data["id"] + "】吗？")) {
+                                    $.post('/Destination/SetValidStateById?id=' + obj.data["id"], function (data) {
+                                        if (data == "1") {
+                                            t.refresh();
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                },
+                //width: 500,
+                height: 500
+            }
+        });
+
+        $("a#refresh").click(function () {
+            var tree = $("div#jstree").jstree();
+            tree.refresh();
+            return (false);
+        });
+
+    });
+
+
+    //验证目的地是否存在
+    function CheckDesName(e) {
+        var newDesName = $.trim($(e).val());
+        if (newDesName != $("#oldDesName").val()) {
+            $.post('/Destination/CheckDesName?name=' + encodeURIComponent(newDesName) + '&parentId=' + encodeURIComponent($("#parentId").val()), function (data) {
+                if (data == "1") {
+                    Utils.alert("改目的地已存在！");
+                    $("#DesName").val("").focus();
+                }
+            });
+        }
+    }
+
+    //验证用户输入
+    function CheckControl() {
+        if ($.trim($("#DesName").val()).length == 0) {
+            Utils.alert("目的地不得为空！");
+            $("#DesName").select().focus();
+            return false;
+        }
+        if ($.trim($("#Level").val()).length == 0) {
+            Utils.alert("请选择级别！");
+            $("#Level").select().focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    //验证该省份下的目的地是否存在
+    function UpdateData() {
+        $.post('/Destination/UpdateData', function (data) {
+            Utils.alert("数据更新条数" + data, 1500);
+        });
+    }
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        // reload
+        var tree = $("div#jstree").jstree();
+        tree.refresh();
+    }
+
+</script>

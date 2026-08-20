@@ -1,0 +1,43 @@
+﻿@using Lvy.Web.Common.Mvc.HtmlHelpers
+@model IEnumerable<Lvy.Models.BaseDB.BaseDictionaryModel>
+@{
+    ViewData["Title"] = "字典管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>
+                    @ViewData["Title"]
+                    <small>系统使用的列表数据</small>
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Destop">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">字典列表</h3>
+            <div class="card-tools">
+                <div class="input-group" style="width:100px;">
+                    <a href="@Url.Action("Create")" class="btn btn-primary"> 添加字典 </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @Html.Partial("UCSearch")
+        </div>
+    </div>
+</section>
+

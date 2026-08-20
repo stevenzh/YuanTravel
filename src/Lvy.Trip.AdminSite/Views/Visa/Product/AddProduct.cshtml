@@ -1,0 +1,271 @@
+﻿@model Lvy.Visa.Models.VisaInformationModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>修改签证信息</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/ProductAdmin/Index">签证管理</a></li>
+                    <li class="breadcrumb-item active">产品添加</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"> 签证基本信息</h3>
+        </div>
+        @using (Html.BeginForm("SaveProduct", "Product", FormMethod.Post, new { id = "frm", enctype = "multipart/form-data" }))
+        {
+            <div class="card-body">
+                @Html.Partial("~/Views/Visa/Product/ProductPartial.cshtml")
+            </div>
+            <div class="card-footer">
+                <button type="button" class="btn btn-success" id="btnSave" onclick="funValidateProductForm()">保存</button>
+                <a href="/ProductAdmin/Index" class="btn btn-secondary">返回列表</a>
+            </div>
+        }
+    </div>
+</section>
+<div id="divProductLoadingData" style="text-align: center; width: 100%; height: auto; top: 60%; display: none; position: fixed; z-index: 9999;">
+    <img src="../../Images/dengdai.gif" alt="" title="" />&nbsp;系统正在为您处理数据中，请稍后。。。。
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //不需要面试
+        $("#InterviewType").val("2");
+        //个签
+        $("#VType").val("1");
+    });
+    function funValidateProductForm() {
+        var pName = $('#InformationName').val();
+        if (!ValidationData('none', pName)) {
+            alert("产品名称不能为空，请输入！！");
+            $('#InformationName').focus();
+            return false;
+        } else {
+            var param = { "InformationName": $('#InformationName').val(), "InformationCode": $('#hidPruductCode').val() };
+            $.post("/VisaProduct/CheckProductNameIsExists/", param, function (data) {
+                if (data == "Y") {
+                    $("#spanPname").html("产品名称已存在！！");
+                    alert("产品名称已存在! !");
+                    $('#InformationName').focus();
+                    $("#spanPname").css("color", "red");
+                } else {
+                    $("#spanPname").html("");
+                    if ($("#VType").val() == "-1") {
+                        alert("请选择类型！！");
+                        $("#VType").focus();
+                        return false;
+                    }
+                    var visatype = $("#VisaType").val();
+                    if (visatype == "-1") {
+                        alert("请选择签证类型！！");
+                        $("#VisaType").focus();
+                        return false;
+                    }
+
+                    var interviewtype = $("#InterviewType").val();
+                    if (interviewtype == "-1") {
+                        alert("请选择面销类型！！");
+                        $("#InterviewType").focus();
+                        return false;
+                    }
+
+                    var continent = $("#Continent").val();
+                    if (continent == "-1") {
+                        alert("请选择版块！！");
+                        $("#Continent").focus();
+                        return false;
+                    }
+
+                    var visacountry = $("#VisaCountry").val();
+                    var _hidparentStr = $("#VisaCountryParentStr").val();
+                    if (!ValidationData('none', visacountry) || !ValidationData('none', _hidparentStr) || $.trim(visacountry) == "中文/拼音") {
+                        alert("签证国家或地区不能为空，请输入！！");
+                        $("#VisaCountry").focus();
+                        $("#VisaCountry").val("中文/拼音");
+                        $("#VisaCountryParentStr").val("");
+                        return false;
+                    }
+
+                    var _visaArea = $("#VisaArea").val();
+                    if (_visaArea == "-1") {
+                        alert("请选择所属领区！！");
+                        $("#VisaArea").focus();
+                        return false;
+                    }
+
+                    var visaIssuePlace = $("#VisaIssuePlaceName").val();
+                    var _hidIssueparentStr = $("#VisaIssuePlace").val();
+                    if (!ValidationData('none', visaIssuePlace) || !ValidationData('none', _hidIssueparentStr) || $.trim(visaIssuePlace) == "中文/拼音") {
+                        alert("签发地不能为空，请输入！！");
+                        $("#VisaIssuePlaceName").focus();
+                        $("#VisaIssuePlaceName").val("中文/拼音");
+                        $("#VisaIssuePlace").val("");
+                        return false;
+                    }
+                    //                    var visaarea = $("#VisaArea").val();
+                    //                    if (visaarea == "-1") {
+                    //                        alert("请选择所属领区！！");
+                    //                        $("#VisaArea").focus();
+                    //                        return false;
+                    //                    }
+
+                    var newToCity = "";
+                    $("span[name=spanTocitys]").each(function () {
+                        newToCity += $(this).attr("rel") + ",";
+                    });
+                    newToCity = newToCity.substring(0, newToCity.length - 1);
+                    $("#LivePassportArea").val(newToCity);
+                    //                    if (newToCity == "") {
+                    //                        alert("居住 / 护照签发地范围不能为空，请选择！！");
+                    //                        $("#LivePassportAreaName").focus();
+                    //                        return false;
+                    //                    }
+                    //                    else {
+                    //                        newToCity = newToCity.substring(0, newToCity.length - 1);
+                    //                        $("#LivePassportArea").val(newToCity);
+                    //                    }
+
+                    var tradeprice = $("#TradePrice").val();
+                    if (!ValidationData('none', tradeprice)) {
+                        alert("同业价格不能为空，请输入！！");
+                        $("#TradePrice").focus();
+                        return false;
+                    }
+                    else if (!ValidationData('positive_number', tradeprice)) {
+                        alert("同业价格格式错误，必须是大于0的整数，请重新输入！！");
+                        $('#TradePrice').focus();
+                        return false;
+                    }
+
+                    var sellprice = $("#SellPrice").val();
+                    if (!ValidationData('none', sellprice)) {
+                        alert("销售价格不能为空，请输入！！");
+                        $("#SellPrice").focus();
+                        return false;
+                    } else if (!ValidationData('positive_number', sellprice)) {
+                        alert("销售价格格式错误，必须是大于0的整数，请重新输入！！");
+                        $('#SellPrice').focus();
+                        return false;
+                    }
+
+                    var acceptedtime = $("#AcceptedTime").val();
+                    if (!ValidationData('none', acceptedtime)) {
+                        alert("办理时长不能为空，请输入！！");
+                        $("#AcceptedTime").focus();
+                        return false;
+                    }
+                    var isvalidtime = $("#IsValidTime").val();
+                    if (!ValidationData('none', isvalidtime)) {
+                        alert("签证有效期不能为空，请输入！！");
+                        $("#IsValidTime").focus();
+                        return false;
+                    }
+
+                    var staydays = $("#StayDays").val();
+                    if (!ValidationData('none', staydays)) {
+                        alert("最长停留时间不能为空，请输入！！");
+                        $("#StayDays").focus();
+                        return false;
+                    }
+
+                    var enterCount = $("#EnterCount").val();
+                    if (!ValidationData('none', enterCount)) {
+                        alert("入境次数不能为空，请输入！！");
+                        $("#EnterCount").focus();
+                        return false;
+                    }
+
+                    var paytimelimit = $("#PayTimeLimit").val();
+                    if (!ValidationData('none', paytimelimit)) {
+                        alert("付款时限不能为空，请输入！！");
+                        $("#PayTimeLimit").focus();
+                        return false;
+                    }
+                    else {
+                        if (!ValidationData('integer', paytimelimit) || paytimelimit < 0) {
+                            alert("付款时限格式错误，必须大于等于0，请重新输入！！");
+                            $('#PayTimeLimit').focus();
+                            return false;
+                        }
+                    }
+
+                    var advanceDays = $("#AdvanceDays").val();
+                    if (!ValidationData('none', advanceDays)) {
+                        alert("提前预定天数不能为空，请输入！！");
+                        $("#AdvanceDays").focus();
+                        return false;
+                    }
+
+                    var enterCount = $("#IsDanBao").val();
+                    if (enterCount == "-1") {
+                        alert("请选择是否需要担保！！");
+                        $("#IsDanBao").focus();
+                        return false;
+                    }
+
+                    //                    var acceptedRange = $("#AcceptedRange").val();
+                    //                    if (!ValidationData('none', acceptedRange)) {
+                    //                        alert("受理范围不能为空，请输入！！");
+                    //                        $("#AcceptedRange").focus();
+                    //                        return false;
+                    //                    }
+
+                    // if (tinyMCE.get("BookingNodes").getContent() == "") {
+                    if ($("#BookingNodes").val() == "") {
+                        alert("预定须知不能为空，请输入！！");
+                        $("#BookingNodes").focus();
+                        return false;
+                    }
+
+                    //                    if ($("#WarmTips").val() == "") {
+                    //                        alert("友情提示不能为空，请输入！！");
+                    //                        $("#WarmTips").focus();
+                    //                        return false;
+                    //                    }
+                    //图片
+                    var imgurl = $("#ImgUrl").val();
+                    if (!ValidationData('none', imgurl)) {
+                        alert("请选择图片！");
+                        return false;
+                    }
+                    //资源端判断
+
+                    var hidSupplierCode = $("#SupplierCode").val();
+                    if (!ValidationData('none', hidSupplierCode)) {
+                        alert("请选择供应商资源！！");
+                        $("#span_supplierName").focus();
+                        return false;
+                    }
+                    //销售价必须大于成人结算价
+                    var reservePrice = $("#ReservePrice").val();
+                    if (parseFloat(sellprice) < parseFloat(reservePrice)) {
+                        alert("销售价必须大于或等于成人结算价!!");
+                        $('#SellPrice').focus();
+                        return false;
+                    }
+                    openLayoutForMark();
+                    $("#divProductLoadingData").show();
+                    $("#btnSave").attr("disabled", "disabled");
+                    $("#frm").submit();
+                }
+            });
+        }
+    }
+
+</script>

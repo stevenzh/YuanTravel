@@ -1,0 +1,235 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Order.TpOrderVModel
+@{
+    ViewBag.Title = "订单列表查询";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+<style type="text/css">
+    .d-content { display: block; }
+</style>
+<form id="theForm" method="POST" action="@Url.Action("")">
+    @Html.HiddenFor(m => m.FirstTime)
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                订单列表查询
+            </div>
+            <table class="sotable" align="center" style="width:90%;">
+                <tr>
+                    <td class="label">产品部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label" width="80px">线路名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.LineName, new { @Class = "text150", @id = "textLineId" })
+                    </td>
+                    <td class="label">线路类型：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.LineType, new { id = "hiddenLineType", @value = "" })
+                        @Html.RadioGroup("lineTypeGroup", ViewBag.LineTypeRadioItems as List<KeyValueBean>, Model.LineType)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">目的地：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.LineScope, ViewBag.LineScopeItems as IEnumerable<SelectListItem>, "--请选择--", new { @Class = "text150" })
+                    </td>
+                    <td class="label">团号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.TourNo, new { @Class = "text150" })
+                    </td>
+                    <td class="label" width="100px">出发日期：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.OutDateRange, new { @id = "OutDateRange", @Class = "text220" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label" width="80px">订单号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.OrderId, new { @Class = "text150" })
+                    </td>
+                    @*<td class="label">关联订单号：</td>
+                        <td colspan="3">
+                            @Html.TextBoxFor(a => a.JoinOrderCode, new { @Class = "text150" })
+                        </td>*@
+                    <td class="label">订单状态：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.OrderState, ViewBag.OrderStateItem as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">预订日期：</td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.CreatedRange, new { id = "CreatedRange", @class = "text220" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">分销商：</td>
+                    <td>
+                        <select id="CustomerCode" name="CustomerCode" class="text150"></select>
+                    </td>
+                    <td class="label">销售部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.SaleTeamId, ViewBag.SalesOfTeam as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">销售员：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="6">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="btnReset" name="" type="button" value="清空" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="xbox clear">
+        <div id="divOrderSearch">
+            @Html.Partial("UCSearchOrder", Model)
+        </div>
+        @*隐藏域*@
+        @Html.HiddenFor(a => a.OrderModel.Remark)
+        @Html.HiddenFor(a => a.OrderModel.OrderCode, new { id = "hiddenOrderCode" })
+    </div>
+</form>
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+
+    <script type="text/javascript">
+    $(function () {
+        $('#CustomerCode').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        hasChild: false,
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+        });
+
+        $('#OutDateRange').daterangepicker({
+            autoUpdateInput: true,
+            ranges: {
+                '今天': [moment(), moment()],
+                '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '本周': [moment().startOf('week'), moment()],
+                '上周': [moment().subtract(6, 'days'), moment()],
+                '本月': [moment().startOf('month'), moment().endOf('month')],
+                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                format: "YYYY/MM/DD", //设置显示格式
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        }, function (start, end) {
+            $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+        });
+        $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#OutDateRange').val('');
+        });
+        $('#CreatedRange').daterangepicker({
+            autoUpdateInput: true,
+            ranges: {
+                '今天': [moment(), moment()],
+                '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '本周': [moment().startOf('week'), moment()],
+                '上周': [moment().subtract(6, 'days'), moment()],
+                '本月': [moment().startOf('month'), moment().endOf('month')],
+                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                format: "YYYY/MM/DD", //设置显示格式
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        }, function (start, end) {
+                $('#CreatedRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+        });
+        $('#CreatedRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#CreatedRange').val('');
+        });
+        // 初始
+        $('#CreatedRange').val('');
+        $('#OutDateRange').val('');
+
+        //搜索
+        $("#btnSearch").click(function () {
+            pageselectCallback(0);
+        });
+
+        //重置
+        $("#btnReset").click(function () {
+            $(".sotable td input[type='text']").val("");
+        });
+
+        //线路类型选择
+        $("input:radio[name=lineTypeGroup]").click(function () {
+            var radValue = $("input:radio[name=lineTypeGroup]:checked").first().val();
+            $("#hiddenLineType").val(radValue);
+        });
+
+        $("#SaleTeamId").change(function(){
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#SalerCode").empty();
+            if (teamId == "") {
+                $("#SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#SalerCode").append("<option value=\""+item.Code+"\">"+item.Name+"</option>");
+                    });
+                }
+            });
+        });
+    });
+
+    </script>
+}
+

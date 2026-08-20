@@ -1,0 +1,66 @@
+﻿@model Lvy.Models.TicketDB.TktProductModel
+@{
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    var list = Model.FileList;
+    var first = list.FirstOrDefault();
+}
+@section HeaderContent {
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.carousel.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.theme.default.css" />
+    <link rel="stylesheet" href="~/css/style.css">
+}
+
+<!-- wrap content -->
+<div class="wrap-content pusher">
+
+    <!-- product details -->
+    <div class="product-details segments-page">
+        <div class="ui container">
+            <div class="slide-product owl-carousel owl-theme">
+                @foreach (var item in list)
+                {
+                    <div class="slide-content"><img src="@(picroot + item.FilePath)" alt=""></div>
+                }
+            </div>
+            <div class="desc-short">
+                <p class="title">@Model.ProductName</p>
+                <h5> @Math.Round(Model.MarketPrice) 元 <span style="font-size:14px;">起</span></h5>
+                <p> @DictionaryTools.GetDestNameStr(Model.ArriveDest) - @Model.Place.PlaceName</p>
+                @*<button class="button"><i class="fa fa-shopping-cart"></i>预订商品</button>*@
+            </div>
+            <div class="desc-long">
+                @*<h5>产品经理推荐</h5>*@
+                <p>
+                    @Html.Raw(Model.Place.OpenTime)
+                </p>
+            </div>
+
+            <div id="context2">
+                <div class="ui secondary pointing menu" style="background-color:#f7f7f7" id="route_header">
+                    <a class="active item" data-tab="seconda">预定须知</a>
+                    <a class="item" data-tab="secondb">商品介绍</a>
+                </div>
+                <div class="ui bottom active tab segment" id="route_tab" data-tab="seconda">
+                    @Model.BookingDesc
+                </div>
+                <div class="ui bottom tab segment" data-tab="secondb">
+                    @Html.Raw(Model.ProductDesc)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="@CDNServerUrl/owl-carousel/owl.carousel.js"></script>
+    <script src="~/js/main.js"></script>
+    <script type="text/javascript">
+        $('#context2 .menu .item').tab({ context: $('#context2') });
+        $(function () {
+
+
+        });
+    </script>
+}

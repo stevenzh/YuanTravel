@@ -1,0 +1,31 @@
+﻿@model  Lvy.VModels.Crm.PermissionVModel
+
+<div align="center" class="r_right">
+    @foreach (var module in Model.Functions.Where(a => a.FuncType == 1))
+    {
+        if (module.IsSuper == 1) { continue; }
+        <div class="sotable_tit">
+            <label>
+                <input id="chk @module.Id" group="@module.Id" value="@module.Id" onclick="SelectCheckbox(this)" type="checkbox" value="" />@module.Name
+            </label>
+        </div>
+        <div class="r_cont">
+            @foreach (var menu in Model.Functions.Where(a => a.FuncType == 2 && a.ParentId == module.Id))
+            {
+                <p>
+                    <label>
+                        <input type="checkbox" id="chk @menu.Id" name="FuncIds" group="@module.Id" group2="@menu.Id" value="@menu.Id" onclick="SelectCheckbox2(this)" />
+                        <strong>@menu.Name</strong>
+                    </label>
+                    @foreach (var func in Model.Functions.Where(a => a.FuncType == 5 && a.ParentId == menu.Id))
+                    {
+                        <label>
+                            <input type="checkbox" id="chk @func.Id" name="FuncIds" group="@module.Id" group2="@menu.Id" value="@func.Id" />
+                            @func.Name
+                        </label>
+                    }
+                </p>
+            }
+        </div>
+    }
+</div>

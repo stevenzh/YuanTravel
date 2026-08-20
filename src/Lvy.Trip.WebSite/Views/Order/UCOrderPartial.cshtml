@@ -1,0 +1,61 @@
+﻿@model Lvy.VModels.Booking.BookingVModel
+
+<table class="table WdayTable-sm">
+    <tr>
+        <td style="text-align:right; vertical-align:top;">订单备注：</td>
+        <td colspan="4">
+            <textarea class="form-control form-control-sm" id="Remark" name="Remark"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:right;">对应销售：</td>
+        <td>
+            @Html.DropDownListFor(a => a.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+        </td>
+        <td style="text-align:right;">
+            分销商:
+        </td>
+        <td colspan="2">
+            @Model.BookingCustomerName
+            @Html.HiddenFor(m => m.BookingCustomer)
+            @Html.HiddenFor(m => m.BookingCustomerName)
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:right;"><span class="some_tips">*</span> 联系人姓名:</td>
+        <td>
+            <input type="hidden" id="ContactCode" name="ContactCode" />
+            <input type="text" class="form-control form-control-sm" id="Managers" name="Managers" />
+        </td>
+        <td style="text-align:right;"><span class="some_tips">*</span> 联系电话:</td>
+        <td>
+            <input type="text" class="form-control form-control-sm" id="ManagerPhone" name="ManagerPhone" />
+        </td>
+        <td>
+            <a href="javascript:;" id="lnkAnsyInfo">自动填充</a>
+        </td>
+    </tr>
+    <tr>
+        <td style="text-align:right;">关联订单：</td>
+        <td>
+            @Html.TextBoxFor(a => a.JoinOrderCode, new { @class = "form-control form-control-sm" })
+        </td>
+        <td>&nbsp;</td>
+        <td rowspan="2" align="right">
+            <input type="button" id="post_button" class="btn btn-info" value="提交订单" />
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="text-align:right;">退改规则</td>
+        <td colspan="4">
+            <div class="some_tips">
+                @*@Html.Raw(Model.LineModel.OpDesc)*@
+            </div>
+        </td>
+    </tr>
+</table>
+
+@*@Html.HiddenFor(a => a.Remark2)*@
+
+

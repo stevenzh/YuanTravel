@@ -1,0 +1,141 @@
+﻿@model Lvy.Visa.Models.VisaCountryConsularDistrictModel
+@{
+    Layout = null;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link href="@CDNServerUrl/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="@CDNServerUrl/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/select2-bootstrap4-theme/select2-bootstrap4.min.css" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="@CDNServerUrl/adminlte/css/adminlte.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/layer/theme/default/layer.css" />
+
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/select2.full.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/i18n/zh-CN.js"></script>
+    <script src="@CDNServerUrl/layer/layer.js"></script>
+</head>
+<body class="hold-transition">
+    <div class="card">
+        @*<div class="card-header">
+            <h3 class="card-title">图片列表</h3>
+        </div>*@
+        <!-- /.card-header -->
+        <!-- form start -->
+        <form class="form-horizontal">
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-2 col-form-label">签证国家</label>
+                    <div class="col-sm-10">
+                        <span style="color: Blue; font-weight: bold;">@Model.CountryName</span>
+                        <input type="hidden" id="CountryName" value="@Model.CountryName" />
+                        <input type="hidden" id="VisaCountryCode" value="@Model.VisaCountryCode" />
+                        <input type="hidden" id="CountryCode" value="@Model.CountryCode" />
+                        <input type="hidden" id="ConsularDistrictId" value='@Model.Id' />
+                        <input type="hidden" id="ConsularDistrictCode" value='@Model.ConsularDistrictCode' />
+                        <input type="hidden" id="isValid" value='@Model.IsValid' />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputPassword3" class="col-sm-2 col-form-label">领区：</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(a => a.ConsularDistrictKey, ViewData["VisaArea"] as IEnumerable<SelectListItem>, new { @id = "ConsularDistrictKey", @class = "form-control", @onchange = "funSelCDkey(this)" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputPassword3" class="col-sm-2 col-form-label">受理范围：</label>
+                    <div class="col-sm-10">
+                        <textarea rows="5" class="form-control" id="AcceptRange">@Model.AcceptRange</textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+                <button type="button" class="btn btn-info" id="btnSaveConsularDistrict">保存</button>
+            </div>
+            <!-- /.card-footer -->
+        </form>
+    </div>
+
+    <script type="text/javascript">
+    $("#btnSaveConsularDistrict").click(function () {
+        if ($("#VisaCountryCode").val() == "") {
+            alert("请先添加签证国家！！");
+            return;
+        }
+        if ($("#ConsularDistrictKey").val() == "-1") {
+            alert("请选择领区！！");
+            return;
+        }
+        if ($("#AcceptRange").val() == "") {
+            alert("请选择受理范围！！");
+            return;
+        }
+        var param = {
+            "CountryCode": $("#CountryCode").val(),
+            "VisaCountryCode": $("#VisaCountryCode").val(),
+            "ConsularDistrictKey": $("#ConsularDistrictKey").val(),
+            "AcceptRange": $("#AcceptRange").val(),
+            "Id": $("#ConsularDistrictId").val(),
+            "ConsularDistrictCode": $("#ConsularDistrictCode").val(),
+            "IsValid": $("#isValid").val()
+        };
+        $.post("/District/CheckCdKey", param, function (datacheck) {
+            if (datacheck == "true") {
+                var ckey = '@Model.ConsularDistrictKey';
+                if (ckey != "-1" && ckey != "" && ckey) {
+                    alert("该领区已存在！请重新选择领区！");
+                    $("#ConsularDistrictKey").val(ckey);
+                }
+                else {
+                    alert("该领区已存在！请重新选择领区！");
+                    $("#ConsularDistrictKey").val("-1");
+                }
+            }
+            else {
+                $.post("/District/SaveConsularDistrict", param, function (data) {
+                    parent.refreshDistrictList();
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                });
+            }
+        });
+
+    });
+    ///验证领区是否已经存在
+    function funSelCDkey(obj) {
+        var cdkey = $(obj).val();
+        var param = {
+            "VisaCountryCode": $("#VisaCountryCode").val(),
+            "ConsularDistrictKey": cdkey,
+            "ConsularDistrictCode": $("#ConsularDistrictCode").val()
+        };
+        $.post("/District/CheckCdKey", param, function (data) {
+            if (data == "true") {
+                var ckey = '@Model.ConsularDistrictKey';
+                if (ckey != "-1" && ckey != "" && ckey) {
+                    alert("该领区已存在！请重新选择领区！");
+                    $(obj).val(ckey);
+                }
+                else {
+                    alert("该领区已存在！请重新选择领区！");
+                    $(obj).val("-1");
+                }
+            }
+        });
+    }
+    </script>
+
+</body>
+</html>

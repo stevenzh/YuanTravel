@@ -1,0 +1,72 @@
+﻿@model Lvy.VModels.Base.TaskVModel
+@{
+    ViewBag.Title = "添加任务";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+
+<section class="content">
+    <form id="theForm" method="POST">
+        @Html.HiddenFor(t => t.Task.TeamID)
+        @Html.HiddenFor(t => t.JsonModel.ContactCode)
+        @Html.HiddenFor(t => t.JsonModel.ContactName)
+        @Html.HiddenFor(t => t.JsonModel.CustomerCode)
+        @Html.HiddenFor(t => t.JsonModel.CustomerName)
+        @Html.HiddenFor(t => t.JsonModel.WorkmanTeam)
+        @Html.HiddenFor(t => t.JsonModel.Workman)
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">添加任务</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-2 col-form-label"><span class="point">*</span>审核组：</label>
+                    <div class="col-10">
+                        @Html.DropDownListFor(a => a.Task.WorkmanTeam, ViewBag.TeamBeans as IEnumerable<SelectListItem>, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label"><span class="point">*</span>审核人：</label>
+                    <div class="col-10">
+                        @Html.DropDownListFor(a => a.Task.Workman, ViewBag.SalesOfTeam as IEnumerable<SelectListItem>, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label"><span class="point">*</span>申请流程：</label>
+                    <div class="col-10">
+                        @Html.DropDownListFor(a => a.Task.WorkFlowID, ViewBag.WorkFlowTypes as IEnumerable<SelectListItem>, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-2 col-form-label"><span class="point">*</span>内容：</label>
+                    <div class="col-10">
+                        @Html.TextAreaFor(a => a.Task.Contents, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <input class="btn btn-info" id="btnSave" type="button" value="提交" />
+            </div>
+        </div>
+    </form>
+</section>
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSave").click(function () {
+            var param = decodeURIComponent($("#theForm").formSerialize());
+            $.post("/Task/Add/", param, function (data) {
+                if (data.Code == "1") {
+                    parent.Utils.alert("已提交领用！");
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                }
+            });
+        });
+
+    });
+
+</script>

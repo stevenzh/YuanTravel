@@ -1,0 +1,208 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@{
+    ViewBag.Title = "编辑联系人";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section HeaderContent{
+
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">@ViewBag.Title</h3>
+    </div>
+    <form id="theForm" action="@Url.Action("Update", "Contact")" method="post" onsubmit="return checkControls();">
+        @Html.HiddenFor(a => a.Account.Code)
+        @Html.HiddenFor(a => a.Account.SalerState)
+        @Html.HiddenFor(a => a.Account.CustomerCode)
+        <div class="card-body">
+            <div class="form-group" style="display:none;">
+                <label>密码：</label>
+                <div>
+                    @Html.HiddenFor(a => a.Account.Pwd)
+                    <input type="button" class="btn btn1" value="重置密码" id="resetPwdBtn" />
+                    <span style="color: gray">&nbsp;&nbsp; 重置后密码默认为：888888 </span>
+                </div>
+            </div>
+            @if (string.IsNullOrEmpty(Model.Account.CustomerCode))
+            {
+                <div class="form-group">
+                    <label>所属客户：</label>
+                    @Html.TextBoxFor(a => a.Account.CustomerName, new { @class = "form-control" })
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    <label>所属客户：</label>
+                    <div>@DictionaryTools.GetCachedCustomer(Model.Account.CustomerCode).Name</div>
+                </div>
+            }
+
+            <div class="form-group">
+                <label>姓名：</label>
+                @Html.TextBoxFor(a => a.Account.Name, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                <label>性别：</label>
+                @Html.RadioGroup("Account.Sex", Model.SexBeans, Model.Account.Sex.ToString())
+            </div>
+            <div class="form-group">
+                <label><span class="point"></span>微信是否绑定：</label>
+                <div>@(string.IsNullOrEmpty(Model.Account.OpenID) ? "未绑定" : "已绑定")</div>
+            </div>
+            <div class="form-group">
+                <label>联系手机：</label>
+                @Html.TextBoxFor(a => a.Account.Mobile, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                <label>电子信箱：</label>
+                @Html.TextBoxFor(a => a.Account.Email, new { @class = "form-control" })
+            </div>
+            <div class="form-group" style="display:none;">
+                <label>联系电话：</label>
+                @Html.TextBoxFor(a => a.Account.Phone, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                <label>销售组：</label>
+                @if (Model.IsLeader == 1)
+                {
+                    @Html.DropDownListFor(a => a.Account.TeamID, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                }
+                else
+                {
+                    @Html.DropDownListFor(a => a.Account.TeamID, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "form-control", @disabled = "disabled" })
+                    @Html.HiddenFor(m => m.Account.TeamID)
+                }
+            </div>
+            <div class="form-group">
+                <label>对应销售：</label>
+                @if (Model.IsLeader == 1)
+                {
+                    @Html.DropDownListFor(a => a.Account.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                }
+                else
+                {
+                    @Html.DropDownListFor(a => a.Account.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "form-control", @disabled = "disabled" })
+                    @Html.HiddenFor(m => m.Account.SalerCode)
+                }
+            </div>
+            <div class="form-group">
+                <label>备注说明：</label>
+                @Html.TextAreaFor(a => a.Account.Remarks, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="card-footer">
+            <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+            <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#resetPwdBtn").click(function () {
+            var params = {
+                loginName: Utils.Trim($("#Account_Code").val())
+            };
+            $.post("@Url.Action("ResetPwd")", params, function (flag) {
+
+                if (flag > 0) {
+                    Utils.alert("重置密码成功");
+                } else {
+                    Utils.alert("重置密码失败！");
+                }
+            });
+        });
+
+        if ($("#Account_SalerState").val()=="1") {
+            $("input[type=text]").attr("disabled", "disabled");
+            $("input[type=radio]").attr("disabled", "disabled");
+            $("select").prop("disabled", "false");
+        }
+
+        $("#theForm").submit(function () {
+            if (!checkControls()) {
+                return false;
+            }
+            return true;
+        });
+
+        $("#Account_TeamID").change(function(){
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#Account_SalerCode").empty();
+            if (teamId == "") {
+                $("#Account_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Saler")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#Account_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#Account_SalerCode").append("<option value=\""+item.Code+"\">"+item.Name+"</option>");
+                    });
+                }
+            });
+        });
+    });
+
+    function checkControls() {
+
+        if (Utils.Trim($("#Account_Name").val()) == "") {
+            Utils.alert("姓名不能为空！");
+            $("#Account_Name").select().focus();
+            return false;
+        }
+
+        var isLssued = true;
+
+        if ($.trim($("#Account_Mobile").val()) == "") {
+            Utils.alert("联系人手机不能为空！");
+            return false;
+        } else {
+            var email = $.trim($("#Account_Mobile").val());
+            $.ajax({
+                url: '/Contact/CheckMobile',
+                data: { mobile: encodeURIComponent(email), code: $("#Account_Code").val() },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data == "1") {
+                        Utils.alert("联系人手机号码已存在!", 2000);
+                        $("#Account_Mobile").focus().select();
+                        isLssued = false;
+                    }
+                }
+            });
+
+            if (isLssued == false) return false;
+        }
+
+        if ($.trim($("#Account_Email").val()) != "") {
+            var email = $.trim($("#Account_Email").val());
+            $.ajax({
+                url: '/Contact/CheckEmail',
+                data: { email: encodeURIComponent(email), code: $("#Account_Code").val() },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data == "1") {
+                        Utils.alert("Email已存在!", 2000);
+                        $("#Account_Email").focus().select();
+                        isLssued = false;
+                    }
+                }
+            });
+        }
+
+        if (isLssued == false) return false;
+        return true;
+    }
+
+</script>

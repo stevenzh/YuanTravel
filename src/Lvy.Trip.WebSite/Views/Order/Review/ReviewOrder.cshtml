@@ -1,0 +1,82 @@
+﻿@model Lvy.VModels.Order.ReviewOrderVModel
+@{
+    ViewBag.Title = "查看订单";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+<h4 class="station">订单信息 - 查看</h4>
+
+<div class="in_box">
+    <div align="center" class="xboxcontent">
+
+        <table id="orderInfo" class="table table-sm">
+            <tr>
+                <td class="label">订单编号：</td>
+                <td colspan="3">@Model.Order.OrderCode</td>
+            </tr>
+            <tr>
+                <td class="label">线路名称：</td>
+                <td colspan="3">@Model.Order.LineName</td>
+            </tr>
+            <tr>
+                <td class="label">联系人姓名：</td>
+                <td>@Model.Order.Managers</td>
+                <td class="label">联系电话：</td>
+                <td>@Model.Order.ManagerPhone</td>
+            </tr>
+            <tr>
+                <td class="label">出发日期：</td>
+                <td>@Model.Order.OutDate.ToDateFormat()</td>
+                <td class="label">线路类型：</td>
+                <td>@DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.Line.LineType.ToString())</td>
+            </tr>
+            <tr>
+                <td class="label">目的地：</td>
+                <td>@DictionaryTools.GetDestNameStr(Model.Order.Line.ArriveDest)</td>
+                <td class="label">行程天数：</td>
+                <td>@Model.Order.Line.TravelDays</td>
+            </tr>
+            <tr>
+                <td class="label">应收款：</td>
+                <td name="TolYsPrice">@Model.Order.TolYsPrice</td>
+                <td class="label">已收款：</td>
+                <td>@Model.Order.TolPaid</td>
+            </tr>
+            <tr>
+                <td class="label">订单状态：</td>
+                <td style="color: red;">@DictionaryTools.GetEnumValue(Enums.OrderStateEnum, Model.Order.OrderState.ToString())</td>
+                <td class="label">&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="label">上车点：</td>
+                <td colspan="3">
+                    @{
+                        var busPoint = Model.LineBusPoints.FirstOrDefault(p => p.Id == Model.Order.LineBusPointId);
+                        string busPointName = busPoint == null ? string.Empty : busPoint.BusPoint;
+                    }
+                    @busPointName
+                </td>
+            </tr>
+            <tr>
+                <td class="label">关联订单号：</td>
+                <td colspan="3">@Model.Order.JoinOrderCode</td>
+            </tr>
+            <tr>
+                <td class="label">备注：</td>
+                <td colspan="3"><p>@Model.Order.Remark</p></td>
+            </tr>
+        </table>
+
+        <br />
+        <div>
+            @if (Model.Line.LineScope < 3)
+            {
+                @Html.Partial("Review/UCShortTripTravellers", Model)
+            }
+            else
+            {
+                @Html.Partial("Review/UCLongTripTravellers", Model)
+            }
+        </div>
+    </div>
+</div>

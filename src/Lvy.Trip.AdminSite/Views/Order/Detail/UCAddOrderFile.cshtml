@@ -1,0 +1,153 @@
+﻿@model  Lvy.VModels.Order.OrderEditVModel
+@using Arch.Common
+@{
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+
+<div class="sotable_tit" style="height:26px; border-top: 1px solid #a7c4e2;">
+    文件附件列表
+    <div class="fr">
+        <table>
+            <tr>
+                <td><b>附件上传：</b></td>
+                <td><b>文件类型：</b></td>
+                <td>@Html.DropDownList("sourceType", (List<SelectListItem>)ViewBag.FileEnum, new { @id = "sourceType", @class = "form-control" })</td>
+                <td id="tdKeyTitle"><b>选择交款单：</b></td>
+                <td><select id="keyId"></select></td>
+                <td><b>描述：</b><input type="text" name="Remark" id="Remark" /></td>
+                <td><input type="file" name="orderFileName" /></td>
+                <td><input type="button" class="btn btn1" value="上传文件" id="btnUpload" /></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<table id="priceList" class="listtbl" style="width:100%;">
+    <thead>
+        <tr style="text-align: center;">
+            <td>文件名称</td>
+            <td>类型</td>
+            <td style="width:150px;">上传时间</td>
+            <td style="width:150px;">上传用户</td>
+            <td>描述</td>
+            <td>版本</td>
+            <td style="width:200px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @Html.HiddenFor(m => m.Order.OrderCode)
+        @foreach (var item in Model.FileList)
+        {
+            <tr style="text-align: center;">
+
+                @if (item.MediaType == "image")
+                {
+                    <td>
+                        <a class="go" href="@(picroot + item.FilePath)" title="@item.FileName" rel='gallery'>
+                            <img style="width:60px;" src="@(picroot + item.FilePath)">
+                        </a>
+                    </td>
+                }
+                else
+                {
+                    <td>@item.FileName</td>
+                }
+                <td>@DictionaryTools.GetEnumValue(Enums.FileBusinessEnum, item.SourceType)</td>
+                <td> @item.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td> @DictionaryTools.GetCachedAccount(item.CreatedBy).Name</td>
+                <td>@item.Remark</td>
+                <td>@(item.Revision == 0 ? "" : item.Revision.ToString())</td>
+                <td>
+                    <a href="javascript:DeleteOrderFile(@item.Id)">删除</a>
+                    <a href="@Url.Action("DownLoadFile",new { id=item.Id})">下载</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(function () {
+
+        $("#sourceType").change(function () {
+            var sourceType = $(this).val();
+            if (sourceType == '1' || sourceType == '2') {
+                $("#keyId").empty();
+
+                // 游客选择
+                $.ajax({
+                    url: '@Url.Action("JsonOrderInfo")',
+                    type: 'POST',
+                    data: { "orderCode": '@Model.Order.OrderCode' },
+                    success: function (data) {
+                        var html = "";
+                        if (sourceType == '1') {
+                            $("#tdKeyTitle").html("<b>选择游客</b>");
+                            $(data.TravellerModels).each(function (i, item) {
+                                html += "<option value=\"" + item.Id + "\">" + item.Name + "</option>";
+                            });
+                        } else {
+                            $("#tdKeyTitle").html("<b>选择缴款单</b>");
+                            $(data.PayInList).each(function (i, item) {
+                                html += "<option value=\"" + item.Id + "\">ID:" +item.Id +",金额:"+ item.Amount + "</option>";
+                            });
+                        }
+                        $("#keyId").html(html);
+                    }
+                });
+            } else {
+                $("#keyId").empty();
+                $("#tdKeyTitle").html("");
+            }
+        });
+
+        $("#btnUpload").click(function () {
+
+            if ($.trim($("[name='orderFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("#sourceType").val()) == "") {
+                Utils.alert("请选择文件类型！");
+                return;
+            }
+
+            var formData = new FormData();
+            //var name = $("[name='orderFileName']").val();
+            formData.append("orderFileName", $("[name='orderFileName']")[0].files[0]);
+            //formData.append("name", name);
+            formData.append("FileModel.SourceType", $("#sourceType").val());
+            formData.append("FileModel.KeyId", $("#keyId").val());
+            formData.append("FileModel.OrderCode", $("#Order_OrderCode").val());
+            formData.append("FileModel.Remark", $("#Remark").val());
+            $.ajax({
+                url: '@Url.Action("AddUpLoadOrderFile")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+
+                    $('#divFile').html(data);
+
+                }
+            });
+        });
+    })
+
+    function DeleteOrderFile(Id) {
+        if (!confirm("确定删除？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("DeleteOrderFile")',
+            type: 'POST',
+            data: { id: Id },
+            success: function (data) {
+                $('#divFile').html(data);
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,145 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@using Arch.Common
+@{
+    ViewBag.Title = "我的个人信息";
+    string picroot = AppSetting.Get("UploadFileRoot");
+}
+
+<form id="theForm" action="@Url.Action("UpdateMyAccount", "Account")" enctype="multipart/form-data" method="POST">
+    <div class="station">
+        修改我的个人资料
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label" width="90px">
+                        <span class="point">*</span>登陆名：
+                    </td>
+                    <td>
+                        @Model.Account.LoginName
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">部门：</td>
+                    <td>@ViewBag.TeamName</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>姓名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>性别：</td>
+                    <td>@Html.RadioGroup("Account.Sex", Model.SexBeans, Model.Account.Sex.ToString())</td>
+                </tr>
+                <tr>
+                    <td class="label">联系手机：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">电子信箱：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Email, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">座机：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Phone, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point"></span>微信号：
+                    </td>
+                    <td>
+                        @if (string.IsNullOrEmpty(Model.Account.OpenID))
+                        {
+                            <a href="/Account/BindingWeixin">点击绑定微信</a>
+                        }
+                        else
+                        {
+                            <span>已绑定</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">所属客户：</td>
+                    <td>@DictionaryTools.GetCachedCustomer(Model.Account.CustomerCode).Name</td>
+                </tr>
+                <tr>
+                    <td class="label">头像(80px X 80px)：</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(Model.Account.ProfilePath))
+                        {
+                            <img src="@(picroot + Model.Account.ProfilePath)" />
+                        }
+                        <input type="file" name="UploadFile" />
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" onclick="return CheckControls();" />
+                        @*<input class="btn btn1" id="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />*@
+                        <input class="btn btn1" id="btnRestPwd" type="button" value="修改密码" />
+                    </td>
+                </tr>
+            </table>
+            @Html.HiddenFor(a => a.Account.LoginName)
+            @Html.HiddenFor(a => a.Account.Code)
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    function CheckControls() {
+
+        if (Utils.Trim($("#Account_Name").val()) == "") {
+            Utils.alert("姓名不能为空！");
+            $("#Account_Name").select().focus();
+            return false;
+        }
+    }
+
+    $(function () {
+        $("#btnRestPwd").click(function () {
+            var c = '<table width="100%" class="edittbl"><tr><td class="label"><span class="point">*</span>密码：</td><td>@Html.PasswordFor(a => a.Account.Pwd, new { @class = "text150" })</td></tr><tr><td class="label"><span class="point">*</span>确认密码：</td><td><input type="password" id="confirmPwd" class="text150" /></td></tr></table>';
+            layer.open({
+                type: 1, title: '修改密码', maxmin: false, shadeClose: false, area: ['260px', '200px'], content: c
+                , btn: ["确定", "取消"]
+                , yes: function (index, layero) {
+                    if (Utils.Trim($("#Account_Pwd").val()) == "") {
+                        Utils.alert("密码不能为空！");
+                        $("#Account_Pwd").select().focus();
+                        return false;
+                    }
+                    if (Utils.Trim($("#confirmPwd").val()) == "") {
+                        Utils.alert("确认密码不能为空！");
+                        $("#confirmPwd").select().focus();
+                        return false;
+                    }
+                    if (Utils.Trim($("#confirmPwd").val()) != Utils.Trim($("#Account_Pwd").val())) {
+                        Utils.alert("密码与确认密码不相同，请重新输入！");
+                        $("#confirmPwd").select().focus();
+                        return false;
+                    }
+
+                    var params = {
+                        accountCode:Utils.Trim($("#Account_Code").val()),
+                        newPwd:Utils.Trim($("#confirmPwd").val())
+                    };
+                    $.post("@Url.Action("ResetPwd")", params, function(flag) {
+                        if (flag > 0) {
+                            Utils.alert("重置密码成功！");
+                            layer.close(index);
+                        } else {
+                            Utils.alert("重置密码失败！");
+                        }
+                    });
+                }
+                , btn2: function (index, layero) {
+                    // 取消
+                }
+            });
+
+        });
+    });
+
+</script>

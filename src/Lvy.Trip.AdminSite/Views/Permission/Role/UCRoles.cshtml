@@ -1,0 +1,54 @@
+﻿@model Lvy.VModels.Crm.RoleVModel
+<div class="xbox">
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                <td>编号</td>
+                <td>角色名称</td>
+                <td>角色描述</td>
+                <td>是否有效</td>
+                <td align="center" width="50px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Roles)
+            {
+                <tr>
+                    <td style="text-align:center;">@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Description.TrimWithElipsis(20)</td>
+                    <td>@(item.IsValid==1?"有效":"无效")</td>
+                    <td align="center">
+                        <table class="toolbar">
+                            <tr>
+                                <td>
+                                    <a href="#" class="edit" name="editRole" title="编辑" bindId="@item.Id"><i class="fa fa-edit"></i></a>
+                                    @*<a href="@Url.Action("SetValidStateByRole", "Permission", new { id = item.Id })" name="delRole" title="删除"></a>*@
+                                </td>
+                                <td>@Html.IconDeleteActionLink("SetValidStateByRole", "Permission", item.IsValid, new { id = item.Id })</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("a[name='editRole']").each(function () {
+            $(this).click(function () {
+                var load_iii = Utils.layerLoad();
+                var url = "/Permission/EditRole";
+                $.get(url, { id: $(this).attr("bindId") }, function (data) {
+                    if (data.length > 0) {
+                        $("#divEditRole").html(data);
+                    }
+                    Utils.layerClose(load_iii);
+                });
+            });
+        });
+    });
+
+</script>

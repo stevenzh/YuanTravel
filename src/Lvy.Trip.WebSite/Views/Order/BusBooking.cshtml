@@ -1,0 +1,473 @@
+@model Lvy.VModels.Booking.BookingVModel
+@{
+    ViewBag.Title = "短线预定页";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="~/lib/powerFloat/powerFloat.css" rel="stylesheet" />
+}
+
+<!--main start-->
+<div class="container">
+    <div class="now_position">
+        <span>当前位置：产品预定</span> <span class="sport">
+            <a href="javascript:void(0);" id="showBusinessCard" rel="/Order/BusinessCard?lineId=@Model.Tour.LineId">
+                <strong>
+                    @DictionaryTools.GetCachedCustomer(@Model.LineModel.CustomerCode).ShortName
+                    <img style="vertical-align: bottom" src="~/images/icon_phone.png" alt="联系我" />
+                </strong>
+            </a>
+        </span>
+    </div>
+
+    <div class="scenic_info">
+        <div class="scenic_info">@Html.Partial("UCTourInfo", Model) @*团信息*@</div>
+    </div>
+    <form id="theForm">
+            <p>
+                <b class="title_b">报价类型</b>
+            </p>
+            <div id="divPrices" class="info_con_money">
+                @Html.Partial("UCPrices", Model.PriceModels)
+            </div>
+        <div class="mingdan">
+            <!--<div class="md_left_box">
+                <div class="md_left">
+                    <p>
+                        <b class="title_b">座位表</b>
+                    </p>
+                </div>
+                <div id="divSeats" class="md_left_mem">-->
+            @* 座位号*@
+            <!--</div>
+            </div>
+            <div class="md_right">-->
+            <p>
+                <b class="title_b">游客名单</b>
+            </p>
+            <div id="divTravellers" class="mem_list">
+                @Html.Partial("UCTravllersBus", Model)
+            </div>
+            @*</div>*@
+        </div>
+        <input type="hidden" id="TourId" name="TourId" value="@Model.Tour.Id" />
+        <input type="hidden" id="BusPointId" name="BusPointId" value="0" />
+    </form>
+</div>
+<!--main end-->
+<div id="showBusinessCardWin" class="shadow" style="position: absolute; background-color: white; display: none;"></div>
+
+@section PageScripts {
+    <script src="~/js/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+    <script src="~/lib/powerFloat/jquery-powerFloat-min.js"></script>
+    <script src="@CDNServerUrl/jquery-form/jquery.form.min.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            // 上车点选择
+            SelectBusPoint();
+            // 名片
+            $("#showBusinessCard").powerFloat({
+                targetMode: "ajax"
+            });
+
+            // 加载座位表
+            // LoadSeats();
+
+            $("input[name='priceNum']").keyup(function () {
+                // 如果已经有报价的场合，先删除同报价类型的游客
+                $("#tbTravellers tr").remove();
+
+                // 判断是否超过剩余库存 ，如超过，跳出。
+                var maxnum = 0;
+                $("input[name='priceNum']").each(function () {
+                    var suit = Number($(this).parents("tr").find("td[name='tdSuitNum']").html()); // 套餐
+                    maxnum += Number($(this).val()) * suit;
+                });
+
+                if (Utils.Trim($("#hidUseQuota").val()) < maxnum) {
+                    $(this).val(0);
+                }
+
+                $("input[name='priceNum']").each(function () {
+
+                    var obj = $(this).parents("tr");
+                    var model = new Object();
+                    model.PriceNum = Number(obj.find("input[name='priceNum']").val()); // 人数
+                    model.PriceId = obj.find("td[name='tdPriceId']").html(); // 报价Id
+
+                    // 取消选择中的座位
+                    $("#tblseats .org").each(function () {
+                        if ($(this).attr("priceId") == model.PriceId) {
+                            $(this).removeClass("org");
+                            $(this).addClass("gray");
+                        }
+                    });
+                    if (model.PriceNum <= 0) {
+                        return;
+                    }
+
+                    model.PriceContent = obj.find("td[name='tdPriceContent']").html(); // 报价类型
+                    model.Price = parseFloat(obj.find("td[name='tdPrice']").html()); //销售价
+                    model.TeJiaFanLi = Number($("#hidTejiaFanLi").val()); // 特价让利
+                    model.FanLi = parseFloat(obj.find("td[name='tdFanLi']").html()); //返利
+                    model.ZiFei = Number(obj.find("td[name='tdZiFei']").html()); // 自费
+                    model.SingleRoom = Number(obj.find("td[name='tdSingleRoom']").html()); // 单房差
+                    model.SuitNum = Number(obj.find("td[name='tdSuitNum']").html()); // 套餐
+                    model.JsPrice = Number(Utils.Trim($('#jsPrice').html())); // 接送费
+                    model.YsPrice = model.Price + model.JsPrice - model.TeJiaFanLi;
+                    //-----初始化座位号-------------------
+                    model.Seats = new Array();
+
+                    var seatNum = model.PriceNum * model.SuitNum;
+                    $("#tblseats .gray").each(function (i, o) {
+                        if (i >= seatNum) { return false; }
+                        $(o).removeClass("gray  ");
+                        $(o).addClass("org");
+                        $(o).attr("priceId", model.PriceId);
+                        model.Seats[i] = Utils.Trim($(o).html()); // 座位号
+                    });
+                    //-----------------------------------------------
+
+                    //-----根据人数，拼接游客html-------------------
+
+                    // 再追加游客
+                    var html = GetTravellersHtml(model);
+                    $("#tbTravellers").append(html);
+                    // 初始化 总价
+                    var totalPrice = 0;
+                    $("#tbTravellers").find("td[name='tdOnePrices']").each(function (i, o) {
+                        totalPrice += Number(Utils.Trim($(o).html()));
+                    });
+
+                    $("#totalPrice").html(totalPrice);  // 总价
+                    //-----------------------------------------------
+                });
+
+            });
+
+            // 预定提交
+            $("#post_button").click(function () {
+                if (!CheckControl()) {
+                    return false;
+                }
+                var params = decodeURIComponent($("#theForm").formSerialize());
+                var load_iii = Utils.layerLoad();
+                $.post('/Online/SaveOrder', params, function (data) {
+                    if (data.StateCode == 100) {
+                        // 预定成功
+                        Utils.alert("预定成功！");
+                        $("#post_button").attr("disabled", "true");
+                        document.location.href = "/Online/GoNoticePrint?orderCode=" + data.OrderCode;
+                        return;
+                    } else if (data.StateCode == 101) {
+                        // 车位已经占了的场合，刷新车位数据，提示客户重新选择车位
+                        Utils.alert("预定失败。已经有客人吧车位占了，请重新选择车位！");
+                        //刷新 下座位表
+                        LoadSeats();
+                    } else if (data.StateCode == 102) {
+                        // 车位已经被锁定的场合，刷新车位数据，提示客户重新选择车位
+                        Utils.alert("预定失败。车位已经被万恶的Op锁定了，请联系Op！");
+                        //刷新 下座位表
+                        LoadSeats();
+                    } else if (data.StateCode == 103) {
+                        // 可用名额小于预定名额
+                        Utils.alert("预定失败。你要预定的名额数超过了我们的可用名额，拿起你的电话，请与op协调！");
+                    } else {
+                        Utils.alert("预定失败。这个错误我也不知道该怎么形容了！请联系技术支持！");
+                    }
+
+                    Utils.layerClose(load_iii);
+                });
+            });
+        });
+
+        // 验证入力数据
+        function CheckControl() {
+            var returnValue = true;
+            if ($('#BusPointId').val() == "0") {
+                Utils.alert("请选择上车点！");
+                $("html,body").animate({ scrollTop: $("#select_div_address").offset().top - 50 }, 500);
+                return false;
+            }
+
+            if ($("#tbTravellers tr").length <= 0) // 游客信息的索引
+            {
+                Utils.alert("请添加游客信息！");
+                $("#tblPrices tr:eq(1)").find("input[name='priceNum']").focus().select(); // 人数
+                return false;
+            }
+
+            var name = $("#tbTravellers").find("input[name$='Name']:eq(0)");
+            if (Utils.Trim(name.val()) == "") {
+                Utils.alert("客人姓名必须填写一个！");
+                name.focus().select();
+                return false;
+            }
+
+            var Phone = $("#tbTravellers").find("input[name$='Phone']:eq(0)");
+            if (Utils.Trim(Phone.val()) == "") {
+                Utils.alert("联系电话必须填写一个！");
+                Phone.focus().select();
+                return false;
+            }
+
+            if (Utils.Trim($("#Managers").val()) == "") {
+                Utils.alert("请输入联系人姓名！");
+                $("#Managers").focus().select();
+                return false;
+            }
+            if (Utils.Trim($("#ManagerPhone").val()) == "") {
+                Utils.alert("请输入联系人的电话！");
+                $("#ManagerPhone").focus().select();
+                return false;
+            }
+
+            if (document.getElementById("JoinOrderCode")) {
+
+                if (Utils.Trim($("#JoinOrderCode").val()) == "") {
+                    return true;
+                }
+                var params = { joinOrderCode: Utils.Trim($("#JoinOrderCode").val()) };
+                $.ajax({
+                    url: "/Order/CheckJoinOrderCode",
+                    type: "GET",
+                    async: false,
+                    data: params,
+                    success: function (flag, textStatus) {
+                        if (flag == "1") {
+                            // exist
+                            Utils.alert("关联订单号已经存在！");
+                            $("#JoinOrderCode").focus().select();
+                            returnValue = false;
+                        }
+                    }
+                });
+            }
+
+            return returnValue;
+        }
+
+        // 回调方法。调用体在ucseats.cshtml里
+        function selectSeatsCallBack() {
+            var obj = $(this);
+
+            //获取客人人数。
+            var tCnt = $("#tbTravellers tr").length;
+            if (obj.attr("class") == "org") {
+                if (tCnt <= 0) {
+                    return false;
+                }
+                obj.attr("class", "gray");
+                $("#tbTravellers td[name='tdSeatNum']").each(function () {
+
+                    if (Utils.Trim($(this).html()) == Utils.Trim(obj.html())) {
+                        $(this).html("--");
+                        return false;
+                    }
+                });
+            }
+            else if (obj.attr("class") == "gray") {
+                if (tCnt <= $("#tblseats .org").length) {
+                    // 检查是否有客人报名。不可占位
+                    return false;
+                }
+                else {
+                    obj.attr("class", "org");
+                    var seatNum = Utils.Trim(obj.html());
+                    $("#tbTravellers td[name='tdSeatNum']").each(function () {
+                        $(obj).attr("priceId", $(this).parents("tr").find("input[name$='PriceId']").val());
+                        if ($(this).html() == "--") {
+                            $(this).html(seatNum);
+                            $(this).parents("tr").find("input[name$='SeatNum']").val(seatNum);
+                            return false;
+                        }
+                    });
+                }
+            }
+
+        }
+
+        // 加载座位表
+        function LoadSeats() {
+            var params = { tourId: $("#TourId").val() };
+            $.ajax(
+                {
+                    url: "/Order/LoadSeats",
+                    type: 'post',
+                    async: false,
+                    data: params,
+                    success: function (html) {
+                        $("#divSeats").html(html);
+                    }
+                });
+        }
+
+        // 上车点选择
+        function SelectBusPoint() {
+            $("#select_div_address").click(function () {
+                window.int0 = diffTime();
+                var className = $(this).attr('id');
+                $(this).attr('class', className + '_1');
+                $('#select_input_address').attr('class', 'select_input_address_1');
+
+                if ($(".select_option_address").css('display') == 'none') {
+                    $(".select_option_address").show();
+                } else {
+                    $(".select_option_address").hide();
+                    $(this).attr('class', className);
+                    $('#select_input_address').attr('class', 'select_input_address');
+                }
+            });
+
+            $(".select_option_address p").hover(function () {
+                $(".select_option_address p").each(function () {
+                    $(this).attr('class', '');
+                });
+                $(this).attr('class', 'option_bac');
+            }, function () {
+                $(this).attr('class', 'option_bac');
+            }
+            );
+            $(".select_option_address p").click(function () {
+
+                var oldjiesong = Number(Utils.Trim($('#jsPrice').html()));
+                $('#BusPointId').val(Utils.Trim($(this).attr("key")));
+                $('#input_address').val($(this).text());
+                $('#jsPrice').html(Utils.Trim($(this).attr("jsPrice")));
+                $('#address_span').html(Utils.Trim($(this).text()));
+                $(".select_option_address").hide();
+
+                // 计算价格
+                var jiesong = Number(Utils.Trim($('#jsPrice').html()));
+                var totalPrice = 0;
+                $("#tbTravellers").find("td[name='tdOnePrices']").each(function (i, o) {
+                    var temp = Number(Utils.Trim($(o).html()));
+                    $(o).html(temp - oldjiesong + jiesong);
+                    totalPrice += Number(Utils.Trim($(o).html()));
+                });
+
+                $("#totalPrice").html(totalPrice);
+            });
+        }
+
+        // 根据人数，拼接html
+        function GetTravellersHtml(model) {
+            var html = "";
+            var travllerIndex = $("#tbTravellers tr").length; // 游客信息的索引
+            for (var i = travllerIndex; i < model.PriceNum + travllerIndex; i++) {
+
+                html += "<tr height=\"30\" name=\"trPriceId" + model.PriceId + "\" >";
+                html += "  <td align=\"center\">" + model.PriceContent + "</td>"; //报价类型
+                html += "  <td align=\"center\"><input type=\"text\" name=\"Travellers[" + i + "].Name\" class=\"txt_input\"  style=\"width:77px;\"  /></td>"; //姓名
+                html += "  <td><input type=\"text\" class=\"txt_input\" name=\"Travellers[" + i + "].Phone\"  style=\"width:121px;\"  /></td>"; //联系电话
+                html += "  <td align=\"center\" name='tdSeatNum'>" + model.Seats[i - travllerIndex] + "</td>"; // 座位号
+                html += "  <td align=\"center\"><input style=\"ime-mode:disabled;width:77px;\" type=\"text\" class=\"txt_input\" name=\"Travellers[" + i + "].OtherPrice\"  onkeyup='CalcPrice(this);' onkeypress='InputLimitNumber();'  /></td>"; // 差价（其他费用）
+                html += " <td align=\"center\"><input type=\"checkbox\" id=\"zifei" + i + "\" name=\"Travellers[" + i + "].ZiFei\" group=\"chkAll\" onclick='CalcPrice(this);' /> <label for=\"zifei" + i + "\" >" + model.ZiFei + "</label></td>";  //自费
+                html += "  <td align=\"center\"><input type=\"checkbox\" id=\"singleroom" + i + "\"  name=\"Travellers[" + i + "].SingleRoom\" group=\"chkAll2\" onclick='CalcPrice(this);' /> <label for=\"singleroom" + i + "\" >" + model.SingleRoom + "</label></td>";  //房差
+                html += "  <td align=\"center\" name=\"tdOnePrices\" style=\"color:#FF8F27;\" >" + model.YsPrice + "</td>";  // 客人应收款
+                html += "  <td align=\"center\" name=\"tdPrice\" style=\"display: none;\" >" + model.Price + "</td>";   //销售价
+                html += " <input type=\"hidden\"  name=\"Travellers[" + i + "].IsMianPiao\" value='0' />";
+                html += "<input type=\"hidden\"  name=\"Travellers[" + i + "].SeatNum\" value=\"" + model.Seats[i - travllerIndex] + "\" />";
+                html += "<input type=\"hidden\"  name=\"Travellers[" + i + "].PriceId\" value=\"" + model.PriceId + "\" />";
+
+                html += "</tr>";
+            }
+            var travellerNum = model.PriceNum * (model.SuitNum - 1); // 实际人数
+            for (var i = model.PriceNum + travllerIndex; i < travellerNum + model.PriceNum + travllerIndex; i++) {
+                html += "<tr height=\"30\" name=\"trPriceId" + model.PriceId + "\" >";
+                html += "  <td align=\"center\">" + model.PriceContent + "</td>"; //报价类型
+                html += "  <td align=\"center\"><input type=\"text\" name=\"Travellers[" + i + "].Name\" class=\"txt_input\"  style=\"width:77px;\"  /></td>"; //姓名
+                html += "  <td><input type=\"text\" class=\"txt_input\" name=\"Travellers[" + i + "].Phone\"  style=\"width:121px;\"  /></td>"; //联系电话
+                html += "  <td align=\"center\" name='tdSeatNum'> " + model.Seats[i - travllerIndex] + "</td>"; // 座位号
+                html += "  <td align=\"center\"><input type=\"text\" style=\"ime-mode:disabled;width:77px;\"   class=\"txt_input\" name=\"Travellers[" + i + "].OtherPrice\"   onkeyup='CalcPrice(this);' onkeypress='InputLimitNumber();'  /></td>"; // 差价（其他费用）
+                html += " <td align=\"center\"><input type=\"checkbox\" id=\"zifei" + i + "\" name=\"Travellers[" + i + "].ZiFei\" group=\"chkAll\" onclick='CalcPrice(this);' /> <label for=\"zifei" + i + "\" >" + model.ZiFei + "</label></td>";  //自费
+                html += "  <td align=\"center\"><input type=\"checkbox\" id=\"singleroom" + i + "\"  name=\"Travellers[" + i + "].SingleRoom\" group=\"chkAll2\" onclick='CalcPrice(this);' /> <label for=\"singleroom" + i + "\" >" + model.SingleRoom + "</label></td>";  //房差
+                html += "  <td align=\"center\" name=\"tdOnePrices\" style=\"color:#FF8F27;\" >" + model.JsPrice + "</td>";  // 客人应收款
+                html += "  <td align=\"center\" name=\"tdPrice\" style=\"display: none;\" >" + 0 + "</td>";   //销售价
+                html += " <input type=\"hidden\"  name=\"Travellers[" + i + "].IsMianPiao\" value='1' />";
+                html += "<input type=\"hidden\"  name=\"Travellers[" + i + "].SeatNum\" value=\"" + model.Seats[i - travllerIndex] + "\" />";
+                html += "<input type=\"hidden\"  name=\"Travellers[" + i + "].PriceId\" value=\"" + model.PriceId + "\" />";
+                html += "</tr>";
+            }
+
+            return html;
+        }
+
+        // 计算游客价格
+        function CalcPrice(_this) {
+
+            var obj = $(_this).parents("tr");
+            var model = new Object();
+            model.Price = Number(obj.find("td[name='tdPrice']").html()); // 销售价
+            model.TeJiaFanLi = Number($("#hidTejiaFanLi").val()); // 特价让利
+            model.OtherPrice = Number(obj.find("input[name$='OtherPrice']").val()); // 差价
+            model.IsZiFei = obj.find("input[name$='ZiFei']").prop('checked'); // 自费
+            model.ZiFei = Number(obj.find("input[name$='ZiFei']").parent().find('label').html()); // 自费
+            model.SingleRoom = Number(obj.find("input[name$='SingleRoom']").parent().find('label').html()); // 房差
+            model.IsSingleRoom = obj.find("input[name$='SingleRoom']").prop('checked'); // 房差
+            model.JsPrice = Number(Utils.Trim($('#jsPrice').html()));
+            model.IsMianPiao = Number(obj.find("input[name$='IsMianPiao']").val());
+            var oneprice = 0;
+            if (model.IsMianPiao == 1) {
+                oneprice = model.Price + model.JsPrice + model.OtherPrice;
+            } else {
+                oneprice = model.Price + model.JsPrice + model.OtherPrice - model.TeJiaFanLi;
+            }
+
+            if (model.IsZiFei == 'checked') {
+                oneprice += model.ZiFei;
+            }
+
+            if (model.IsSingleRoom == 'checked') {
+                oneprice += model.SingleRoom;
+            }
+
+            obj.find("td[name='tdOnePrices']").html(oneprice);  // 显示报价类型的总计
+
+            // 价格总价
+            model.TotalPrice = 0;
+            $(_this).parents("table").find("td[name='tdOnePrices']").each(function (i, o) {
+                model.TotalPrice += parseFloat($(o).html());
+            });
+
+            $("#totalPrice").html(model.TotalPrice);  // 总价
+
+            showDetails();
+        }
+
+        function showDetails() {
+            //------------自费-----------------------------------
+            var zifeiNum = 0;
+            var zifei = 0;
+            $("table input[name$='ZiFei']").each(function () {
+                if ($(this).prop('checked')) {
+                    zifeiNum++;
+                    zifei = zifei + Number($(this).parent().find('label').html());
+                }
+            });
+
+            //------------单房差-----------------------------------
+            var singleRoomNum = 0;
+            var singleRoom = 0;
+            $("table input[name$='SingleRoom']").each(function () {
+                if ($(this).prop('checked')) {
+                    singleRoomNum++;
+                    singleRoom = singleRoom + Number($(this).parent().find('label').html());
+                }
+
+            });
+
+            //------------补差价-----------------------------------
+            var otherPrices = 0;
+            $("table input[name$='OtherPrice']").each(function () {
+                otherPrices += Number($(this).val());
+            });
+
+            $("#totalOtherPrice").html(otherPrices);
+            $("#totalZifei").html(zifeiNum);
+            $("#totalSingleRoom").html(singleRoomNum);
+        }
+    </script>
+}

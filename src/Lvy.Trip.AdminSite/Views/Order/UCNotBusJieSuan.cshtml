@@ -1,0 +1,88 @@
+﻿@model Lvy.VModels.Order.OrderConfirmPrintVModel
+<table style="border: 0px;" class="listtbl" width="100%">
+    <thead>
+        <tr>
+            <td align="center">游客姓名</td>
+            <td align="center">联系电话</td>
+            <td align="left">证件类型</td>
+            <td align="left">证件号码</td>
+            <td align="center">报价类型</td>
+            <td align="center">销售价</td>
+            <td align="center">让利</td>
+            <td align="center">自费</td>
+            <td align="center">单房差</td>
+            <td align="center">签证费</td>
+            <td align="center">结算金额</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TravellerModels.Count > 0)
+        {
+            var models = Model.TravellerModels.Where(a => a.State == 2); // 有效客户
+            foreach (var item in models)
+            {
+                <tr>
+                    <td align="center">@item.Name</td>
+                    <td align="center">@item.Phone</td>
+                    <td align="left">
+                        @DictionaryTools.GetEnumValue(Enums.PassTypeEnum, item.PassType.ToString())
+                    </td>
+                    <td align="left">@item.PassNo</td>
+                    <td align="left">
+                        @{
+                            var index = item.PriceContent.IndexOf('(');
+                            if (index == -1)
+                            {
+                                @item.PriceContent
+                            }
+                            else
+                            {
+                                @item.PriceContent.Substring(0, item.PriceContent.IndexOf('('))
+                            }
+                        }
+
+                    </td>
+                    <td align="left">@item.Price</td>
+                    <td align="left">@item.FanLi</td>
+                    <td align="left">@item.ZiFei</td>
+                    <td align="left">@item.SingleRoom</td>
+                    <td align="left">@item.VisaPrice</td>
+                    <td align="center">@item.YsPrice</td>
+                </tr>
+            }
+            var tuiTuanModels = Model.TravellerModels.Where(a => a.State == 1); // 退团产生费用
+            foreach (var item in tuiTuanModels)
+            {
+                <tr>
+                    <td align="center">@item.Name</td>
+                    <td align="center">@item.Phone</td>
+                    <td align="left">@DictionaryTools.GetEnumValue(Enums.PassTypeEnum, item.PassType.ToString())</td>
+                    <td align="left">@item.PassNo</td>
+                    <td align="left"> 已退团  </td>
+                    <td align="left">   </td>
+                    <td align="left">   </td>
+                    <td align="left">   </td>
+                    <td align="left">   </td>
+                    <td align="left">   </td>
+                    <td align="center">@item.YsPrice</td>
+                </tr>
+            }
+            <tr>
+                <td align="right" colspan="10">
+                    <label class="label" style="padding-right: 28px;">结算总金额：</label>
+                </td>
+                <td align="center">
+                    <label class="label">@Model.OrderModel.TolYsPrice</label>
+                </td>
+            </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" align="center" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+    </tbody>
+</table>

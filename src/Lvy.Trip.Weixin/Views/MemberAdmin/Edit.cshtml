@@ -1,0 +1,182 @@
+﻿@model Lvy.Models.WeixinDB.Member
+@{
+    ViewBag.Title = "编辑用户";
+    MemberQR qr = ViewData["MyQR"] as MemberQR;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@using Lvy.Models.WeixinDB;
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+
+<section class="content">
+    <div class="row">
+        <div class="col-sm-6">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.MemberID)
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">用户信息.</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">真实姓名</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(model => model.RealName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">电话号码</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">企业名称</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(model => model.CustomerName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.LogoUrl, new { @class = "col-3 col-form-label" })
+                            <div class="col-9">
+                                @Html.TextBoxFor(model => model.LogoUrl, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">销售姓名</label>
+                            <div class="col-9">
+                                @Html.TextBoxFor(model => model.Sales, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">销售绑定</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(model => model.Binding, (List<SelectListItem>)ViewBag.BindingList, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">同业审核</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(model => model.Approved, (List<SelectListItem>)ViewBag.ApprovedList, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">分享显示标识</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(model => model.HideShared, (List<SelectListItem>)ViewBag.ShareList, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label">对应系统用户ID</label>
+                            <div class="col-9">
+                                @Html.DropDownListFor(model => model.EmployeeID, (List<SelectListItem>)ViewBag.SalesList, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        @if (qr != null)
+                        {
+                            <div class="form-group row">
+                                <label class="col-3 col-form-label">我的二维码</label>
+                                <div class="col-9">
+                                    <img src="https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=@qr.Ticket" style="width:180px;" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <input type="submit" value="保存" class="btn btn-default" />
+                        @if (!string.IsNullOrEmpty(Model.EmployeeID) && Model.QrID == null)
+                        {
+                            <input type="button" id="btn_qr" value="生成二维码" class="btn btn-default" />
+                        }
+                        @Html.ActionLink("返回列表", "Index", null, new { @class="btn btn-default float-right" })
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">微信用户信息</h4>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <td class="width:30%">OpenID</td>
+                            <td>@Model.OpenID</td>
+                        </tr>
+                        <tr>
+                            <td>是否关注</td>
+                            <td>@Model.Subscribe</td>
+                        </tr>
+                        <tr>
+                            <td>关注时间</td>
+                            <td>@Model.SubscribeTime</td>
+                        </tr>
+                        <tr>
+                            <td>昵称</td>
+                            <td>@Model.NickName</td>
+                        </tr>
+                        <tr>
+                            <td>性别</td>
+                            <td>@Model.Sex</td>
+                        </tr>
+                        <tr>
+                            <td>国家</td>
+                            <td>@Model.Country</td>
+                        </tr>
+                        <tr>
+                            <td>省份</td>
+                            <td>@Model.Province</td>
+                        </tr>
+                        <tr>
+                            <td>城市</td>
+                            <td>@Model.City</td>
+                        </tr>
+                        <tr>
+                            <td>头像</td>
+                            <td><img src="@Model.HeadImgUrl" style="height:200px;" /></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(function () {
+        $("#btn_qr").click(function () {
+            $.ajax({
+                url: '/Member/CreateQr',
+                type: 'post',
+                dataType: 'json',
+                data: {id : '@Model.MemberID', employeeid :'@Model.EmployeeID' },
+                success: function (data) {
+                    //console.log(data);
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    $("#btn_qr").hide();;
+                },
+            });
+        });
+    });
+</script>

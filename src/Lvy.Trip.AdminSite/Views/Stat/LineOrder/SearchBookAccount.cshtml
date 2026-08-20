@@ -1,0 +1,146 @@
+﻿@model Lvy.VModels.Finance.FinanceVModel
+@{
+    ViewBag.Title = "预定统计";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/scripts/jquery.fileDownload.1.3.3.js" type="text/javascript"></script>
+    <style>
+        .select2-container--default .select2-selection--single { border-radius: 0; }
+    </style>
+}
+<form id="theForm" method="POST" action="@Url.Action("ExportExcel")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                预定统计分析
+            </div>
+            <table id="searchTable" class="edittbl" style="border-bottom: 0px; width:100%;">
+                <tr>
+                    <td class="label">产品类型：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.LineType, ViewBag.LineTypes as IEnumerable<SelectListItem>, new { @class = "text150" })
+                    </td>
+                    <td class="label">产品名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.LineName, new { @class = "text150" })
+                    </td>
+                    <td class="label">出发日期：</td>
+                    <td colspan="3">
+                        <input type="text" name="Condition.StartOutDate" id="d4311" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4312\')||\'2020-10-01\'}'})" />
+                        &nbsp;--&nbsp;
+                        <input type="text" name="Condition.EndOutDate" id="d4312" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4311\')}'})" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">订单编号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.OrderId, new { @class = "text150" })
+                    </td>
+                    <td class="label">团号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Condition.TourNo, new { @class = "text150" })
+                    </td>
+                    <td class="label">预定日期：</td>
+                    <td colspan="3">
+                        <input type="text" name="Condition.StartCreatedTime" id="d4313" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,maxDate:'#F{$dp.$D(\'d4314\')||\'2020-10-01\'}'})" />
+                        &nbsp;--&nbsp;
+                        <input type="text" name="Condition.EndCreatedTime" id="d4314" class="Wdate text100" onfocus="WdatePicker({isShowClear:true,readOnly:true,onpicked:function(){},minDate:'#F{$dp.$D(\'d4313\')}'})" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">产品部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">销售部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SaleTeamId, ViewBag.SalesOfTeam as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">销售：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">分销商：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.Condition.BookingCustomerName, new { @id = "Condition_BookingCustomerName" })
+                        <select id="mySelect1" name="Condition.BookingCustomer" class="text220 ">
+                            <option></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">订单状态：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.OrderState, ViewBag.AllOrderStates as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">结算状态：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.SettlementState, ViewBag.SettlementStateBean as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    <td class="label">订单来源：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Condition.OrderSource, ViewBag.OrderSourceItems as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: center;">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="resetBtn" type="button" value="清空" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divFinanceList">
+        @Html.Partial("LineOrder/UCBAccountSearch", Model)
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('#mySelect1').select2({
+                ajax: {
+                    url: '/Customer/GetCustomerSelect2',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                            page: params.page || 0,
+                            size: 10,
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 0;
+                        return {
+                            results: data.rows,
+                            pagination: {
+                                more: (params.page * 10) < data.total
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                //templateResult: formatState
+                allowClear: true
+            });
+            $('#mySelect1').on('select2:select', function (e) {
+                $("#Condition_BookingCustomerName").val(e.params.data.text);
+            });
+
+            //搜索
+            $("#btnSearch").click(function () {
+                pageselectCallback(0);
+            });
+
+            //重置
+            $("#resetBtn").click(function () {
+                $("#searchTable td input[type=text]").val("");
+                $("#searchTable td input[type=hidden]").val("");
+            });
+
+        });
+
+    </script>
+</form>

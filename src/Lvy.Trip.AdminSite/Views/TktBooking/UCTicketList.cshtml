@@ -1,0 +1,133 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Ticket.SearchTicketVModel
+
+<div class="card-body p-0">
+    <table class="table table-sm" id="listtbl">
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>部门</th>
+                <th>商品名称</th>
+                <th>目的地</th>
+                <th>购买方式</th>
+                <th>库存</th>
+                <th>价格模式</th>
+                <th>商品类型</th>
+                <th>供应商</th>
+                <th style="width: 120px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.PagedTickets.Items == null || Model.PagedTickets.Items.Count == 0)
+            {
+                <tr style="text-align: center; color: #FF0000;">
+                    <td colspan="9">
+                        无数据
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.PagedTickets.Items)
+                {
+                    var customer = DictionaryTools.GetCachedCustomer(item.SupplierCode);
+                    <tr>
+                        <td>
+                            @item.ProductId
+                        </td>
+                        <td>
+                            @DictionaryTools.GetCachedTeam(item.TeamID).TeamName
+                        </td>
+                        <td title="@item.ProductName">
+                            @item.ProductName.TrimWithElipsis(20)
+                        </td>
+                        <td>
+                            @DictionaryTools.GetDestNameStr(item.ArriveDest)
+                        </td>
+                        <td>
+                            @DictionaryTools.GetEnumValue(Enums.TktTypeEnum, item.TktType.ToString(CultureInfo.InvariantCulture))
+                        </td>
+                        <td>
+                            @*@DictionaryTools.GetEnumValue(Enums.TktTuiJianTypeEnum, item.TuiJianType.ToString(CultureInfo.InvariantCulture))*@
+                            @if (item.TuiJianType == 2)
+                            {
+                                @item.PlanQuota
+                            }
+                            else
+                            {
+                                @("不限库存")
+                            }
+                        </td>
+                        <td>
+                            @(item.PriceMode == 2?"日期价格":"固定价格")
+                        </td>
+                        <td>
+                            @DictionaryTools.GetEnumValue(Enums.ProductAllTypeEnum, item.ProductType.ToString(CultureInfo.InvariantCulture))
+                        </td>
+                        <td title="@customer.FastCode-@customer.Name">
+                            @customer.Name.TrimWithElipsis(7)
+                        </td>
+                        <td>
+                            @if (item.ProductState == 2)
+                            {
+                                //当前下线
+                                <span></span>
+                            }
+                            else if (item.ProductState == 3)
+                            {
+                                //当前上线
+                                <a class="btn btn-sm btn-info" href="/TktBooking/Booking/@item.ProductId"><i class="fa fa-arrow-down"></i>预订</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+</div>
+<div class="card-footer">
+    @Html.HiddenFor(m => m.PagedTickets.PageIndex, new { id = "hiddenIndex" })
+    <div id="divPagination" class="digg">
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    //分页回调函数
+    function pageselectCallback(pageId) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchTicket")', params, function (data) {
+            if (data == "no") {
+                Utils.alert('权限不足！');
+                Utils.layerClose(load_iii);
+            } else {
+                $('#ticketContainer').html(data);
+                Utils.layerClose(load_iii);
+                hoverChangeStyle();
+            }
+        });
+    }
+
+
+
+    function initailList() {
+	    //更改上线、下线状态
+
+    }
+
+    $(function () {
+    	// 创建分页
+    	$("#divPagination").pagination(Number('@Model.PagedTickets.TotalCount'), {
+    		callback : pageselectCallback,
+    		items_per_page : ( @Model.PagedTickets.PageSize),
+    		num_display_entries : 5,
+    		num_edge_entries : 2,
+    		current_page : ( @Model.PagedTickets.PageIndex - 1)
+    	});
+
+        initailList();
+    });
+</script>

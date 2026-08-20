@@ -1,0 +1,176 @@
+﻿@model Lvy.Models.BaseDB.PhotoInfoModel
+@using Arch.Common
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewData["Title"] = "图片编辑";
+    string picroot = AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="~/Content/dropzone/basic.min.css" rel="stylesheet" />
+    <link href="~/Content/dropzone/dropzone.min.css" rel="stylesheet" />
+}
+<section class="content">
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">图片显示名称:</label>
+                <div class="col-sm-9">
+                    <input type="text" id="txtCaption" class="form-control" value="@Model.Caption" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">顺序:</label>
+                <div class="col-sm-9">
+                    <input type="text" id="txtSeq" class="form-control" value="@Model.Seq" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">是否有效:</label>
+                <div class="col-sm-9">
+                    @if (Model.PhotoId > 0 && Model.Status == 0)
+                    {
+                        <input type="checkbox" id="cbIsValid" /><span style="color: green">有效</span>
+                    }
+                    else
+                    {
+                        <input type="checkbox" id="cbIsValid" checked="checked" /><span style="color: green">有效</span>
+                    }
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">图片:</label>
+                <div class="col-sm-5" id="imgDiv">
+                    @if (!string.IsNullOrEmpty(Model.Url))
+                    {
+                        <img id="img" alt="@Model.Caption" class="img-fluid" title="@Model.Caption" src="@(picroot+Model.Url)?r=@DateTime.Now.Ticks" />
+                    }
+                    else
+                    {
+                        <img id="img" class="img-fluid"/>
+                    }
+                </div>
+                <div class="col-sm-4">
+                    <form action="/Photo/UploadPhoto" method="post" enctype="multipart/form-data" class="dropzone" id="dropzoneForm">
+                        <input type="hidden" name="photoId" value="@Model.PhotoId" />
+                        <input type="hidden" name="albumId" value="@Model.AlbumId" />
+                        <div class="fallback">
+                            <input name="resFileName" type="file" />
+                        </div>
+                        <div class="dz-message" data-dz-message><span>选择新的文件，点击或拖放到这里</span></div>
+                    </form>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label">图片地址:</label>
+                <div class="col-sm-9">
+                    <input type="text" id="txtUrl" class="form-control" value="@(picroot+ Model.Url)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-info" id="btnSave">确定</button>
+        </div>
+    </div>
+</section>
+<script src="~/Content/dropzone/dropzone.min.js"></script>
+<script src="@CDNServerUrl/jquery-form/jquery.form.min.js"></script>
+
+<script type="text/javascript" language="javascript">
+    var comm_albumId = parseInt('@Model.AlbumId');
+    var comm_photoId = parseInt('@Model.PhotoId');
+</script>
+
+<script>
+    Dropzone.options.dropzoneForm = {
+        paramName: "resFileName", // The name that will be used to transfer the file
+        maxFilesize: 2, // MB
+        acceptedFiles: "image/*",
+        init: function () {
+            this.on("success", function (file, response) {
+                $("#txtUrl").val(response);
+                $("#img").attr('src', response);
+            });
+            this.on("addedfile", function (file) { console.log("Added file."); });
+        }
+    };
+
+    $(function () {
+
+        // 事件绑定
+        $("#btnSave").click(function () {
+            var caption = $.trim($("#txtCaption").val());
+            if (caption.length == 0) {
+                toastr.warning("请输入图片显示名称！");
+                return;
+            }
+            var seq = parseInt($.trim($("#txtSeq").val()));
+            if (isNaN(seq)) seq = 0;
+
+
+            if ($.trim($("#txtUrl").val()).length == 0 && $("#fileImg").val().length == 0) {
+                toastr.warning("请上传图片！");
+                return;
+            }
+            if ($.trim($("#txtUrl").val()).length > 0 && $.trim($("#txtUrl").val()).indexOf('sh-cct.cn') == -1) {
+                var param = {
+                    'albumId': comm_albumId,
+                    'photoUrl': $.trim($("#txtUrl").val()),
+                    'photoId': comm_photoId
+                };
+                // 图片下载
+                $.post('/Photo/DownLoadPhoto?', param, function (data) {
+                    DoPhotoOperate(caption, seq, data);
+                });
+            } else {
+                DoPhotoOperate(caption, seq, $.trim($("#txtUrl").val()));
+            }
+        });
+
+        $("#txtUrl").blur(function () {
+            if ($.trim($(this).val()).length > 0) {
+                if ($("#img").length > 0) {
+                    $("#img").attr("src", $.trim($(this).val()));
+                } else {
+                    $("#imgDiv").html("<img src='" + $.trim($(this).val()) + "'>");
+                }
+            }
+        });
+    });
+
+
+    function DoPhotoOperate(caption, seq, photoUrl) {
+        var url = '/Photo/AddPhotoInfo?'
+        if (comm_photoId > 0) {
+            url = '/Photo/EditPhotoInfo?'
+        }
+        var param = {
+            'Caption': caption,
+            'AlbumId': comm_albumId,
+            'Url': photoUrl,
+            'Seq': seq,
+            'Status': $("#cbIsValid").prop("checked") ? 1 : 0,
+            'PhotoId': comm_photoId
+        };
+
+        $.post(url, param, function (data) {
+            if (data != null && data.length > 0 && data == "0000") {
+                if (comm_photoId > 0) {
+                    toastr.success("修改成功！");
+                    parent.RefreshPhotoListCallBack();
+
+                } else {
+                    toastr.success("添加成功！");
+                    parent.RefreshPhotoListCallBack();
+                }
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            } else {
+                toastr.error(data);
+            }
+        });
+    }
+
+</script>
+

@@ -1,0 +1,8 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+@{
+    Layout = null;
+}
+
+<div id="Baseinfomation">
+    @{Html.RenderAction("ShowBaseInfo", "OrderAdmin", new { OrderCode = Model.OrderModel.OrderCode });}
+</div>

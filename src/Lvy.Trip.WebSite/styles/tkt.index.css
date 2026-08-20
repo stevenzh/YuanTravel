@@ -1,0 +1,31 @@
+﻿.m_left { width: 241px; float: left; }
+.m_right { width: 938px; margin-left: 10px; float: left; display: inline; }
+.m_left_2 { width: 239px; border: 1px solid #CFDEF3; margin-top: 10px; }
+.notice { height: 181px; overflow: hidden; }
+    .notice ul { width: 640px; margin-left: 45px; }
+        .notice ul li { border-bottom: 1px dashed #fff; line-height: 20px; margin-top: 8px; padding-bottom: 8px; float: left; width: 100%; }
+            .notice ul li.noborder { border: none; }
+            .notice ul li a { color: #000; }
+                .notice ul li a:visited,
+                .notice ul li a:hover,
+                .notice ul li a:active { }
+.notice_span { font-size: 13px; width: 530px; float: left; }
+.hot_tuan { width: 741px; height: 215px; margin-top: 10px; border: 1px solid #CFDEF3; color: #666666; }
+.hot_line_list { width: 100%; }
+    .hot_line_list th { height: 28px; color: #666666; text-align: center; }
+    .hot_line_list .td_name { text-align: left; text-indent: 1em; }
+    .hot_line_list td { text-align: center; }
+.right_title { border-bottom: 2px solid #5BB9EC; height: 27px; background: #E4F1FA; color: #0F598A; line-height: 26px; text-indent: 1.5em; }
+.tab_big_title { float: left; font-size: 15px; font-weight: bold; }
+.tab_small_title { float: right; margin-right: 6px; padding-right: 6px; }
+.hr1 { width: 98%; border: none; border-top: 1px dotted #DDDDDD; margin: auto; font-size: 1px; overflow: hidden; height: 1px; *height: 10px; _height: 10px; }
+.left_title { border-top: 1px solid #fff; border-bottom: 2px solid #38A8E7; height: 28px; background: #E4F1FA; color: #0F598A; font-size: 14px; font-weight: bold; line-height: 26px; text-indent: 1em; }
+.dest_search { height: 24px; background: #38A8E7; color: #fff; padding-top: 6px; font-size: 14px; font-weight: bold; line-height: 26px; text-indent: 1em; }
+.dest_search_content { border: 6px solid #38A8E7; word-break: keep-all; padding-left: 10px; padding-top: 15px; color: #666666; }
+    .dest_search_content ul { }
+        .dest_search_content ul li { padding-top: 3px; width: 210px; }
+.dest_search_input { background: none repeat scroll 0 0 #FCFCFC; border: 1px solid #CCCCCC; height: 25px; width: 200px; }
+.recommend { width: 733px; border: 6px solid #ABE4DB; margin-top: 10px; color: #666666; }
+.rec_title { height: 31px; background: #ABE4DB; line-height: 29px; }
+    .rec_title .title { float: left; color: #0F598A; font-size: 15px; font-weight: bold; line-height: 26px; text-indent: 1em; }
+    .rec_title span { float: right; color: #0F598A; }

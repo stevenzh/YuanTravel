@@ -1,0 +1,16 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+
+<table class="table">
+    <tr>
+        <td>已收：</td>
+        <td>@Model.Balance.YiShou</td>
+        <td>未收：</td>
+        <td>
+            @{ var ws = Model.Balance.YingShou - Model.Balance.YiShou;}@ws
+        </td>
+        <td>毛利率：</td>
+        <td>
+            @{ var per = string.Format("{0:0.00%}", (Model.Balance.TotalCost == 0 ? 0 : Model.Balance.MaoLi / Model.Balance.TotalCost)); } @per
+        </td>
+    </tr>
+</table>

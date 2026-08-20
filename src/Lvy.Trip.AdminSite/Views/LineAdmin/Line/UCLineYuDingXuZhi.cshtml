@@ -1,0 +1,183 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+@{
+    Layout = null;
+}
+
+@if (Model.TpLine.Id > 0)
+{
+    <div class="ibox-content">
+        <form action="@Url.Action("SaveYuDingXuZhi")" class="form-horizontal" id="theForm" method="post">
+            @Html.HiddenFor(m => m.TpLine.LineId)
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">预定须知：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.BookingNodes, new { @class = "form-control", @rows = "5" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">费用包含：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.PriceContain, new { @class = "form-control", @rows = "5" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">费用不包含：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.PriceNoContain, new { @class = "form-control", @rows = "5" })
+                </div>
+            </div>
+            <div class="form-group row" style="display:none;">
+                <label class="col-sm-2 col-form-label">出行提示：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.FootNotes, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group row" style="display:none;">
+                <label class="col-sm-2 col-form-label">退改规则：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.OpDesc, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group row" style="display:none;">
+                <label class="col-sm-2 col-form-label">购物描述：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.Shopping, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group row" style="display:none;">
+                <label class="col-sm-1 control-label">签证类型：</label>
+                <div class="col-lg-1">
+                    <select class="form-control" onchange="funChangeQZType(this)" id="qzTypeSel">
+                        <option value="0"></option>
+                        <option value='2'>团队签证</option>
+                        <option value='1'>个人签证</option>
+                    </select>
+                </div>
+                <label class="col-sm-1 control-label">版块：</label>
+                <div class="col-lg-1">
+                    <select class="form-control" onchange="funChangeBKType(this)" id="pankuaiSel">
+                        <option value="0"></option>
+                        <option value='1'>亚洲</option>
+                        <option value='2'>欧洲</option>
+                        <option value='4'>美洲</option>
+                        <option value='5'>大洋洲</option>
+                        <option value='3'>中东及非洲</option>
+                    </select>
+                </div>
+                <label class="col-sm-1 control-label">国家：</label>
+                <div class="col-lg-1">
+                    <select class="form-control" id="citySel" onchange="funChangeCity(this)"></select>
+                </div>
+            </div>
+            <div class="form-group" style="display:none;">
+                <label class="col-sm-1 control-label">签证说明：</label>
+                <div class="col-sm-5">
+                    @Html.TextAreaFor(m => m.TpLine.VisaNote, new { @class = "form-control", @id = "VisaNote" })
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 col-sm-offset-3">
+                    <button class="btn btn-success" type="button" id="submitBtn">保存</button>
+                    <button class="btn btn-secondary" type="button" id="backBtn">返回列表</button>
+                </div>
+            </div>
+        </form>
+    </div>
+}
+else
+{
+    <p style="text-align:center;padding-top: 100px;background: #fff;text-align: center;color: #121212; font-size: 14px;">
+        保存<strong> 基本信息</strong>后，可填写更多内容！
+    </p>
+}
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#submitBtn").click(function () {
+
+            var params = $("#theForm").serialize();
+            $.ajax({
+                url: $("#theForm").attr("action"),
+                data: params,
+                type: "post",
+                success: function (data) {
+                    if (data.length > 0) {
+                        // Utils.alert("保存成功！");
+                        $('#tab-1').html(data);
+                        //保存成功后 加载预定须知.
+                        $("a[name='tabTitle']")[4].click();
+                    } else {
+                        Utils.alert('提交发生异常，请稍后再试！');
+                    }
+                }, error: function (ex) {
+
+                    Utils.alert("出错了！请联系管理员！");
+                }
+            })
+        });
+        // 返回列表
+        $("#backBtn").click(function () {
+            window.location.href = "/LineAdmin/SearchLine";
+        });
+    })
+
+    //签证
+    function funChangeQZType(obj) {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: { continent: $("#pankuaiSel").val(), vtype: $(obj).val() },
+            url: "/LineAdmin/GetVisaGroup",
+            success: function (data) {
+                $("#citySel").empty();
+                $("#citySel").append("<option value=''></option>");
+                $(data.list).each(function (i, item) {
+                    $("#citySel").append("<option value='" + item.InformationCode + "'>" + item.InformationName + "</option>");
+                });
+            },
+            error: function (request, error) {
+                // This callback function will trigger on unsuccessful action
+                console.log(error);
+            }
+        });
+    }
+    function funChangeBKType(obj) {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: { continent: $(obj).val(), vtype: $("#qzTypeSel").val() },
+            url: "/LineAdmin/GetVisaGroup",
+            success: function (data) {
+                $("#citySel").empty();
+                $("#citySel").append("<option value=''></option>");
+                $(data.list).each(function (i, item) {
+                    $("#citySel").append("<option value='" + item.InformationCode + "'>" + item.InformationName + "</option>");
+                });
+            },
+            error: function (request, error) {
+                // This callback function will trigger on unsuccessful action
+                console.log(error);
+            }
+        });
+    }
+
+    function funChangeCity(obj) {
+        var cityValue = $(obj).val();
+        var checkText = $(obj).find("option:selected").text();
+        var visaValue = "";
+        if (cityValue == "") {
+            // CKEDITOR.instances["Visa"].document.getBody().setHtml("");
+        }
+        else {
+            visaValue = checkText + "<br />请根据自身情况选择签证所需材料：" +
+                "<a href='http://visa.sh-cct.cn/" + cityValue + ".html'>" + checkText + "</a>";
+
+        }
+        // Utils.alert(visaValue);
+        // $("#VisaNote").append("<br />" + visaValue);
+        // window.editorVisaNodes.html("<br />" + visaValue);   // 替换文字
+        window.editorVisaNodes.insertHtml("<br />" + visaValue);   // 追加文字
+    }
+</script>

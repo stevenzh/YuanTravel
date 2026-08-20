@@ -1,0 +1,104 @@
+﻿@using Lvy.Models.WeixinDB
+@{
+    ViewBag.Title = "个人中心";
+    var userInfo = HttpContext.Current.Session["WeixinUser"] as Member;
+}
+<!-- profile seller -->
+<div class="profile-seller segments-page">
+    <div class="ui container">
+        <div class="pages-title">
+            <h3>个人中心</h3>
+        </div>
+        <div class="profile-banner">
+            <img src="@userInfo.HeadImgUrl" alt="">
+            <a href="/member/settings"><i class="fa fa-cog"></i></a>
+            <h4>@userInfo.RealName</h4>
+            <p>@userInfo.NickName</p>
+        </div>
+        <div class="ui menu">
+            <a href="" class="item active center aligned" data-tab="product">我的收藏</a>
+            <a href="" class="item center-tab" data-tab="discussion">我的消息</a>
+            <a href="" class="item">我的订单</a>
+        </div>
+        <div class="ui tab active product" data-tab="product">
+            <div class="ui grid">
+                <div class="eight wide column pr">
+                    <div class="content">
+                        <img src="~/images/demo/product1.png" alt=""><a href="">
+                            <p>Watch Modern for Men & Women</p>
+                        </a>
+                        <h5>$66</h5>
+                    </div>
+                </div>
+                <div class="eight wide column pl">
+                    <div class="content">
+                        <img src="~/images/demo/product2.png" alt=""><a href="">
+                            <p>Women Trending Bags for Girls</p>
+                        </a>
+                        <h5>$99</h5>
+                    </div>
+                </div>
+                <div class="eight wide column pr">
+                    <div class="content">
+                        <img src="~/images/demo/product3.png" alt=""><a href="">
+                            <p>Hat Blue Trending for Men & Women</p>
+                        </a>
+                        <h5>$99</h5>
+                    </div>
+                </div>
+                <div class="eight wide column pl">
+                    <div class="content">
+                        <img src="~/images/demo/product8.png" alt=""><a href="">
+                            <p>Backpack Treanding for Men</p>
+                        </a>
+                        <h5>$99</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination">
+                <ul>
+                    <li class="active">1</li>
+                    <li><a href="">2</a></li>
+                    <li><a href="">3</a></li>
+                    <li><a href="">4</a></li>
+                    <li><a href="">5</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="ui tab" data-tab="discussion">
+            <div class="comment-people">
+                <div class="content">
+                    <div class="icon"><img src="~/images/demo/comment1.png" alt=""></div>
+                    <div class="text">
+                        <h5>John Doe</h5>
+                        <p class="date">January 10, 2018</p>
+                    </div>
+                    <div class="post">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                    </div>
+                </div>
+                <div class="content reply">
+                    <div class="icon"><img src="~/images/demo/comment2.png" alt=""></div>
+                    <div class="text">
+                        <h5>John Doe <i class="fa fa-bookmark"></i></h5>
+                        <p class="date">January 10, 2018</p>
+                    </div>
+                    <div class="post">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                    </div>
+                </div>
+                <div class="content-post">
+                    <div class="comment-title">
+                        <h4>Leave Your Reply</h4>
+                    </div>
+                    <form class="ui form">
+                        <div class="field"><input type="text" placeholder="Name"></div>
+                        <div class="field"><input type="text" placeholder="Email"></div>
+                        <div class="field"><textarea cols="30" rows="10" placeholder="Comment"></textarea></div>
+                        <button class="button">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- end profile seller -->

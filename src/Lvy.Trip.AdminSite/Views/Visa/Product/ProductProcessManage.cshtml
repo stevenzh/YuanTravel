@@ -1,0 +1,34 @@
+﻿@model Lvy.Visa.Models.VisaInformationModel
+@{
+    Layout = null;
+    var IsAdderRoler = (bool)ViewData["IsAdderRoler"];
+    var IsProductManageRoler = (bool)ViewData["IsProductManageRoler"];
+}
+@using Arch.Common
+<div style="text-align:center;">
+    <div class="btn-group">
+        @if ((Model.State == 1 || Model.State == 4) && (IsAdderRoler || IsProductManageRoler))
+        {
+            <a class="btn btn-info" href="####" onclick="UpdateProductState('@Model.InformationCode',2)">提交审核</a>
+        }
+        @*else if (Model.State == 2) //已提交审核
+            {
+                <a class="btn btn-info" href="/VisaProduct/AuditProduct?InformationCode=@Model.InformationCode&&State=3">审核</a>
+            }*@
+        else if ((Model.State == 2 || Model.State == 6) && IsProductManageRoler)
+        {
+            <a class="btn btn-warning" href="/VisaProduct/UpdateProductState?InformationCode=@Model.InformationCode&&State=5">审核通过并上线</a>
+            <a class="btn btn-secondary" href="####" onclick="funNoPassRemark('@Model.InformationCode',4)">审核不通过</a>
+        }
+        else if (Model.State == 5 && IsProductManageRoler)
+        {
+            <a class="btn btn-info" href="####" onclick="funOffLineRemark('@Model.InformationCode',6)">下线</a>
+        }
+        <a class="btn btn-primary" href="####" onclick="FunSearchProductData('@Model.InformationCode')">数据检测</a>
+        @if (Model.VType == 1)
+        {
+            <a class="btn btn-info" target="_blank" href="@(AppSetting.Get("Visa")+ Model.InformationCode.ToLower())">预览</a>
+        }
+        <a class="btn btn-secondary" href="/ProductAdmin/Index">返回产品管理</a>
+    </div>
+</div>

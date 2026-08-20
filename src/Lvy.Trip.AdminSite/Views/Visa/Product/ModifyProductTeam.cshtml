@@ -1,0 +1,160 @@
+﻿@model Lvy.Visa.Models.VisaInformationModel
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("SaveProduct", "VisaProduct", FormMethod.Post, new { id = "frmModify", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(a => a.InformationCode)
+    @Html.HiddenFor(a => a.InformationId)
+    @Html.HiddenFor(a => a.State)
+    @Html.HiddenFor(a => a.CreateBy)
+    @Html.HiddenFor(a => a.CreateByName)
+    @Html.HiddenFor(a => a.Createtime)
+    @Html.HiddenFor(a => a.PManageUser)
+    @Html.HiddenFor(a => a.PManageUserName)
+    @Html.HiddenFor(a => a.PManageDate)
+    @Html.HiddenFor(a => a.OnlineUser)
+    @Html.HiddenFor(a => a.OnlineUserName)
+    @Html.HiddenFor(a => a.OnlineDate)
+    @Html.HiddenFor(a => a.IsCategory)
+    @Html.HiddenFor(a => a.IsValid)
+
+    <input type="hidden" id="VisaType" name="VisaType" value="1" />
+    <input type="hidden" id="SellPrice" name="SellPrice" value="0" />
+    <input type="hidden" id="PayTimeLimit" name="PayTimeLimit" value="0" />
+    <input type="hidden" id="BookingNodes" name="BookingNodes" value=" " />
+    <input type="hidden" id="SupplierCode" name="SupplierCode" value=" " />
+
+    @Html.Partial("~/Views/Visa/Product/ProductPartialTeam.cshtml")
+
+    <div class="form-group">
+        <input type="button" value="保存" class="btn btn-info" id="btnSave" onclick="funValidateProductForm()" />
+        <input type="button" value="取消" class="btn btn-info" id="btnCancel" />
+    </div>
+    <div>
+        @{ Html.RenderAction("ProductProcessManage", new { InformationCode = Model.InformationCode }); }
+    </div>
+
+}
+
+<script type="text/javascript">
+    function funValidateProductForm() {
+        var pName = $('#InformationName').val();
+        if (!ValidationData('none', pName)) {
+            alert("产品名称不能为空，请输入！！");
+            $('#InformationName').focus();
+            return false;
+        } else {
+            var param = { "InformationName": $('#InformationName').val(), "InformationCode": $('#InformationCode').val() };
+            $.post("/VisaProduct/CheckProductNameIsExists/", param, function (data) {
+                if (data == "Y") {
+                    $("#spanPname").html("产品名称已存在！！");
+                    alert("产品名称已存在! !");
+                    $('#InformationName').focus();
+                    $("#spanPname").css("color", "red");
+                } else {
+                    $("#spanPname").html("");
+
+                    var interviewtype = $("#InterviewType").val();
+                    if (interviewtype == "-1") {
+                        alert("请选择面销类型！！");
+                        $("#InterviewType").focus();
+                        return false;
+                    }
+
+                    var continent = $("#Continent").val();
+                    if (continent == "-1") {
+                        alert("请选择版块！！");
+                        $("#Continent").focus();
+                        return false;
+                    }
+
+                    var visacountry = $("#VisaCountry").val();
+                    var _hidparentStr = $("#VisaCountryParentStr").val();
+                    if (!ValidationData('none', visacountry) || !ValidationData('none', _hidparentStr) || $.trim(visacountry) == "中文/拼音") {
+                        alert("签证国家或地区不能为空，请输入！！");
+                        $("#VisaCountry").focus();
+                        $("#VisaCountry").val("中文/拼音");
+                        $("#VisaCountryParentStr").val("");
+                        return false;
+                    }
+
+                    var visaIssuePlace = $("#VisaIssuePlaceName").val();
+                    var _hidIssueparentStr = $("#VisaIssuePlace").val();
+                    if (!ValidationData('none', visaIssuePlace) || !ValidationData('none', _hidIssueparentStr) || $.trim(visaIssuePlace) == "中文/拼音") {
+                        alert("签发地不能为空，请输入！！");
+                        $("#VisaIssuePlaceName").focus();
+                        $("#VisaIssuePlaceName").val("中文/拼音");
+                        $("#VisaIssuePlace").val("");
+                        return false;
+                    }
+
+                    var newToCity = "";
+                    $("span[name=spanTocitys]").each(function () {
+                        newToCity += $(this).attr("rel") + ",";
+                    });
+                    newToCity = newToCity.substring(0, newToCity.length - 1);
+                    $("#LivePassportArea").val(newToCity);
+
+
+
+                    var acceptedtime = $("#AcceptedTime").val();
+                    if (!ValidationData('none', acceptedtime)) {
+                        alert("受理时间不能为空，请输入！！");
+                        $("#AcceptedTime").focus();
+                        return false;
+                    }
+
+
+                    var isvalidtime = $("#IsValidTime").val();
+                    if (!ValidationData('none', isvalidtime)) {
+                        alert("签证有效期不能为空，请输入！！");
+                        $("#IsValidTime").focus();
+                        return false;
+                    }
+
+                    var staydays = $("#StayDays").val();
+                    if (!ValidationData('none', staydays)) {
+                        alert("最长停留时间不能为空，请输入！！");
+                        $("#StayDays").focus();
+                        return false;
+                    }
+
+                    var enterCount = $("#EnterCount").val();
+                    if (!ValidationData('none', enterCount)) {
+                        alert("入境次数不能为空，请输入！！");
+                        $("#EnterCount").focus();
+                        return false;
+                    }
+                    var acceptedRange = $("#AcceptedRange").val();
+                    if (!ValidationData('none', acceptedRange)) {
+                        alert("受理范围不能为空，请输入！！");
+                        $("#AcceptedRange").focus();
+                        return false;
+                    }
+                    //图片
+                    var imgurl = $("#ImgUrl").val();
+                    if (!ValidationData('none', imgurl)) {
+                        alert("请选择图片！");
+                        return false;
+                    }
+
+                    $("#divProductLoadingData").show();
+                    $("#btnSave").attr("disabled", "disabled");
+                    $("#frmModify").submit();
+                }
+            });
+        }
+    }
+    //取消按钮事件
+    $("#btnCancel").click(function () {
+        $("#tbModifyProduct input[type=text]").val("");
+        $("#tbModifyProduct textarea").text("");
+        $("#tbModifyProduct select").val("-1");
+        $("#VisaCountry").val("中文/拼音");
+        $("#VisaIssuePlaceName").val("中文/拼音");
+        $("#LivePassportAreaName").val("中文/拼音");
+        $("#pToArea").html("");
+    });
+</script>

@@ -1,0 +1,19 @@
+﻿@model int
+<div class="station">
+    @if (Model > 0)
+    {
+        @Html.ActionLink("库存", "CreateTour", new { linId = Model })
+        <span>&nbsp;&nbsp;</span>
+        @Html.ActionLink("库存", "UCTourStore", new { linId = Model })
+
+        <span>&nbsp;&nbsp;</span>
+    }
+    else
+    {
+        <span>库存</span>
+        <span>&nbsp;&nbsp;</span>
+        <span>库存</span>
+        <span>&nbsp;&nbsp;</span>
+    }
+</div>
+

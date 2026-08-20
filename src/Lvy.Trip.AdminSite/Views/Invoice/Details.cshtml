@@ -1,0 +1,136 @@
+﻿@model Lvy.Models.OrderDB.TpInvoiceModel
+@{
+    ViewBag.Title = "发票申请详情";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources{ }
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- info row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body p-2">
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <td style="width:15%;"><b>ID：</b></td>
+                                <td style="width:35%;">@Model.Id</td>
+                                <td style="width:15%;"><b>订单号：</b></td>
+                                <td style="width:35%;">@Model.OrderCode</td>
+                            </tr>
+                            <tr>
+                                <td><b>发票号码：</b></td>
+                                <td>@Model.InvoiceNo</td>
+                                <td><b>状态：</b></td>
+                                <td>@(Model.IsValid==0 ? "作废":(Model.State == 0 ? "申请" : "已开具"))</td>
+                            </tr>
+                            <tr>
+                                <td><b>税号：</b></td>
+                                <td>@Model.TaxNumber</td>
+                                <td><b>客户名称：</b></td>
+                                <td>@Model.CustomerName</td>
+                            </tr>
+                            <tr>
+                                <td><b>服务项目：</b></td>
+                                <td>@Model.ServiceItems</td>
+                                <td><b>金额：</b></td>
+                                <td>@Model.Amount</td>
+                            </tr>
+                            <tr>
+                                <td><b>开户行：</b></td>
+                                <td>@Model.BankName</td>
+                                <td><b>账户名：</b></td>
+                                <td>@Model.BankAccount</td>
+                            </tr>
+                            <tr>
+                                <td><b>电话：</b></td>
+                                <td>@Model.Phone</td>
+                                <td><b>地址：</b></td>
+                                <td>@Model.Address</td>
+                            </tr>
+                            <tr>
+                                <td><b>备注说明：</b></td>
+                                <td colspan="3">@Model.Remark</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    @if (Model.State == 0 && GlobalContext.Current.LoginUserRoles.Any(role => role.Name == "财务"))
+                    {
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#modal-sm"><i class="fa fa-credit-card"></i> 审核后出票</button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-sm">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">审核发票</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" id="theForm">
+                            @Html.HiddenFor(m => m.Id)
+                            <div class="form-group">
+                                <label for="inputEmail3" class="col-sm-4 control-label">发票号码</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="InvoiceNo" placeholder="发票号码">
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                    <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+                                    <div class="col-sm-10">
+                                        <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+                                    </div>
+                                </div>*@
+                        </form>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-success" id="btnSubmit">提交</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSubmit").click(function () {
+            var params = { id: '@Model.Id', InvoiceNo: $("#InvoiceNo").val() };
+            var load_iii = Utils.layerLoad();
+            $.post("/Invoice/CheckInvoice", params, function (result) {
+                Utils.layerClose(load_iii);
+                if (result && result == 'success') {
+                    layer.msg('审核成功。');
+                    //return true;
+                    // 弹出框关闭前调用父窗口方法
+                    parent.pageselectCallback(1);
+
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                }
+                else {
+                    layer.msg('审核失败。');
+                    return true;
+                }
+            });
+        });
+    });
+
+</script>

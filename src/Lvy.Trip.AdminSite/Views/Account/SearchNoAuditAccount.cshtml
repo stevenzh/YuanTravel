@@ -1,0 +1,62 @@
+﻿@model List<Lvy.Models.CrmDB.CrmAccountModel>
+@{
+    ViewBag.Title = "审核客户";
+}
+
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+    <div class="xbox clear">
+        <div id="divSearch">
+            @if (Model.Count > 0)
+            {
+                <table class="listtbl" width="100%">
+                    <thead>
+                        <tr>
+                            @*<td>登录名</td>*@
+                            <td>客户名称</td>
+                            <td>联系人</td>
+                            <td>联系电话</td>
+                            @*<td>公司电话<br />公司传真</td>*@
+                            <td>结算方式</td>
+                            <td>地址</td>
+                            <td align="center" style="width:30px;">操作</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                @*<td>@item.LoginName</td>*@
+                                <td align="center">@item.Customer.Name</td>
+                                <td align="center">@item.Customer.Head</td>
+                                <td align="center">@item.Customer.Mobile</td>
+                                <td style="text-align: center;">
+                                    @*@DictionaryTools.GetEnumValue(Enums.PaymentTypeEnum, item.PaymentType.ToString())*@
+                                </td>
+                                @*<td>@item.Customer.Phone <br />@item.Customer.Fax</td>*@
+                                <td align="center">@item.Customer.Address</td>
+                                <td align="center">
+                                    <table class="toolbar">
+                                        <tr>
+                                            <td>
+                                                <a href="@Url.Action("EditNoAuditAccount", new { accountCode = item.Code })" title="客户审核" name="audit"><i class="fa fa-calendar-check-o"></i></a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div id="Pagination" class="digg"></div>
+            }
+            else
+            {
+                <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+                    <br />
+                    没有未审核的客户！！！
+                </div>
+            }
+        </div>
+    </div>
+</form>
+

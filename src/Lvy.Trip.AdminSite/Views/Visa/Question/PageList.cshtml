@@ -1,0 +1,76 @@
+﻿@model Lvy.Visa.VModels.VisaCountryQuestionQModel
+@{ 
+    Layout = null;
+}
+<table class="table table-striped projects">
+    @if (Model.QuetionList != null && Model.QuetionList.TotalCount > 0)
+    {
+        foreach (var item in Model.QuetionList.Items)
+        {
+            <tr>
+                <td>
+                    <p class="text-blue">
+                        <strong>问题：</strong> [<span>@item.CountryName</span>]&nbsp;&nbsp;@item.Question
+                    </p>
+                    <p class="text-muted">
+                        <strong>回答：</strong>@item.Answer
+                    </p>
+                </td>
+                <td style="width:150px;">
+                    <a href="javascript:DeleteQuestion('@item.QuestionCode')" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i>删除
+                    </a>
+                    <a href="javascript:EditQuestion('@item.QuestionCode')" class="btn btn-info btn-sm">
+                        <i class="fas fa-edit"></i>编辑
+                    </a>
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td style="text-align: center; font-size: 14px; color: Red;">对不起！没有找到您要的数据！ </td>
+        </tr>
+    }
+    <tr>
+        <td colspan="2">
+            <div id="Pagination" class="digg" />
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.QuetionList.TotalCount'), {
+                callback: pageselectCallback1,
+                prev_text: '前一页',
+                next_text: '后一页',
+                items_per_page: 10,
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: pageIndex
+            });
+    });
+    //回调方法
+    function pageselectCallback1(page_id, jq) {
+        jQuery.ajaxSetup({ cache: false });
+        pageIndex = page_id;
+        page_id = page_id + 1;
+        var param = {
+            'QuestionModel.CountryName': $.trim($("#selcountryName").val()) == "中文/拼音" ? "" : $.trim($("#selcountryName").val()),
+            'QuetionList.PageIndex': page_id,
+            'QuetionList.PageSize': 10
+        };
+        $.post('/Question/SearchQuestion/', param, function (data) {
+            $('#questionListsDiv').html(data);
+        });
+    }
+    //分页控件 end
+
+
+</script>
+

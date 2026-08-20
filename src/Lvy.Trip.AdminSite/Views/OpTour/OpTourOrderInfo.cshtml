@@ -1,0 +1,172 @@
+﻿@model Lvy.VModels.Op.EditTouristsVModel
+@using Lvy.Models
+
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+}
+<form id="theForm" action="@Url.Action("SaveTourists")">
+    <div class="in_box">
+        <div class="xboxcontent">
+            <div class="sotable_tit">
+                团计划信息
+                @Html.HiddenFor(m => m.Tour.Id)
+                @Html.HiddenFor(m => m.Line.TrafficType)
+            </div>
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label">团号：</td>
+                    <td>@Model.Tour.TourNo</td>
+                    <td class="label">线路名：</td>
+                    <td colspan="3">@Model.Line.LineName</td>
+                </tr>
+                <tr>
+                    <td class="label">出发日期：</td>
+                    <td>@Model.Tour.OutDate.ToDateFormat()</td>
+                    <td class="label">线路类型：</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.Line.LineType.ToString())</td>
+                </tr>
+                <tr>
+                    <td class="label">计划库存：</td>
+                    <td>
+                        @(Model.Quota.HoldQuota > 0 ? Model.Quota.PlanQuota - Model.Quota.HoldQuota + "+" + Model.Quota.HoldQuota : Model.Quota.PlanQuota.ToString())
+                        @if (Model.Quota.Source == 2)
+                        {<span class="badge badge-10">共享库存</span>}
+                    </td>
+                    <td class="label">已确认/占位：</td>
+                    <td>@Model.Tour.TravellerCount / @Model.Quota.UnLockQuota</td>
+                    <td class="label">剩余库存：</td>
+                    <td>@Model.Quota.UseQuota</td>
+                </tr>
+                @if (Model.Line.TrafficType != 1)
+                {
+                    <tr>
+                        <td class="label">出境口岸：</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.OutCityEnum, Model.Tour.PortOfExit.ToString())</td>
+                        <td class="label">入境日期：</td>
+                        <td>@(Model.Tour.EntryDate == null ? "" : Model.Tour.EntryDate.Value.ToString("yyyy-MM-dd"))</td>
+                        <td class="label">入境口岸：</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.OutCityEnum, Model.Tour.PortOfEntry.ToString())</td>
+                    </tr>
+                }
+                <tr>
+                    <td class="label">应收总额：</td>
+                    <td>@Model.Tour.TolYsPrice</td>
+                    <td class="label">已收总额：</td>
+                    <td>@Model.Tour.TolPaid</td>
+                    <td class="label">人均成本：</td>
+                    <td>@Model.Tour.PerCapitaCost</td>
+                </tr>
+            </table>
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;height:25px">
+                订单列表
+            </div>
+            <table id="tbllist" class="listtbl" width="100%">
+                <thead>
+                    <tr>
+                        <td align="center" style="width:90px">订单号</td>
+                        <td align="center" style="width:210px">分销商</td>
+                        <td align="center">联系人</td>
+                        <td align="center">销售</td>
+                        <td align="center" style="width:120px">开单日期</td>
+                        <td align="center">游客姓名</td>
+                        <td align="center">人数</td>
+                        <td align="center">应收款</td>
+                        <td align="center">已收款</td>
+                        <td align="center">未收款</td>
+                        <td align="center">订单状态</td>
+                        <td align="center" style="width: 50px;">操作</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.TpOrderList.Count > 0)
+                    {
+                        foreach (var item in Model.TpOrderList.OrderBy(t => t.IsCancel))
+                        {
+                            var sale = DictionaryTools.GetCachedAccount(item.SalerCode);
+                            <tr>
+                                <td name="orderCode" align="center" orderCode='@item.OrderCode'>
+                                    @item.OrderCode
+                                </td>
+                                @{
+                                    string BookingCustomer = "";
+                                    if (!string.IsNullOrEmpty(item.BookingCustomer))
+                                    {
+                                        var customer = DictionaryTools.GetCachedCustomer(item.BookingCustomer);
+                                        BookingCustomer = customer.Name;
+                                        <td align="left" title="@customer.Name">
+                                            @customer.Name.TrimWithElipsis(15)
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td align="center"></td>
+                                    }
+                                }
+                                <td align="center">@item.Managers</td>
+                                <td align="center">@sale.Name</td>
+                                <td align="center">@item.CreatedTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td align="center">@item.LinkMan</td>
+                                <td align="center">@item.TravellerCount</td>
+                                <td align="right">@item.TolYsPrice</td>
+                                <td align="right">@item.TolPaid</td>
+                                <td align="right">
+                                    @if (item.TolYsPrice - item.TolPaid > 0)
+                                    {
+                                        <span style="color:crimson">@(item.TolYsPrice - item.TolPaid)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@(item.TolYsPrice - item.TolPaid)</span>
+                                    }
+                                </td>
+                                <td name="orderState" align="center">
+                                    @if (item.IsCancel == 0)
+                                    {
+                                        @Common.DisplayState(item.OrderState)
+                                        @Common.DisplayTraceState(item.TraceState)
+                                    }
+                                    else
+                                    {
+                                        <span>取消</span> @DictionaryTools.GetEnumValue(Enums.OrderCancelStateEnum, item.CancelState.ToString())
+                                    }
+                                </td>
+                                <td align="center">
+                                    <a title="详情" href="@Url.Action("OrderDetail","Order", new { orderCode = item.OrderCode,fromId=1 ,tourId=item.TourId})">详情</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" align="center" style="color: red; font-weight: bold;">
+                                当前没有数据！
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div id="addTourFileContainer" style="margin-top:50px">
+                <!---附件信息-->
+                @Html.Partial("UCAddTourFile", Model)
+            </div>
+        </div>
+        <div style="text-align: center;margin-top:50px">
+            <input type="button" class="btn btn1" id="backBtn" value="返回列表" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $('#backBtn').click(function () {
+        if (@ViewBag.fromId==1) {
+    //从产品管理过来的。
+            window.location ='@Url.Action("SearchTour", "Product",new { lineId=ViewBag.lineId })'+'&fromId='+@ViewBag.fromId; //"/OpTour/SearchTour";
+        }else {
+            window.location = "/OpTour/SearchTour";
+        }
+    });
+</script>

@@ -1,0 +1,138 @@
+﻿@model Lvy.VModels.Product.EditLineAdminVModel
+@{
+    var customer = Model.CustomerLineAdmin;
+    var plat = Model.PlatLineAdmin;
+}
+<form id="lineAdminForm" action="@Url.Action("SaveLineAdmin")">
+    <input type="hidden" name="LineId" value="@Model.LineId" />
+    <div style="width: 280px; float: left;">
+        <div class="station">
+            专线批发商专管员：
+        </div>
+        <div style="max-height: 250px; overflow-y: auto;">
+            <table class="listtbl" width="100%">
+                <thead>
+                    <tr style="text-align: center;">
+                        <th>选择</th>
+                        <th>用户名</th>
+                        <th>是否主要负责</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (customer != null && customer.Count > 0)
+                    {
+                        for (int i = 0, len = customer.Count; i < len; i++)
+                        {
+                            <tr style="text-align: center;">
+                                <td>
+                                    <input type="hidden" name="Customer[@i].LineAdminId" value="@customer[i].LineAdminId" />
+                                    <input type="hidden" name="Customer[@i].AccountCode" value="@customer[i].AccountCode" />
+                                    <input type="hidden" name="Customer[@i].Checked" value="@customer[i].Checked" />
+                                    @if (customer[i].Checked == 0)
+                                    {
+                                        <input type="checkbox" name="Check4Customer" value="@customer[i].Checked" />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Check4Customer" checked="checked" value="@customer[i].Checked" />
+                                    }
+                                </td>
+                                <td>
+                                    @customer[i].Name
+                                </td>
+                                <td>
+                                    <input type="hidden" name="Customer[@i].IsPrimary" value="@customer[i].IsPrimary" />
+                                    @if (customer[i].IsPrimary == 0)
+                                    {
+                                        <label>
+                                            <input type="radio" name="Primary4Customer" value="@customer[i].IsPrimary" />主要负责
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label>
+                                            <input type="radio" name="Primary4Customer" checked="checked" value="@customer[i].IsPrimary" />主要负责
+                                        </label>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr style="text-align: center;">
+                            <td colspan="3">
+                                <span style="color: #FF0000">无数据</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="width: 280px; float: left; margin-left: 5px;">
+        <div class="station">
+            系统专管员：
+        </div>
+        <div style="max-height: 250px; overflow-y: auto;">
+            <table class="listtbl" width="100%">
+                <thead>
+                    <tr style="text-align: center;">
+                        <th>选择</th>
+                        <th>用户名</th>
+                        <th>是否主要负责</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (plat != null && plat.Count > 0)
+                    {
+                        for (int i = 0, len = plat.Count; i < len; i++)
+                        {
+                            <tr style="text-align: center;">
+                                <td>
+                                    <input type="hidden" name="plat[@i].LineAdminId" value="@plat[i].LineAdminId" />
+                                    <input type="hidden" name="plat[@i].AccountCode" value="@plat[i].AccountCode" />
+                                    <input type="hidden" name="plat[@i].Checked" value="@plat[i].Checked" />
+                                    @if (plat[i].Checked == 0)
+                                    {
+                                        <input type="checkbox" name="Check4Plat" value="@plat[i].Checked" />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" name="Check4Plat" checked="checked" value="@plat[i].Checked" />
+                                    }
+                                </td>
+                                <td>
+                                    @plat[i].Name
+                                </td>
+                                <td>
+                                    <input type="hidden" name="Plat[@i].IsPrimary" value="@plat[i].IsPrimary" />
+                                    @if (plat[i].IsPrimary == 0)
+                                    {
+                                        <label>
+                                            <input type="radio" name="Primary4Plat" value="@plat[i].IsPrimary" />主要负责
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label>
+                                            <input type="radio" name="Primary4Plat" checked="checked" value="@plat[i].IsPrimary" />主要负责
+                                        </label>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr style="text-align: center;">
+                            <td colspan="3">
+                                <span style="color: #FF0000">无数据</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>

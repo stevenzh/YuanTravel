@@ -1,0 +1,523 @@
+﻿@model Lvy.VModels.Online.SearchProductVModel
+@{
+    ViewBag.Title = "查询产品";
+    Layout = "~/Views/Shared/_FrontLayout.cshtml";
+}
+@section AdditionalResources
+{
+    <link href="~/styles/list.css" rel="stylesheet" type="text/css" />
+    <link href="~/styles/destnav.css" rel="stylesheet" type="text/css" />
+    <script src="~/lib/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+<!--m_left start-->
+<div class="m_left">
+    @*<div class="m_left_1">
+            @{Html.RenderPartial("Common/UCDestNav", Model.DestsNav);}
+        </div>
+        <div class="clear"></div>*@
+    <div style="height: 1px; font-size: 1px; overflow: hidden;"></div>
+    <div class="m_left_2" id="divHotTags">
+        @{Html.RenderAction("HotTags", "Online"); }
+    </div>
+    @if (GlobalContext.Current.UserInfo != null)
+    {
+        <div class="m_left_2" id="divDownload">
+            @{Html.RenderAction("LoadDownload", "Online"); }
+        </div>
+    }
+</div>
+<!--m_left end-->
+<!--m_right start-->
+<div class="m_right">
+    <form id="theForm" method="post" action="">
+        @Html.HiddenFor(m => m.LineType)
+        @Html.HiddenFor(m => m.ProductPagedList.PageIndex)
+        @Html.HiddenFor(m => m.ProductPagedList.PageCount)
+        @Html.HiddenFor(m => m.Themes)
+        @Html.HiddenFor(m => m.ArriveDest)
+        @Html.HiddenFor(m => m.OrderBy)
+        <ul class="m_right_1">
+            @Html.Partial("Search/UCDynamicSearch", Model)
+            @Html.Partial("Search/UCStaticSearch", Model)
+        </ul>
+    </form>
+    <div class="line_name">
+        <table id="productListTb" style="width:100%;">
+            <thead>
+                <tr class="line_name_title">
+                    <th>团号</th>
+                    <th height="30" class="textIndent10">线路名称</th>
+                    <th width="80">出发日期</th>
+                    <th width="40">价格</th>
+                    <th width="40">房差</th>
+                    <th width="40">交通</th>
+                    <th width="30">计划</th>
+                    <th width="30">已订</th>
+                    <th width="30">剩余</th>
+                    <th width="80">供应商</th>
+                </tr>
+            </thead>
+            <tbody>
+                @Html.Partial("Search/UCProductList", Model)
+            </tbody>
+        </table>
+    </div>
+    <div style="text-align: center; margin-top: 10px; padding-top: 10px;">
+        <div id="divPagerEnd" style="display: none;">
+            <img src="~/images/pager_end.png" alt="没有数据了亲" />
+        </div>
+        <div id="divLoadingBottom" style="display: none;">
+            <h3>Loding...</h3>
+        </div>
+    </div>
+</div>
+<div id="showPriceWin" class="shadow" style="position: absolute; background-color: white; display: none;"></div>
+<div id="showBusinessCardWin" class="shadow" style="position: absolute; background-color: white; display: none;"></div>
+<!--m_right end-->
+<div class="clear"></div>
+<script type="text/javascript">
+    //所点击价格的Id
+    var priceClickId = 0;
+    // 添加价格链接
+    function AddPriceLink(className) {
+        var $containerDiv = $('#showPriceWin');
+        $('#productListTb a[name="priceLink"]').click(function () {
+            if ($containerDiv.css("display") != "none") {
+                $containerDiv.hide();
+                return false;
+            }
+            var x = $(this).position().left;
+            var y = $(this).position().top + $(this).height();
+            var tourId = $(this).attr('tourId');
+            if (tourId != priceClickId) {
+                priceClickId = tourId;
+                $.get("/Online/ShowPrice?tourId=" + tourId, function (data) {
+                    $containerDiv.html(data);
+                    $containerDiv.show();
+                    $containerDiv.css("left", x).css("top", y);
+                });
+            }
+            else {
+                $containerDiv.show();
+                $containerDiv.css("left", x).css("top", y);
+            }
+            return false;
+        });
+        $containerDiv.hover(function () {
+        }, function () {
+            $containerDiv.hide();
+        });
+    }
+
+    //显示名片
+    function showBusinessCard() {
+        var $link = $('.line_name').find('a[name="showBusinessCard"]');
+        var $containerDiv = $('#showBusinessCardWin');
+
+        $link.click(function () {
+            if ($containerDiv.css("display") != "none") {
+                $containerDiv.hide();
+                return false;
+            }
+            var $this = $(this);
+            var thisWidth = $this[0].offsetWidth;
+            var x = $this.position().left + thisWidth;
+            var y = $this.position().top + $(this).height();
+            var lineId = $this.attr('lineId');
+            $.get("/Online/BusinessCard?lineId=" + lineId, function (data) {
+                $containerDiv.html(data);
+                $containerDiv.show();
+                var width = $containerDiv[0].offsetWidth;
+                $containerDiv.css("left", x - width).css("top", y);
+            });
+            return false;
+        });
+        $containerDiv.hover(function () {
+        }, function () {
+            $containerDiv.hide();
+        });
+    }
+
+    function goTop() {
+        var $backToTopTxt = "返回顶部",
+            $backToTopEle = $('<div class="backToTop"></div>').appendTo($("body")).text($backToTopTxt).attr("title", $backToTopTxt).click(function () {
+                $("html, body").animate({ scrollTop: 0 }, 120);
+            }),
+            $backToTopFun = function () {
+                var st = $(document).scrollTop(), winh = $(window).height();
+                (st > 0) ? $backToTopEle.show() : $backToTopEle.hide();
+                //IE6下的定位
+                if (!window.XMLHttpRequest) {
+                    $backToTopEle.css("top", st + winh - 166);
+                }
+            };
+        $(window).bind("scroll", $backToTopFun);
+        $(function () { $backToTopFun(); });
+    }
+
+    function clearSearch() {
+        $('#ArriveDest').val("");
+        $('#spanArriveDestName').html("");
+
+        $('#theForm').resetForm();
+        var $weeksCheckBox = $(':checkbox[name="SelectedDays"]');
+        $weeksCheckBox.each(function () {
+            $(this).attr("disabled", "disabled");
+        });
+        $('#not_weekend').attr("disabled", "disabled");
+        $('#weekend').attr("disabled", "disabled");
+        $('#week_all').attr("disabled", "disabled");
+    }
+
+    //检查查询日期范围内的星期
+    function checkWeekend() {
+        var startValue = $('#MinOutDate').val();
+        var endValue = $('#MaxOutDate').val();
+        if (startValue.length == 0 || endValue.length == 0)
+            return;
+
+        var $weeksCheckBox = $(':checkbox[name="SelectedDays"]');
+        var $notWeekend = $('#not_weekend');
+        var $weekend = $('#weekend');
+        var $all = $('#week_all');
+
+        var startValueFormat = startValue.replace(/-/g, "/");
+        var endValueFormat = endValue.replace(/-/g, "/");
+        $weeksCheckBox.each(function () {
+            $(this).prop("checked", false);
+        });
+        $notWeekend.prop("checked", false);
+        $weekend.prop("checked", false);
+        $weeksCheckBox.prop("checked", false);
+        var startDate = new Date(startValueFormat);
+        var endDate = new Date(endValueFormat);
+        var diff = (endDate - startDate) / 1000 / 60 / 60 / 24;
+        if (diff < 6) {
+            $all.attr("disabled", "disabled");
+            $notWeekend.attr("disabled", "disabled");
+            $weekend.attr("disabled", "disabled");
+            $weeksCheckBox.attr("disabled", "disabled");
+            var arr = new Array();
+            while (startDate <= endDate) {
+                switch (startDate.getDay()) {
+                    case 0: $('input[name=SelectedDays][value="Sunday"]').removeAttr("disabled"); break;
+                    case 1: $('input[name=SelectedDays][value="Monday"]').removeAttr("disabled"); break;
+                    case 2: $('input[name=SelectedDays][value="Tuesday"]').removeAttr("disabled"); break;
+                    case 3: $('input[name=SelectedDays][value="Wednesday"]').removeAttr("disabled"); break;
+                    case 4: $('input[name=SelectedDays][value="Thursday"]').removeAttr("disabled"); break;
+                    case 5: $('input[name=SelectedDays][value="Friday"]').removeAttr("disabled"); break;
+                    case 6: $('input[name=SelectedDays][value="Saturday"]').removeAttr("disabled"); break;
+                    default: break;
+                }
+                arr.push(startDate.getDay());
+                startDate = DateAdd('d', 1, startDate);
+            }
+            if (arr.indexOf(0) >= 0 && arr.indexOf(1) >= 0 && arr.indexOf(2) >= 0 && arr.indexOf(3) >= 0 && arr.indexOf(4) >= 0) {
+                $notWeekend.removeAttr("disabled");
+            }
+            if (arr.indexOf(5) >= 0 && arr.indexOf(6) >= 0) {
+                $weekend.removeAttr("disabled");
+            }
+        }
+        else {
+            $weeksCheckBox.each(function () {
+                $(this).removeAttr("disabled");
+            });
+            $all.removeAttr("disabled");
+            $notWeekend.removeAttr("disabled");
+            $weekend.removeAttr("disabled");
+        }
+    }
+
+    $(function () {
+
+        $(':checkbox[name="SelectedDays"]').each(function () {
+            $(this).attr('disabled', 'disabled');
+        });
+        $('#not_weekend').attr('disabled', 'disabled');
+        $('#weekend').attr('disabled', 'disabled');
+        $('#week_all').attr('disabled', 'disabled');
+
+        $('.nav li').each(function () {
+            $(this).addClass('noback');
+            if ($(this).children('a').attr('href') == window.location.pathname) {
+                $(this).removeClass('noback');
+            }
+        });
+
+        //==== 星期选择start ====
+        var notWeekend = [1, 2, 3, 4, 7];
+        var weekend = [5, 6];
+        //选择星期(快选)
+        $(".checkall input[type='checkbox']").click(function () {
+            if ($(this).prop("checked")) {
+                //非周末
+                var i = 0, count = 0;
+                if ($(this).attr('id') == 'not_weekend') {
+                    for (i = 0, count = notWeekend.length; i < count; i++) {
+                        $(".week_list input[type='checkbox']").eq((notWeekend[i] - 1)).prop('checked', true);
+                    }
+                    if ($("input[name=SelectedDays]:checked").length == 7) {
+                        $("#week_all").prop("checked", true);
+                    }
+                }
+                //周末
+                else if ($(this).attr('id') == 'weekend') {
+                    for (i = 0, count = weekend.length; i < count; i++) {
+                        $(".week_list input[type='checkbox']").eq((weekend[i] - 1)).prop('checked', true);
+                    }
+                    if ($("input[name=SelectedDays]:checked").length == 7) {
+                        $("#week_all").prop("checked", true);
+                    }
+                }
+                //全选
+                else {
+                    $(".week_list input[type='checkbox']").prop('checked', true);
+                    $('#not_weekend').prop('checked', true);
+                    $('#weekend').prop('checked', true);
+                }
+            } else {
+                //非周末
+                if ($(this).attr('id') == 'not_weekend') {
+                    for (i = 0, count = notWeekend.length; i < count; i++) {
+                        $(".week_list input[type='checkbox']").eq((notWeekend[i] - 1)).prop('checked', false);
+                    }
+                    $("#week_all").prop("checked", false);
+                }
+                //周末
+                else if ($(this).attr('id') == 'weekend') {
+                    for (i = 0, count = weekend.length; i < count; i++) {
+                        $(".week_list input[type='checkbox']").eq((weekend[i] - 1)).prop('checked', false);
+                    }
+                    $("#week_all").prop("checked", false);
+                }
+                //全选
+                else {
+                    $(".week_list input[type='checkbox']").prop('checked', false);
+                    $('#not_weekend').prop('checked', false);
+                    $('#weekend').prop('checked', false);
+                }
+            }
+        });
+
+        //选择星期(单选)
+        $('input:checkbox[name=SelectedDays]').click(function () {
+            if ($(this).prop('checked')) {
+                var i = 0, count = 0;
+                var weekendCount = 0;
+                var notWeekendCount = 0;
+                for (i = 0, count = notWeekend.length; i < count; i++) {
+                    if ($(".week_list input[type='checkbox']").eq((notWeekend[i] - 1)).prop('checked')) {
+                        notWeekendCount++;
+                    }
+                }
+                for (i = 0, count = weekend.length; i < count; i++) {
+                    if ($(".week_list input[type='checkbox']").eq((weekend[i] - 1)).prop('checked')) {
+                        weekendCount++;
+                    }
+                }
+                if (weekendCount == 2) {
+                    $('#weekend').prop('checked', true);
+                }
+                if (notWeekendCount == 5) {
+                    $('#not_weekend').prop('checked', true);
+                }
+                if ($("input[name=SelectedDays]:checked").length == 7) {
+                    $("#week_all").prop("checked", true);
+                }
+            }
+            else {
+                $("#week_all").prop("checked", false);
+                if ($(this).val() == 'Friday' || $(this).val() == 'Saturday') {
+                    $('#weekend').prop('checked', false);
+                }
+                else {
+                    $('#not_weekend').prop('checked', false);
+                }
+            }
+        });
+        //==== 星期选择end ====
+
+        //查询按钮点击事件
+        $('#searchBtn').click(function () {
+            //将页码恢复到1
+            $('input:hidden[name="ProductPagedList.PageIndex"]').val(1);
+            var params = $('#theForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('/Online/SearchProduct', params, function (data) {
+                $('#productListTb>tbody').html(data);
+                Utils.layerClose(load_iii);
+                AddPriceLink();
+                showBusinessCard();
+            });
+        });
+
+        // 旅行天数选择
+        $('#selectTravelDays a').click(function () {
+            $('#selectTravelDays a').css('color', '');
+            $(this).css('color', 'red');
+            //将页码恢复到1
+            $('input:hidden[name="ProductPagedList.PageIndex"]').val(1);
+            $('input:hidden[name="TravelDays"]').val($(this).attr('value'));
+            var params = $('#theForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('/Online/SearchProduct', params, function (data) {
+                $('#productListTb>tbody').html(data);
+                Utils.layerClose(load_iii);
+                AddPriceLink();
+                showBusinessCard();
+            });
+        });
+
+        // 主题选择
+        $('.zhuti_tips a').click(function () {
+            if ($(this).attr('class') == 'time_list_3') {
+                if ($('.zhuti_tips:visible').length == 1) {
+                    $('.zhuti_tips').show();
+                    $(this).text('收起');
+                }
+                else {
+                    $('.zhuti_tips').hide();
+                    $('.zhuti_tips:first').show();
+                    $(this).text('更多');
+                }
+                return false;
+            }
+
+            $('.zhuti_tips a').css('color', '');
+            $(this).css('color', 'red');
+            //将页码恢复到1
+            $('input:hidden[name="ProductPagedList.PageIndex"]').val(1);
+            var $hiddenTheme = $('input:hidden[name="Themes"]');
+            if ($(this).text() == "不限") {
+                $hiddenTheme.val('');
+            }
+            else {
+                $hiddenTheme.val($(this).text()); //仅选择一个主题
+            }
+            var params = $('#theForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('/Online/SearchProduct', params, function (data) {
+                $('#productListTb>tbody').html(data);
+                Utils.layerClose(load_iii);
+                AddPriceLink();
+                showBusinessCard();
+            });
+        });
+
+        $(".dest_tips a").click(function () {
+            $('.dest_tips a').css('color', '');
+            $(this).css('color', 'red');
+            //将页码恢复到1
+            $('input:hidden[name="ProductPagedList.PageIndex"]').val(1);
+            $('input:hidden[name="ArriveDest"]').val($(this).attr("value"));
+            var params = $('#theForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('/Online/SearchProduct', params, function (data) {
+                $('#productListTb>tbody').html(data);
+                Utils.layerClose(load_iii);
+                AddPriceLink();
+                showBusinessCard();
+            });
+        });
+
+        // 排序方式选择
+        $("#select_div_order").click(function () {
+            window.int0 = diffTime();
+            var className = $(this).attr('id');
+            $(this).attr('class', className + '_1');
+            $('#select_input_order').attr('class', 'select_input_order_1');
+            //$(".select_option_address").hide();
+            if ($(".select_option_order").css('display') == 'none') {
+                $(".select_option_order").show();
+            } else {
+                $(".select_option_order").hide();
+                $(this).attr('class', className);
+                $('#select_input_order').attr('class', 'select_input_order');
+            }
+        });
+
+        $(".select_option_order").hover(function () {
+        }, function () {
+            //$(".select_option_time").hide();
+        });
+
+        $(".select_option_order p").click(function () {
+            var optionVal = $(this).text();
+            //$('#out_order').val(optionVal);
+            $('input:hidden[name="OrderBy"]').val($(this).attr('id'));
+            $('#out_order_span').html(optionVal);
+            $(".select_option_order").hide();
+            $('#select_input_order').attr('class', 'select_input_order');
+            $('#select_div_order').attr('class', 'select_div_order');
+            //将页码恢复到1
+            $('input:hidden[name="ProductPagedList.PageIndex"]').val(1);
+            var params = $('#theForm').formSerialize();
+            var load_iii = Utils.layerLoad();
+            $.post('/Online/SearchProduct', params, function (data) {
+                $('#productListTb>tbody').html(data);
+                Utils.layerClose(load_iii);
+                AddPriceLink();
+                showBusinessCard();
+            });
+        });
+
+        $(".select_option_order p").hover(function () {
+            $(".select_option_order p").each(function () {
+                $(this).attr('class', '');
+            });
+            $(this).attr('class', 'option_bac');
+        }, function () {
+            $(this).attr('class', 'option_bac');
+        }
+        );
+
+        // 给浏览器窗口绑定 scroll 事件
+        var isLoding = false;
+        $(window).bind("scroll", function () {
+            // 判断窗口的滚动条是否接近页面底部
+            if ($(document).scrollTop() + $(window).height() > $(document).height() - 10) {
+                if (!isLoding) {
+                    var $pageIndex = $('input:hidden[name="ProductPagedList.PageIndex"]');
+                    var currnetIndex = Number($pageIndex.val());
+                    var pageCount = Number($('input:hidden[name="ProductPagedList.PageCount"]').val());
+                    // 判断下一页链接是否为空
+                    if (currnetIndex <= pageCount) {
+                        isLoding = true;
+                        $pageIndex.val(currnetIndex + 1);
+                        $("#divLoadingBottom").show();
+                        // 请求下一页数据
+                        var params = $('#theForm').formSerialize();
+                        $.post('/Online/SearchProduct', params, function (data) {
+                            $("#divLoadingBottom").hide();
+                            $('#productListTb>tbody').append(data);
+                            if (currnetIndex == pageCount) {
+                                $("#divPagerEnd").show();
+                            }
+                            isLoding = false;
+                            AddPriceLink(); //重新绑定显示价格
+                            showBusinessCard(); //重新绑定显示名片
+                        });
+                    }
+                }
+            }
+        });
+
+        $('#showPriceWin').hover(function () {
+        }, function () {
+            $(this).hide();
+        });
+
+        AddPriceLink();
+
+        //显示名片
+        showBusinessCard();
+        //    $('.line_name').find('a[name="showBusinessCard"]').powerFloat({
+        //        eventType: "hover",
+        //        //target: "/Online/BusinessCard?lineId=0",
+        //        targetMode: "ajax"
+        //    });
+
+        goTop();
+    });
+</script>

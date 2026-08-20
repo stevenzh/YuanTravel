@@ -1,0 +1,229 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<form id="theForm" action="">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                线路列表查询
+            </div>
+            <table width="100%" class="sotable">
+                <tr>
+                    <td class="label">产品编号：</td>
+                    <td><input class="text150" name="" type="text" /></td>
+                    <td class="label">产品名称：</td>
+                    <td><input class="text400" name="" type="text" /></td>
+                </tr>
+                <tr>
+                    <td class="label">目的地：</td>
+                    <td><input class="text150" name="" type="text" /></td>
+                    <td class="label">开班日期：</td>
+                    <td><input class="text70" name="" type="text" />&nbsp;至&nbsp;<input class="text70" name="" type="text" /></td>
+                </tr>
+            </table>
+            <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+            <input class="btn btn1" id="btnClear" type="button" value="取消" />
+        </div>
+    </div>
+
+
+    @* 列表*@
+    <div class="xbox">
+        <div id="divSearch">
+            <div class="btnlist">
+                <div class="fl ">
+                    <input class="btn btn2" name="" type="button" value="删除" />
+                    <input class="btn btn2" name="" type="button" value="彻底删除" />
+                    <input class="btn btn2" name="" type="button" value="转发" />
+                    <input class="btn btn2" name="" type="button" value="举报" />
+                    <input class="btn btn2" name="" type="button" value="全部标记为已读" />
+                    <select class="text70" name=""></select>
+                    <select class="text70" name=""></select>
+                </div>
+                <div class="fr ">
+                    <a href="#" class="btn btn1" title="添加"></a>
+                </div>
+            </div>
+
+            <table class="listtbl" width="100%">
+                <thead>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>产品编号</td>
+                        <td>产品名称</td>
+                        <td>出团日期</td>
+                        <td align="center">行程<br />天数</td>
+                        <td align="center">产品<br />类型</td>
+                        <td align="center">目的地</td>
+                        <td align="center">供应商</td>
+                        <td align="center">支付<br />类型</td>
+                        <td align="center">操作</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input name="" type="checkbox" value="" /></td>
+                        <td>SZ10120410125</td>
+                        <td><a href=""><span>[纯玩]</span>大连 旅顺 黄金海岸双方4日游</a></td>
+                        <td>2012.04.12 - 2012.04.15</td>
+                        <td align="center">4</td>
+                        <td align="center">国内</td>
+                        <td align="center">大连</td>
+                        <td align="center">皇朝假期</td>
+                        <td align="center">金额</td>
+                        <td align="center">
+                            <a class="search" title="查看"></a>
+                            <a class="edit" title="编辑"></a>
+                            <a class="delete" title="删除"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+
+@*编辑*@
+<form id="theForm" action="" method="POST">
+    <div class="station">出团计划信息</div>
+
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label"><span class="point">*</span>团名：</td>
+                    <td>
+                        <a href="#">青岛三日游</a>
+                        <input name="input" class="text220" type="text" />
+                        <span class="alert malf20">填写需少于6个字符</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">计划名额：</td>
+                    <td>
+                        <input name="input" class="text70" type="text" />
+                        <span class="label malf20">预留名额： </span>
+                        <input name="input" type="text" class="text70" />
+                        <span style="display:inline-block" class="mark malf20"><span>已用库存&nbsp;40</span><span>剩余库存&nbsp;10</span></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        备注：
+                    </td>
+                    <td>  <textarea class="textarea440" name="textarea"></textarea></td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                        <input class="btn btn1" name="btnClear" type="button" value="返回列表" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+
+
+
+
+<p> 座位表</p>
+
+<div class="seat_box">
+
+    <p>
+        <b class="title_b">座位分布</b>
+    </p>
+
+    <div class="seat_content">
+        <table width="261px" border="0" cellspacing="3" class="seat_tbl">
+            <tr>
+                <td class="gray">1</td>
+                <td class="gray">2</td>
+                <td rowspan="12" class="noborder">&nbsp;</td>
+                <td class="gray">3</td>
+                <td class="gray">4</td>
+            </tr>
+            <tr>
+                <td class="red">5</td>
+                <td class="red">6</td>
+                <td class="gray">7</td>
+                <td class="gray">8</td>
+            </tr>
+            <tr>
+                <td class="red">9</td>
+                <td class="red">10</td>
+                <td class="gray">11</td>
+                <td class="gray">12</td>
+            </tr>
+            <tr>
+                <td class="red">13</td>
+                <td class="red">14</td>
+                <td class="red">15</td>
+                <td class="red">16</td>
+            </tr>
+            <tr>
+                <td class="red">17</td>
+                <td class="red">18</td>
+                <td class="red">19</td>
+                <td class="red">20</td>
+            </tr>
+            <tr>
+                <td class="blue">21</td>
+                <td class="blue">22</td>
+                <td class="blue">23</td>
+                <td class="blue">24</td>
+            </tr>
+            <tr>
+                <td class="blue">25</td>
+                <td class="blue">26</td>
+                <td class="blue">27</td>
+                <td class="blue">28</td>
+            </tr>
+            <tr>
+                <td class="blue">29</td>
+                <td class="blue">30</td>
+                <td class="blue">31</td>
+                <td class="blue">32</td>
+            </tr>
+            <tr>
+                <td class="blue">33</td>
+                <td class="blue">34</td>
+                <td class="blue">35</td>
+                <td class="blue">36</td>
+            </tr>
+            <tr>
+                <td class="blue">37</td>
+                <td class="blue">38</td>
+                <td class="blue">39</td>
+                <td class="blue">40</td>
+            </tr>
+            <tr>
+                <td class="blue">41</td>
+                <td class="blue">42</td>
+                <td class="blue">43</td>
+                <td class="blue">44</td>
+            </tr>
+            <tr>
+                <td class="gray">45</td>
+                <td class="gray">46</td>
+                <td class="gray">47</td>
+                <td class="gray">48</td>
+            </tr>
+            <tr>
+                <td class="gray">49</td>
+                <td class="gray">50</td>
+                <td class="gray">51</td>
+                <td class="gray">52</td>
+                <td class="gray">53</td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div class="clear"></div>
+</div>

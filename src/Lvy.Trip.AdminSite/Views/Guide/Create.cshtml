@@ -1,0 +1,241 @@
+﻿@model Lvy.VModels.Base.GuideVModel
+@{
+    ViewBag.Title = "创建领队信息";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+}
+<form id="theForm" action="@Url.Action("Create", "Guide")" method="POST">
+    <div class="station">
+        创建领队信息
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>部门：
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(a => a.GuideModel.TeamID, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>姓名：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Name, new { @class = "text150" })
+                    </td>
+                    <td class="label">英文名:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.PinYin, new { @class = "text150" })
+                    </td>
+
+                    <td class="label">性 别:</td>
+                    <td class="data">
+                        <select name="GuideModel.Sex">
+                            <option value="3">--请选择--</option>
+                            <option value="1">男</option>
+                            <option value="2">女</option>
+                            <option value="3">不明</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">出生日期：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.BirthDate, new { @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:true,readOnly:true})" })
+                    </td>
+                    <td class="label">出生地：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.BirthPlace, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>身份证：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Card, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">手机：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Mobile, new { @class = "text150" })
+                    </td>
+                    <td class="label">联系电话：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Tel, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">E_mail:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Email, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">地址：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Address, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">是否有导游证：</td>
+
+                    <td class="data">
+                        <select name="GuideModel.TourKey">
+                            <option value="0">--请选择--</option>
+                            <option value="1">是</option>
+                            <option value="2">否</option>
+                        </select>
+                    </td>
+                    <td class="label">导游证号:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.TourCard, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">年检时间：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.CheckDate, new { @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:false,readOnly:true})" })
+                    </td>
+                    <td class="label">IC卡登记号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.ICCard, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">是否有领队证：</td>
+                    <td class="data">
+                        <select name="GuideModel.LeadKey">
+                            <option value="0">--请选择--</option>
+                            <option value="1">是</option>
+                            <option value="2">否</option>
+
+                        </select>
+                    </td>
+                    <td class="label">领队证号：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.LeadCard, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">领队证有效期:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.DateStart, new { @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:false,readOnly:true})" })
+                        至
+                        @Html.TextBoxFor(a => a.GuideModel.DateEnd, new { @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:false,readOnly:true})" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">护照类型：</td>
+                    <td class="data">
+                        <select name="GuideModel.Hzzl">
+                            <option value="0">--请选择--</option>
+                            <option value="1">因私旅游</option>
+                            <option value="2">因私护照</option>
+                            <option value="3">因公护照</option>
+                            <option value="4">通行证</option>
+                            <option value="5">外籍护照</option>
+                        </select>
+                    </td>
+                    <td class="label">护 照 号:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Hzno, new { @class = "text150" })
+                    </td>
+                    <td class="label">护照签发地:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.HzAddress, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">护照有效期:</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.HzDate, new { @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:false,readOnly:true})" })
+                        至
+                        @Html.TextBoxFor(a => a.GuideModel.HzEndDate, new { @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:false,readOnly:true})" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">分类1:</td>
+                    <td class="data">
+                        <select name="GuideModel.WorkType1">
+                            <option value="0">--请选择--</option>
+                            <option value="1">社内</option>
+                            <option value="2">社外</option>
+                        </select>
+                    </td>
+                    <td class="label">分类2:</td>
+                    <td class="data">
+                        <select name="GuideModel.WorkType2">
+                            <option value="0">--请选择--</option>
+                            <option value="1">专职</option>
+                            <option value="2">兼职</option>
+                        </select>
+                    </td>
+                    <td class="label">可带团类型：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.GuideModel.Remarks, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr style="display:none">
+                    <td class="label">工作经历(250字以内):</td>
+                    <td>
+                        @Html.TextAreaFor(a => a.GuideModel.WorkRemark, new { @class = "textarea440" })
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" onclick="return CheckControls();" />
+                        <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    function CheckControls() {
+        if (Utils.Trim($("#GuideModel_Code").val()) == "") {
+            Utils.alert("陪同代码不能为空！");
+            $("#GuideModel_Code").select().focus();
+            return false;
+        }
+        if (Utils.Trim($("#GuideModel_Name").val()) == "") {
+            Utils.alert("部门不能为空！");
+            $("#GuideModel_Name").select().focus();
+            return false;
+        }
+        if (Utils.Trim($("#GuideModel_TeamID").val()) == "") {
+            Utils.alert("姓名不能为空！");
+            $("#GuideModel_TeamID").select().focus();
+            return false;
+        }
+        if (Utils.Trim($("#GuideModel_Card").val()) == "") {
+            Utils.alert("身份证不能为空！");
+            $("#GuideModel_Card").select().focus();
+            return false;
+        }
+
+        return true;
+    }
+
+</script>
+<script type="text/javascript">
+
+    $(function () {
+        $("input[name$='Name']").on("keyup keydown change blur", function () {
+
+            var obj = $(this).parent("td").parent("tr");
+            obj.find("input[name$='PinYin']").val($(this).toPinyin());
+        });
+    })
+</script>

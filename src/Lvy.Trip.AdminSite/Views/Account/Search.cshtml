@@ -1,0 +1,54 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+@{
+    ViewBag.Title = "查询账号";
+}
+@section AdditionalResources{}
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+    @Html.HiddenFor(m => m.FirstTime)
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                账号列表查询
+            </div>
+            <table width="100%" class="sotable">
+                <tr>
+                    <td class="label">登录名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.LoginName, new { @class = "text150" })</td>
+                    <td class="label">账号姓名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+                    <td class="label">部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                    @*<td class="label">工作职能：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.Account.DepartCode, ViewBag.DepartCodes as IEnumerable<SelectListItem>)
+                        </td>*@
+                </tr>
+            </table>
+            <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+            <input class="btn btn1" id="btnClear" type="button" value="取消" />
+        </div>
+    </div>
+    @* 列表*@
+    <div class="xbox clear">
+        <div id="divSearch">
+            @Html.Partial("UCSearch", Model)
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSearch").click(function () {
+            $("#Accounts_PageIndex").val("1");
+            $("#theForm").submit();
+        });
+
+        //重置
+        $("#btnClear").click(function () {
+            $(".sotable td input[type=text]").val("");
+            $(".sotable td input[type=hidden]").val("");
+        });
+    });
+</script>

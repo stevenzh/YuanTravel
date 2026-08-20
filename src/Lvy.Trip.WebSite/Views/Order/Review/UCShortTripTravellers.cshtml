@@ -1,0 +1,48 @@
+﻿@model Lvy.VModels.Order.ReviewOrderVModel
+@*短线游客信息，显示座位号*@
+<h4>游客信息</h4>
+
+<table id="tbTrallers" class="table table-bordered">
+    <thead>
+        <tr style="text-align: center">
+            <td>姓名</td>
+            <td>电话</td>
+            <td>座位号</td>
+            <td>报价种类</td>
+            <td>补差价</td>
+            <td>自费</td>
+            <td>房差</td>
+            <td>应收款</td>
+            <td>状态</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Travellers)
+        {
+            <tr style="text-align: center;">
+                <td>@item.Name</td>
+                <td>@item.Phone</td>
+                <td>@item.SeatNum</td>
+                <td title="@item.PriceContent">@item.PriceContent.TrimWithElipsis(8)</td>
+                <td>@item.FanLi</td>
+                <td>@item.ZiFei</td>
+                <td>@item.SingleRoom</td>
+                <td>@item.YsPrice</td>
+                <td>
+                    @if (item.State == 0)
+                    {
+                        <label style="color: red;">已取消</label>
+                    }
+                    else if (item.State == 1)
+                    {
+                        <label style="color: red;">已退团</label>
+                    }
+                    else
+                    {
+                        <label style="color: red;">有效</label>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

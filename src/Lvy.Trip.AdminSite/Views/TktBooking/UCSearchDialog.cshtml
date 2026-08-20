@@ -1,0 +1,85 @@
+﻿@using Lvy.Models
+
+<div id="productDialog" class="shadow">
+    <p class="dest_search">目的地景区搜索</p>
+    <div class="dest_search_content">
+
+        <ul>
+            <li>快速搜索</li>
+            <li>
+                <input type="text" class="dest_search_input" id="txtSearchDest" />
+                <div id='suggestDest' class="ac_results"></div>
+                <input type="hidden" id="searchKeyword" />
+            </li>
+            <li>
+                <a href="javascript:;" class="searchButton" id="btnAddProduct" title="查询">查询</a>
+            </li>
+
+            <li style="height: 30px; border-bottom: 1px dashed #ccc;" align="left"> </li>
+            <li style="height: 10px;"></li>
+
+            <li>该目的地下的景区 ：</li>
+            <li style="word-break:keep-all;padding-top: 5px;  ">
+                @foreach (var item in ViewBag.SameProducts as List<KeyValueBean>)
+                {
+                    <a name="addProductToShopCar" productId="@item.Key" href="#" style="padding-left: 5px;">@item.Value</a>
+                }
+
+            </li>
+            <li style="height: 15px;"></li>
+            <li>该目的地下的购物点 ：</li>
+            <li style="word-break:keep-all;padding-top:5px;  ">
+                @foreach (var item in ViewBag.SameShoppings as List<KeyValueBean>)
+                {
+                    <a name="addProductToShopCar" productId="@item.Key" href="#" style="padding-left: 5px;">@item.Value</a>
+                }
+
+            </li>
+        </ul>
+
+        <p style="height: 20px;"></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("a[name='addProductToShopCar']").click(function () {
+            var pId = $(this).attr("productId");
+            var obj = $("#divProducts").find("#product-" + pId);
+            if (obj.length > 0) {
+                Utils.alert("不能添加重复的产品!!");
+                return false;
+            }
+            var url = '@Url.Action("AddProductToShopCar")';
+            var params = { productId: pId };
+            $.post(url, params, function (html) {
+                $("#divProducts").append(html);
+                $.powerFloat.hide();
+                $("#productDialog").html("");
+            });
+        });
+
+        $("#btnAddProduct").click(function () {
+            var pId = $("#searchKeyword").val();
+            if (Utils.Trim(pId) == "") {
+                return false;
+            }
+            var obj = $("#divProducts").find("#product-" + pId);
+            if (obj.length > 0) {
+                Utils.alert("不能添加重复的产品!!");
+                return false;
+            }
+            var url = '/TktBooking/AddProductToShopCar';
+            var params = { productId: pId };
+            $.post(url, params, function (html) {
+                $("#divProducts").append(html);
+                $.powerFloat.hide();
+                $("#productDialog").html("");
+            });
+        });
+
+        $("#txtSearchDest").suggestTicket(
+        { attachObject: '#suggestDest', dataContainer: '#searchKeyword' });
+    });
+
+</script>

@@ -1,0 +1,89 @@
+﻿@model FlProceedsRefundModel
+
+<!DOCTYPE html>
+<html>
+<body>
+    <table width="100%">
+        <tr>
+            <td style="padding: 15px; text-align: center">
+
+                <table class="h25 tab" align="center" width="100%">
+                    <tr>
+                        <td width="10%" align="right">订单号：</td>
+                        <td width="20%" style="color: #0066FF" align="left">&nbsp;@Model.OrdersCode</td>
+                        <td width="10%" align="right">收款单号：</td>
+                        <td width="20%" align="left">&nbsp;@Model.ProceedsRefundCode</td>
+                        <td width="10%" align="right">产品名称：</td>
+                        <td width="20%" align="left">&nbsp;@Model.ProductName</td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">收款方式：</td>
+                        <td align="left">&nbsp;@CCT.Core.Dictionary.GetNode("CollectionType", Model.Type.Value.ToString()).Value</td>
+                        <td align="right">收款人：</td>
+                        <td align="left">&nbsp;@Model.ChargerName</td>
+                        <td align="right">收款渠道：</td>
+                        <td align="left">&nbsp;@CCT.Core.Dictionary.GetNode("CollectionChannel", Model.ProceedsChannel.Value.ToString()).Value</td>
+                    </tr>
+                    <tr>
+                        <td align="right">收款金额：</td>
+                        <td align="left">&nbsp;@decimal.Round(Model.ReceiveRefundSum.Value, 2)</td>
+                        <td align="right">交易凭证号：</td>
+                        <td style="color: #e02d31; font-weight: bold" align="left">&nbsp;<input type="text" class="text100" value="@Model.TradeNo" id="TradeNo" name="TradeNo" /></td>
+                        <td align="right"></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td align="right">收款人备注：</td>
+                        <td colspan="5" align="left">&nbsp;@Model.Remark</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <table class="printBtn h25" align="center" width="95%">
+        <tr>
+            <td align="center">
+                <input type="button" value="确认到账" class="btn_2" style="cursor: pointer;" id="ConfirmCollection" />&nbsp;&nbsp;&nbsp;
+                <input type="button" value="关 闭" class="btn_2" onclick="ClosePlan()" />
+                <input type="hidden" id="ProceedsRefundCode" name="ProceedsRefundCode" value="@Model.ProceedsRefundCode" />
+                <input type="hidden" id="Type" name="Type" value="@Model.Type" />
+                <input type="hidden" id="OrdersCode" name="OrdersCode" value="@Model.OrdersCode" />
+            </td>
+        </tr>
+    </table>
+    <script type="text/javascript">
+        var flag = '<%: Request.QueryString["flag"] %>';
+        $("#ConfirmCollection").click(function () {
+            var params = {
+                "ProceedsRefundCode": $("#ProceedsRefundCode").val(),
+                "TradeNo": $("#TradeNo").val(),
+                "Type": $("#Type").val(),
+                "OrdersCode": $("#OrdersCode").val()
+            }
+            $.post('/Collection/UpdateCollectionInfo', params, function (data) {
+
+                var result = data.Status;
+                if (result == "1") {
+                    //                        if (flag == "d") {   //从详细页面进行的到账动作
+                    //                            Utils.alert(flag);
+                    window.parent.location.reload();
+                    //                        }
+                    //                        else {
+                    //                            window.parent.RefreshCollection1(data);
+                    //                        }
+
+                } else {
+                    Utils.alert("确认到账出错，请联系网络信息部！");
+                }
+                ClosePlan();
+            });
+        });
+
+        function ClosePlan() {
+            window.parent.JqueryDialog.Close();
+        }
+    </script>
+</body>
+</html>
+

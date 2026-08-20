@@ -1,0 +1,45 @@
+﻿@model List<Lvy.Models.ProductDB.TpPriceModel>
+
+<table id="tblPrices" class="table">
+    <tr>
+        <td>价格类型</td>
+        <td>市场价</td>
+        <td>结算价</td>
+        @if (Model[0].TeJiaFanLi > 0)
+        {
+            <td>特价</td>
+        }
+        <td>自费</td>
+        <td>单房差</td>
+        <td style="width:200px;">人数</td>
+    </tr>
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <tr>
+            <td name="tdPriceContent" title="@Model[i].PriceRemark">@Model[i].PriceRemark.TrimWithElipsis(18)</td>
+            @if (Model[i].TeJiaFanLi > 0)
+            {
+                <td name="tdPrice" style="text-decoration:line-through;">@Model[i].Price</td>
+                <td name="tdSettlePrice" style="text-decoration:line-through;">@Model[i].SettlePrice</td>
+                <td>@Html.Raw(Model[i].SettlePrice - Model[i].TeJiaFanLi)</td>
+            }
+            else
+            {
+                <td name="tdPrice">@Model[i].Price</td>
+                <td name="tdSettlePrice">@Model[i].SettlePrice</td>
+            }
+            <td name="tdZiFei">@Model[i].ZiFei</td>
+            <td name="tdSingleRoom">@Model[i].SingleRoom</td>
+            <td align="center">
+                <input type="number" value="0" class="form-control form-control-sm" name="priceNum" input-limit="number" />
+            </td>
+            <td name="tdSuitNum" style="display: none">@Model[i].SuitNum</td>
+            <td name="tdPriceId" style="display: none">@Model[i].Id</td>
+            <td name="tdTeJiaFanLi" style="display: none">@Model[i].TeJiaFanLi</td>
+        </tr>
+    }
+</table>
+
+<div class="bac_money_table"></div>
+<br />
+

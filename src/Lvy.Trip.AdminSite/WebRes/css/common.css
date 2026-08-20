@@ -1,0 +1,53 @@
+﻿@charset "utf-8";
+/* Online/Route/LineRouteDetail.cshtml  Online/Route/TourRouteDetail.cshtml  Shared/_RrontLayout.cshtml */
+html, body { margin: 0; padding: 0; width: 100%; }
+body { font: 13px/160% "Microsoft Yahei", Tahoma, Arial, Helvetica, STHeiti; color: #000; background: #f7f2f2; }
+* html { background-image: url(about:blank); background-attachment: fixed; }
+a { color: #666; text-decoration: none; }
+    a:visited { text-decoration: none; color: #666; }
+    a:hover { color: #ff6600; text-decoration: underline; }
+    a:focus { outline: 0; }
+    a:active { text-decoration: none; }
+p { margin: 0; padding: 0; line-height: 150%; }
+input, font, select, option, textarea, button, fieldset, legend { font-family: Arial; color: #333; font-size: 1em; line-height: 120%; }
+input, textarea, option { line-height: 23px; padding-left: 3px; }
+img { border: none; }
+ul, li, form { margin: 0; padding: 0; list-style: none; }
+div, td, PRE { word-wrap: break-word; }
+h1, h2, h3, h4, h5, h6 { margin: 0; padding: 0; font-weight: normal; }
+h1 { font-size: 18px; color: #222; }
+textarea { resize: none; }
+* { margin: 0px; padding: 0px; }
+
+.clear { clear: both; font-size: 1px; overflow: hidden; height: 1px; }
+
+.color_red { color: red; }
+.color_bbb { color: #bbb; }
+.color_ccc { color: #ccc; }
+.marginright20 { margin-right: 20px; }
+.marginright12 { margin-right: 12px; }
+.right { float: right; }
+.noborder { border: none; }
+.paddingtop5 { padding-top: 5px; }
+.paddingtop10 { padding-top: 10px; }
+.hidden { display: none; }
+.nohidden { }
+.bac_line_hidden { display: none; }
+.margintop25 { margin-top: 25px; }
+.margintop15 { margin-top: 15px; }
+.margintop10 { margin-top: 10px; }
+.marginbottom15 { margin-bottom: 15px; }
+.textIndent10 { text-indent: 10px; }
+.colorFF8D26 { color: #FF8D26; }
+
+.height45 { height: 45px; }
+
+
+/*input css*/
+.inputText { border: 1px solid #5BB9EC; }
+/*input css*/
+
+.bussinessCard { width: 350px; padding: 0 3px 0 3px; }
+    .bussinessCard table { width: 100%; text-align: left; }
+    .bussinessCard .label { width: 90px; text-align: right; font-weight: bold; }
+    .bussinessCard .logo { max-height: 60px; max-width: 280px; }

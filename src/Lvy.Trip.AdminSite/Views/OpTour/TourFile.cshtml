@@ -1,0 +1,73 @@
+﻿@model Lvy.VModels.Op.TourVModel
+
+<div>
+    @Html.HiddenFor(m => m.TourId)
+    <input type="file" name="TourFileName" />
+    <input type="button" value="上传附件" class="btn btn1" id="btnUpload" />
+</div>
+<table id="priceList" class="listtbl" style="width:100%;">
+    <thead>
+        <tr style="text-align: center;">
+            <td>编号</td>
+            <td>文件名称</td>
+            <td>说明</td>
+            <td>操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TourFileList)
+        {
+            <tr style="text-align: center;">
+                <td>@item.Id</td>
+                <td>@item.FileName</td>
+                <td>@item.Note</td>
+                <td>
+                    <a href="javascript:DeleteTourFile(@item.Id)">删除</a>
+                    <a href="@Url.Action("DownTourFile",new { id=item.Id})">下载</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    //局部刷新添加
+    $(function () {
+        $("#btnUpload").click(function () {
+            if ($.trim($("[name='TourFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            var formData = new FormData();
+            var name = $("[name='TourFileName']").val();
+            formData.append("TourFileName", $("[name='TourFileName']")[0].files[0]);
+            formData.append("name", name);
+            formData.append("TourId", $("#TourId").val());
+            $.ajax({
+                url: '@Url.Action("AddUploadTourFile")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    $('#addTourFileContainer').html(data);
+                }
+            });
+        });
+    })
+    function DeleteTourFile(Id) {
+        if (!confirm("确定删除？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("DeleteTourFile")',
+            type: 'POST',
+            data: { id: Id },
+            success: function (data) {
+                $('#addTourFileContainer').html(data);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,91 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Contract.AdditionsVModel
+@{
+    ViewBag.Title = "Additions";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+<form id="theForm" method="POST">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                合同协议列表查询
+            </div>
+
+            <table class="sotable" align="center" style="width:80%;">
+                <tr>
+                    <td width="80px">内容：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.content, new { @Class = "text150", @id = "content" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="6">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="btnReset" name="" type="button" value="清空" />
+                        <input class="btn btn1" id="btnAdd" name="" type="button" value="添加" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="xbox clear">
+        <div id="divAddtionsSearch">
+            @Html.Partial("UCSearchAdditions", Model)
+        </div>
+        @*隐藏域*@
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //搜索
+        $("#btnSearch").click(function () {
+            pageselectCallback();
+        });
+
+        //重置
+        $("#btnReset").click(function () {
+            $(".sotable td input[type='text']").val("");
+        });
+
+        $("#btnAdd").click(function () {
+            layer.open({ type: 2, title: '添加/修改合同协议', maxmin: true, shadeClose: false, area: ['1000px', '550px'], content:  '@Url.Action("CreateAdditions", "Contract")' });
+        });
+    });
+
+    //回调方法
+    function pageselectCallback() {
+        var params = $("#theForm").formSerialize();
+        var load_iii = Utils.layerLoad();
+        $.post('@Url.Action("Additions", "Contract")', params, function (data) {
+            console.log(data);
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+
+            $('#divAddtionsSearch').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    function delAdditions(id) {
+        var param = { id: id };
+        $.post('@Url.Action("DelAdditons", "Contract")', param, function (data) {
+            Utils.alert(data.msg);
+            if (data.code == "0") {
+                pageselectCallback();
+            }
+        });
+    }
+
+    function editAdditions(id) {
+        layer.open({ type: 2, title: '添加/修改合同协议', maxmin: true, shadeClose: false, area: ['1000px', '550px'], content:  "/Contract/CreateAdditions?id=" + id });
+    }
+
+</script>

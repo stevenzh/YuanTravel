@@ -1,0 +1,198 @@
+﻿@model Lvy.VModels.Ticket.EditTaskOrderVModel
+@{
+    ViewBag.Title = "编辑任务单";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    var actionUrl = Model.TaskOrder.ID == 0 ? Url.Action("AddTaskOrder") : Url.Action("UpdateTaskOrder");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link rel="stylesheet" href="@CDNServerUrl/summernote/summernote-bs4.min.css" />
+    <script type="text/javascript" src="@CDNServerUrl/summernote/summernote-bs4.min.js"></script>
+    <script type="text/javascript" src="@CDNServerUrl/summernote/lang/summernote-zh-CN.min.js"></script>
+    <script type="text/javascript" src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js"></script>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">@Model.CustomerName</h4>
+    </div>
+    <form id="theForm" action="@actionUrl">
+        <div class="card-body">
+            <div style="padding: 5px 0 5px 0;">
+                <span style="font-size: 24px; font-family: SimHei;">@(Model.CustomerName)任务单</span>
+                @Html.HiddenFor(m => m.TaskOrder.ID)
+                @Html.HiddenFor(m => m.TaskOrder.MasterOrderCode)
+            </div>
+
+            <table width="100%" class="table ">
+                <tr>
+                    <td class="label">
+                        团号：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.TaskOrder.TourCode, new { @class = "form-control" })
+                    </td>
+                    <td class="label">
+                        人数：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.TaskOrder.TouristNumber, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        出团时间：
+                    </td>
+                    <td>
+                        @*<input id="StartDate" name="StartDate" type="text" value="@Model.StartDate" class="Wdate text150" onfocus="WdatePicker({doubleCalendar:true,isShowClear:false,minDate:'%y-%M-%d',readOnly:true,onpicked:function(){$('#EndDate')[0].focus();}})" onclick = "$(this).focus();"/>*@
+                        @Html.HiddenFor(m => m.TaskOrder.StartDate)
+                        @Html.HiddenFor(m => m.TaskOrder.EndDate)
+                        @Model.TaskOrder.StartDate.ToDateFormat()
+                        --
+                        @Model.TaskOrder.EndDate.ToDateFormat()
+                        @*<input id="EndDate" name="EndDate" type="text" value="@Model.EndDate" class="Wdate text150" onfocus="WdatePicker({doubleCalendar:true,isShowClear:false,minDate:'#F{$dp.$D(\'StartDate\'||\'%y-%M-%d\')}',readOnly:true})" onclick = "$(this).focus();" />*@
+                    </td>
+                    <td class="label">
+                        导游：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.TaskOrder.GuideName, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>游程安排：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextAreaFor(m => m.TaskOrder.RouteDetail, new { @class = "form-control summernote" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        交通：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.TaskOrder.Traffic, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        门票：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextAreaFor(m => m.TaskOrder.Product, new { @class = "form-control summernote" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        住宿：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.TaskOrder.Hotel, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        餐费：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.TaskOrder.Catering, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        其他：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.TaskOrder.Other, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        景区备注：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextAreaFor(m => m.TaskOrder.Description, new { @class = "form-control summernote" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        预支团款：
+                    </td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(m => m.TaskOrder.PreMoney, new { @class = "form-control" })
+                    </td>
+                    @*<td class="label" colspan="2">
+                            业务签发单位（盖章有效）
+                        </td>*@
+                </tr>
+            </table>
+        </div>
+        <div class="card-footer">
+            <input type="button" id="saveBtn" class="btn btn-info" value="保存" />
+            @if (Model.TaskOrder.ID > 0)
+            {
+                @*若已创建任务单，可直接打印，否则需先保存再打印*@
+                <input type="button" id="printBtn" class="btn btn-info" value="打印" />
+            }
+        </div>
+
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        $('.summernote').summernote({
+            lang: 'zh-CN',
+            height: 200,
+            tabsize: 2,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+
+        $('#saveBtn').click(function () {
+            var $routeInfo = $('#TaskOrder_RouteDetail');
+            if ($routeInfo.val().length == 0) {
+                Utils.alert('行程不能为空。');
+                $routeInfo.focus().select();
+                return false;
+            }
+
+            var load_iii = Utils.layerLoad();
+            var $form = $('#theForm');
+            var params = $form.formSerialize();
+            $.post($form.attr('action'), params, function (data) {
+                if (data && data.TaskOrderId > 0) {
+                    //                    if (confirm('保存成功，现在打印？')) {
+                    //                        var taskOrderId = data.TaskOrderId;
+                    //                        window.open('/TktOrder/PrintTaskOrder?taskId=' + taskOrderId);
+                    //                    }
+                    //                    else {
+                    Utils.alert('保存成功');
+                    window.location.reload();
+                    //                    }
+                }
+                else {
+                    Utils.alert('保存出现异常，请稍后再试。');
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+        $('#printBtn').click(function () {
+            var taskOrderId = $('#TaskOrder_Id').val();
+            window.open('/TktOrder/PrintTaskOrder?taskId=' + taskOrderId);
+        });
+    });
+
+</script>

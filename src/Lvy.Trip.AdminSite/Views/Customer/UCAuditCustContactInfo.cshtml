@@ -1,0 +1,75 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+
+<style>
+    .listtbl tbody td { text-align: center; }
+</style>
+<div class="xbox clear">
+    <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;padding:10px">联系人信息</div>
+    @if (Model.Accounts.Items.Count > 0)
+    {
+        <table class="listtbl" style="width:100%;">
+            <thead>
+                <tr>
+                    <td>姓名</td>
+                    <td>性别</td>
+                    <td>手机号码</td>
+                    <td>电子信箱</td>
+                    <td>销售组</td>
+                    <td>对应销售</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Accounts.Items)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.SexEnum, item.Sex.ToString())</td>
+                        <td>@item.Mobile</td>
+                        <td>@item.Email</td>
+                        <td>@DictionaryTools.GetCachedTeam(item.TeamID).TeamName </td>
+                        <td>@DictionaryTools.GetCachedAccount(item.SalerCode).Name</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.HiddenFor(a => a.Accounts.PageIndex)
+        <div id="Pagination" class="digg"></div>
+    }
+    else
+    {
+        <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+            <br />
+            没有查找到数据！
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Accounts.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Accounts.PageSize'),
+                current_page: @Model.Accounts.PageIndex-1
+            });
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#Accounts_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("UCAuditCustContactInfo")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divContactInfoList').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+</script>

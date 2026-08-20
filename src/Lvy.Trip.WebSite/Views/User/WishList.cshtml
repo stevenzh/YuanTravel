@@ -1,0 +1,42 @@
+﻿@model Lvy.Models.CrmDB.CrmAccountModel
+@{
+    ViewBag.Title = "我的收藏夹";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources{ }
+
+<!-- Home -->
+<div class="home">
+    <div class="home_background parallax-window" data-parallax="scroll" data-image-src="images/shop_background.jpg"></div>
+    <div class="home_overlay"></div>
+    <div class="home_content d-flex flex-column align-items-center justify-content-center">
+        <h2 class="home_title">@ViewBag.Title</h2>
+    </div>
+</div>
+
+<div class="register-login-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="@CDNServerUrl/jquery-validation/jquery.validate.min.js"></script>
+    <script src="@CDNServerUrl/jquery-validation/localization/messages_zh.min.js" type="text/javascript"></script>
+    <script src="@CDNServerUrl/jquery-form/jquery.form.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var host = '@Arch.Common.AppSetting.Get("UploadFileRoot")';
+    </script>
+    <script type="text/javascript">
+
+        $(function () {
+
+        });
+    </script>
+
+}

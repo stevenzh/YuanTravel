@@ -1,0 +1,240 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+
+@if (Model.TpLine.Id > 0)
+{
+    var listTraffic = DictionaryTools.GetEnumsBy(Enums.TrafficTypeEnum);
+    @Html.HiddenFor(m => m.TpLine.LineId)
+
+    <div class="box-group" id="accordion">
+        <form action="@Url.Action("SaveLineRoute")" class="form-horizontal" id="theForm" method="post">
+            @for (int i = 0; i < Model.TpLineRouteList.Count; i++)
+            {
+                <div class="callout callout-info">
+                    <h5 class="box-title">第 @(i + 1)天</h5>
+                    <div class="form-group" style="display:none;">
+                        <label class="col-sm-2 control-label">标题：</label>
+                        <div class="col-sm-5">
+                            @Html.HiddenFor(m => Model.TpLineRouteList[i].Id)
+                            @Html.TextBoxFor(m => Model.TpLineRouteList[i].Title, new { @class = "form-control form-control-sm", @maxlength = "100" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 control-label">  城市：</label>
+                        <div class="col-sm-8">
+                            <table id="RouteTrafficList_@i">
+                                <tbody>
+                                    @for (int j = 0; j < Model.TpLineRouteList[i].LineTrafficList.Count; j++)
+                                    {
+                                        <tr id="rowIndex_@j">
+                                            <td>From -</td>
+                                            <td>
+                                                @Html.HiddenFor(m => Model.TpLineRouteList[i].LineTrafficList[j].Id)
+                                                @Html.TextBoxFor(m => Model.TpLineRouteList[i].LineTrafficList[j].FromCity, new { @class = "form-control form-control-sm", @style = "width:100px;", @maxlength = "25" })
+                                            </td>
+                                            <td>To -</td>
+                                            <td>@Html.TextBoxFor(m => Model.TpLineRouteList[i].LineTrafficList[j].ToCity, new { @class = "form-control form-control-sm", @style = "width:100px;", @maxlength = "25" })</td>
+                                            <td>交通：</td>
+                                            <td>
+                                                <select name="LineTrafficList[@j].TrafficId" class="form-control form-control-sm">
+                                                    @foreach (var t in listTraffic)
+                                                    {
+                                                        if (t.Key == Model.TpLineRouteList[i].LineTrafficList[j].TrafficId.ToString())
+                                                        {
+                                                            <option value="@t.Key" selected="selected">@t.Value</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@t.Key">@t.Value</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td class="data"><a href="#" routListIndex="@i" rowIndex="@j" onclick="SubmitDeleteRow(this)">删除</a></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="button" class="btn btn-primary btn-sm" id="addCity" onclick="AddCity(@i)">添加城市</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-2 control-label"> 餐饮：</label>
+                        <label class="col-sm-1 control-label" style="float:left">早餐</label>
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(a => Model.TpLineRouteList[i].Breakfast, new { @class = "form-control form-control-sm select2-tags" })
+                        </div>
+                        <label class="col-sm-1 control-label" style="float:left">午餐</label>
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(a => Model.TpLineRouteList[i].Lunch, new { @class = "form-control form-control-sm select2-tags" })
+                        </div>
+                        <label class="col-sm-1 control-label" style="float:left">晚餐</label>
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(a => Model.TpLineRouteList[i].Supper, new { @class = "form-control form-control-sm select2-tags" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 control-label"> 住宿：</label>
+                        <div class="col-sm-10">
+                            @Html.TextBoxFor(m => Model.TpLineRouteList[i].Hotel, new { @class = "form-control form-control-sm", @maxlength = "100" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 control-label"> 行程描述：</label>
+                        <div class="col-sm-10">
+                            @Html.TextAreaFor(m => Model.TpLineRouteList[i].Contents, new { @class = "form-control form-control-sm", @rows = "5" })
+                        </div>
+                    </div>
+                </div>
+
+            }
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10" style="margin-top:25px"></div>
+        <div class="col-lg-10 col-sm-offset-4 ">
+            <button class="btn btn-success" type="button" name="submitAllBtn">保存行程</button>
+            <a class="btn btn-secondary" href="/LineAdmin/SearchLine">返回列表</a>
+        </div>
+    </div>
+
+    var optionStr = string.Empty;
+    foreach (var t in listTraffic)
+    {
+        if (t.Key == "3")
+        {
+            optionStr += " <option value=\"" + t.Key + "\"  selected >" + t.Value + "</option>";
+        }
+        else
+        {
+            optionStr += " <option value=\"" + t.Key + "\"  >" + t.Value + "</option>";
+        }
+    }
+    <span id="optionStr" style="display:none">
+        @optionStr
+    </span>
+}
+else
+{
+    <p style="text-align:center;padding-top: 100px;background: #fff;text-align: center;color: #121212; font-size: 14px;">
+        保存<strong> 基本信息</strong>后，可填写更多内容！
+    </p>
+}
+
+<script>
+    $(function () {
+
+        //$("[name='submitBtn']").click(function () {
+        //    var form = $(this).parents("form")[0];
+        //    var url = $(form).attr("action");
+        //    var params = $(form).serialize();
+        //    $.ajax({
+        //        url: url,
+        //        data: params,
+        //        type: "post",
+        //        success: function (data) {
+        //            if (data.Code =="200") {
+        //                Utils.alert("保存成功！");
+        //            } else {
+        //                Utils.alert(data.Message);
+        //            }
+        //        }, error: function (ex) {
+        //            Utils.alert("出错了！请联系管理员！");
+        //        }
+        //    })
+        //});
+
+        $("[name='submitAllBtn']").click(function () {
+
+            var url = $("#theForm").attr("action");
+            var params = $("#theForm").serialize();
+            $.ajax({
+                url: url,
+                data: params,
+                type: "post",
+                success: function (data) {
+                    if (data.Code == "200") {
+                        // Utils.alert("保存成功！");
+
+                        //保存成功后 加载预定须知.
+                        $("a[name='tabTitle']")[2].click();
+
+                    } else {
+
+                        Utils.alert(data.Message);
+                    }
+                }, error: function (ex) {
+
+                    Utils.alert("出错了！请联系管理员！");
+                }
+            })
+        });
+
+    })
+
+    $('.select2-tags').inputpicker({
+        data: ["包含", "不包含", "飞机餐", "酒店早餐"],
+        autoOpen: true,
+        width: '100%',
+        selectMode: 'creatable'
+    });
+
+    function AddCity(index) {
+
+        var rowCount = $("#RouteTrafficList_" + index + ">tbody>tr").length;
+        var optionStr = $("#optionStr").text();
+        var newRow = "  <tr id=\"rowIndex_" + rowCount + "\"> ";
+        newRow += " <td>From -</td> ";
+        newRow += "<td> ";
+        newRow += " <input class=\"form-control form-control-sm\" name=\"TpLineRouteList[" + index + "].LineTrafficList[" + rowCount + "].FromCity\" type=\"text\" style=\"width:100px;\" value=\"\" maxlength=\"25\"> ";
+        newRow += "</td> ";
+        newRow += " <td>To -</td> ";
+        newRow += " <td> <input class=\"form-control form-control-sm\" name=\"TpLineRouteList[" + index + "].LineTrafficList[" + rowCount + "].ToCity\" type=\"text\" style=\"width:100px;\" value=\"\" maxlength=\"25\">  </td>";
+        newRow += " <td>交通：</td> ";
+        newRow += "<td>";
+        newRow += " <select name=\"TpLineRouteList[" + index + "].LineTrafficList[" + rowCount + "].TrafficId\" class=\"form-control form-control-sm\"> ";
+        newRow += optionStr;
+        newRow += "  </select> ";
+        newRow += "</td>";
+        newRow += "    <td class=\"data\"  ><a href=\"#\"  routListIndex=\"" + index + "\" rowIndex=\"" + rowCount + "\" onclick=\"SubmitDeleteRow(this)\">删除</a></td>";
+        newRow += " </tr> ";
+
+        $("#RouteTrafficList_" + index + " tbody").append(newRow);
+    }
+
+    function SubmitDeleteRow(_this) {
+
+
+        var routListIndex = $(_this).attr("routListIndex");
+        // Utils.alert(routListIndex);
+        var rowIndex = $(_this).attr("rowIndex");
+        // Utils.alert(rowIndex);
+        // $(_this).remove();
+        // Utils.alert($("#RouteTrafficList_" + routListIndex + " #rowIndex_" + rowIndex).length);
+        $("#RouteTrafficList_" + routListIndex + " #rowIndex_" + rowIndex).remove();
+        var rowCount = $("#RouteTrafficList_" + routListIndex + ">tbody>tr").length;
+        ////alert(rowCount)
+        $("#RouteTrafficList_" + routListIndex + ">tbody>tr").each(function (index, item) {
+
+            //改变行的index
+            $(this).attr("id", $(this).attr("id").replace(/\d+/, index));
+
+            var ctr = $(this).find("input[type='text'],select,a");
+            ctr.each(function () {
+                if ($(this).prop("tagName") == "A") {
+                    $(this).attr("rowIndex", $(this).attr("rowIndex").replace(/\d+/, index));
+                    // $(this).attr("href", $(this).attr("href").replace(/\d+/, index));
+                }
+                //else {
+                //    $(this).attr("name", $(this).attr("name").replace(/\d+/, index));
+                //}
+
+            })
+        })
+    }
+
+
+</script>

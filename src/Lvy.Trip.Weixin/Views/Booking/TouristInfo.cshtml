@@ -1,0 +1,206 @@
+﻿@model Lvy.Models.OrderDB.TpTravellerModel
+@{
+    Layout = null;
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+@using Arch.Common
+@using System.Globalization
+<form role="form">
+    <div class="card-body" style="padding:0;">
+        <div class="form-group row" style="display:none;">
+            <label class="col-4 col-form-label" for="passType">证件类型：</label>
+            <div class="col-8">
+                <select id="passType" class="form-control form-control-sm">
+                    <option value="1">身份证</option>
+                    <option value="2" selected="selected">护照</option>
+                    <option value="3">港澳通行证</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label" for="passNo">证件号码：</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" id="passNo" value="@Model.PassNo" placeholder="证件号码">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label" for="name">游客姓名：</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" id="name" placeholder="姓名" value="@Model.Name">
+                @Html.HiddenFor(m => m.Id, new { @id = "touristId" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label" for="pinyin">英文名：</label>
+            <div class="col-8">
+                @Html.TextBoxFor(m => m.PinYin, new { @class = "form-control form-control-sm", @placeholder = "英文名" })
+            </div>
+            @*<div class="col-xs-2">(仔细校对)</div>*@
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">出生日期:</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" id="dateOfBirth" value="@(Model.DateOfBirth==null ?"" : Model.DateOfBirth.Value.ToString("yyyy/MM/dd"))" data-inputmask="'alias': 'yyyy-mm-dd'" data-mask>
+            </div>
+            <!-- /.input group -->
+        </div>
+        <div class="form-group row" style="display:none;">
+            <label class="col-4 col-form-label" for="placeOfBirth">出生地</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" id="placeOfBirth" value="@Model.PlaceOfBirth" placeholder="出生地">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">签发日期：</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" value="@(Model.DateOfIssue==null ?"" :Model.DateOfIssue.Value.ToString("dd MMM yyy",CultureInfo.CreateSpecificCulture("en-GB")))" id="dateOfIssue">
+            </div>
+            <!-- /.input group -->
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label" for="placeOfIssue">签发地点：</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" id="placeOfIssue" value="@Model.PlaceOfIssue" placeholder="签发地">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-4 col-form-label">有效期至:</label>
+            <div class="col-8">
+                <input type="text" class="form-control form-control-sm" value="@(Model.DateOfExpiry== null?"" :Model.DateOfExpiry.Value.ToString("dd MMM yyy",CultureInfo.CreateSpecificCulture("en-GB")))" id="dateOfExpiry">
+            </div>
+        </div>
+    </div>
+
+    <!-- /.box-body -->
+    @*<div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>*@
+</form>
+
+
+<div class="card card-default">
+    <div class="card-header">
+        <h3 class="card-title">附件文件 </h3>
+    </div>
+    <div class="card-body">
+        @if (Model.FileList.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>上传时间</th>
+                        <th>文件名(点击查看)</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.FileList)
+                    {
+                        <tr>
+                            <td>@item.CreatedTime.ToString("MM-dd HH:mm")</td>
+                            <td>
+                                @if (item.MediaType == "image")
+                                {
+                                    <img class="go" alt="@item.FileName" style="width:60px;" src="@(picroot + item.FilePath)" rel="gallery">
+                                }
+                                else
+                                {
+                                    @item.FileName
+                                }
+                            </td>
+                            <td>@item.Remark</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+    <div class="card-footer">
+        <a href="####" class="ui green button" id="uploadImage">上传图片</a>
+    </div>
+</div>
+
+
+<script>
+
+    $(function () {
+
+        //$('#dateOfBirth').datebox({
+        //    mode: "flipbox",
+        //    closeCallback: "someFunction"
+        //});
+
+        $("#dateOfBirth").inputmask("datetime", {
+            inputFormat: "yyyy/mm/dd",
+            outputFormat: "mm-yyyy-dd",
+            inputEventOnly: true
+        });
+
+        $('#dateOfIssue').datebox({
+            mode: "flipbox",
+            closeCallback: "someFunction"
+        });
+        $('#dateOfExpiry').datebox({
+            mode: "flipbox",
+            closeCallback: "someFunction"
+        });
+        $("#name").on("keyup keydown change blur", function () {
+            $("#PinYin").val($(this).toPinyin());
+        });
+    });
+    function someFunction() {
+        $("body").addClass("modal-open");
+    }
+
+    wx.ready(function () {
+        var images = {
+            localId: [],
+            serverId: []
+        };
+        document.querySelector('#uploadImage').onclick = function () {
+            wx.chooseImage({
+                sizeType: ['original'],
+                success: function (res) {
+                    images.localId = res.localIds;
+                    // Utils.alert('已选择 ' + res.localIds.length + ' 张图片');
+
+                    // uploadImage
+                    if (images.localId.length == 0) {
+                        // Utils.alert('请先使用 chooseImage 接口选择图片');
+                        return;
+                    }
+                    var i = 0, length = images.localId.length;
+                    images.serverId = [];
+                    function upload() {
+                        wx.uploadImage({
+                            localId: images.localId[i],
+                            success: function (res) {
+                                i++;
+                                // Utils.alert('已上传：' + i + '/' + length);
+                                images.serverId.push(res.serverId);
+                                upview1(res.serverId);
+                                if (i < length) {
+                                    upload();
+                                }
+                            },
+                            fail: function (res) {
+                                Utils.alert(JSON.stringify(res));
+                            }
+                        });
+                    }
+                    upload();
+                }
+            });
+        };
+    });
+
+    function upview1(serverId) {
+        var param = { id: serverId, orderCode: $("#Order_OrderCode").val(), sourceType: "1", remarks: "游客资料", KeyId: $("#touristId").val() };
+        $.getJSON('/Booking/GetMedia/', param, function (data) {
+            if (data.Success == 'ok') {
+                // 成功
+                Utils.alert("照片上传成功")
+            }
+        });
+    }
+</script>

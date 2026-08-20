@@ -1,0 +1,125 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+@*短线游客信息，显示座位号*@
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+    短线游客信息
+</div>
+<table id="tbTrallers" width="100%" class="edittbl">
+    <tbody>
+        <tr>
+            <td>
+                <table class="listtbl" width="100%" style="border: 0px;">
+                    <thead>
+                        <tr>
+                            <td align="center">姓名</td>
+                            <td align="left">电话</td>
+                            <td align="left">座位号</td>
+                            <td align="left">报价种类</td>
+                            <td align="left">让利</td>
+                            <td align="center">自费</td>
+                            <td align="center">单房差</td>
+                            <td align="center">应收款</td>
+                            <td align="center">操作</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Travellers.Count > 0)
+                        {
+                            //有效游客信息的 状态2
+                            var cnt = Model.Travellers2.Count();
+                            for (int i = 0; i < cnt; i++)
+                            {
+                                var price = Model.Prices.FirstOrDefault(a => a.Id == Model.Travellers2[i].PriceId);
+                                var zifei = price == null ? 0 : price.ZiFei;
+                                var singleRoom = price == null ? 0 : price.SingleRoom;
+                            <tr>
+                                <td align="center">
+                                    <input type="hidden" value="@Model.Travellers2[i].Id" name="Travellers2[@i].Id"/>
+                                    <input type="text" value="@Model.Travellers2[i].Name" class="text50" style="width: 100px;" name="Travellers2[@i].Name" />
+                                </td>
+                                <td align="left">
+                                    <input type="text" value="@Model.Travellers2[i].Phone" class="text150" style="width: 100px;" name="Travellers2[@i].Phone" />
+                                </td>
+                                <td align="left">
+                                      @Model.Travellers2[i].SeatNum
+                                </td>
+                                <td align="left" title="@Model.Travellers2[i].PriceContent">
+                                    @Model.Travellers2[i].PriceContent.TrimWithElipsis(8)
+                                </td>
+                                <td align="left" name="gpOtherPrice">
+                                    @Model.Travellers2[i].FanLi
+                                    <input type="hidden" value="@Model.Travellers2[i].FanLi" class="text50" group="gpOtherPrice" name="Travellers2[@i].OtherPrice" onkeypress="InputLimitNumber();" />
+                                    @*应收*@
+                                    <input type="hidden" value="@Model.Travellers2[i].Price" name="Travellers2[@i].Price"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].FanLi" name="Travellers2[@i].FanLi"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].ZiFei" name="Travellers2[@i].ZiFei"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].SingleRoom" name="Travellers2[@i].SingleRoom"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].TeJiaFanLi" name="Travellers2[@i].TeJiaFanLi"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].JiePrice" name="Travellers2[@i].JiePrice"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].SongPrice" name="Travellers2[@i].SongPrice"/>
+                                    <input type="hidden" value="@Model.Travellers2[i].YsPrice" name="Travellers2[@i].YsPrice"/>
+                                </td>
+                                <td align="center" name="ZiFei">
+                                    @zifei.ToInteger()
+                                </td>
+                                <td align="center" name="SingleRoom">
+                                    @singleRoom.ToInteger()
+                                </td>
+                                <td align="center" name="YsPrice">
+                                    @Model.Travellers2[i].YsPrice
+                                </td>
+                                <td align="center">
+                                    @if(Model.Order.OrderState==1){
+                                        <a  href="javascript:void(0);" onclick="cancel_click(@Model.Travellers2[i].Id,'@Model.Travellers2[i].Name')">
+                                            取消</a>
+                                        }
+                                </td>
+                            </tr>
+                            }
+                            //已取消或已退团游客信息 状态1或0
+                            var cnt2 = Model.Travellers10.Count();
+                            for (int i = 0; i < cnt2; i++)
+                            {
+                            <tr>
+                                <td align="center">
+                                    @Model.Travellers10[i].Name
+                                </td>
+                                <td align="left">
+                                </td>
+                                <td align="left">
+                                    @Model.Travellers10[i].Phone
+                                </td>
+                                <td align="left">
+                                </td>
+                                <td align="left"></td>
+                                <td align="center"></td>
+                                <td align="center"></td>
+                                <td align="center" name="YsPrice">
+                                    @Model.Travellers10[i].YsPrice
+                                </td>
+                                <td align="center">
+                                    @if (Model.Travellers10[i].State == 0)
+                                    {
+                                        <label style="color: red;">已取消</label>
+                                    }
+                                    else
+                                    {
+                                        <label style="color: red;">已退团</label>
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" align="center" style="color: red;">
+                                    当前没有数据！
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>

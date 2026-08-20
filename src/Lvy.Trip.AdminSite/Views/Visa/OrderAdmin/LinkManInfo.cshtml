@@ -1,0 +1,32 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">联系人信息</h3>
+    </div>
+    <div id="divShowLinkManInfos" class="card-body">
+        <table id="tabLinkManInfo" class="table table-sm">
+            <tr>
+                <td>联系人姓名：</td>
+                <td>@Model.MasterOrder.ContactName</td>
+                <td>联系人电话：</td>
+                <td>@Model.MasterOrder.ContactPhone</td>
+            </tr>
+            <tr>
+                <td>联系人email：</td>
+                <td>@Model.MasterOrder.ContactEmail</td>
+                <td>邮编：</td>
+                <td>@Model.MasterOrder.PostCode</td>
+            </tr>
+            <tr>
+                <td>
+                    配送地址：
+                </td>
+                <td colspan="3">
+                    @Model.MasterOrder.DeliveryAddress
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</div>

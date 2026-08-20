@@ -1,0 +1,48 @@
+﻿@model Lvy.Trip.Weixin.Models.WapModel
+@{
+    Layout = "~/Views/Shared/_LineLayout.cshtml";
+    ViewBag.Title = "微信公众号";
+    string OutCityCode = (String)HttpContext.Current.Session["OutCity"];
+    //var userInfo = HttpContext.Current.Session["WeixinUser"] as MemberModel;
+}
+@using Lvy.Models.SiteDB
+@section HeaderContent { }
+
+<!-- categories -->
+<section class="categories divider segments-page">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>@Model.Title</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui three column grid">
+            @foreach (SiteNavItemModel item in Model.NavList)
+            {
+                var url = "/line/list?outcity=" + item.OutCity + "&itemId=" + item.ItemID;
+                if (!item.IsLeaf)
+                {
+                    url = "/line/index2?outcity=" + item.OutCity + "&itemId=" + item.ItemID;
+                }
+                <div class="column ">
+                    <div class="ui segment" style="padding:0.2em;background-color:@item.BgColor">
+                        <a href="@url">
+                            <img src="@item.WapImageUrl" class="ui centered image" style="width:50%;" alt="@item.Name" />
+                            <p style="text-align:center; color:#ffffff;">@item.Name</p>
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</section>
+<!-- end categories -->
+
+@section Scripts {
+
+    <script>
+        $(function () {
+
+        });
+    </script>
+}

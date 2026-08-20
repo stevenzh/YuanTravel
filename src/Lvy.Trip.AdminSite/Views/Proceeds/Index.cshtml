@@ -1,0 +1,115 @@
+﻿@model Lvy.VModels.Finance.ProceedsSearchQModel
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+    <link href="~/WebRes/scripts/My97DatePicker/skin/WdatePicker.css" rel="stylesheet" />
+}
+@using (Html.BeginForm("ExportExcel", "Proceeds", FormMethod.Post, new { @id = "forSearch" }))
+{
+    <div class="xbox clear">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                订单收款管理
+            </div>
+
+            <table border="0" style="margin-top: 10px; padding: 5px; width: 100%;">
+                <tr>
+                    <td align="right">缴款单号：</td>
+                    <td>@Html.TextBoxFor(t => t.ProceedsCode, new { @id = "QProceedsCode", @class = "text150" })</td>
+                    <td align="right">缴款单位：</td>
+                    <td>@Html.TextBoxFor(t => t.ChargerHost, new { @id = "QChargerHost", @class = "text150" })</td>
+                    <td align="right">缴款部门（业务部门）</td>
+                    <td>&nbsp;@Html.DropDownListFor(t => t.ChargerDept, (List<SelectListItem>)ViewBag.Teams, new { @id = "QChargerDept" })</td>
+                </tr>
+                <tr>
+                    <td align="right">缴款业务员：</td>
+                    <td>@Html.TextBoxFor(t => t.ChargerName, new { @id = "QChargerName", @class = "text150" })</td>
+                    <td align="right">收款时间：</td>
+                    <td>
+                        <input type="text" onfocus="var CreateDate2=$dp.$('CollectedDateTo');WdatePicker({onpicked:function(){CollectedDateTo.focus();},maxDate:'#F{$dp.$D(\'CollectedDateTo\')}'})" class="text100" name="CollectedDateFrom" id="CollectedDateFrom">
+                        至<input type="text" onfocus="WdatePicker({minDate:'#F{$dp.$D(\'CollectedDateFrom\')}'})" class="text100" name="CollectedDateTo" id="CollectedDateTo">
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="bottom" align="center" colspan="6">
+                        <input type="button" id="btnQuery1" value="查 询" class="btn btn1">
+                        <input type="button" id="searchReset" value="重 置" class="btn btn1" onclick="ClearTextBoxValue();">
+                        <input type="button" value="添 加" class="btn btn1" onclick="GoCollection(this);">
+                        <input type="button" id="btnExport" value="导出Excel" class="btn btn1">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+<br />
+<div id="CollectionQueryList" style="margin-top: 10px;">
+    @Html.Partial("CollectionQueryList", Model)
+</div>
+<input id="pageIndex" type="hidden" value="1" />
+
+<script type="text/javascript">
+    $("#btnQuery1").click(function () {
+        if ($("#OrderType").val() == "-1") {
+            Utils.alert("请选择订单类型");
+            return;
+        }
+        index = 0;
+        loadData(1);
+    });
+
+    var index = 0;      //分页当前页码数
+    var pageSize;       //分页每页数
+    function loadData(pageIndex) {
+        var param = {
+            "ProceedsCode": $("#QProceedsCode").val(),
+            "ChargerHost": $("#QChargerHost").val(),
+            "ChargerDept": $("#QChargerDept").val(),
+            "CollectedDateFrom": $("#CollectedDateFrom").val(),
+            "CollectedDateTo": $("#CollectedDateTo").val(),
+            "ChargerName": $("#QChargerName").val(),
+            "pagedIndex": pageIndex
+        }
+
+        $.post('/Proceeds/CollectionQueryList', param, function (data) {
+            $('#CollectionQueryList').html(data);
+        });
+    }
+
+    function GoCollection(obj) {
+        layer.open({ type: 2, title: '添加收款', maxmin: true, shadeClose: false, area: ['800px', '400px'], content: '/Proceeds/GoCollection' });
+    }
+    function ClosePlan() {
+
+    }
+</script>
+
+<script type="text/javascript">
+
+    function onClick(e, treeId, treeNode) {
+        $("#QChargerDept").val(treeNode.OrganName);
+        //
+        $.ajax({
+            async: false,
+            cache: false,
+            type: 'POST',
+            dataType: "json",
+            data: { orgnID: treeNode.OrganId },
+            url: "/Department/GetJsonEmployee",
+            error: function () {   //请求失败处理函数
+                Utils.alert('请求失败');
+            },
+            success: function (data) { //请求成功后处理函数。
+                $("#ChargerId").empty();
+                $(data).each(function (i) {
+                    var option = "<option value=\"" + data[i].EmployeeId + "\">" + data[i].Name + "</option>";
+                    $("#ChargerId").append(option);
+                });
+            }
+        });
+    }
+
+    $("#btnExport").click(function () {
+        $("#forSearch").submit();
+    });
+</script>

@@ -1,0 +1,43 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+
+<div class="sotable_tit">
+    &nbsp;营业收入
+</div>
+<table style="border: 0px;width:100%;" class="listtbl">
+    <thead>
+        <tr>
+            <td style="width:100px;">订单编号</td>
+            <td style="text-align: center;">客户</td>
+            <td>对应销售</td>
+            <td>人数</td>
+            <td>应收款</td>
+            <td>已收款</td>
+            <td>欠款</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Orders.Count > 0)
+        {
+            foreach (var item in Model.Orders)
+            {
+                <tr>
+                    <td style="text-align: center;">@item.OrderCode</td>
+                    <td style="text-align: center;">@item.AgentName</td>
+                    <td style="text-align: center;">@DictionaryTools.GetCachedAccount(item.SalerCode).Name</td>
+                    <td style="text-align: center;">@item.TravellerCount</td>
+                    <td style="text-align: right;">@item.TolYsPrice</td>
+                    <td style="text-align: right;">@item.TolPaid</td>
+                    <td style="text-align: right;">@(item.TolYsPrice - item.TolPaid)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

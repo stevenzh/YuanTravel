@@ -1,0 +1,88 @@
+﻿@model Lvy.VModels.Crm.TeamVModel
+<table class="listtbl" width="100%">
+    <thead>
+        <tr style="text-align: center;">
+            <th>编码</th>
+            <th>名称</th>
+            <th>职能</th>
+            <th>主管</th>
+            <th>状态</th>
+            <th>锁定线路名称</th>
+            <th>备注</th>
+            <th style="width: 50px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.PagedModel.Items == null || !Model.PagedModel.Items.Any())
+        {
+            <tr style="text-align: center;">
+                <td colspan="9" style="color: red;">无数据</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model.PagedModel.Items)
+            {
+                <tr style="text-align: center;">
+                    <td style="text-align: left;">@item.TeamID</td>
+                    <td style="text-align: left;">@item.TeamName</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.DepartCodeEnum, item.DepartCode.ToString())</td>
+                    <td>@(item.LeaderCode.IsNullOrEmpty() ? "" : DictionaryTools.GetCachedAccount(item.LeaderCode).Name)</td>
+                    <td>@(item.IsValid == 0 ? "无效" : "有效")</td>
+                    <td>@(item.LockName == 0 ? "不锁" : "锁定")</td>
+                    <td>@item.Remark</td>
+                    <td style="text-align: center;">
+                        @Html.IconActionLink("编辑", "EditTeam", "Team", "fa fa-edit", new { id = item.TeamID })
+                        @if (item.IsValid == 1)
+                        {
+                            <a name="delete" url="/Team/DeleteTeam/@item.TeamID" class="delete" href="javascript:;" title="删除"><i class="fa fa-remove"></i></a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(m => m.PagedModel.PageIndex, new { id = "hiddenIndex" })
+<div id="divPagination" class="digg">
+</div>
+<script type="text/javascript">
+
+    // 分页回调函数
+    function pageselectCallback(pageId) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchTeam")', params, function (data) {
+            $('#busPointListContent').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    $(function () {
+        // 删除上车点
+        $("a[name=delete]").click(function () {
+            if (confirm('确定要删除这条数据?')) {
+                var load_iii = Utils.layerLoad();
+                $.post(
+                    $(this).attr("url"),
+                    function (data) {
+                        $('#busPointListContent').html(data);
+                        Utils.layerClose(load_iii);
+                    });
+            }
+            return false;
+        });
+
+        // 创建分页
+        $("#divPagination").pagination(
+            Number('@Model.PagedModel.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: (@Model.PagedModel.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.PagedModel.PageIndex - 1)
+            });
+    });
+</script>

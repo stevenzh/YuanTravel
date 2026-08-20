@@ -1,0 +1,438 @@
+/*
+* filename: layout.css
+* virsion: 0.0.1
+* update: 2016-10-24
+* description: 布局样式在该文件添加补充
+*/
+*{
+    font-family: 'PingFang SC','Microsoft YaHei';
+}
+body {
+    font-family: "微软雅黑";
+}
+
+.error-wrapper{
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    text-align: center;
+}
+
+.error-wrapper .error{
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    /*margin: 20px auto;*/
+    margin-top: 60px;
+    background: url('../images/error_bg.png') center center no-repeat;
+}
+.error-wrapper p{
+    width: 100%;
+    height: auto;
+    font-size: 16px;
+    color: #888;
+    text-align: center;
+    line-height: 40px;
+}
+
+.error-wrapper a{
+    color: #59b214;
+    font-size: 16px;
+}
+
+.page-wrapper .page-header.navbar {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    height: 58px;
+    filter: none;
+    background-image: none;
+}
+.page-header.navbar .top-menu .navbar-nav {
+    padding: 0;
+    margin-right: 20px;
+    display: block;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown {
+    margin: 0px;
+    padding: 0px 4px;
+    height: 58px;
+    display: inline-block;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown:last-child {
+    padding-right: 0px;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown > .dropdown-toggle {
+    margin: 0px;
+    padding: 20px 10px 12px 10px;
+    color: #fff!important;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown-user .dropdown-toggle {
+    padding: 14px 6px 12px 8px;
+}
+
+.page-header .top-menu .dropdown-quick-sidebar-toggler > .dropdown-toggle {
+    padding: 17px 10px 12px 10px !important;
+}
+
+.page-header.navbar .top-menu .navbar-nav > li.dropdown > .dropdown-toggle:focus {
+    background: none;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-menu {
+    margin-top: 3px;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-menu:before {
+    position: absolute;
+    top: -7px;
+    right: 9px;
+    display: inline-block !important;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid #eee;
+    border-left: 7px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+    content: '';
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-menu:after {
+    position: absolute;
+    top: -6px;
+    right: 10px;
+    display: inline-block !important;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #fff;
+    border-left: 6px solid transparent;
+    content: '';
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-menu > li > a {
+    color: #555;
+}
+.page-header.navbar .top-menu .navbar-nav > li.dropdown-extended .dropdown-menu {
+    min-width: 160px;
+    max-width: 300px;
+    width: 233px;
+    background-color: #ffffff;
+}
+
+.page-header.navbar .top-menu .navbar-nav > li .dropdown-menu > li a:hover {
+    background-image: none;
+    background-color: #f5f5f5;
+    color: #000;
+    filter: none;
+}
+
+.page-container .page-sidebar-wrapper .page-sidebar .copyright{
+    position: fixed;
+    bottom: 0;
+    width: 155px;
+    margin-bottom: 10px;
+}
+.page-container .page-sidebar-wrapper .page-sidebar .copyright p{
+    color: #fff;
+    text-align: center;
+    font-size: 12px;
+    font-weight: normal;
+    width: 100%;
+    font-weight: 300;
+    line-height: 20px;
+    margin: 0;
+}
+
+/*新增*/
+.page-wrapper .page-header-inner .page-logo {
+    float: left;
+    display: block;
+    width: 50%;
+    height: 58px;
+    margin-left: 30px;
+    /*background: url('../images/logo.png') center left no-repeat;*/
+    background-size: 40px 40px;
+    padding-left: 50px;
+}
+
+.page-wrapper .page-header-inner .logo-default {
+    margin: 15px 10px 0;
+}
+
+.page-wrapper .page-header-inner .page-tips {
+    float: left;
+    color: #ffffff;
+    /*padding-top: 10px;*/
+    line-height: 58px;
+}
+
+.page-wrapper .page-header-inner .page-tips a{
+    float: left;
+    color: #fefefe;
+    line-height: 58px;
+    font-size: 14px;
+}
+
+.page-wrapper .page-header-inner .change-block {
+    display: block;
+    padding-bottom: 5px;
+}
+
+.page-wrapper .page-header-inner .login-total a {
+    padding-left: 10px;
+    text-decoration: none;
+}
+
+.page-header.navbar .top-menu {
+    margin: 0;
+    padding: 0;
+    float: right;
+}
+
+.page-header.navbar .top-menu .navbar-nav {
+    padding: 0;
+    margin: 0px;
+    /*margin-right: 20px;*/
+    display: block;
+}
+
+.page-header.navbar .top-menu .navbar-nav > li {
+    margin: 0;
+    padding: 0 4px;
+    height: 58px;
+    display: inline-block;
+}
+
+.page-header.navbar .top-menu .navbar-nav > li > a {
+    margin: 0;
+    display: block;
+    height: 58px;
+    /*padding: 0 10px 24px;*/
+}
+
+.page-header.navbar .top-menu .navbar-nav > li > a .top-menu-icon {
+    display: block;
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.page-header-fixed .navbar-inverse .navbar-toggle {
+    border: none;
+    margin-top: 28px;
+    border-radius: 0px;
+}
+
+.page-sidebar-wrapper .page-sidebar.navbar-collapse {
+    padding: 0;
+    box-shadow: none;
+}
+
+.page-sidebar-wrapper .page-sidebar .page-sidebar-menu {
+    list-style: none;
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+
+.page-sidebar-wrapper .page-sidebar .page-sidebar-menu .sub-menu {
+    list-style: none;
+    display: none;
+    padding: 0;
+    margin: 8px 0;
+}
+
+.page-sidebar-wrapper .page-sidebar .page-sidebar-menu .sub-menu li > .sub-menu, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu li > .sub-menu {
+    margin: 0;
+}
+
+.page-sidebar-wrapper .page-sidebar .page-sidebar-menu > li {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.page-sidebar-wrapper .page-sidebar .page-sidebar-menu .sub-menu li {
+    background: 0 0;
+    margin: 0;
+    padding: 0;
+    margin-top: 1px !important;
+}
+
+.page-sidebar .page-sidebar-menu > li > a, .page-sidebar .page-sidebar-menu .sub-menu li > a {
+    display: block;
+    position: relative;
+    margin: 0;
+    border: 0;
+    padding: 15px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.page-sidebar .page-sidebar-menu > li.open > a {
+    display: block;
+    position: relative;
+    margin: 0;
+    border: 0;
+    padding: 15px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.page-sidebar .page-sidebar-menu .sub-menu li > a, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu .sub-menu li > a {
+    display: block;
+    margin: 0;
+    padding: 6px 15px 6px 20px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 300;
+    background: 0 0;
+}
+
+.page-sidebar .page-sidebar-menu > li.active > a > .selected {
+    display: block;
+    float: right;
+    position: absolute;
+    right: 0;
+    top: 8px;
+    background: 0 0;
+    width: 0;
+    height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-right: 12px solid #EAEFF6;
+}
+
+.page-sidebar .page-sidebar-menu > li > a > i.page-icon {
+    font-size: 14px;
+    margin-left: 1px;
+    margin-right: 4px;
+    text-shadow: none;
+}
+
+.page-sidebar .page-sidebar-menu li > a > .arrow:before {
+    float: right;
+    width: 20px;
+    text-align: center;
+    display: inline;
+    font-size: 12px;
+    height: auto;
+    font-weight: 300;
+    text-shadow: none;
+    position: absolute;
+    top: 18px;
+    right: 14px;
+}
+
+.page-sidebar .page-sidebar-menu .sub-menu li > a > .arrow:before {
+    top: 10px;
+}
+
+.page-sidebar .page-sidebar-menu li > a > .arrow.open:before, .page-sidebar-closed.page-sidebar-fixed .page-sidebar:hover .page-sidebar-menu li > a > .arrow.open:before {
+    content: "\e604";
+}
+
+.page-content-wrapper .page-content {
+    margin-top: 0;
+    padding: 0;
+    background-color: #ebebeb;
+}
+
+.page-header-fixed .page-container {
+    margin-top: 52px;
+}
+
+.page-container {
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.hide-file{
+    display: none!important;
+    position: absolute;
+    z-index: 99999;
+    width: 80px;
+    top: 0;
+    right: 0;
+    /*opacity: 0;*/
+    cursor: pointer;
+}
+
+@media (max-width: 991px) {
+    .page-header.navbar {
+        padding: 0 20px;
+        position: relative;
+        clear: both;
+    }
+    .page-container {
+        margin: 0!important;
+        padding: 0!important;
+    }
+    .page-header.navbar .top-menu .navbar-nav {
+        display: inline-block;
+        margin: 0 10px 0 0;
+    }
+    .page-header.navbar .page-logo {
+        width: auto;
+        padding: 0;
+        margin-right: 10px;
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .page-header {
+        padding: 0 10px;
+    }
+
+    .page-header .page-logo {
+        width: auto;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .page-header.navbar .top-menu .navbar-nav {
+        margin-right: 0;
+    }
+    .page-header.navbar .top-menu {
+        display: block;
+        clear: both;
+        float: none;
+    }
+}
+
+
+
+/* 小屏幕（平板，大于等于 768px） */
+@media (min-width: 768px) {
+    .page-sidebar-wrapper .page-sidebar {
+        width: auto;
+        border-top: 0;
+        box-shadow: none;
+    }
+}
+
+/* 中等屏幕（桌面显示器，大于等于 992px） */
+@media (min-width: 768px) {
+    .page-content-wrapper {
+        float: left;
+        width: 100%;
+    }
+
+    .page-sidebar-wrapper .page-sidebar {
+        width: 155px;
+        float: left;
+        position: relative;
+        margin-right: -100%;
+    }
+
+    .page-content-wrapper .page-content {
+        margin-left: 155px;
+        margin-top: 0;
+        /*min-height: 600px;*/
+        /*padding: 25px 20px 10px;*/
+    }
+}
+
+/* 大屏幕（大桌面显示器，大于等于 1200px） */
+@media (min-width: 1200px) {
+
+}

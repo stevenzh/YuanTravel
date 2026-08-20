@@ -1,0 +1,95 @@
+﻿@model Lvy.Models.BaseDB.BaseFileResModel
+@{
+    ViewBag.Title = "添加文件";
+}
+
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("Add")" method="POST" enctype="multipart/form-data">
+    <div class="station">
+        添加文件
+    </div>
+    <div class="inform">
+        <div class="in_box">
+
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>上传文件：
+                    </td>
+                    <td>
+                        <input type="file" id="UploadFile" name="UploadFile" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label" width="90px">
+                        <span class="point">*</span>文件名：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.FileName, new { @Class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point">*</span>文件类型：
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(a => a.ResType, ViewBag.FileResTypeBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">
+                        <span class="point"></span>排序：
+                    </td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Sort, new { @Class = "text150", value = "0" })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        &nbsp;
+                    </td>
+                    <td align="left">
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                        <input class="btn btn1" id="btnBack" onclick="location.href='@Url.Action("Search")';" type="button" value="返回列表" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#UploadFile").change(function() {
+            $("#FileName").val($(this).get(0).files[0].name);
+        });
+
+        $("#theForm").submit(function () {
+            if (!CheckControls()) {
+                return false;
+            }
+        });
+    });
+
+    //验证用户输入
+    function CheckControls() {
+
+        var fileInput = $('#UploadFile').get(0).files[0];
+        if (fileInput === undefined) {
+            Utils.alert("请选择上传文件！");
+            return false;
+        }
+        if (Utils.Trim($("#FileName").val()) == "") {
+            Utils.alert("文件名不得为空！", 1000);
+            $("#FileName").focus().select();
+            return false;
+        }
+        if (Utils.Trim($("#ResType").val()) == "") {
+            Utils.alert("请选择类型", 1000);
+            $("#ResType").focus().select();
+            return false;
+        }
+
+        return true;
+    }
+</script>

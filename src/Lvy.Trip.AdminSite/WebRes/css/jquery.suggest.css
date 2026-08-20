@@ -1,0 +1,30 @@
+/* all page used */
+
+#box { width: 600px; text-align: left; margin: 0 auto; padding-top: 80px; }
+#suggest { width: 200px; }
+.cGray{ color:#a2a2a2}
+
+/*.gray { color: gray; }
+.ac_results { background: #fff; border: 1px solid #7f9db9; position: absolute; z-index: 10000; display: none; }
+    .ac_results ul { margin: 0; padding: 0; list-style: none; }
+    .ac_results li a { white-space: nowrap; text-decoration: none; display: block; color: #05a; padding: 1px 3px; }
+    .ac_results li { border: 1px solid #fff; }
+        .ac_over, .ac_results li a:hover { background: #c8e3fc; }
+        .ac_results li a span { float: right; }
+.ac_result_tip { border-bottom: 1px dashed #666; padding: 3px; }*/
+
+.page{ float:right; margin-right:15px; }
+.page a,.page span{ margin:0 4px; color:#0044CC;}
+.page span.custom{ margin-right:8px;}
+.page span.now{ color:#ff6600; font-weight:700; font-style:italic;}
+.page span.none{ color:#bfbfbf;}
+
+    .ac_results { background: #fff; border: 1px solid #7f9db9; position: absolute; z-index: 10000; display: none; font-size: 12px; }
+        .ac_results ul { margin: 0; padding: 0; list-style: none; }
+        .ac_results li a { text-decoration: none; display: block; color: #05a; padding: 1px 1px; clear: both; display: inline; }
+        .ac_results li { border: 1px solid #fff; line-height: 1.0em; cursor: pointer; }
+            .ac_over, .ac_results li a:hover { background: #c8e3fc; }
+            .ac_results li a span.py { float: right; width: 40%; text-align: right; overflow: hidden; white-space: nowrap; color: Gray; font-size: 12px; font-family: Simsun,sans-serif; }
+            .ac_results li a span.id { font-size: 12px; font-family: Simsun,sans-serif; color: Red; }
+    .ac_result_tip { padding: 3px; background-color: #67A1E2; background-color: #5D9DE5 #67A1E2 #67A1E2 #5D9DE5; color: White; height: 18px; }
+    .ac_result_tip_no { background-color: #0053AA; }

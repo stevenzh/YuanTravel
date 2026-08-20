@@ -1,0 +1,79 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+@{
+    //距出发日期3天以外的
+    DateTime ThreeDay = DateTime.Now.AddDays(3);
+    var ThreeDayModels = Model.OrderModels.Where(a => a.OutDate == ThreeDay).ToList();
+    int cnt = ThreeDayModels.Count;
+
+}
+@if (ThreeDayModels.Count > 0)
+{
+    var bookName0 = DictionaryTools.GetCachedCustomer(ThreeDayModels[0].BookingCustomer).Name;
+    <tr name="3">
+        <td name="orderCode" align="center" orderCode="@ThreeDayModels[0].OrderCode">
+            @ThreeDayModels[0].Id
+        </td>
+        <td align="left" title="@ThreeDayModels[0].LineName">
+            @ThreeDayModels[0].LineName.TrimWithElipsis(20)
+        </td>
+        <td align="center">@ThreeDayModels[0].OutDate.ToString("MM-dd")</td>
+        <td align="center">@ThreeDayModels[0].LinkMan</td>
+        <td align="center">@ThreeDayModels[0].TravellerCount</td>
+        <td name="orderState" align="center" style="color: red;">
+            @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, ThreeDayModels[0].OrderState.ToString())
+        </td>
+        <td align="center">@ThreeDayModels[0].TolYsPrice</td>
+        <td align="center">@ThreeDayModels[0].Managers</td>
+        <td align="left">
+            @Html.EditActionLink("EditTimerOrder", "Order", new { orderCode = ThreeDayModels[0].OrderCode, dayFlag = 3 })
+            <!--0:时间相等；1在6个小时范围之外；-1在6个小时范围之内-->
+            @if (DateTime.Now.CompareTo(ThreeDayModels[0].CreatedTime.AddHours(6)) < 1)
+            {
+                <a href="javascript:void(0);" class="delete">
+                    <span style="display: none;">@ThreeDayModels[0].Remark</span><span name="createdTime" style="display: none;">@ThreeDayModels[0].CreatedTime</span>
+                </a>
+            }
+        </td>
+    </tr>
+    for (int i = 1; i < cnt; i++)
+    {
+        var bookName = DictionaryTools.GetCachedCustomer(ThreeDayModels[i].BookingCustomer).Name;
+        <tr name="3">
+            <td name="orderCode" align="center" orderCode="@ThreeDayModels[i].OrderCode">
+                @ThreeDayModels[i].Id
+            </td>
+            <td align="left" title="@ThreeDayModels[i].LineName">
+               @ThreeDayModels[i].LineName.TrimWithElipsis(20)
+            </td>
+            <td align="center">@ThreeDayModels[i].OutDate.ToString("MM-dd")</td>
+            <td align="center">@ThreeDayModels[i].LinkMan</td>
+            <td align="center">@ThreeDayModels[i].TravellerCount</td>
+            <td name="orderState" align="center" style="color: red;">
+                @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, ThreeDayModels[i].OrderState.ToString())
+            </td>
+            <td align="center">@ThreeDayModels[i].TolYsPrice</td>
+            <td align="center">@ThreeDayModels[i].Managers</td>
+            <td align="left">
+                @Html.EditActionLink("EditTimerOrder", "Order", new { orderCode = ThreeDayModels[i].OrderCode, dayFlag = 3 })
+                <!--0:时间相等；1在6个小时范围之外；-1在6个小时范围之内-->
+                @if (DateTime.Now.CompareTo(ThreeDayModels[i].CreatedTime.AddHours(6)) < 1)
+                {
+                    <a href="javascript:void(0);" class="delete">
+                        <span style="display: none;">@ThreeDayModels[i].Remark</span>
+                        <span name="createdTime" style="display: none;">@ThreeDayModels[i].CreatedTime</span>
+                    </a>
+                }
+                <a title="确认单" href="@Url.Action("OrderConfirmPrint", "Order", new { orderCode = ThreeDayModels[i].OrderCode, isTimerOrder = 1 })">确认单</a>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+
+        <td colspan="9" style="color: red; text-align: center;">
+            当前没有数据
+        </td>
+    </tr>
+}

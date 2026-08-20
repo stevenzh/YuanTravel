@@ -1,0 +1,93 @@
+﻿@model OrderModel
+@{
+    ViewBag.Title = "微信_我的订单";
+    Layout = null;
+}
+@using TopWeb.Model
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="~/Scripts/jquery-2.2.4.min.js"></script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Content/gjunge-rateit/jquery.rateit.min.js"></script>
+    <link href="~/Content/gjunge-rateit/rateit.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="panel panel-default">
+        <div class="panel-heading">我的订单</div>
+        <div class="panel-body">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <h4>订单号：@Model.Tid</h4>
+                    <span class="badge">@Model.Payment</span>
+                    <p>商品： @Model.Title</p>
+                    <p>数量： @Model.Num</p>
+                    <p>操作状态： @Model.OpStatusValue</p>
+                    @if ((Model.OpStatus == "355"|| Model.OpStatus == "123"|| Model.OpStatus == "400" || Model.OpStatus == "70") && Model.Satisfaction== null)
+                    {
+                        <div id="@("ddv"+Model.Tid)" class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">客户满意度评价</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">评分</label>
+                                    <input type="range" value="4" step="1" id="@("backing"+Model.Tid)">
+                                    <div class="rateit form-control" data-rateit-backingfld="@("#backing"+Model.Tid)" data-rateit-resetable="false" data-rateit-ispreset="true" data-rateit-min="0" data-rateit-max="5"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputPassword1">评价</label>
+                                    <textarea class="form-control" rows="3" id="@("desc"+Model.Tid)></textarea>
+                                </div>
+                                <button type="submit" onclick="javascript:cti('@Model.Tid')" class="btn btn-default">提交评价</button>
+                            </div>
+                        </div>
+                    }
+                </li>
+            </ul>
+
+            @if (Model.OrderLogs.Count() > 0)
+            {
+                <h4>操作历史</h4>
+                <ul class="list-group">
+                    @foreach (OrderLogModel log in Model.OrderLogs)
+                    {
+                        <li class="list-group-item">
+                            <h5>@log.Created : @log.StatusValue</h5>
+                            <p>@log.Description </p>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+    <script type="text/javascript">
+        function cti(tid) {
+            var fengshu = $("#backing" + tid).val();
+            var desc = $("#desc" + tid).val();
+            $.ajax({
+                url: '/Member/PutSatisfaction',
+                type: 'post',
+                dataType: 'json',
+                data: { 'tid': tid, 'fengshu': fengshu, 'desc':desc },
+                success: function (data) {
+                    if (data == '1') {
+                        Utils.alert("提示", "同步成功");
+
+                        $("#ddv" + tid).hide();
+                    }
+                    else {
+                        Utils.alert("提示", "同步失败:" + data.ErrorMessage);
+                    }
+                },
+                data: ''
+            });
+        }
+    </script>
+</body>
+</html>

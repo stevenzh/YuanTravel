@@ -1,0 +1,75 @@
+﻿@model Lvy.VModels.Crm.CustomerVModel
+<div class="xbox clear">
+    <div align="center" class="xboxcontent clear">
+        <div class="sotable_tit">
+            客户列表查询
+        </div>
+        <table class="sotable">
+            <tr>
+                <td class="label">客户名称：</td>
+                <td>
+                    @Html.TextBoxFor(a => a.Customer.Name, new { @class = "text150" })
+                </td>
+                <td class="label">联系电话：</td>
+                <td>
+                    @Html.TextBoxFor(a => a.ContactNumber, new { @class = "text150" })
+                </td>
+                <td width="100" class="label">结算方式：</td>
+                <td>
+                    @Html.DropDownListFor(a => a.Customer.PaymentType, ViewBag.PaymentTypes as IEnumerable<SelectListItem>, new { @class = "select150" })
+                </td>
+            </tr>
+            <tr>
+                <td width="100" class="label">销售组：</td>
+                <td>
+                    @Html.DropDownListFor(a => a.Customer.TeamID, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "select150" })
+                </td>
+                <td width="100" class="label">对应销售：</td>
+                <td>
+                    @Html.DropDownListFor(a => a.Customer.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150" })
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <input class="btn btn1" id="btnSearch" type="submit" value="搜索" />
+                    <input class="btn btn1" id="btnClear" type="button" value="清空" />
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function(){
+        $("#Customer_TeamID").change(function(){
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#Customer_SalerCode").empty();
+            if (teamId == "") {
+
+                $("#Customer_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#Customer_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#Customer_SalerCode").append("<option value=\""+item.Code+"\">"+item.Name+"</option>");
+                    });
+                }
+            });
+        });
+    })
+
+    //重置
+    $("#btnClear").click(function () {
+        $(".sotable td input[type=text]").val("");
+        $(".sotable td input[type=hidden]").val("");
+    });
+</script>
+

@@ -1,0 +1,122 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+@{
+    ViewBag.Title = "联系人管理";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section HeaderContent
+{
+    <script type="text/javascript">
+        var page_id = 0;
+    </script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-tools">
+                <form id="theForm" action="@Url.Action("Index")" method="POST" role="form">
+                    <div class="input-group input-group-sm" style="width:400px">
+                        @Html.TextBoxFor(m => m.Account.CustomerName, new { @class = "form-control pull-right", @placeholder = "客户名称" })
+                        @Html.TextBoxFor(a => a.Account.Name, new { @class = "form-control pull-right", @placeholder = "联系人姓名" })
+
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "form-control pull-right" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.CrmTeamId, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "form-control pull-right", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.CrmTeamId)
+                        }
+
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.SalesCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "form-control pull-right" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.SalesCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "form-control pull-right", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.SalesCode)
+                        }
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default pull-right"><i class="fas fa-search"></i> </button>
+                            <a href="/Contact/Create" class="btn btn-success pull-right"><i class="fas fa-plus"></i></a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0" id="divSearch">
+            @Html.Partial("UCSearch", Model)
+        </div>
+        <div class="card-footer">
+            <ul id="pagination-demo" class="pagination-sm"></ul>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(function () {
+        $("#CrmTeamId").change(function () {
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#SalesCode").empty();
+            if (teamId == "") {
+                $("#SalesCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Saler")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#SalesCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#SalesCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                    });
+                }
+            });
+        });
+
+        $('#pagination-demo').twbsPagination({
+            totalPages: Math.ceil(Number('@Model.Accounts.TotalCount') / 10),
+            visiblePages: 3,
+            first: "首页",
+            prev: "上一页",
+            next: "下一页",
+            last: "末页",
+            onPageClick: function (event, page) {
+                page_id = page;
+                var param = {
+                    'Customer.Name': $("#CustomerName").val(),
+                    'Customer.TeamID': $("#CutomerTeamId").val(),
+                    'Customer.SalerCode': $("#CutomerSalerCode").val(),
+                    'Customers.PageIndex': page_id,
+                    'Customers.PageSize': 10
+                };
+                $.post('/Contact/Search/', param, function (data) {
+                    $('#questionListsDiv').html(data);
+                });
+            }
+        });
+    });
+
+
+</script>

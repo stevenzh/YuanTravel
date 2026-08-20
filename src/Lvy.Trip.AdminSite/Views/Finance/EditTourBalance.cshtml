@@ -1,0 +1,305 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    ViewBag.Title = "单团核算";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <form id="theForm">
+                @Html.HiddenFor(t => t.Balance.MasterOrderCode)
+                @Html.HiddenFor(t => t.IsCopy)
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title"> 核算明细</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-md-12 col-lg-9 ">
+                                <div class="row">
+                                    <div class="col-12 col-sm-4">
+                                        <div class="info-box bg-light">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text text-center text-muted">收入</span>
+                                                <span class="info-box-number text-center text-muted mb-0">@Model.Balance.YingShou</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-4">
+                                        <div class="info-box bg-light">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text text-center text-muted">成本</span>
+                                                <span class="info-box-number text-center text-muted mb-0">@Model.Balance.TotalCost</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-4">
+                                        <div class="info-box bg-light">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text text-center text-muted">毛利</span>
+                                                <span class="info-box-number text-center text-muted mb-0">@Model.Balance.MaoLi</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        @*<h4>收支详情</h4>*@
+                                        <div class="post">
+                                            <!-- 结算明细 -->
+                                            @Html.Partial("TourBalance/UCTourCalc")
+                                        </div>
+
+                                        <div id="divPayIn" class="post">
+                                            @if (Model.Balance.IsPackage == 1)
+                                            {
+                                                <!-- 营业收入 -->
+                                                @Html.Partial("TourBalance/UCBussinessIncomm", Model)
+                                            }
+
+                                            <!-- 缴款记录 -->
+                                            @Html.Partial("TourBalance/UCPayIn", Model)
+
+                                        </div>
+                                        <div class="post">
+                                            @Html.Partial("TourBalance/UCCosts", Model)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-3 ">
+
+                                <!-- 团队基本信息 -->
+                                @Html.Partial("TourBalance/UCTourInfo")
+
+                                <div class="text-center mt-5 mb-3">
+                                    @if (Model.Balance.AuditState < 3)
+                                    {
+                                        <input class="btn btn-sm btn-warning" id="btnAudit" type="button" value="审核" url="/Financee/AuditTour?orderCode=@Model.Balance.MasterOrderCode" />
+                                    }
+                                    <input class="btn btn-sm btn-success" id="btnSave" type="button" value="保存" />
+                                    <a class="btn btn-sm btn-info" href="@Url.Action("PrintTourBalance", "Finance", new { orderCode = Model.Balance.MasterOrderCode })" target="_blank">打印</a>
+                                    <input class="btn btn-sm btn-secondary" id="btnBack" type="button" value="返回列表" onclick="location.href='@Url.Action("SearchBalance", "Finance")'" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </section>
+</div>
+@section PageScripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+        //打印单团核算
+        $("#btnPrintTourAccount").click(function () {
+            window.open('');
+        });
+
+        $('#btnAudit').click(function () {
+            var $link = $(this);
+            if (!confirm("审核确认!")) {
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            $.post($link.attr("url"), function (data) {
+                if (data == "no") {
+                    Utils.alert("您无权限进行审核。");
+                }
+                else if (data == "1") {
+                    Utils.alert("该团期仍未成团，无法执行审核。");
+                }
+                else if (data == "2") {
+                    Utils.alert("已审核。");
+                    $link.hide();
+                } else {
+                    Utils.alert("请求发生异常。");
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+        $("#btnSave").click(function() {
+
+            var flag = true;
+            $("select[name$='.Item']").each(function() {
+                if ($(this).val()=="") {
+                    Utils.alert("必须选择项目名称！");
+                    $(this).focus().select();
+                    return  flag= false;
+                }
+            });
+            if (!flag) {return false;}
+            $("select[name$='.SupplierId']").each(function() {
+                if ($(this).val()=="0") {
+                    Utils.alert("必须选择供应商名称！");
+                    $(this).focus().select();
+                    return  flag= false;
+                }
+            });
+            if (!flag) {return false;}
+            $("input[name$='.Cost']").each(function() {
+                if ($(this).val()=="") {
+                    Utils.alert("必须填写单位成本！");
+                    $(this).focus().select();
+                    return flag= false;
+                } else if(!Utils.Check.IsMoney($(this).val())) {
+                    Utils.alert("必须填写金额类型！");
+                    $(this).focus().select();
+                    return flag= false;
+                }
+            });
+            if (!flag) {return false;}
+            if (flag) {
+                $('#theForm').ajaxSubmit({
+                    type: 'post',
+                    url: '@Url.Action("SaveTourBalance", "Finance")',
+                    success: function (data) {
+
+
+                        Utils.alert('提交成功!');
+                        // 弹出框关闭前调用父窗口方法
+                        location.replace(location.href);
+                    },
+                });
+            }
+        });
+
+        // 添加成本
+        $("#addItem2").click(function () {
+            var cnt = $("#costtable tbody tr").length;
+            $.post("@Url.Action("AddRowCost")", { rowIndex: cnt,orderCode:'@Model.Balance.MasterOrderCode'}, function(html) {
+                $("#costtable tbody").append(html);
+            });
+        });
+
+        // 添加缴款单
+        $("#btnAddPayInfo").click(function () {
+            var url = '@Url.Action("EditPayIn","Balance",new { id=0, type=Model.Balance.Type, orderCode = Model.Balance.MasterOrderCode})';
+            layer.open({ type: 2, title: '添加缴款单', maxmin: true, shadeClose: true, area: ['950px', '500px'], content: url });
+        });
+
+
+        $("a[name='lnkDel']").on("click",function(){
+           var obj = $(this).parent("td").parent("tr")
+           $(obj).remove();
+        })
+
+        $("select[name$='SupplierId']").on("change",function(){
+
+            //付款方式text 显示
+            var obj = $(this).parent("td").parent("tr").find("span[name='payment']");
+            //付款方式 value
+            var obj2 = $(this).parent("td").parent("tr").find("input[name$='PaymentType']");
+            var payment = $(this).find("option:selected").attr("payment");
+            var paymentType = $(this).find("option:selected").attr("paymentType");
+            $(obj).text(payment);
+            $(obj2).val(paymentType);
+            calcCost(this);
+        })
+
+        $("input[name$='Cost']").on("keyup",function(){
+            calcCost(this);
+        })
+        $("input[name$='Num']").on("keyup",function(){
+            calcCost(this);
+        })
+    })
+
+    function calcCost(_this){
+
+        var obj = $(_this).parent("td").parent("tr");
+        ///////计算单行金额////////////////////////////////////////////
+        var Num = parseFloat($(obj).find("input[name$='Num']").val());
+        var Cost = parseFloat($(obj).find("input[name$='Cost']").val());
+        var Amount = Num*Cost;
+
+        //成本
+        var xinajie = 0.0;
+        var qiandan = 0.0;
+        var zongji = 0.0;
+        var a = $(obj).find("input[name$='ItemCost']");
+        if (a != undefined && a != null && a.length > 0) {
+            $(a).val(Amount);
+            ////////////////////计算现结，签单，总计////////////////////////////////////
+            $(_this).parents("tbody").find("tr").each(function(index,item){
+
+               // Num=parseFloat($(item).find("input[name$='Num']").val());
+                var ItemCost = parseFloat($(item).find("input[name$='ItemCost']").val());
+                Amount = ItemCost;
+                var PaymentType = $(item).find("input[name$='PaymentType']").val();
+                if (PaymentType > 0) {
+                    if (PaymentType == 1) {
+                        xinajie += Amount;
+                    }
+                    else {
+                        qiandan += Amount;
+                    }
+                }
+            });
+
+            zongji = xinajie + qiandan;
+        }
+          xinajie = 0;
+          qiandan = 0;
+          zongji = 0;
+          Amount = 0;
+        //其他收入
+        var b=$(obj).find("span[name='ItemCost']");
+        if (b != undefined && b != null && b.length > 0) {
+
+            $(b).text(Amount);
+            ////////////////////计算现结，签单，总计////////////////////////////////////
+            $(_this).parents("tbody").find("tr").each(function(index,item){
+
+                Num = parseFloat($(item).find("input[name$='Num']").val());
+                Cost = parseFloat($(item).find("input[name$='Cost']").val());
+                Amount = Num*Cost;
+                var PaymentType = $(item).find("input[name$='PaymentType']").val();
+                if (PaymentType > 0) {
+
+                    if (PaymentType == 1) {
+                        xinajie += Amount;
+                    }
+                    else {
+                        qiandan += Amount;
+
+                    }
+                }
+            });
+
+            zongji = xinajie + qiandan;
+        }
+        $(_this).parents("table").find("span[name='xianjie']").text(xinajie);
+        $(_this).parents("table").find("span[name='qiandan']").text(qiandan);
+        $(_this).parents("table").find("span[name='zongji']").text(zongji);
+    }
+
+
+    function reloadPayIn() {
+        $.get("/Finance/ReLoadPayIn?orderCode=" + $("#Balance_MasterOrderCode").val(), function (result) {
+            $("#divPayIn").html(result);
+        });
+    }
+    // 缴款单详情
+    function payInfoDetail(id, orderCode) {
+        var url = "/Balance/EditPayIn?id=" + id + "&orderCode=" + orderCode;
+        layer.open({ type: 2, title: '缴款单详情', maxmin: true, shadeClose: true, area: ['950px', '450px'], content: url });
+    }
+
+    </script>
+
+}

@@ -1,0 +1,76 @@
+﻿@model Lvy.Models.ProductDB.TpBusSeatModel
+
+<table width="261" border="0" cellspacing="3" id="tblseats">
+    @{
+        var totalRow = Math.Round((double)Model.SeatModels.Count / 4);
+        var y = 0;
+    }
+    @for (int i = 0; i < totalRow - 1; i++)
+    {
+        <tr>
+            <td class="@Model.SeatModels[y].ChangeStateClass()">
+                @Model.SeatModels[y].No
+            </td>
+            <td class="@Model.SeatModels[y + 1].ChangeStateClass()">
+                @Model.SeatModels[y + 1].No
+            </td>
+            <td class="noborder">
+                &nbsp;
+            </td>
+            <td class="@Model.SeatModels[y + 2].ChangeStateClass()">
+                @Model.SeatModels[y + 2].No
+            </td>
+            <td class="@Model.SeatModels[y + 3].ChangeStateClass()">
+                @Model.SeatModels[y + 3].No
+            </td>
+        </tr>
+
+        @*  @Html.HiddenFor(a => a.SeatModels[y].State)
+            @Html.HiddenFor(a => a.SeatModels[y].No)
+            @Html.HiddenFor(a => a.SeatModels[y + 1].State)
+            @Html.HiddenFor(a => a.SeatModels[y + 1].No)
+            @Html.HiddenFor(a => a.SeatModels[y + 2].State)
+            @Html.HiddenFor(a => a.SeatModels[y + 2].No)
+            @Html.HiddenFor(a => a.SeatModels[y + 3].State)
+            @Html.HiddenFor(a => a.SeatModels[y + 3].No)*@
+
+        y = y + 4;
+    }
+    @*最后一行*@
+    <tr>
+        @for (int i = y; i < Model.SeatModels.Count; i++)
+        {
+            <td class="@Model.SeatModels[i].ChangeStateClass()">
+                @Model.SeatModels[i].No
+            </td>
+
+            @*  @Html.HiddenFor(a => a.SeatModels[i].State)
+                @Html.HiddenFor(a => a.SeatModels[i].No)*@
+        }
+    </tr>
+</table>
+
+
+<div class="zuowei_explain">
+    <table width="261" border="0">
+        <tr>
+            <td colspan="6" height='10'></td>
+        </tr>
+        <tr>
+            <td class="gray">&nbsp;</td>
+            <td>未占</td>
+            <td class="red">&nbsp;</td>
+            <td>已占</td>
+            <td class="blue">&nbsp;</td>
+            <td>已锁定</td>
+        </tr>
+    </table>
+    <br />
+    <span style="color:  #369DEA ;font-size: 12px">
+        如遇特殊情况 实际座位号以组团社调度为准 <br />请谅解！
+    </span>
+</div>
+
+<script type="text/javascript">
+    $("#tblseats td").bind('click', selectSeatsCallBack);
+</script>

@@ -1,0 +1,78 @@
+﻿@model Lvy.Visa.VModels.OnLineProductQModel
+@{
+    Layout = null;
+    int index = 1;
+}
+<p style="line-height: 28px; color: #666;">请根据自身情况选择签证所需材料： </p>
+<div class="accordion" id="accordionExample">
+    @foreach (var categoryModel in Model.VisaCategoryModels)
+    {
+        <div class="card">
+            <div class="card-header" id="@("heading"+categoryModel.CategoryCode)">
+                <h2 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="@("#div"+ categoryModel.CategoryCode)" aria-expanded="true" aria-controls="@categoryModel.CategoryCode">
+                        @categoryModel.CategoryName
+                    </button>
+                </h2>
+            </div>
+            <div id="@("div"+categoryModel.CategoryCode)" class="collapse @(index==1?"show":"")" aria-labelledby="@("heading"+categoryModel.CategoryCode)" data-parent="#accordionExample">
+                <div class="card-body">
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <td style="width:20%;">需提交材料</td>
+                            <td>详细说明</td>
+                        </tr>
+                        @foreach (var visaItemModel in Model.VisaDataModels.Where(t => t.CategoryCode == categoryModel.CategoryCode))
+                        {
+                            <tr>
+                                <td valign="middle">
+                                    @visaItemModel.DataName
+                                </td>
+                                <td>
+                                    @Html.Raw(visaItemModel.DataExplain)<br />
+                                    @{
+                                        var fileDataList = Model.VisaDataFileModels.Where(a => a.DataCode.Equals(visaItemModel.DataCode));
+                                    }
+                                    @if (fileDataList.Count() > 0)
+                                    {
+                                        <span>附件下载：</span>
+                                        foreach (var dataFileModel in fileDataList)
+                                        {
+                                            <a href="@dataFileModel.FileUrl" title="@dataFileModel.FileName" target="_blank">
+                                                @dataFileModel.FileName
+                                            </a>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+        index++;
+    }
+</div>
+
+
+
+<script type="text/javascript">
+    $("div[id^='div']").css({ "border": "1px solid #ddd", "margin-bottom": "5px", "padding": "2px" });
+    $("table").css({ "border-collapse": "collapse" });
+    $("table[id^='tabVisaData_'] td").css({ "padding": "5px", "border-top": "1px solid #ddd" });
+    $("table[id^='tabVisaData_'] td:even").css({ "border-right": "1px solid #ddd" });
+    $("table[id^='tabVisaData_']").eq(0).show();
+    $(".imgVisaDatas").eq(0).attr("src", "../../Images/icon_minus012.gif");
+
+    $(".imgVisaDatas").click(function () {
+        var id = $(this).attr("id");
+        if ($(this).attr("src") == "../../Images/icon_minus012.gif") {
+            $(this).attr("src", "../../Images/icon_add012.gif");
+            $("#tabVisaData_" + id).hide();
+        } else {
+            $(this).attr("src", "../../Images/icon_minus012.gif");
+            $("#tabVisaData_" + id).show();
+        }
+    });
+</script>
+

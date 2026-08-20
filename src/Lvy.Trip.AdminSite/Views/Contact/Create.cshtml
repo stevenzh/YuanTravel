@@ -1,0 +1,245 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@{
+    ViewBag.Title = "创建联系人";
+}
+@section AdditionalResources {}
+<form id="theForm" action="@Url.Action("Add", "Contact")" method="POST" onsubmit="return CheckControls();">
+    @Html.HiddenFor(m => m.Account.CustomerCode)
+    <div class="station">@ViewBag.Title</div>
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:100%;">
+                <tr>
+                    <td class="label"><span class="point">*</span>所属客户：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.CustomerName, new { @class = "text400" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>姓名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>性别：</td>
+                    <td>@Html.RadioGroup("Account.Sex", Model.SexBeans, "1")</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>联系手机：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">电子信箱：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Email, new { @class = "text150" })</td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label"><span class="point">*</span>密码：</td>
+                    <td>@Html.PasswordFor(a => a.Account.Pwd, new { @class = "text150" })</td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label"><span class="point">*</span>确认密码：</td>
+                    <td><input type="password" id="confirmPwd" class="text150" /></td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">联系电话：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Phone, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">销售组：</td>
+                    <td>
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.Account.TeamID, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "select150" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.Account.TeamID, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "select150", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.Account.TeamID)
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">对应销售：</td>
+                    <td>
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.Account.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.Account.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.Account.SalerCode)
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">备注说明：</td>
+                    <td>@Html.TextAreaFor(a => a.Account.Remarks, new { @class = "textarea440" })</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                        <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#Account_TeamID").change(function(){
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#Account_SalerCode").empty();
+            if (teamId == "") {
+                $("#Account_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#Account_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#Account_SalerCode").append("<option value=\""+item.Code+"\">"+item.Name+"</option>");
+                    });
+                }
+            });
+        });
+    });
+
+    function CheckControls() {
+        console.log("call checkcontrols().");
+        //if (Utils.Trim($("#Account_Pwd").val()) == "") {
+        //    Utils.alert("密码不能为空！");
+        //    $("#Account_Pwd").select().focus();
+        //    return false;
+        //}
+        //if (Utils.Trim($("#confirmPwd").val()) == "") {
+        //    Utils.alert("确认密码不能为空！");
+        //    $("#confirmPwd").select().focus();
+        //    return false;
+        //}
+        //if (Utils.Trim($("#confirmPwd").val()) != Utils.Trim($("#Account_Pwd").val())) {
+        //    Utils.alert("密码与确认密码不相同，请重新输入！");
+        //    $("#confirmPwd").select().focus();
+        //    return false;
+        //}
+
+        var isLssued = true;
+
+        if (Utils.Trim($("#Account_CustomerName").val()) == "") {
+            Utils.alert("所属客户不得为空！");
+            $("#Account_CustomerName").select().focus();
+            return false;
+        } else {
+            // 检查客户名称是否存在
+            $.ajax({
+                url: '/Customer/CheckCustomerName',
+                data: { customerName:$.trim($("#Account_CustomerName").val()), code: '' },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data.Code == "0") {
+                        Utils.alert("客户名称不存在，请先添加客户！");
+                        $("#Account_CustomerName").focus().select();
+                        isLssued = false;
+                    } else {
+                        $("#Account_CustomerCode").val(data.CustomerCode);
+                    }
+                }
+            });
+
+            if (isLssued == false) return false;
+        }
+
+
+        if (Utils.Trim($("#Account_Name").val()) == "") {
+            Utils.alert("姓名不能为空！");
+            $("#Account_Name").select().focus();
+            return false;
+        } else {
+            // 姓名重复检测
+            var email = $.trim($("#Account_Name").val());
+            $.ajax({
+                url: '/Contact/CheckContactName',
+                data: { customerName:$("#Account_CustomerName").val(),  name: email, code: '' },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data.Code == "1") {
+                        var msg = data.Message + ",是否申请认领此联系人，认领选择‘确定’，不认领选择‘取消’";
+                        if (confirm(msg) == true) {
+                            // 弹出任务单
+                            var url = '/Task/CreateContactTask?contactCode=' + data.ContactCode + '&workflowId=' + data.WorkFlowId;
+                            layer.open({ type: 2, title: '添加任务', maxmin: true, shadeClose: true, area: ['800px', '400px'], content: url });
+                        }
+
+                        $("#Account_Name").focus().select();
+                        isLssued = false;
+                    } else if (data.Code == "2") {
+                        Utils.alert(data.Message);
+                        isLssued = false;
+                    } else if (data.Code == "3") {     // 组外添加
+                        var msg = data.Message + ",是否继续，添加联系人选择‘确定’";
+                        if (confirm(msg) == true) {
+                              isLssued = true;
+                        } else {
+                              isLssued = false;
+                        }
+                    }
+                }
+            });
+
+            if (isLssued == false) return false;
+        }
+
+        if ($.trim($("#Account_Mobile").val()) == "") {
+            Utils.alert("联系人手机不能为空！");
+            return false;
+        } else if ($.isMobile($("#Account_Mobile").val()) == false) {
+            Utils.alert("联系人手机格式有误！");
+            return false;
+        } else {
+            var mobile = $.trim($("#Account_Mobile").val());
+            $.ajax({
+                url: '/Contact/CheckContactMobile',
+                data: { mobile: mobile, code: $("#Account_Code").val() },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data == "1") {
+                        Utils.alert("联系人手机号码已存在!", 2000);
+                        $("#Account_Mobile").focus().select();
+                        isLssued = false;
+                    }
+                }
+            });
+
+            if (isLssued == false) return false;
+        }
+
+        if ($.trim($("#Account_Email").val()) != "") {
+            var email = $.trim($("#Account_Email").val());
+            $.ajax({
+                url: '/Contact/CheckContactEmail',
+                data: { email: encodeURIComponent(email), code: $("#Account_Code").val() },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    if (data == "1") {
+                        Utils.alert("Email已存在!", 2000);
+                        $("#Account_Email").focus().select();
+                        isLssued = false;
+                    }
+                }
+            });
+        }
+
+        if (isLssued == false) return false;
+        return true;
+    }
+
+</script>

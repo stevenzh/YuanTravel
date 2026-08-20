@@ -1,0 +1,329 @@
+﻿@model TopWeb.Model.OrderModel
+@{
+    ViewBag.Title = "订单详细";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section HeaderContent
+{
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <link href="~/Content/calendarchange.css" rel="stylesheet" />
+}
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title.
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Home"><i class="fa fa-dashboard"></i> 首页</a></li>
+        <li><a href="/Order"><i class="fa fa-dashboard"></i> 订单管理</a></li>
+        <li class="active">订单详细</li>
+    </ol>
+</section>
+
+<section class="content">
+    <div class="row ">
+        <div class="col-sm-4 invoice-col">
+            @Html.HiddenFor(m => m.Tid)
+            @Html.HiddenFor(m => m.StatusValue)
+            <b>买家</b><br />
+            <b>昵称:</b> @Html.DisplayFor(model => model.BuyerNick)<br>
+            <b>留言:</b> @Html.DisplayFor(model => model.BuyerMessage)<br>
+        </div><!-- /.col -->
+        <div class="col-sm-4 invoice-col">
+            <b>商品</b><br />
+            <b>标题:</b> @Html.DisplayFor(model => model.Title)<br>
+            <b>数量:</b> @Html.DisplayFor(model => model.Num)<br>
+            <b>价格:</b> @Html.DisplayFor(model => model.Price)<br>
+        </div><!-- /.col -->
+        <div class="col-sm-4 invoice-col">
+            <b>订单号 @Html.DisplayFor(model => model.Tid)</b><br>
+            <b>订单来源:</b> @(Model.OrderFrom == "1" ? "微信" : "淘宝")<br>
+            @if (Model.OrderFrom == "0")
+            {
+                <b>支付宝交易号:</b> @Html.DisplayFor(model => model.AlipayNo)<br>
+            }
+            <b>付款时间:</b> @Html.DisplayFor(model => model.PayTime)<br>
+            <b>金额:</b> @Html.DisplayFor(model => model.Payment)<br />
+            <b>订单状态:</b> @Html.DisplayFor(model => model.StatusValue)
+        </div><!-- /.col -->
+
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">内部操作</h3>
+                    <div class="box-tools">
+
+                        <a href="###" id="btn_operator" class="btn btn-success">保存</a>
+
+                    </div>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <form role="form">
+                        <div class="control-group">
+                            <label> 操作员</label>
+                            <div class="control">
+                                @if (Model.OperatorId != default(int))
+                                {
+                                    @Model.Operator
+                                }
+                                else
+                                {
+                                    @Html.DropDownListFor(m => m.OperatorId, (List<SelectListItem>)ViewBag.Worker, new { @id = "OperatorID", @class = "form-control" })
+                                }
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label> OP操作状态</label>
+                            <div class="control">
+                                @Model.OpStatusValue
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label> 游客名单</label>
+                            <div class="control">
+                                @Html.TextAreaFor(m => m.RealName, new { @id = "RealName", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label> 开始着手日期（收到材料日期）</label>
+                            <div class="control">
+                                @Html.TextBoxFor(m => m.ReadyDate, "{0:yyyy-MM-dd}", new { @id = "ReadyDate", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label> 任务完成日期（预计出签日期）</label>
+                            <div class="control">
+                                @Html.TextBoxFor(m => m.FinishDate, "{0:yyyy-MM-dd}", new { @id = "FinishDate", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label> 备注</label>
+                            <div class="control">
+                                @Html.TextAreaFor(m => m.Remarks, new { @id = "Remarks", @class = "form-control" })
+                            </div>
+                        </div>
+                    </form>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">订单操作记录</h3>
+                    <div class="box-tools">
+                        <a class="btn btn-default" id="btn_log">填写操作记录</a>
+                    </div>
+                </div><!-- /.box-header -->
+                <div id="div_logs" class="box-body no-padding">
+                    @if (Model.OrderLogs.Count() > 0)
+                    {
+                        @Html.Partial("LogList", Model)
+                    }
+                    else
+                    {
+                        <p>没有记录.</p>
+                    }
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
+
+    @if (ViewData["Member"] != null)
+    {
+        @Html.Partial("Member", ViewData["Member"])
+    }
+
+    <div id="logModal" class="modal fade" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">订单操作记录</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form>
+                                <div class="form-group">
+                                    <label for="recipient-name" class="control-label">订单状态:</label>
+                                    @Html.DropDownList("OpStatus", (List<SelectListItem>)ViewBag.OrderStatus, new { @id = "OpStatus", @class = "form-control" })
+                                </div>
+                                <div class="form-group">
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" checked="checked" id="checkSend">微信推送消息</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="message-text" class="control-label">说明（微信发送）:</label>
+                                    <textarea id="sendContent2" rows="4" class="form-control"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <div id='calendar'></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pull-left" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-default" id="btn_writelog">保存</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+
+</section>
+
+<script src="@CDNServerUrl/moment/moment.min.js"></script>
+<script src="http://cdn.sh-cct.cn/fullcalendar/main.min.js"></script>
+<script src="http://cdn.sh-cct.cn/fullcalendar/locales/zh-cn.js"></script>
+<script src="~/Scripts/lunar_demo.js"></script>
+<script>
+    $(function () {
+
+        $('#ReadyDate').datepicker({
+            format: "yyyy-mm-dd",
+            language: "zh-CN"
+        });
+        $('#FinishDate').datepicker({
+            format: "yyyy-mm-dd",
+            language: "zh-CN"
+        });
+
+        $("#btn_log").click(function () {
+            $("#logModal").modal('show');
+        });
+
+        $('#logModal').on('shown.bs.modal', function () {
+            renderCalendar();
+        })
+
+        $("#OpStatus").change(function () {
+            if ($(this).val() == "200" && $("#sendContent2").val() == "") {
+                $("#sendContent2").val("预计{0}出签，具体由领馆实际情况决定.");
+            }
+        });
+
+        $("#btn_writelog").click(function () {
+            $("#logModal").modal('hide');
+            var send = "0";
+            if ($("#checkSend").prop('checked') == true)
+                send = "1";
+            $.ajax({
+                type: "POST",
+                // dataType: "json",
+                // async: false,
+                data: {
+                    OpenID: $("#OpenID").val(),
+                    Tid: $("#Tid").val(),
+                    StatusValue: $("#StatusValue").val(),
+                    NewStatus: $("#OpStatus").val(),
+                    NewStatusValue: $("#OpStatus").find("option:selected").text(),
+                    Description: $("#sendContent2").val(),
+                    SendMessage: send
+                },
+                url: "/Order/WriteLog",
+                success: function (data) {
+                    if (data == "ok") {
+                        refreshLog();
+                    } else {
+                        // 显示结果
+                        Utils.alert("发送失败");
+                    }
+                },
+                error: function () {
+                    Utils.alert("保存失败！");
+                }
+            });
+        });
+
+        $("#btn_operator").click(function () {
+            $.ajax({
+                type: "POST",
+                // dataType: "json",
+                data: {
+                    Tid: $("#Tid").val(),
+                    OperatorId: $("#OperatorID").val(),
+                    RealName: $("#RealName").val(),
+                    ReadyDate: $("#ReadyDate").val(),
+                    FinishDate: $("#FinishDate").val(),
+                    Remarks: $("#Remarks").val()
+                },
+                url: "/Order/UpdateOrder",
+                success: function (data) {
+                    if (data == "ok") {
+                        Utils.alert("保存成功");
+                    } else {
+                        // 显示结果
+                        Utils.alert("保存失败");
+                    }
+                },
+                error: function () {
+                    Utils.alert("保存失败！");
+                }
+            });
+        });
+
+        function renderCalendar() {
+            $('#calendar').fullCalendar({
+                editable: true,
+                header: {
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                },
+                lang: 'zh-cn',
+                height: 'auto',
+                aspectRatio: 1.2,
+                eventLimit: true, // allow "more" link when too many events
+                events: function (start, end, timezone, callback) {
+                    var events = [];
+                    var di = 1;
+                    for (var i = 1; i < 30; i++) {
+                        var d = moment().add(i, 'days');
+                        if (d.format('d') != "0" && d.format('d') != "6") {
+                            events.push({
+                                title: di + " Day",
+                                start: d.format('YYYY-MM-DD') // will be parsed
+                            });
+                            di++;
+                        }
+                        if (di > 15)
+                            break;
+                    }
+                    callback(events);
+                },
+                dayCellDidMount: function (date, cell) {
+                    var fes = lunar(date).festival();
+                    if (fes && fes.length > 0) {
+                        $(cell).html($.trim(fes[0].desc));
+                        $(cell).addClass('holiday');
+                    }
+                },
+                dayClick: function (date, jsEvent, view) {
+                    //alert('Clicked on: ' + date.format());
+                    var ss = $("#sendContent2").val();
+                    if (ss.indexOf("{0}") > 0)
+                        $("#sendContent2").val($("#sendContent2").val().replace("{0}", date.format("YYYY年MM月DD日")));
+                    $(this).css('background-color', 'red');
+                }
+            });
+        }
+    });
+
+    function refreshLog() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("LogList", "Order")',
+            data: { Tid: $("#Tid").val() },
+            success: function (response) {
+                $("#div_logs").html(response);
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,60 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+<div class="sotable_tit">
+    &nbsp;团队基本信息
+</div>
+<table class="edittbl" style="width:100%;">
+    <tr>
+        <td class="label">团名称：</td>
+        <td colspan="5">【@Model.Balance.TourNo】   @Model.Balance.ProductName</td>
+    </tr>
+    <tr>
+        <td class="label">出发日期：</td>
+        <td style="width: 150px;">@Model.Balance.OutDate</td>
+        <td class="label">线路类型：</td>
+        <td style="width: 150px;">@DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.Balance.ProductType.ToString(), false)</td>
+        <td width="100" class="label">天数：</td>
+        <td style="width: 150px;">@Model.Balance.TravelDays</td>
+    </tr>
+    <tr>
+        <td width="100" class="label">出团人数：</td>
+        <td style="width: 150px;">@Model.Balance.Pax</td>
+        <td width="100" class="label">领队/导游：</td>
+        <td>@Model.Balance.GuideName</td>
+        <td width="100" class="label">团状态：</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+
+<div class="sotable_tit">
+    &nbsp;结算明细
+</div>
+<table class="edittbl" style="width:100%;">
+    <tr>
+        <td class="label">营业收入：</td>
+        <td>@Model.Balance.OrderReceivables</td>
+        <td class="label">其他收入：</td>
+        <td>@Model.Balance.OtherIncome</td>
+        <td class="label">总收入：</td>
+        <td>@Model.Balance.TotalIncome</td>
+        <td class="label">已收：</td>
+        <td>@Model.Balance.AmountReceived</td>
+        <td class="label">未收：</td>
+        <td>
+            @(Model.Balance.TotalIncome - Model.Balance.TotalCost)
+        </td>
+    </tr>
+    <tr>
+        <td width="100" class="label">结算人数：</td>
+        <td>@Model.Balance.Pax</td>
+        <td width="100" class="label">成本合计：</td>
+        <td>@Model.Balance.TotalCost</td>
+        <td width="100" class="label">该团毛利：</td>
+        <td>@(Model.Balance.TotalIncome - Model.Balance.TotalCost)</td>
+        <td width="100" class="label">毛利率：</td>
+        <td>
+            @{ var per = string.Format("{0:0.00%}", (Model.Balance.TotalCost == 0 ? 0 : (Model.Balance.TotalIncome - Model.Balance.TotalCost) / Model.Balance.TotalCost)); } @per
+        </td>
+    </tr>
+</table>

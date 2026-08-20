@@ -1,0 +1,30 @@
+﻿@*@model Lvy.VModels.Order.TpOrderVModel*@
+
+<table class="edittbl" border="0" style="margin-top: 5px; display: block; padding-right: 20px; margin-left: -20px;width:100%;">
+    <tr>
+        <td style="font-weight: bold; text-align: right; width:100px;">订单编号：</td>
+        <td style="text-align: left;"><span id="OrderCodeSpan2"></span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">线路名称：</td>
+        <td style="text-align: left;"><span id="ProductNameASpan2"></span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">应收款：</td>
+        <td style="text-align: left;"><span id="OrderPriceASpan2"></span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">已收款：</td>
+        <td style="text-align: left;"><span id="TolPaidASpan2"></span></td>
+    </tr>
+    <tr>
+
+        <td style="font-weight: bold; text-align: right; width: 100px;">分销商：</td>
+        <td style="text-align: left;"><span id="BookingNameASpan2"></span></td>
+    </tr>
+</table>
+
+<input type="hidden" id="hiddenOrderCode2" />
+<input type="hidden" id="hiddenTolYsPrice2" />
+@*@Html.HiddenFor(a => a.OrderModel.OrderCode, new { id = "hiddenOrderCode" })
+    @Html.HiddenFor(a => a.OrderModel.TolYsPrice, new { id = "hiddenTolYsPrice" })*@

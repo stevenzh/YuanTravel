@@ -1,0 +1,73 @@
+﻿@model TopWeb.Model.OrderModel
+@{
+    ViewBag.Title = "订单详细";
+    Layout = null;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <link href="~/Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Content/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="panel panel-default">
+        @*<div class="panel-heading">我的订单</div>*@
+        <div class="panel-body">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <p><b>订单号 </b>@Html.DisplayFor(model => model.Tid)</p>
+                    <p> <b>商品标题:</b> @Html.DisplayFor(model => model.Title) </p>
+                    <p> <b>数量:</b> @Html.DisplayFor(model => model.Num) </p>
+                    @*<p><b>价格:</b> @Html.DisplayFor(model => model.Price)</p>*@
+                    <p><b>订单来源:</b>@Html.DisplayFor(model => model.OrderFromValue)</p>
+                    <p><b>付款时间:</b> @Html.DisplayFor(model => model.PayTime)</p>
+                    <p><b>金额:</b> @Html.DisplayFor(model => model.Payment)  </p>
+                    <p><b>订单状态:</b> @Html.DisplayFor(model => model.StatusValue) </p>
+                    <hr />
+                    <p><b>买家昵称:</b> @Html.DisplayFor(model => model.BuyerNick)</p>
+                    <p><b>买家留言:</b> @Html.DisplayFor(model => model.BuyerMessage) </p>
+                    <p> <b>买家备注:</b> @Html.DisplayFor(model => model.BuyerMemo) </p>
+                    <hr />
+                    <p><b>收货人手机:</b> @Html.DisplayFor(model => model.ReceiverMobile)</p>
+                    <p> <b>收货人姓名:</b> @Html.DisplayFor(model => model.ReceiverName)</p>
+                    <p><b>收货人电话:</b> @Html.DisplayFor(model => model.ReceiverPhone) </p>
+                    <p><b>收货人省份:</b> @Html.DisplayFor(model => model.ReceiverProvince) </p>
+                    <p><b>收货人城市:</b> @Html.DisplayFor(model => model.ReceiverCity)</p>
+                    <p><b>收货人地址:</b> @Html.DisplayFor(model => model.ReceiverAddress)</p>
+                    <p><b>发票抬头:</b> @Html.DisplayFor(model => model.InvoiceTitle)</p>
+                </li>
+
+                @if (Model.SubOrders.Count() > 0)
+            {
+                    <li class="list-group-item">
+                        <h3 class="box-title">子订单</h3>
+
+                        @foreach (var item in Model.SubOrders)
+                        {
+                            <strong>商品名称</strong>
+                            <p>@item.Title</p>
+                            <strong>单价</strong>
+                            <p>@item.Price</p>
+                            <strong>数量</strong>
+                            <p>@item.Num</p>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+﻿@model TopWeb.Model.MemberModel
+@{
+    Layout = null;
+}
+<table class="table">
+    <tr>
+        <th>订单号</th>
+        <th>商品名称</th>
+        <th>实付金额</th>
+        <th>支付时间</th>
+        <th>交易状态</th>
+        <th>买家昵称</th>
+    </tr>
+
+    @foreach (var item in Model.OrderList)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tid)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Payment)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PayTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StatusValue)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BuyerNick)
+            </td>
+        </tr>
+    }
+
+</table>

@@ -1,0 +1,111 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Product.LineCostRuleVModel
+@{
+    Layout = null;
+    ViewBag.Title = "ShowCostRules";
+}
+@section AdditionalResources { }
+
+@using (Html.BeginForm("SaveCostRule", "LineAdmin", FormMethod.Post, new { id = "theForm" }))
+{
+    @Html.HiddenFor(m => m.TpLine.LineId)
+    <div id="listContainer" class="xbox">
+        <div class="fr">
+            <button id="addItem" type="button" title="添加项目" class="btn btn-info">添加项目</button>
+        </div>
+        <table class="table" id="costtable">
+            <thead>
+                <tr style="text-align: center;">
+                    <th>项目</th>
+                    <th>供应商</th>
+                    <th>单价(金额)</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.CostModels.Count(); i++)
+                {
+                    <tr>
+                        <td>
+                            @Html.DropDownListFor(a => a.CostModels[i].Item, DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor(Model.CostModels[i].Item), new { @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.DropDownList("CostModels[" + @i + "].SupplierId", ViewBag.Suppliers as IEnumerable<KeyValueBean>, Model.CostModels[i].SupplierId)
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(a => a.CostModels[i].Cost, new { @class = "form-control" })
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(a => a.CostModels[i].Remark, new { @class = "form-control" })
+                        </td>
+                        <td>
+                            <input type="hidden" name="CostModels[@i].LineId" value="@Model.CostModels[i].LineId" />
+                            <input type="hidden" name="CostModels[@i].IsValid" value="1" />
+                            <a href="#" name="lnkDel">删除</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <input class="btn btn-success" id="saveBtn" type="button" value="保存" />
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#addItem").click(function () {
+            var cnt = $("#costtable tbody tr").length;
+
+            $.post("@Url.Action("AddRowCost")", { rowIndex: cnt,lineId: '@Model.TpLine.LineId'}, function(html) {
+                $("#costtable tbody").append(html);
+            });
+        });
+
+        $("a[name='lnkDel']").each(function () {
+            $(this).click(function () {
+                $(this).parents('tr').attr('style','display:none');
+                $(this).parents('tr').find("input[name$='.IsValid']").val(0);
+            });
+        });
+
+        $("select[name$='.SupplierId']").select2({ language: "zh-CN"});
+
+        $("#saveBtn").click(function() {
+
+            var flag = true;
+            $("select[name$='.Item']").each(function() {
+                if ($(this).val()=="") {
+                    Utils.alert("必须选择项目名称！");
+                    $(this).focus().select();
+                    return  flag= false;
+                }
+            });
+            if (!flag) {return false;}
+            $("select[name$='.SupplierId']").each(function() {
+                if ($(this).val()=="0") {
+                    Utils.alert("必须选择供应商名称！");
+                    $(this).focus().select();
+                    return  flag= false;
+                }
+            });
+            if (!flag) {return false;}
+            $("input[name$='.Cost']").each(function() {
+                if ($(this).val()=="") {
+                    Utils.alert("必须填写单位成本！");
+                    $(this).focus().select();
+                    return flag= false;
+                } else if(!Utils.Check.IsMoney($(this).val())) {
+                    Utils.alert("必须填写金额类型！");
+                    $(this).focus().select();
+                    return flag= false;
+                }
+            });
+            if (!flag) {return false;}
+            if (flag) {
+                $("#theForm").submit();
+            }
+
+        });
+    });
+</script>

@@ -1,0 +1,54 @@
+﻿@model Lvy.VModels.OpTour.ExchangeTourVModel
+<table class="listtbl" style="width:100%;">
+    <thead>
+        <tr style="text-align: center;">
+            <td style="width: 30px;">选择</td>
+            <td>团编号</td>
+            <td>线路名称</td>
+            <td>出发日期</td>
+            <td>计划</td>
+            <td>已用</td>
+            <td>剩余</td>
+            <td>是否<br />成团</td>
+            <td>报价</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TourList != null && Model.TourList.Count > 0)
+        {
+            foreach (var item in Model.TourList)
+            {
+                <tr style="text-align: center; cursor: pointer;" onclick="$(this).children().first().children(':radio').prop('checked', true);">
+                    <td><input type="radio" name="checkExchangeTour" value="@item.TourId" /></td>
+                    <td>@item.Tour.TourNo</td>
+                    <td style="text-align: left;" title="@item.Tour.LineName">
+                        @item.Tour.LineName.TrimWithElipsis(20)
+                    </td>
+                    <td>@item.Tour.OutDate.ToDateFormat()</td>
+                    <td>@item.Quota.PlanQuota</td>
+                    <td>@item.Quota.UsedQuota</td>
+                    <td>@item.Quota.UseQuota</td>
+                    <td>
+                        @if (item.Tour.AuditState>0)
+                        {
+                            <span class="badge badge-1">已成团</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-2">未成团</span>
+                        }
+                    </td>
+                    <td>@item.Tour.Price</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr style="text-align: center;">
+                <td colspan="11" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

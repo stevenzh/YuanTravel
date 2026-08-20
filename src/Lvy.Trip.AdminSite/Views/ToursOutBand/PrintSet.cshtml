@@ -1,0 +1,199 @@
+﻿@model Lvy.VModels.Op.TourOutBandHeadVModel
+@using Lvy.Models.BaseDB
+@{
+    var owner = GlobalContext.Current.OwnerInfo;
+}
+<style>
+    .text300 { width: 300px; height: 21px; border: 1px #C2C2C2 solid; line-height: 20px; padding-left: 3px; }
+</style>
+<form id="theForm" action="@Url.Action("PrintTraveller")">
+    <div class="inform">
+        <table width="100%" class="edittbl">
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>组团社序号：
+                </td>
+                <td>
+
+                    @Html.TextBoxFor(a => a.OutBandHeadModel.ZuTuanNo, new { @class = "text300" })<font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>团队编号：
+                </td>
+                <td>
+                    @Html.TextBoxFor(a => a.OutBandHeadModel.TourNo, new { @class = "text300" })<font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>年份：
+                </td>
+                <td>
+                    @Html.TextBoxFor(a => a.OutBandHeadModel.Years, new { @class = "text100" })<font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>线路：
+                </td>
+                <td>@Html.TextBoxFor(a => a.OutBandHeadModel.LineName, new { @class = "text300" })<font color="red">*</font></td>
+            </tr>
+            <tr>
+                <td class="label">
+                    <span class="point"></span>总人数：
+                </td>
+                <td>
+                    @Model.OutBandHeadModel.TravellerCount   (其中 男：@Model.OutBandHeadModel.ManCount  女：@Model.OutBandHeadModel.WomenCount )
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    <span class="point"></span>组团社名称：
+                </td>
+                <td>
+                    @Html.TextBoxFor(a => a.OutBandHeadModel.ZuTuanName, new { @class = "text300", @Value = owner.Name })<font color="red">*</font>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label" width="150px">
+                    <span class="point"></span>联络人员姓名及电话:
+                </td>
+                <td>
+                    @Html.TextBoxFor(a => a.OutBandHeadModel.ZuTuanContact, new { @class = "text300" })<font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>接待社名称：
+                </td>
+                <td>@Html.TextBoxFor(a => a.OutBandHeadModel.ReceptionName, new { @class = "text300" })<font color="red">*</font></td>
+            </tr>
+            <tr>
+                <td class="label" width="150px">
+                    <span class="point"></span>联络人员姓名及电话：
+                </td>
+                <td>@Html.TextBoxFor(a => a.OutBandHeadModel.ReceptionContact, new { @class = "text300" })<font color="red">*</font></td>
+            </tr>
+            <tr>
+                <td class="label" width="150px">
+                    <span class="point"></span>出入境日期和口岸：
+                </td>
+                <td>
+                    @Html.CheckBoxFor(a => a.OutBandHeadModel.IsContainsEnterDateAndPosition) 取消出入境日期和口岸
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>表头中含领队：
+                </td>
+                <td>
+                    @Html.CheckBoxFor(a => a.OutBandHeadModel.IsContainsLingDui, new { @Checked = "checked" }) 表头中含领队
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>选择领队：
+                </td>
+                <td>
+                    <select id="GuideName" name="OutBandHeadModel.GuideName" onchange="SelectGuideChange()">
+                        <option value="" GuideNo=""></option>
+                        @foreach (var item in ViewBag.GuideList as List<GuideModel>)
+                        {
+                            <option value="@item.Name" GuideNo="@item.LeadCard">@item.Name</option>
+                        }
+                    </select>
+                    <font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td class="label" width="90px">
+                    <span class="point"></span>	领队证号：
+                </td>
+                <td>
+                    @Html.TextBoxFor(a => a.OutBandHeadModel.GuideNo, new { @class = "text300" })<font color="red">*</font>
+                </td>
+            </tr>
+        </table>
+        <div>
+            <input id="printBtn" type="submit" value="打印出境名单" class="btn btn1" style="width:100px" onclick="return print()" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    function print() {
+
+        if ($.trim($("[name='OutBandHeadModel.ZuTuanNo']").val()) == "") {
+
+            Utils.alert("组团社序号不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.LineName']").val()) == "") {
+
+            Utils.alert("团队编号不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.Years']").val()) == "") {
+
+            Utils.alert("年份不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.LineName']").val()) == "") {
+
+            Utils.alert("线路不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.ZuTuanName']").val()) == "") {
+
+            Utils.alert("组团社名称不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.ZuTuanContact']").val()) == "") {
+
+            Utils.alert("组团社联络人员姓名及电话不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.ReceptionName']").val()) == "") {
+
+            Utils.alert("接待社名称不能为空！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.ReceptionContact']").val()) == "") {
+
+            Utils.alert("接待社联络人员姓名及电话不能为空！");
+            return false;
+        }
+
+        if ($.trim($("[name='OutBandHeadModel.ReceptionContact']").val()) == "") {
+
+            Utils.alert("接待社联络人员姓名及电话不能为空！");
+            return false;
+        }
+
+        if ($.trim($("#GuideName").val()) == "") {
+
+            Utils.alert("请选择领队！");
+            return false;
+        }
+        if ($.trim($("[name='OutBandHeadModel.GuideNo']").val()) == "") {
+
+            Utils.alert("领队证号不能为空！");
+            return false;
+        }
+
+        return true;
+
+    }
+
+    function SelectGuideChange() {
+
+        var LeadCard = $("#GuideName").find("option:selected").attr("GuideNo");
+        $("[name='OutBandHeadModel.GuideNo']").val(LeadCard);
+
+    }
+
+
+</script>

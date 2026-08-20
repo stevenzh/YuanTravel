@@ -1,0 +1,90 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+<div class="btnlist">
+    <div class="fr">
+        <a href="/UserAdmin/Create" class="btn btn1">添加账户</a>
+    </div>
+</div>
+
+@if (Model.Accounts.Items.Count > 0)
+{
+    <table class="listtbl" style="width:100%;">
+        <thead>
+            <tr>
+                <td>登录名</td>
+                <td>姓名</td>
+                <td>座机</td>
+                <td>手机</td>
+                <td>所在部门</td>
+                <td>客户名称</td>
+                <td>账户类型</td>
+                <td>是否有效</td>
+                <td align="center" style="width: 50px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Accounts.Items)
+            {
+                <tr>
+                    <td>@item.LoginName</td>
+                    <td>@item.Name</td>
+                    <td>@item.Phone</td>
+                    <td>@item.Mobile</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.DepartCodeEnum, item.DepartCode.ToString()) </td>
+                    <td>@item.CustomerName</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.AccountTypeEnum, item.AccountType.ToString()) </td>
+                    <td>
+                        @if (item.IsValid == 1)
+                        {<span style='color:green;'>有效</span>}
+                        else
+                        {<span style='color:gray;'>无效</span>}
+                    </td>
+                    <td align="center">
+                        @Html.IconActionLink("编辑", "Edit", "UserAdmin", "fa fa-edit", new { code = item.Code })
+                        @Html.IconDeleteActionLink("SetValidState", "UserAdmin", item.IsValid, new { code = item.Code })
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    @Html.HiddenFor(a => a.Accounts.PageIndex)
+    <div id="Pagination" class="digg"></div>
+}
+else
+{
+    <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+        <br />
+        对不起，没有查找到数据！请重新输入查询条件 ！
+    </div>
+}
+<script type="text/javascript">
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Accounts.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Accounts.PageSize'),
+                current_page: @Model.Accounts.PageIndex-1
+            });
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+
+        var load_iii = Utils.layerLoad();
+
+        $("#CAccounts_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+</script>

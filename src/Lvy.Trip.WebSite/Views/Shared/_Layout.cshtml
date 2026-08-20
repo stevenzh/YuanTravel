@@ -1,0 +1,381 @@
+﻿@{
+    var UserInfo = GlobalContext.Current.UserInfo;
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@using Lvy.Models.SiteDB
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewBag.Title - 测试站点</title>
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/layer/theme/default/layer.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/pagination.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.carousel.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.theme.default.css" />
+    <link href="~/lib/animate-css/animate.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/styles/styles.css" />
+    <link rel="stylesheet" href="~/styles/responsive.css" />
+    @RenderSection("AdditionalResources", false)
+
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="@CDNServerUrl/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="@CDNServerUrl/layer/layer.js"></script>
+    <script src="@CDNServerUrl/jquery.pagination.js"></script>
+</head>
+<body>
+    <div class="super_container">
+        <!-- Header -->
+        <header class="header">
+
+            <!-- Top Bar -->
+            <div class="top_bar">
+                <div class="container">
+                    <div class="row">
+                        <div class="col d-flex flex-row">
+                            <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="~/images/phone.png" alt=""></div>400-620-7888</div>
+                            <div class="top_bar_contact_item"><div class="top_bar_icon"><img src="~/images/mail.png" alt=""></div><a href="mailto:help@sh-cct.com">help@sh-cct.com</a></div>
+                            <div class="top_bar_content ml-auto">
+                                <div class="top_bar_menu">
+                                    <ul class="standard_dropdown top_bar_dropdown">
+                                        <li>
+                                            <a href="#">@(GlobalContext.Current.CurrentCityName + "出发")<i class="fas fa-chevron-down"></i></a>
+                                            <ul>
+                                                <li><a href="/Home/Index?out_city=31">上海出发</a></li>
+                                                <li><a href="/Home/Index?out_city=3201">南京出发</a></li>
+                                                <li><a href="/Home/Index?out_city=3401">合肥出发</a></li>
+                                                <li><a href="/Home/Index?out_city=3202">无锡出发</a></li>
+                                                <li><a href="/Home/Index?out_city=3203">徐州出发</a></li>
+                                                <li><a href="/Home/Index?out_city=3204">常州出发</a></li>
+                                                <li><a href="/Home/Index?out_city=3208">淮安出发</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="top_bar_menu">
+                                    <ul class="index_top_nav ">
+                                        <li class="nav_item item_weibo">
+                                            <a onclick="_gaq.push(['_trackEvent','首页_sz','点击','顶部按钮_微博___'])" class="header_icon icon_weibo vm" rel="nofollow" target="_blank" href="https://weibo.com/u/3069447335"></a>
+                                        </li>
+                                        <li class="nav_item item_weixin has_dropdown">
+                                            <a class="header_icon icon_weixin vm" rel="nofollow" href="#"></a>
+                                            <div class="dropdown_panel weixin_panel">
+                                                <img src="~/images/qrcode_for_weixin.png" />
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="top_bar_user">
+                                    <div class="user_icon"><img src="~/images/user.svg" alt=""></div>
+                                    @if (UserInfo != null)
+                                    {
+                                        <div>
+                                            @Html.ActionLink(UserInfo.Name, "Index", "Seller", routeValues: null, htmlAttributes: new { title = "商户中心" })
+                                        </div>
+                                        <div><a href="/User/Logout">登出</a></div>
+                                    }
+                                    else
+                                    {
+                                        <div>@Html.ActionLink("登陆", "Login", "User", routeValues: null, htmlAttributes: new { id = "loginLink" })</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Main -->
+            <div class="header_main">
+                <div class="container">
+                    <div class="row">
+
+                        <!-- Logo -->
+                        <div class="col-lg-2 col-sm-3 col-3 order-1">
+                            <div class="logo_container">
+                                <div class="logo">
+                                    <a href="/home"><img src="@GlobalContext.Current.CustomerLogoPath" /></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="col-lg-6 col-12 order-lg-2 order-3 text-lg-left text-right">
+                            <div class="header_search">
+                                <div class="header_search_content">
+                                    <div class="header_search_form_container">
+                                        <form action="/Home/Search" class="header_search_form clearfix">
+                                            <input type="search" name="q" required="required" class="header_search_input" placeholder="搜索国家、城市、产品">
+                                            <div class="custom_dropdown">
+                                                <div class="custom_dropdown_list">
+                                                    <span class="custom_dropdown_placeholder clc">所有产品</span>
+                                                    <i class="fas fa-chevron-down"></i>
+                                                    <ul class="custom_list clc">
+                                                        <li><a class="clc" href="#">所有产品</a></li>
+                                                        <li><a class="clc" href="#">出境游</a></li>
+                                                        <li><a class="clc" href="#">签证服务</a></li>
+                                                        <li><a class="clc" href="#">门票</a></li>
+                                                        <li><a class="clc" href="#">自驾</a></li>
+                                                        <li><a class="clc" href="#">国内游</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="header_search_button trans_300" value="Submit">
+                                                <img src="~/images/search.png" alt="" />
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wishlist -->
+                        <div class="col-lg-4 col-9 order-lg-3 order-2 text-lg-left text-right">
+                            <div class="wishlist_cart d-flex flex-row align-items-center justify-content-end">
+                                <div class="wishlist d-flex flex-row align-items-center justify-content-end">
+                                    <div class="wishlist_icon"><img src="~/images/heart.png" alt=""></div>
+                                    <div class="wishlist_content">
+                                        <div class="wishlist_text"><a href="/User/WishList">收藏夹</a></div>
+                                        <div class="wishlist_count">@(UserInfo == null ? 0 : UserInfo.WishCount)</div>
+                                    </div>
+                                </div>
+
+                                <!-- Cart -->
+                                <div class="cart">
+                                    <div class="cart_container d-flex flex-row align-items-center justify-content-end">
+                                        <div class="cart_icon">
+                                            <img src="~/images/cart.png" alt="">
+                                            <div class="cart_count"><span>10</span></div>
+                                        </div>
+                                        <div class="cart_content">
+                                            <div class="cart_text"><a href="/Cart/Index">购物车</a></div>
+                                            <div class="cart_price">￥85</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main_nav">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+
+                            <div class="main_nav_content d-flex flex-row">
+
+                                <!-- Categories Menu -->
+                                <div class="cat_menu_container">
+                                    <div class="cat_menu_title d-flex flex-row align-items-center justify-content-start">
+                                        <div class="cat_burger"><span></span><span></span><span></span></div>
+                                        <div class="cat_menu_text">旅游目的地</div>
+                                    </div>
+
+                                    <ul class="cat_menu">
+                                        @Html.FrontMenuBuild(ViewBag.N1 as List<SiteNavItemModel>)
+                                    </ul>
+                                </div>
+
+                                <!-- Main Nav Menu -->
+                                <div class="main_nav_menu ml-auto">
+                                    <ul class="standard_dropdown main_nav_dropdown">
+                                        @Html.FrontMenuBuild(ViewBag.N2 as List<SiteNavItemModel>)
+                                    </ul>
+                                </div>
+
+                                <!-- Menu Trigger -->
+                                <div class="menu_trigger_container ml-auto">
+                                    <div class="menu_trigger d-flex flex-row align-items-center justify-content-end">
+                                        <div class="menu_burger">
+                                            <div class="menu_trigger_text">menu</div>
+                                            <div class="cat_burger menu_burger_inner"><span></span><span></span><span></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Menu -->
+            <div class="page_menu">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+
+                            <div class="page_menu_content">
+
+                                <div class="page_menu_search">
+                                    <form action="#">
+                                        <input type="search" required="required" class="page_menu_search_input" placeholder="Search for products...">
+                                    </form>
+                                </div>
+                                <ul class="page_menu_nav">
+                                    <li class="page_menu_item has-children">
+                                        <a href="#">出发城市<i class="fa fa-angle-down"></i></a>
+                                        <ul class="page_menu_selection">
+                                            <li><a href="/Home/Index?out_city=31">上海出发<i class="fa fa-angle-down"></i></a></li>
+                                            <li><a href="/Home/Index?out_city=3201">南京出发<i class="fa fa-angle-down"></i></a></li>
+                                            <li><a href="/Home/Index?out_city=3401">合肥出发<i class="fa fa-angle-down"></i></a></li>
+                                            <li><a href="/Home/Index?out_city=3202">无锡出发<i class="fa fa-angle-down"></i></a></li>
+                                            <li><a href="/Home/Index?out_city=3204">常州出发<i class="fa fa-angle-down"></i></a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="page_menu_item">
+                                        <a href="/Home/Index">首页<i class="fa fa-angle-down"></i></a>
+                                    </li>
+                                    @Html.HidenMenuBuild(ViewBag.N2 as List<SiteNavItemModel>)
+                                </ul>
+
+                                <div class="menu_contact">
+                                    <div class="menu_contact_item"><div class="menu_contact_icon"><img src="~/images/phone_white.png" alt=""></div>400 620 7888</div>
+                                    <div class="menu_contact_item"><div class="menu_contact_icon"><img src="~/images/mail_white.png" alt=""></div><a href="mailto:help@sh-cct.com">help@sh-cct.com</a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </header>
+
+        @RenderBody()
+
+        <!-- Newsletter -->
+        @*<div class="newsletter">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <div class="newsletter_container d-flex flex-lg-row flex-column align-items-lg-center align-items-center justify-content-lg-start justify-content-center">
+                                <div class="newsletter_title_container">
+                                    <div class="newsletter_icon"><img src="~/images/send.png" alt=""></div>
+                                    <div class="newsletter_title">Sign up for Newsletter</div>
+                                    <div class="newsletter_text"><p>...and receive %20 coupon for first shopping.</p></div>
+                                </div>
+                                <div class="newsletter_content clearfix">
+                                    <form action="#" class="newsletter_form">
+                                        <input type="email" class="newsletter_input" required="required" placeholder="Enter your email address">
+                                        <button class="newsletter_button">Subscribe</button>
+                                    </form>
+                                    <div class="newsletter_unsubscribe_link"><a href="#">unsubscribe</a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-3 footer_col">
+                        <div class="footer_column footer_contact">
+                            <div class="logo_container">
+                                <div class="logo"><a href="#">康辉旅游</a></div>
+                            </div>
+                            <div class="footer_title"> 周一至周五 08:45-17:30</div>
+                            <div class="footer_phone">400 620 7888</div>
+                            <div class="footer_contact_text">
+                                <p>上海市武定路458号12-13楼</p>
+                            </div>
+                            @*<div class="footer_social">
+                                    <ul>
+                                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-youtube"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-google"></i></a></li>
+                                        <li><a href="#"><i class="fab fa-vimeo-v"></i></a></li>
+                                    </ul>
+                                </div>*@
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 offset-lg-2">
+                        <div class="footer_column">
+                            <div class="footer_title">关于康辉</div>
+                            <ul class="footer_list">
+                                <li><a href="/user/customerreg">商户入驻</a></li>
+                                <li><a href="#">联系我们</a></li>
+                                <li><a href="#">门店地址</a></li>
+                                <li><a href="#">人才招聘</a></li>
+                                <li><a href="#">淘宝网店</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="footer_column">
+                            <div class="footer_title">网站条款</div>
+                            <ul class="footer_list">
+                                <li><a href="#">法律声明</a></li>
+                                <li><a href="#">服务条款</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="footer_column">
+                            <div class="footer_title">用户帮助</div>
+                            <ul class="footer_list">
+                                <li><a href="#">商务合作</a></li>
+                                <li><a href="#">投诉建议</a></li>
+                                <li><a href="#">网站地图</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Copyright -->
+
+        <div class="copyright">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+
+                        <div class="copyright_container d-flex flex-sm-row flex-column align-items-center justify-content-start">
+                            <div class="copyright_content">
+                                Copyright &copy; 2002 - @DateTime.Today.Year 上海新康辉国际旅行社有限责任公司 旅行社业务经营许可证编号：L-SH-GJ00042
+                                <a href="https://beian.miit.gov.cn">沪ICP备09073213号-10</a>
+                            </div>
+                            @*<div class="logos ml-sm-auto">
+                                    <ul class="logos_list">
+                                        <li><a href="#"><img src="~/images/logos_1.png" alt=""></a></li>
+                                        <li><a href="#"><img src="~/images/logos_2.png" alt=""></a></li>
+                                        <li><a href="#"><img src="~/images/logos_3.png" alt=""></a></li>
+                                        <li><a href="#"><img src="~/images/logos_4.png" alt=""></a></li>
+                                    </ul>
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="@CDNServerUrl/owl-carousel/owl.carousel.js"></script>
+    <script src="~/lib/greensock/TweenMax.min.js"></script>
+    <script src="~/lib/greensock/TimelineMax.min.js"></script>
+    <script src="~/lib/scrollmagic/ScrollMagic.min.js"></script>
+    <script src="~/lib/greensock/animation.gsap.min.js"></script>
+    <script src="~/lib/greensock/ScrollToPlugin.min.js"></script>
+    <script src="~/lib/easing/easing.js"></script>
+    <script src="~/js/main.js"></script>
+    <script src="~/js/common.js"></script>
+    @RenderSection("PageScripts", required: false)
+</body>
+</html>
+

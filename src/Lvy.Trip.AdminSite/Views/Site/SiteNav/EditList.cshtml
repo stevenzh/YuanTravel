@@ -1,0 +1,85 @@
+﻿@model Lvy.VModels.Online.NavItemVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewData["Title"] = "编辑网站分类";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+
+@section AdditionalResources
+{
+    <!-- Bootstrap4 Duallistbox -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
+    <style>
+        .duallistbox { height: 290px; }
+    </style>
+}
+
+<section class="content">
+    <div class="card card-default">
+        @*<div class="card-header">
+                <h3 class="card-title">Bootstrap Duallistbox</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>*@
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        @Html.HiddenFor(m => m.NavItem.ItemID)
+                        @*<label>选择推荐的产品</label>*@
+                        @Html.DropDownList("navd", ViewData["NavList"] as List<SelectListItem>, new { @class = "duallistbox", @multiple = "multiple" })
+                    </div>
+                    <!-- /.form-group -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer">
+            <button id="btnSave" type="button" class="btn btn-info">保存</button>
+        </div>
+    </div>
+    <!-- /.card -->
+
+</section>
+
+@section PageScripts
+{
+    <!-- Bootstrap4 Duallistbox -->
+    <script src="@CDNServerUrl/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //Bootstrap Duallistbox
+            $('.duallistbox').bootstrapDualListbox();
+
+            $("#btnSave").click(function () {
+                var param = {
+                    ItemID: $("#NavItem_ItemID").val(),
+                    ListStr: $("#navd").val()
+                }
+                $.post("/SiteNav/SaveNavList/", param, function (data) {
+                    if (data == 0) {
+                        Utils.alert("编码重复！");
+                        $("#code").focus();
+                    } else {
+                        //Utils.alert("保存成功！");
+                        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(index);
+                        parent.refreshTree();
+                    }
+                });
+            });
+
+        });
+    </script>
+
+}
+

@@ -1,0 +1,162 @@
+﻿@model Lvy.Visa.Models.CountryConsularDistrictQModel
+@{
+    Layout = null;
+    string pictureUrl = AppSetting.Get("UploadFileRoot");
+}
+@using Arch.Common
+<script type="text/javascript">
+    image_countryIndex = 0;
+</script>
+
+<!-- Horizontal Form -->
+<div class="card card-info">
+    <div class="card-header">
+        <h3 class="card-title">Horizontal Form</h3>
+    </div>
+    <!-- /.card-header -->
+    <!-- form start -->
+    <form class="form-horizontal">
+        <div class="card-body">
+            <div class="form-group row">
+                <label for="inputEmail3" class="col-sm-2 col-form-label">国家</label>
+                <div class="col-sm-10">
+                    <select type="text" class="form-control" id="CountryCode" placeholder="Email" onkeyup="funCheckCountryCode(this)">
+                        <option value="@Model.country.CountryCode" selected="selected">@Model.country.CountryName</option>
+                    </select>
+
+                    @Html.HiddenFor(a => a.country.CountryCode, new { @id = "CountryCodeStr" })
+                    <input type="hidden" id="VisaCountryCode" value="@Model.country.VisaCountryCode" />
+                    <input type="hidden" id="CountryId" value='@Model.country.Id' />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputPassword3" class="col-sm-2 col-form-label">国家国旗</label>
+                <div class="col-sm-10">
+                    @if (Model.country != null)
+                    {
+                        <img src="@(pictureUrl + Model.country.CountryImgPath)" style="width: 100px; height: 50px;" id="img_pimg" name="img_pimg" />
+                    }
+                    else
+                    {
+                        <img style="width: 100px; height: 50px;" id="img_pimg" name="img_pimg" />
+                    }
+                    @Html.HiddenFor(a => a.country.CountryImgPath, new { @id = "CountryImgPath" })
+                    <input type="button" class="btn_2" style="font-weight: lighter;" value="选择图片" onclick="funSelectImage()" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">领区详解</label>
+                <div class="col-sm-10">
+                    <textarea id="ConsularDistrictNotes" class="form-control" rows="5" placeholder="Enter ...">@Model.country.ConsularDistrictNotes</textarea>
+                </div>
+            </div>
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer">
+            <button type="button" class="btn btn-success" id="SaveCountryInfo">保存</button>
+            <a href="/District/Index" class="btn btn-secondary float-right">返回列表</a>
+        </div>
+        <!-- /.card-footer -->
+    </form>
+</div>
+<!-- /.card -->
+
+<script type="text/javascript">
+    $(function () {
+        //签证国家或地区
+        $('#CountryCode').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetCountrySelect2';
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList
+                    };
+                },
+                cache: true
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        ///保存国家信息
+        $("#SaveCountryInfo").click(function () {
+            if ($("#CountryCodeStr").val() == "") {
+                toastr.warning("请先添加签证国家！！");
+                $("#CountryCode").focus();
+                return;
+            }
+            if ($("#CountryImgPath").val() == "") {
+                toastr.warning("请选择国家国旗！！");
+                return;
+            }
+            if ($("#ConsularDistrictNotes").val() == "") {
+                toastr.warning("请填写领区详解！！");
+                $("#ConsularDistrictNotes").focus();
+                return;
+            }
+            var param = {
+                "CountryCode": $("#CountryCodeStr").val(),
+                "CountryImgPath": $("#CountryImgPath").val(),
+                "ConsularDistrictNotes": $("#ConsularDistrictNotes").val(),
+                "VisaCountryCode": $("#VisaCountryCode").val(),
+                "Id": $("#CountryId").val()
+            };
+            $.post("/District/CheckCountry", param, function (datacheck) {
+                if (datacheck == "1") {
+                    alert("国家已经存在！！请重新选择！");
+                    $("#CountryCode").val("中文/拼音");
+                    $("#CountryCodeStr").val("");
+                    $("#CountryCode").focus();
+                }
+                else {
+                    $.post("/District/SaveCountryInfo", param, function (data) {
+                        if (data != null && data != "") {
+                            toastr.success('保存成功！');
+                            $("#divCountryInfo").html(data);
+                        }
+                    });
+                }
+            });
+        });
+    });
+
+    //check 国家
+    function funCheckCountryCode(obj) {
+        if ($(obj).val() == "") {
+            $('#CountryCodeStr').val("");
+        }
+        else {
+        }
+    }
+
+    //选择图片
+    function funSelectImage() {
+        var parentStr = $("#CountryCodeStr").val();
+        var url = "/District/ShowSelectImg/?VisaCountryParentStr=" + $.trim(parentStr) + "&Rnd=" + Math.random();
+        layer.open({ type: 2, title: '选择图片', maxmin: true, shadeClose: true, area: ['900px', '400px'], content: url });
+    }
+
+    function funSelectImageReturn(image_url) {
+        $('#img_pimg').attr('src', image_url);
+        $('#CountryImgPath').val(image_url);
+    }
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+
+</script>
+

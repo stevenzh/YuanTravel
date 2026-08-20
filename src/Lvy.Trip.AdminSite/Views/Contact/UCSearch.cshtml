@@ -1,0 +1,113 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+
+<style>
+    .listtbl tbody td { text-align: center; }
+</style>
+<div class="btnlist">
+    <div class="fl">
+        排序方式：@Html.DropDownListFor(m => m.SortKey, Model.SortKeyValueBean.ToSelectListFor(Model.SortKey.ToString()))
+    </div>
+    <img src="~/WebRes/images/customer_status.png" style="height:25px; border:1px solid #b3a4a4; margin-left:5px;" />
+    <div class="fr">
+        <a href="@Url.Action("Create")" class="btn btn1">新 增</a>
+    </div>
+</div>
+@if (Model.Accounts.Items.Count > 0)
+{
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr>
+                <td>编码</td>
+                <td>姓名</td>
+                <td>手机</td>
+                <td>电子邮箱</td>
+                <td>销售</td>
+                <td>客户名称</td>
+                <td>状态</td>
+                <td align="center" style="width: 50px;">操作</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Accounts.Items)
+            {
+                string color = "#fff";
+                if (item.IsValid == 0)
+                {
+                    color = "#f3f3f4";
+                }
+                else if (item.SalerState == 1)
+                {
+                    color = "#e0f9e4";
+                }
+                else if (item.SalerState == 2)
+                {
+                    color = "#fdfab6";
+                }
+
+                <tr style="background-color: @color ;">
+                    <td>@item.Code</td>
+                    <td>@item.Name</td>
+
+                    <td>@item.Mobile</td>
+                    <td>@item.Email</td>
+                    <td>@item.SalerName </td>
+                    <td style="text-align:left;">@item.CustomerName</td>
+                    <td> @DictionaryTools.GetEnumValue(Enums.CustomerStateEnum, item.SalerState.ToString(), false)</td>
+                    <td>
+                        <table class="toolbar">
+                            <tr>
+                                <td>@Html.IconActionLink("详情", "Details", "Contact", "fa fa-list", new { code = item.Code })</td>
+                                <td>@Html.IconActionLink("编辑", "Edit", "Contact", "fa fa-edit", new { code = item.Code })</td>
+                                <td>@Html.IconDeleteActionLink("SetValidState", "Contact", item.IsValid, new { code = item.Code })</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @Html.HiddenFor(a => a.Accounts.PageIndex)
+    <div id="Pagination" class="digg"></div>
+}
+else
+{
+    <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+        <br />
+        对不起，没有查找到数据！请重新输入查询条件 ！
+    </div>
+}
+<script type="text/javascript">
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Accounts.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Accounts.PageSize'),
+                current_page: @Model.Accounts.PageIndex-1
+            });
+    });
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#Accounts_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    $(function () {
+        $('select[name="SortKey"]').change(function () {
+            pageselectCallback(0);
+        });
+    });
+
+</script>

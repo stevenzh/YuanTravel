@@ -1,0 +1,113 @@
+﻿@model Lvy.Visa.VModels.VisaOrderQModel
+@using Lvy.Visa.VModels
+@{
+    Layout = null;
+}
+
+<div id="listinfo">
+    <table class="table table-sm">
+        <tr>
+            <th>订单编号</th>
+            <th>产品名称</th>
+            <th>联系人</th>
+            <th>联系人电话</th>
+            <th>产品经理</th>
+            <th>预订时间</th>
+            <th>预订员</th>
+            <th>支付状态</th>
+            <th>订单状态</th>
+            <th>操作状态</th>
+            @*<th>跟进日期</th>*@
+            <th>操作</th>
+        </tr>
+        @if (Model.visaOrderModelsList != null && Model.visaOrderModelsList.Items != null && Model.visaOrderModelsList.Items.Count() > 0)
+        {
+            foreach (var item in Model.visaOrderModelsList.Items)
+            {
+                <tr>
+                    <td><a href="/OrderAdmin/OrderDetail?OrderCode=@item.MasterOrderCode" title="查看订单">@item.MasterOrderCode</a></td>
+                    <td>@item.ProductName</td>
+                    <td>@item.ContactName</td>
+                    <td>@item.ContactPhone</td>
+                    <td>@item.VisaOrder.PManageName</td>
+                    <td>@item.CreatedTime.ToString()</td>
+                    <td>@(string.IsNullOrEmpty(item.CreatedBy) ? item.OrderSourceValue : DictionaryTools.GetCachedAccount(item.CreatedBy).Name)</td>
+                    <td style="color: @(item.PaymentStatus!=5?"#":"#008B00")">@item.PaymentStatusName</td>
+                    <td style="color: @(item.OrderState!=8?"#":"#FF0000")">@item.OrderStatusName</td>
+                    <td>@item.StatusName</td>
+                    @*<td>@item.FollowupDate</td>*@
+                    <td>
+                    <a class="btn btn-sm btn-info" href="/OrderAdmin/ModifyOrder?OrderCode=@item.MasterOrderCode">编辑</a>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="javascript:parent.openTabPage('@Url.Action("EditTourBalance","Finance", new { orderCode = item.MasterOrderCode })','团单【@item.MasterOrderCode】')" title="团单详情">团单详情</button>
+                    </td>
+                </tr>
+            }
+        }
+        <tr>
+            <td colspan="12">
+                <div id="Pagination2" class="digg" />
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script src="~/WebRes/scripts/jquery.pagination.js"></script>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination2").pagination(
+            Number(@Model.visaOrderModelsList.TotalCount), {
+                callback: pageselectCallback,
+                prev_text: '前一页',
+                next_text: '后一页',
+                items_per_page: 10,
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: index2
+            });
+    });
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        jQuery.ajaxSetup({ cache: false });
+        page_id = page_id + 1;
+        var param = {
+            "orderQueryModel.OrderCode": $("#ordercode").val(),
+            "orderQueryModel.ProductName": $("#prodcutnames").val(),
+            "orderQueryModel.ProduceManager": $("#prodcutmanagers").val(),
+            "orderQueryModel.TourNo": $("#TourNo").val(),
+            "orderQueryModel.TeamID": $("#TeamID").val(),
+            "orderQueryModel.BookMan": $("#bookman").val(),
+            "orderQueryModel.BookDate1": $("#bookdt1").val(),
+            "orderQueryModel.BookDate2": $("#bookdt2").val(),
+            "orderQueryModel.OrderSource": $("#ordersource").val(),
+            "orderQueryModel.ContactName": $("#name").val(),
+            "orderQueryModel.ContactTel": $("#tel").val(),
+            "orderQueryModel.ApplicantName": $("#outman").val(),
+            "orderQueryModel.PaymentType": $("#repaytype").val(),
+            "orderQueryModel.PaymentStatus": $("#repaystatus").val(),
+            "orderQueryModel.OrderStatus": $("#orderstatus").val(),
+            //            "orderQueryModel.LaterPayDate1": $("#repatdt1").val(),
+            //            "orderQueryModel.LaterPayDate2": $("#repatdt2").val(),
+            //            "orderQueryModel.CancelDate1": $("#canceldt1").val(),
+            //            "orderQueryModel.CancelDate2": $("#canceldt2").val(),
+            "orderQueryModel.TraceState": $("#operstatus").val(),
+            "orderQueryModel.SendVisaDate1": $("#sendt1").val(),
+            "orderQueryModel.SendVisaDate2": $("#sendt2").val(),
+            "orderQueryModel.MaterialDeadline1": $("#deadt1").val(),
+            "orderQueryModel.MaterialDeadline2": $("#deadt2").val(),
+            "orderQueryModel.OperateName": $("#OperateName").val(),
+            "orderQueryModel.IsPaymentApplication": $("#ispayapp").val(),
+            "orderQueryModel.InterviewDate1": $("#iviewdt1").val(),
+            "orderQueryModel.InterviewDate2": $("#iviewdt2").val(),
+            "orderQueryModel.FollowupDate1": $("#followdt1").val(),
+            "orderQueryModel.FollowupDate2": $("#followdt2").val(),
+            "visaOrderModelsList.PageIndex": page_id,
+            "visaOrderModelsList.PageSize": 10
+        }
+        $.post("/OrderAdmin/List/", param, function (data) {
+            $("#ShowList").html(data);
+        });
+    }
+    //分页控件 end
+</script>

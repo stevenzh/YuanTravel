@@ -1,0 +1,8 @@
+﻿@{
+    ViewBag.Title = "微信公众号";
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+}
+
+<script type="text/javascript">
+    document.addEventListener('WeixinJSBridgeReady', function () { WeixinJSBridge.call('closeWindow'); }, false);
+</script>

@@ -1,0 +1,106 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Base.BusPointVModel
+<table class="table table-sm">
+    <thead>
+        <tr style="text-align: center;">
+            <th>发车地点</th>
+            <th>发车时间</th>
+            <th>接送类型</th>
+            <th>状态</th>
+            <th style="width: 90px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.PagedModel.Items == null || !Model.PagedModel.Items.Any())
+        {
+            <tr style="text-align: center;">
+                <td colspan="9" style="color: red;">
+                    无数据
+                </td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model.PagedModel.Items)
+            {
+                <tr style="text-align: center;">
+                    <td style="text-align: left;">@item.BusPoint</td>
+                    <td>@item.JieSongTime</td>
+                    <td>
+                        @if (item.JsType == 1)
+                        {
+                            <span>接</span>
+                        }
+                        else if (item.JsType == 2)
+                        {
+                            <span>送</span>
+                        }
+                        else
+                        {
+                            <span>接/送</span>
+                        }
+                    </td>
+                    <td>@(item.IsValid == 0 ? "无效" : "有效")</td>
+                    <td>
+
+                        <button name="edit" type="button" class="btn btn-sm" data-id="@item.Id" title="编辑"><i class="fa fa-edit"></i></button>
+
+                        @if (item.IsValid == 1)
+                        {
+                            <button name="delete" type="button" class="btn btn-sm" url="/BusPoint/DeleteBusPoint/@item.Id" title="删除"><i class="fa fa-trash"></i></button>
+                        }
+
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(m => m.PagedModel.PageIndex, new { id = "hiddenIndex" })
+<div id="divPagination" class="digg">
+</div>
+<script type="text/javascript">
+
+    // 分页回调函数
+    function pageselectCallback(pageId) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchBusPoint")', params, function (data) {
+            $('#busPointListContent').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    $(function () {
+        // 删除上车点
+        $("button[name=delete]").click(function () {
+            if (confirm('确定要删除这条数据?')) {
+                var load_iii = Utils.layerLoad();
+                $.post(
+                    $(this).attr("url"),
+                    function (data) {
+                        $('#busPointListContent').html(data);
+                        Utils.layerClose(load_iii);
+                    });
+            }
+            return false;
+        });
+
+        $("button[name=edit]").click(function () {
+            var url = "@Url.Action("EditBusPoint", "BusPoint")/" + $(this).attr("data-id");
+           layer.open({ type: 2, title: '编辑上下车点', maxmin: true, shadeClose: false, area: ['540px', '400px'], content: url });
+        });
+
+        // 创建分页
+        $("#divPagination").pagination(
+            Number('@Model.PagedModel.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: (@Model.PagedModel.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.PagedModel.PageIndex - 1)
+            });
+    });
+</script>

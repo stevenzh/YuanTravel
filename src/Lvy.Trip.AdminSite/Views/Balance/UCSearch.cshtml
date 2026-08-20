@@ -1,0 +1,115 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+
+<div class="card-body p-0">
+    <table class="table table-striped projects">
+        <thead>
+            <tr>
+                <th>部门</th>
+                <th>门店</th>
+                <th>团号</th>
+                <th>产品名称</th>
+                <th>出发日期</th>
+                <th>人数</th>
+                <th>总收入</th>
+                <th>成本</th>
+                <th>毛利</th>
+                <th>审核状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Balances.Items.Count > 0)
+            {
+                foreach (var item in Model.Balances.Items)
+                {
+                    <tr>
+                        <td>@item.TeamName</td>
+                        <td>@item.BranchName</td>
+                        <td>@item.TourNo</td>
+                        <td>@item.ProductName.TrimWithElipsis(20)</td>
+                        <td>@item.OutDate.ToDateFormat()</td>
+                        <td>@item.Num</td>
+                        <td>@item.YingShou</td>
+                        <td>@item.TotalCost</td>
+                        <td>@(item.YingShou - item.TotalCost)</td>
+                        <td>@DictionaryTools.GetEnumValue(Enums.TourAuditStateEnum, item.AuditState.ToString(),false)</td>
+                        <td class="project-actions text-right">
+                            <a class="btn btn-primary btn-sm" href="@Url.Action("Edit", new { id = item.MasterOrderCode })">
+                                <i class="fas fa-folder"></i>
+                                详情
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" style="color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @Html.HiddenFor(a => a.Balances.PageIndex, new { id = "hiddenIndex" })
+    @Html.HiddenFor(a => a.Balances.PageSize)
+</div>
+<div class="card-footer">
+    <div id="divPagination" class="digg"></div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //分页
+        $("#divPagination").pagination(
+            Number('@Model.Balances.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: (@Model.Balances.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.Balances.PageIndex - 1)
+            });
+
+
+        //审核
+        $("a[name=auditTour]").click(function () {
+            var $link = $(this);
+            if (!confirm("审核确认!")) {
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            $.post($link.attr("url"), function(data) {
+                if(data=="no") {
+                    Utils.alert("您无权限进行审核。");
+                }
+                else if(data=="1") {
+                    Utils.alert("该团期仍未成团，无法执行审核。");
+                }
+                else if(data=="2") {
+                    Utils.alert("已审核。");
+                    pageselectCallback(@Model.Balances.PageIndex - 1);
+                } else {
+                    Utils.alert("请求发生异常。");
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+    });
+
+    //分页
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post(
+            '@Url.Action("Search")',
+            params,
+            function (data) {
+                $('#divTourAccountList').html(data);
+                hoverChangeStyle();
+                Utils.layerClose(load_iii);
+            });
+    }
+
+</script>

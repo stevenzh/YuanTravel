@@ -1,0 +1,559 @@
+﻿@using Lvy.Models
+@using Lvy.Models.BaseDB
+@using System.Globalization
+@model Lvy.VModels.Product.AddLineVModel
+@{
+    Layout = null;
+    var owner = GlobalContext.Current.OwnerInfo;
+}
+
+<div class="ibox-content">
+    @using (Html.BeginForm("SaveLineInfo", "LineAdmin", FormMethod.Post, new { id = "theForm", @class = "form-horizontal" }))
+    {
+        @Html.HiddenFor(m => m.TpLine.LineId)
+        @Html.HiddenFor(m => m.LockName)
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">编号：</label>
+            <div class="col-sm-10">@Model.TpLine.LineId</div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label"></label>
+            <div class="col-sm-10">
+                线路名称规则：{出发城市}{目的地城市}{夜数}晚{天数}天{品牌}{航空公司}{线路名称后缀}
+            </div>
+        </div>
+        if (Model.LockName == 1)
+        {
+            if (Model.TpLine.Id > 0)
+            {
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">线路名称：</label>
+                    <div class="col-sm-10">@Model.TpLine.LineName</div>
+                </div>
+            }
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">线路名称后缀：</label>
+                <div class="col-sm-10">@Html.TextBoxFor(m => m.TpLine.LineNamePostfix, new { @class = "form-control form-control-sm" })</div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">线路名称<span class="text-danger">*</span>：</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(m => m.TpLine.LineName, new { @class = "form-control", @maxlength = "100" })
+                </div>
+            </div>
+        }
+
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">行程天数<span class="text-danger">*</span>：</label>
+            <div class="col-sm-1">
+                @Html.TextBoxFor(m => m.TpLine.Night, new { @class = "form-control form-control-sm", contentlimit = "number" })
+            </div>
+            <label class="col-sm-1 col-form-label" style="float:left">晚</label>
+            <div class="col-sm-1">
+                @Html.TextBoxFor(m => m.TpLine.TravelDays, new { @class = "form-control form-control-sm", contentlimit = "number" })
+            </div>
+            <label class="col-sm-7 col-form-label" style="float:left">天</label>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">部门<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10">
+                @if (Model.TpLine.Id > 0)
+                {
+                    <span>@Model.TpLine.TeamName</span>
+                    @Html.HiddenFor(t => t.TpLine.TeamID)
+                }
+                else
+                {
+                    @Html.DropDownListFor(m => m.TpLine.TeamID, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "form-control form-control-sm" })
+                }
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">品牌：</label>
+            <div class="col-sm-10">
+                @Html.DropDownListFor(m => m.TpLine.BrandCode, ViewBag.LineBrandList as IEnumerable<SelectListItem>, new { @Class = "form-control form-control-sm" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2  col-form-label">是否自组团：</label>
+            <div class="col-sm-10">
+                <div class="icheck-primary d-inline ">
+                    @Html.RadioButtonFor(m => m.TpLine.IsSelfGroup, false, new { @class = "form-control", @id = "IsSelfGroupFalse" })
+                    <label for="IsSelfGroupFalse"> 否</label>
+                </div>
+                <div class="icheck-primary d-inline ">
+                    @Html.RadioButtonFor(m => m.TpLine.IsSelfGroup, true, new { @class = "form-control", @id = "IsSelfGroupTrue" })
+                    <label for="IsSelfGroupTrue">是</label>
+                </div>
+            </div>
+        </div>
+        <div id="divGroup" class="form-group row" style="display:@(Model.TpLine.IsSelfGroup ?"none": "flex");">
+            <label class="col-sm-2 col-form-label">组团社：</label>
+            <div class="col-sm-10">
+                @Html.HiddenFor(m => m.TpLine.CustomerName, new { @id = "TpLine_CustomerName" })
+                <select id="mySelect3" name="TpLine.CustomerCode" class="form-control form-control-sm">
+                    <option selected="selected" value="@Model.TpLine.CustomerCode">@Model.TpLine.CustomerName</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">提前预定天数：</label>
+            <div class="col-sm-10">
+                @Html.TextBoxFor(m => m.TpLine.MoveUpDays, new { @class = "form-control form-control-sm", contentlimit = "number" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">目的地范围<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10 form-inline">
+                @Html.RadioGroup("TpLine.LineScope", ViewBag.LineScopeRadioItems as List<KeyValueBean>, Model.TpLine.LineScope.ToString(CultureInfo.InvariantCulture))
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">线路类型<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10 form-inline">
+                @Html.RadioGroup("TpLine.LineType", ViewBag.LineTypeRadioItems as List<KeyValueBean>, Model.TpLine.LineType.ToString(CultureInfo.InvariantCulture))
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">交通类型<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10 form-inline">
+                @Html.RadioGroup("TpLine.TrafficType", ViewBag.TrafficTypeRadioItems as List<KeyValueBean>, Model.TpLine.TrafficType.ToString(CultureInfo.InvariantCulture))
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">航空公司：</label>
+            <div class="col-sm-10">
+                @Html.HiddenFor(m => m.TpLine.AirlineName, new { id = "AirlineName" })
+                <select id="mySelect4" name="TpLine.AirlineCode" class="form-control form-control-sm">
+                    @if (Model != null && !Model.TpLine.AirlineCode.IsNullOrEmpty())
+                    {
+                        <option value="@Model.TpLine.AirlineCode">@DictionaryTools.GetCachedAirline(Model.TpLine.AirlineCode).ShortName</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">出发地<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10">
+                @Html.DropDownListFor(m => m.TpLine.DepartDest, Model.OutCities.ToSelectListFor(Model.TpLine.DepartDest), new { @class = "form-control form-control-sm" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">目的地<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10">
+                <select id="mySelect1" name="TpLine.ArriveDest" class="form-control form-control-sm">
+                    <option value="@Model.TpLine.ArriveDest">@DictionaryTools.GetDestNameStr(Model.TpLine.ArriveDest)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">途径目的地：</label>
+            <div class="col-sm-10">
+                <select id="mySelect2" name="SelectedMutliDest" multiple="multiple" class="form-control form-control-sm" style="width:90%;">
+                    @if (!Model.TpLine.MutliDest.IsNullOrEmpty())
+                    {
+                        var destlist = Model.TpLine.MutliDest.Split(',');
+                        foreach (var item in destlist)
+                        {
+                            <option value="@item" selected="selected">@DictionaryTools.GetDestNameStr(item)</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row" style="display:none;">
+            <label class="col-sm-2 col-form-label">应急电话<span class="text-danger">*</span>：</label>
+            <div class="col-sm-10">
+                @Html.TextBoxFor(m => m.TpLine.YingJiPhone, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">主题标签：</label>
+            <div class="col-sm-10">
+                <select id="mySelect5" name="ThemeIds" multiple="multiple" class="form-control form-control-sm" style="width:90%;">
+                    @{
+                        string[] ll = (Model.TpLine.Themes == null ? new string[] { } : Model.TpLine.Themes.Split('|'));
+                        foreach (var item in ViewBag.ThemesList as List<BaseTagModel>)
+                        {
+                            if (ll.Contains(item.TagName))
+                            {
+                                <option value="@item.TagName" selected="selected">@item.TagName</option>
+                            }
+                            else
+                            {
+                                <option value="@item.TagName">@item.TagName</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">线路特色：</label>
+            <div class="col-sm-10">
+                @Html.TextAreaFor(m => m.TpLine.LineSpecial, new { @class = "form-control", @rows = "5" })
+            </div>
+        </div>
+        if (Model.TpLine.IsImport)
+        {
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">外社输入产品-状态：</label>
+                <div class="col-sm-2" id="divImportState">@(DictionaryTools.GetEnumValue(Enums.ImportStateEnum, Model.TpLine.ImportState.ToString(), false)) </div>
+                <div class="col-sm-8">
+                    <div class="btn-group btn-sm">
+                        <button type="button" class="btn btn-info">改变状态</button>
+                        <button type="button" class="btn btn-info dropdown-toggle dropdown-hover dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu" style="">
+                            <a class="dropdown-item" href="#" onclick="SetImportState('4','审核通过')">审核通过</a>
+                            <a class="dropdown-item" href="#" onclick="SetImportState('2','审核不通过')">审核不通过</a>
+                            @*<div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">其他设置</a>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="form-group">
+            <button class="btn btn-success" type="button" id="submitBtn">保存</button>
+            <a class="btn btn-secondary" href="/LineAdmin/SearchLine">返回列表</a>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("input[name='TpLine.Night'],input[name='TpLine.TravelDays'],input[name='TpLine.MoveUpDays'] ").change(function () {
+            $(this).val($(this).val().replace(/\D/g, ""))
+        })
+        // 设置当地参团，出发城市无效
+        $("input[type=radio][name='TpLine.LineType']").change(function () {
+            if (this.value == '3') {
+                $("#TpLine_DepartDest").val("");
+                $("#TpLine_DepartDest").attr("disabled","disabled");
+            }
+            else {
+                $('#TpLine_DepartDest').removeAttr("disabled");
+            }
+        });
+
+        // 手动触发一次
+        var linetype = $("input:radio[name='TpLine.LineType']:checked").val();
+        if (linetype == '3') {   // 当地参团
+            $("#TpLine_DepartDest").val("");
+            $("#TpLine_DepartDest").attr("disabled", "disabled");
+        }
+
+        ////限定输入内容为数字
+        //$('form input[contentlimit="number"]').keypress(function () {
+        //    if ((event.keyCode < 48 || event.keyCode > 57) && event.keyCode != 46)
+        //        event.returnValue = false;
+        //});
+
+        $("#TpLine_LineName").change(function () {
+            var name = $(this).val();
+            var lineId = $("#TpLine_LineId").val();
+            var load_iii = Utils.layerLoad();
+            $.post('/LineAdmin/CheckLineName?lineId=' + lineId + '&lineName=' + encodeURIComponent(name), function (result) {
+                if (result != 'ok') {
+                    Utils.alert('线路名称重复！');
+                    $("#TpLine_LineName").focus().select();
+                } else {
+                    tempLineName = name;
+                }
+
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        //提交事件
+        $("#submitBtn").click(function () {
+            if (typeof ($('input[name="TpLine.LineName"]').val()) == "undefined") {
+                // 不处理
+            }
+            else if ($('input[name="TpLine.LineName"]').val().length == 0) {
+                Utils.alert("线路名称不能为空！");
+                $('input[name="TpLine.LineName"]').focus().select();
+                return false;
+            }
+
+            if ($('input[name="TpLine.TravelDays"]').val().length == 0) {
+                Utils.alert("行程天数不能为空！");
+                $('input[name="TpLine.TravelDays"]').focus().select();;
+                return false;
+            }
+            if ($('input[name="TpLine.Night"]').val().length == 0) {
+                Utils.alert("行程天数不能为空！");
+                $('input[name="TpLine.TravelDays"]').focus().select();;
+                return false;
+            }
+            if (Number($('input[name="TpLine.TravelDays"]').val()) == 0) {
+                Utils.alert("行程天数必须大于0！");
+                $('input[name="TpLine.TravelDays"]').focus().select();;
+                return false;
+            }
+
+            //if ($('select[name="TpLine.BrandCode"]').val().length == 0) {
+            //    Utils.alert("请选择品牌！");
+            //    $('select[name="TpLine.BrandCode"]').focus().select();;
+            //    return false;
+            //}
+
+            //分组
+            if ($('#TpLine_TeamID').val().length == 0) {
+                Utils.alert("部门不能为空！");
+                $('#TpLine_TeamID').focus().select();;
+                return false;
+            }
+            if ($('input[name="TpLine.MoveUpDays"]').val().length == 0) {
+                Utils.alert("提前预定天数不能为空！");
+                $('input[name="TpLine.MoveUpDays"]').focus().select();;
+                return false;
+            }
+
+            var linetype = $("input:radio[name='TpLine.LineType']:checked").val();
+            if (linetype != '3') {   // 当地参团
+                if ($('select[name="TpLine.DepartDest"]').val().length == 0) {
+                    Utils.alert("出发地不能为空！");
+                    $('select[name="TpLine.DepartDest"]').focus().select();;
+                    return false;
+                }
+            }
+
+            if ($('select[name="TpLine.ArriveDest"]').val().length == 0) {
+                Utils.alert("目的地不能为空！");
+                $('select[name="TpLine.ArriveDest"]').focus().select();;
+                return false;
+            }
+            //            if ($('select[name="LineAdmin.AccountCode"]').val().length == 0) {
+            //                Utils.alert("负责人不能为空！");
+            //                $('select[name="LineAdmin.AccountCode"]').focus().select(); ;
+            //                return false;
+            //            }
+            //if ($('input[name="TpLine.YingJiPhone"]').val().length == 0) {
+            //    Utils.alert("应急电话不能为空！");
+            //    $('input[name="TpLine.YingJiPhone"]').focus().select(); ;
+            //    return false;
+            //}
+
+            // var operationType = $('#OperationType').val();
+            // var load_iii = Utils.layerLoad();
+            // var forms = $("#theForm").serialize();//formSerialize();
+            //$.post('/LineAdmin/CheckLineName?lineName=' + encodeURIComponent($('input[name="TpLine.LineName"]').val()), function (result) {
+            //    if (result != 'ok') {
+            //        Utils.alert('线路名称重复！');
+            //        $('input[name="TpLine.LineName"]').focus().select();
+            //        Utils.layerClose(load_iii);
+            //    }
+            //    else {
+            var form = document.getElementById("theForm");
+            // var fd = new FormData(form);
+            var formData = new FormData(form);
+            //  formData.append($("#theForm"));
+
+            $.ajax({
+                url: $("#theForm").attr("action"),
+                data: formData,
+                type: "post",
+                //dataType: 'text',
+                // async: false,
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    if (data.length > 0) {
+                        // Utils.alert("保存成功！");
+                        $('#tab-1').html(data);
+                        // Utils.alert(data);
+                        //保存成功后 加载行程信息.
+                        $("a[name='tabTitle']")[1].click();
+
+                    } else {
+                        Utils.alert('提交发生异常，请稍后再试！');
+                    }
+                }, error: function (ex) {
+                    Utils.alert("出错了！请联系管理员！");
+                }
+            })
+            //  Utils.layerClose(load_iii);
+        });
+
+        $("input[type=radio][name='TpLine.IsSelfGroup']").change(function () {
+            if (this.value == 'True') {
+                $("#divGroup").hide();
+                $("#TpLine_CustomerName").val("@owner.Name");
+                $("#mySelect3").empty();
+                $("#mySelect3").append("<option value='@owner.CustomerCode' selected='selected'>@owner.Name</option>");
+            }
+            else {
+                $("#divGroup").show();
+            }
+        });
+
+        // 部门改变 替换品牌列表
+        $("#TpLine_TeamID").change(function () {
+            if ($(this).val() != '') {
+                $("#TpLine_BrandCode").empty();
+                $("#TpLine_BrandCode").append("<option value=''>请选择</option>");
+                $.post("/Brand/GetBrandList", { teamCode: $(this).val() }, function (data) {
+                    if (data.ReturnMsg == '0') {
+                        var arr = data.List
+                        for (item in arr) {
+                            $("#TpLine_BrandCode").append("<option value=" + arr[item].Code + ">" + arr[item].Name + "</option>");
+                        };
+                    }
+                });
+            }
+        });
+
+        $('#mySelect1').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $('#mySelect2').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $('#mySelect3').select2({
+            ajax: {
+                url: function (params) {
+                    return '/Customer/GetSupplierSelect2?keyword=' + params.term;
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            //templateResult: formatState
+        });
+        $('#mySelect3').on('select2:select', function (e) {
+            $("#TpLine_CustomerName").val(e.params.data.text);
+        });
+
+        $('#mySelect4').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Airline/GetAirlineSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Code, text: arr[item].ShortName, pinyin: '' })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            templateResult: formatState
+        });
+
+        $('#mySelect4').on('select2:select', function (e) {
+            var data = e.params.data;
+            $("#AirlineName").val(data.text);
+        });
+
+        $('#mySelect5').select2({
+            language: "zh-CN"
+        });
+    });
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+    function SetImportState(state, label) {
+        var load_iii = Utils.layerLoad();
+        var params = { LineId: $("#TpLine_LineId").val(), ImportState: state };
+        $.post("/LineAdmin/SetImportState", params, function (data) {
+            if (data.Code == "1") {
+                Utils.alert('设置成功！');
+                $("#divImportState").html(label);
+            }
+
+            Utils.layerClose(load_iii);
+        });
+    }
+
+</script>

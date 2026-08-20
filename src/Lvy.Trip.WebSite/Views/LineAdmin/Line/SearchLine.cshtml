@@ -1,0 +1,85 @@
+﻿@model Lvy.VModels.Product.TpLineVModel
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+    ViewBag.Title = "线路查询";
+}
+@section AdditionalResources
+{
+    <style>
+        .select2-container--default .select2-selection--single { border-radius: 0; }
+    </style>
+}
+
+<form id="theForm" action="" method="post">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">线路查询</h3>
+        </div>
+        <div class="card-body">
+            <div class="form-inline">
+                @Html.TextBoxFor(m => m.LineName, new { @class = "form-control form-control-sm mr-sm-2", placeholder = "线路名称" })
+                <select id="mySelect1" name="ArriveDest" class="form-control form-control-sm mr-sm-2 " style="width:150px;" placeholder="选择目的地">
+                </select>
+                @Html.DropDownListFor(m => m.LineScope, ViewBag.LineScopeItems as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm mr-sm-2" })
+                @Html.DropDownListFor(m => m.LineType, ViewBag.LineTypeItems as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm mr-sm-2" })
+                <button type="button" id="searchBtn" class="btn btn-sm btn-default mr-sm-2">查询</button>
+                <a class="btn btn-sm btn-success" href="@Url.Action("AddLineInfo")">添加线路</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card ">
+        <div id="lineListContent" class="card-body p-0">
+            @Html.Partial("Line/UCLineList", Model)
+        </div>
+    </div>
+
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        // 限制输入数字
+        $('form input[contentlimit="number"]').keypress(function () {
+            if ((event.keyCode < 48 || event.keyCode > 57) && event.keyCode != 46)
+                event.returnValue = false;
+        });
+
+        //目的地
+        $('#mySelect1').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            placeholderOption: "first",
+            allowClear: true,
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+        });
+
+        //查询
+        $("#searchBtn").click(function () {
+            pageselectCallback(0);
+        });
+
+    });
+
+</script>

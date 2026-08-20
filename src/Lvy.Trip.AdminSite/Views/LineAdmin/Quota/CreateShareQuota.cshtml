@@ -1,0 +1,200 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.ShareQuotaVModel
+@{
+    ViewBag.Title = "添加共享库存";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+}
+@using (Html.BeginForm("AddShareQuota", "LineAdmin", FormMethod.Post, new { id = "theForm" }))
+{
+    <div class="station">
+        添加共享库存
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tbody>
+                    <tr>
+                        <td class="label">
+                            <span class="point">*</span>共享名称：
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.Quota.QuotaName, new { id = "quotaName", @class = "text150", @maxlength = "50" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <span class="point">*</span>计划名额：
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.Quota.PlanQuota, new { id = "planQuota", @class = "text150", contentlimit = "number" })
+                            &nbsp; &nbsp;<input type="button" id="showBusSeat" value="显示车位" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <span class="point">*</span>预留名额：
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.Quota.HoldQuota, new { id = "holdQuota", @class = "text150", contentlimit = "number" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <span class="point">*</span>剩余名额：
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.Quota.UseQuota, new { id = "useQuota", @class = "text150", disabled = "disabled" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            <span class="point">*</span>出发日期：
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.Quota.OutDate, new { @Value = Model.Quota.OutDate.ToDateFormat(), @class = "Wdate text150", @onfocus = "WdatePicker({isShowClear:false,minDate:'%y-%M-%d',readOnly:true})" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            共享说明：
+                        </td>
+                        <td>
+                            @Html.TextAreaFor(m => m.Quota.ShareDesc, new { @class = "textarea440" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            交通类型：
+                        </td>
+                        <td>
+                            @Html.RadioGroup("Quota.TrafficType", DictionaryTools.GetEnumsBy(Enums.TrafficTypeEnum), Model.Quota.TrafficType.ToString(CultureInfo.InvariantCulture))
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">
+                            选择巴士：
+                        </td>
+                        <td>
+                            <div id="busSeatContainer">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td style="text-align: center;">
+                            <input class="btn btn1" id="submitBtn" type="button" value="保存" />
+                            <input class="btn btn1" id="backBtn" type="button" value="返回列表" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    //创建车位
+    function CreateBusSeat(seatNum) {
+        $.post(
+            "/LineAdmin/CreateBusSeat?seatNum=" + seatNum,
+            function (data) {
+                $("#busSeatContainer").html(data);
+            });
+    }
+
+    $(function () {
+
+        //显示车位
+        $("#showBusSeat").bind("click", function () {
+            var $trafficType = $('input:radio[name="Quota.TrafficType"]:checked');
+            if ($trafficType.length == 0 || $trafficType.val() != 1) {
+                Utils.alert('交通类型非汽车，无需创建座位表。');
+                return false;
+            }
+            var plan = $('#planQuota').val();
+            if (Number(plan) > 0) {
+                CreateBusSeat(plan);
+            }
+            else {
+                Utils.alert('总库存须大于零！');
+            }
+            return true;
+        });
+
+        //限定输入内容为数字
+        $('form input[contentlimit="number"]').keypress(function () {
+            InputLimitNumber();
+        });
+
+        //提交
+        $('#submitBtn').click(function () {
+            var $name = $('#quotaName');
+            if ($name.val().length == 0) {
+                Utils.alert("共享名称不能为空！");
+                $name.focus().select();
+                return false;
+            }
+            var $plan = $('#planQuota');
+            var plan = Number($plan.val());
+            var hold = Number($('#holdQuota').val());
+
+            if (plan <= 0) {
+                Utils.alert('计划库存必须大于零。');
+                $plan.focus().select();
+                return false;
+            }
+
+            var $trafficType = $('input:radio[name="Quota.TrafficType"]:checked');
+            if ($trafficType.val() == 1) {
+                //座位表
+                var busSeat = $("#busSeatContainer").children();
+                if (busSeat.length == 0) {
+                    Utils.alert('请显示座位表并确认。');
+                    return false;
+                } else {
+                    //座位数
+                    var seatCount = Number($('#hiddenSeatCount').val());
+                    //预留座位数
+                    var holdCount = $(".seat_box .blue").length;
+                    if (seatCount != plan) {
+                        Utils.alert('请重新显示座位表并确认。');
+                        return false;
+                    }
+                    if (holdCount != hold) {
+                        Utils.alert('请确认预留座位是否一致。');
+                        return false;
+                    }
+                }
+            }
+
+            var load_iii = Utils.layerLoad();
+            $('#theForm').submit();
+            return false;
+        });
+
+        //返回列表
+        $('#backBtn').click(function () {
+            window.location.href = "/LineAdmin/SearchShareQuota";
+        });
+
+
+        $('#planQuota').keyup(function () {
+            var $this = $(this);
+            var plan = Number($this.val());
+            var hold = Number($('#holdQuota').val());
+            var use = plan - hold;
+            $('#useQuota').val(use);
+        });
+        $('#holdQuota').keyup(function () {
+            var $this = $(this);
+            var hold = Number($this.val());
+            var plan = Number($('#planQuota').val());
+            var use = plan - hold;
+            $('#useQuota').val(use);
+        });
+    });
+</script>

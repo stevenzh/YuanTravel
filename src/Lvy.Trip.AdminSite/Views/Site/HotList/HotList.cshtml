@@ -1,0 +1,183 @@
+﻿@model Lvy.Visa.VModels.HotProductQModel
+@{
+    ViewData["Title"] = "产品推荐列表";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <script src="~/js/common.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/HotList/Index">产品推荐设置</a></li>
+                    <li class="breadcrumb-item active">@Model.ModuleModel.Name</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">产品列表</h3>
+            <div class="card-tools">
+                <button onclick="funAddProduct()" class="btn btn-success">添加产品</button>
+                @Html.HiddenFor(t => t.ModuleModel.ProductType)
+            </div>
+        </div>
+        <div class="card-body" id="HotVisaListsDiv">
+            <table class="table table-sm table-bordered">
+                <tr>
+                    <th style="width: 10%;">产品编号</th>
+                    <th>产品名称</th>
+                    @if (Model.ModuleModel.ProductType == "1")
+                    {
+                        <th style="width: 12%;">出发城市</th>
+                    }
+                    else if (Model.ModuleModel.ProductType == "9")
+                    {
+                        <th style="width: 12%;">景区名称</th>
+                    }
+                    else if (Model.ModuleModel.ProductType == "3")
+                    {
+                        <th style="width: 12%;">类型</th>
+                        <th style="width: 13%;">领区</th>
+                        <th style="width: 10%;">销售价</th>
+                    }
+                    else if (Model.ModuleModel.ProductType == "3")
+                    {
+                        <th style="width: 12%;">所在城市 </th>
+                    }
+
+                    <th style="width: 10%;">
+                        排序( <a href="javascript:funSaveSort()" style="color: Blue;">保存</a>)
+                    </th>
+                    <th style="width: 8%;">操作</th>
+                </tr>
+                @foreach (var item in Model.HotProductList)
+                {
+                    <tr>
+                        <td>@item.ProductId</td>
+                        <td>@item.ProductName</td>
+                        @if (Model.ModuleModel.ProductType == "1")
+                        {
+                            <td>@item.OurCityName</td>
+                        }
+                        else if (Model.ModuleModel.ProductType == "9")
+                        {
+                            <td>@item.PlaceName</td>
+                        }
+                        else if (Model.ModuleModel.ProductType == "3")
+                        {
+                            <td>@item.VTypeValue</td>
+                            <td>@item.VisaAreaValue</td>
+                            <td>@item.SellPrice.ToString("0.##")</td>
+                        }
+                        else if (Model.ModuleModel.ProductType == "4")
+                        {
+                            <td>@item.VTypeValue</td>
+                        }
+                        <td>
+                            <input type="text" id="@item.ListID" name="txtsortnum_@item.ProductId" value="@item.SortOrder" class="form-control form-control-sm" />
+                        </td>
+                        <td>
+                            <button onclick="funDeleteHotVisa('@item.ListID')" class="btn btn-sm btn-danger">删除</button>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="card-footer">
+            <a href="/HotList/Index" class="btn btn-secondary">返回推荐模块</a>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    //删除线路
+    function funDeleteHotVisa(listID) {
+        if (confirm("确定删除？")) {
+            $.post("/HotList/DeleteHotVisa/", { "ListID": listID }, function () {
+                window.location.href = "@Html.Raw("/HotList/HotList?ItemID=" + Model.ModuleModel.ItemID)";
+            });
+        }
+    }
+
+    //添加线路
+    function funAddProduct() {
+
+        var url = "@Html.Raw("/HotList/AddLineProduct?ItemID=" + Model.ModuleModel.ItemID)";
+        var type = $("#ModuleModel_ProductType").val();
+        if (type == "9") {
+            url = "@Html.Raw("/HotList/AddTicketProduct?ItemID=" + Model.ModuleModel.ItemID)";
+        } else if (type == "3") {
+            url = "@Html.Raw("/HotList/AddVisaProduct?ItemID=" + Model.ModuleModel.ItemID)";
+        } else if (type == "4") {
+            url = "@Html.Raw("/HotList/AddHotel?ItemID=" + Model.ModuleModel.ItemID)";
+        }
+        layer.open({ type: 2, title: '产品添加', maxmin: true, shadeClose: true, area: ['900px', '570px'], content: url });
+
+    }
+
+    //保存排序
+    function funSaveSort() {
+        if (funValidSortNum()) {
+            var param = {};
+            $("#HotVisaListsDiv input[name^=txtsortnum_]").each(function (n) {
+                param["HotProductList[" + n + "].ListId"] = $(this).attr("id");
+                param["HotProductList[" + n + "].SortOrder"] = $(this).val();
+            });
+            $.post("/HotList/SaveHotVisaSort/", param, function () {
+                toastr.success('保存成功！');
+                window.location.href = "@Html.Raw("/HotList/HotList?ItemID=" + Model.ModuleModel.ItemID)";
+            });
+        }
+    }
+
+    function funAddSuccess() {
+        window.location.href = "@Html.Raw("/HotList/HotList?ItemID=" + Model.ModuleModel.ItemID)";
+    }
+
+    //验证序号
+    function funValidSortNum() {
+        var resultStr = "";
+        var length = $("#HotVisaListsDiv input[name^=txtsortnum_]").length;
+        if (length > 0) {
+            for (var x = 0; x < length; x++) {
+                var sortnumvalue = $("#HotVisaListsDiv input[name^=txtsortnum_]:eq(" + x + ")").val();
+                if (!/^\d+$/.test(sortnumvalue) || sortnumvalue <= 0) {
+                    resultStr += "第" + (x + 1) + "行的序号格式错误，必须为大于0的整数！";
+                    break;
+                }
+                for (var y = x + 1; y < length; y++) {
+                    var nextsortnum = $("#HotVisaListsDiv input[name^=txtsortnum_]:eq(" + y + ")").val();
+                    if ($.trim(sortnumvalue) == $.trim(nextsortnum)) {
+                        resultStr += "第" + (x + 1) + "行的序号和第" + (y + 1) + "行的序号相同！";
+                        break;
+                    }
+                }
+                if (resultStr != "")
+                    break;
+            }
+            if (resultStr != "") {
+                toastr.warning(resultStr);
+                return false;
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+</script>

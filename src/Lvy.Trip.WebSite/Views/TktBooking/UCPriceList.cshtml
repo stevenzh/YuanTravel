@@ -1,0 +1,45 @@
+﻿@model Lvy.VModels.Ticket.TktPriceListVModel
+<table class="table table-sm">
+    <tbody>
+        <tr>
+            <td>报价类型</td>
+            <td>市场价</td>
+            <td>结算价</td>
+            @if (Model.PriceList[0].TktType == 1 || Model.PriceList[0].TktType == 2)
+            {
+                <td>签单价</td>
+            }
+            else
+            {
+                <td>返利</td>
+            }
+            <td>价格政策</td>
+            <td>人数</td>
+            <td>结算价</td>
+            <td style="display: none"></td>
+        </tr>
+        @foreach (var item in Model.PriceList)
+        {
+            <tr>
+                <td title="@item.PriceType">@item.PriceType</td>
+                <td>@item.MarketPrice</td>
+                <td name="tdSettlePrice">@item.SettlePrice</td>
+                <td name="tdSysPrice">@item.SysPrice</td>
+                <td title="@item.PriceDesc">@item.PriceDesc.TrimWithElipsis(10)</td>
+                <td>
+                    @if (Model.Product.TuiJianType == 2)
+                    {
+                        <input name="PeopleNum" type="text" input-limit='number' class="mem_num_input" onkeyup="checkPeopleNum(this,@Model.Product.ProductId);" value="0" />
+                    }
+                    else
+                    {
+                        <input name="PeopleNum" type="text" input-limit='number' class="mem_num_input" onkeyup="CalcOneYsPrice(this);" value="0" />
+                    }
+                    <input name="PriceIds" type="hidden" value="@item.Id" />
+                </td>
+                <td name="tdOneYsPrice">0</td>
+                <td style="display: none" name="tdTktType">@item.TktType</td>
+            </tr>
+        }
+    </tbody>
+</table>

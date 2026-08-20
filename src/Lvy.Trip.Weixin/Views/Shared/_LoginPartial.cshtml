@@ -1,0 +1,62 @@
+﻿@{
+    CrmAccountModel user = GlobalContext.Current.UserInfo;  //当前用户
+    string userkey = (user == null) ? "" : user.LoginName;
+    string[] admins = { "admin" };
+}
+@using Lvy.Models.CrmDB;
+@using Lvy.Web.Common;
+@if (user != null)
+{
+    <li class="dropdown user user-menu">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <img src="/images/user2-160x160.jpg" class="user-image" alt="User Image">
+            <span class="hidden-xs">@user.Name</span>
+        </a>
+        <ul class="dropdown-menu">
+            <!-- User image -->
+            <li class="user-header">
+                <img src="/images/user2-160x160.jpg" class="img-circle" alt="User Image">
+                <p>
+                    @user.Name - Web Developer
+                    <small>Member since Nov. 2012</small>
+                </p>
+            </li>
+            <!-- Menu Body -->
+            <li class="user-body">
+                <div class="row">
+                    <div class="col-xs-4 text-center">
+                        <a href="#">Followers</a>
+                    </div>
+                    <div class="col-xs-4 text-center">
+                        <a href="#">Sales</a>
+                    </div>
+                    <div class="col-xs-4 text-center">
+                        <a href="#">Friends</a>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </li>
+            <!-- Menu Footer-->
+            <li class="user-footer">
+                <div class="pull-left">
+                    <a href="#" class="btn btn-default btn-flat">Profile</a>
+                </div>
+                <div class="pull-right">
+                    <a href="javascript:document.getElementById('logoutForm').submit()" class="btn btn-default btn-flat">登出</a>
+                </div>
+            </li>
+        </ul>
+        @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+        {
+            @Html.AntiForgeryToken()
+        }
+    </li>
+}
+else
+{
+    <li class="nav navbar-nav navbar-right">
+        @Html.ActionLink("登陆", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })
+    </li>
+}
+
+

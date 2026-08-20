@@ -1,0 +1,244 @@
+﻿@model Lvy.Visa.VModels.VisaInformationQModel
+@{
+    Layout = null;
+    var IsAdderRoler = (bool)ViewData["IsAdderRoler"];
+    var IsProductManageRoler = (bool)ViewData["IsProductManageRoler"];
+}
+<div id="VisaInformationList">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th style="width:120px;"><input type="checkbox" name="cboSelAllp" />编号</th>
+                <th>产品名称</th>
+                @*<th>版块</th>*@
+                @*<th>类型</th>*@
+                <th>签证国家或地区</th>
+                <th>所属领区</th>
+                <th>售价</th>
+                <th style="width:150px;">录入员</th>
+                @*<th>录入时间</th>*@
+                <th>产品经理</th>
+                @*<th>审核时间</th>
+                    <th>上线时间</th>*@
+                <th>状态</th>
+                <th style="width:180px;"></th>
+            </tr>
+        </thead>
+
+        @if (Model.VisaInformationList.Items != null)
+        {
+            foreach (var model1 in Model.VisaInformationList.Items)
+            {
+                <tr>
+                    <td>
+                        <input type="checkbox" name="cboModifyProManager" value="@model1.InformationCode+'-'+model.InformationName+'-'+model.PManageUserName" @(string.IsNullOrEmpty(model1.PManageUserName) ? "disabled" : "") />
+
+                        @if (model1.VType == 1)
+                        {
+                            <a href="@(Arch.Common.AppSetting.Get("Visa") + model1.InformationCode.ToLower())" target="_blank" title="查看网站产品">@model1.InformationCode</a>
+                        }
+                        else
+                        {
+                            @model1.InformationCode
+                        }
+                    </td>
+                    <td><a title='@model1.InformationName' style="color: black; text-decoration: none;">@(model1.InformationName.Length > 10 ? model1.InformationName.Substring(0, 10) + "..." : model1.InformationName)</a> </td>
+                    @*<td>@model1.ContinentValue </td>*@
+                    @*<td>@model1.VisaTypeValue </td>*@
+                    <td>@model1.VisaCountry </td>
+                    <td>@model1.VisaAreaValue</td>
+                    <td>
+                        @if (model1.VType == 1)
+                        {
+                            @Convert.ToInt32(model1.SellPrice)
+                        }
+                        else { Html.Raw(" -- "); }
+                    </td>
+                    <td class="text-left">
+                        @model1.CreateByName
+                        <br />
+                        <small>Created @model1.Createtime.ToShortDateString()</small>
+                    </td>
+                    <td>@model1.PManageUserName </td>
+                    @*<td>@model1.PManageDate </td>
+                        <td>@model1.OnlineDate </td>*@
+                    <td class="project-state">
+                        @if (model1.State == 1)
+                        {
+                            <span class="badge badge-secondary">@model1.StateValue</span>
+                        }
+                        else if (model1.State == 2 || model1.State == 3)
+                        {
+                            <span class="badge badge-info">@model1.StateValue</span>
+                        }
+                        else if (model1.State == 4)
+                        {
+                            <span class="badge badge-warning">@model1.StateValue</span>
+                        }
+                        else if (model1.State == 5)
+                        {
+                            <span class="badge badge-success">@model1.StateValue</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">@model1.StateValue</span>
+                        }
+                    </td>
+                    <td class="project-actions text-right">
+                        @if (model1.State == 1 || model1.State == 4) //录入中，审核不通过
+                        {
+                            if (IsAdderRoler || IsProductManageRoler)
+                            {
+                                <a href="/VisaProduct/ShowTabModifyProduct?InformationCode=@model1.InformationCode" class="btn btn-info btn-sm mt-1"><i class="fas fa-edit"></i> 修改</a>
+                                <a href="javascript:void(0)" onclick="funDelProduct('@model1.InformationCode')" class="btn btn-danger btn-sm mt-1"><i class="fas fa-trash"></i> 删除</a>
+                                <a href="javascript:void(0)" onclick="funSubmitAudit('@model1.InformationCode')" class="btn btn-info btn-sm mt-1"><i class="fas fa-check"></i>提交审核</a>
+                                <a href="javascript:void(0)" class="btn btn-secondary btn-sm mt-1"><i class="fas fa-copy"></i>复制</a>
+                            }
+                            else
+                            {
+                                <button href="javascript:void(0)" class="btn btn-info btn-sm mt-1" disabled><i class="fas fa-edit"></i> 修改</button>
+                                <button href="javascript:void(0)" class="btn btn-danger btn-sm mt-1" disabled><i class="fas fa-trash"></i> 删除</button>
+                                <button href="javascript:void(0)" class="btn btn-success btn-sm mt-1" disabled><i class="fas fa-check-square"></i> 审核</button>
+                                <button href="javascript:void(0)" class="btn btn-secondary btn-sm mt-1" disabled><i class="fas fa-copy"></i> 复制</button>
+                            }
+                        }
+                        else if (model1.State == 2)//提交审核
+                        {
+                            if (IsProductManageRoler)
+                            {
+                                <a href="/VisaProduct/ShowTabModifyProduct?InformationCode=@model1.InformationCode" class="btn btn-info btn-sm mt-1"><i class="fas fa-edit"></i> 修改</a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-info btn-sm mt-1" disabled><i class="fas fa-edit"></i> 修改</button>
+                            }
+
+                            <a href="javascript:void(0)" class="btn btn-danger btn-sm mt-1"><i class="fas fa-trash"></i> 删除</a>
+                            <a href="javascript:void(0)" onclick="funAuditProduct('@model1.InformationCode','@model1.State')" class="btn btn-success btn-sm mt-1"><i class="fas fa-check-square"></i> 审核</a>
+                            <a href="javascript:void(0)" class="btn btn-secondary btn-sm mt-1"><i class="fas fa-copy"></i> 复制</a>
+                        }
+                        else if (model1.State == 3)//审核中
+                        {
+                            if (IsProductManageRoler)
+                            {
+                                <a href="/VisaProduct/ShowTabModifyProduct?InformationCode=@model1.InformationCode" class="btn btn-info btn-sm mt-1"><i class="fas fa-edit"></i> 修改</a>
+                                <a href="javascript:void(0)" class="btn btn-danger btn-sm mt-1"><i class="fas fa-trash"></i> 删除</a>
+                                <a href="javascript:void(0)" class="btn btn-success btn-sm mt-1"><i class="fas fa-check-square"></i> 审核</a>
+                                <a href="javascript:void(0)" class="btn btn-secondary btn-sm mt-1"><i class="fas fa-copy"></i> 复制</a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-info btn-sm mt-1" disabled><i class="fas fa-edit"></i> 修改</button>
+                                <button class="btn btn-danger btn-sm mt-1" disabled><i class="fas fa-trash"></i> 删除</button>
+                                <button class="btn btn-success btn-sm mt-1" disabled><i class="fas fa-check-square"></i> 审核</button>
+                                <button class="btn btn-secondary btn-sm mt-1" disabled><i class="fas fa-copy"></i> 复制</button>
+                            }
+                        }
+                        else if (model1.State == 5)//上线
+                        {
+                            if (IsProductManageRoler)
+                            {
+
+                                <a href="../VisaProduct/ShowTabModifyProduct?InformationCode=@model1.InformationCode" class="btn btn-info btn-sm mt-1"><i class="fas fa-edit"></i> 修改 </a>
+                                <button class="btn btn-danger btn-sm mt-1" disabled><i class="fas fa-trash"></i> 删除</button>
+                                <a href="javascript:void(0)" onclick="funSetDownLine('@model1.InformationCode')" class="btn btn-info btn-sm mt-1"><i class="fas fa-arrow-down"></i> 下线</a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-info btn-sm mt-1" disabled><i class="fas fa-edit"></i> 修改</button>
+                                <button class="btn btn-danger btn-sm mt-1" disabled><i class="fas fa-trash"></i> 删除</button>
+                                <button class="btn btn-info btn-sm mt-1" disabled><i class="fas fa-arrow-down"></i> 下线</button>
+                            }
+
+                            <a href="javascript:void(0)" onclick="funCopyProduct('@model1.InformationCode','@model1.InformationName')" class="btn btn-secondary btn-sm mt-1"><i class="fas fa-copy"></i> 复制</a>
+                        }
+                        else if (model1.State == 6)
+                        {
+                            <a href="/VisaProduct/ShowTabModifyProduct?InformationCode=@model1.InformationCode" class="btn btn-info btn-sm mt-1"><i class="fas fa-edit"></i> 修改</a>
+                            <a href="javascript:void(0)" class="btn btn-danger btn-sm mt-1"><i class="fas fa-trash"></i> 删除</a>
+                            @*<a href="javascript:void(0)" class="btn btn-info btn-sm mt-1"><i class="fas fa-arrow-down"></i>下线</a>*@
+                            <a href="javascript:void(0)" onclick="funCopyProduct('@model1.InformationCode','@model1.InformationName')" class="btn btn-secondary btn-sm mt-1"><i class="fas fa-copy"></i> 复制</a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9">
+                    <div style="color: Red; font-size: 14px; text-align: center;"><b> 对不起！没有找到您要的数据！</b></div>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan="9">
+                <div id="Pagination" class="digg" />
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number(@Model.VisaInformationList.TotalCount), {
+                callback: pageselectCallback1,
+                prev_text: '前一页',
+                next_text: '后一页',
+                items_per_page: 10,
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: index
+            });
+    });
+    //回调方法
+    function pageselectCallback1(page_id, jq) {
+        jQuery.ajaxSetup({ cache: false });
+        index = page_id;
+        page_id = page_id + 1;
+        var param = {
+            'Info.InformationCode': $('#InformationCode').val(),
+            'Info.InformationName': $('#InformationName').val(),
+            'Info.VisaType': $('#VisaType').val(),
+            'Info.State': $('#State').val(),
+            'Info.VType': $('#VType').val(),
+            'Info.Continent': $("#Continent").val(),
+            'Info.VisaCountry': $("#VisaCountry").val(),
+            'Info.VisaArea': $("#VisaArea").val(),
+            'Info.CreateByName': $("#CreateByName").val(),
+            'Info.PManageUserName': $("#PManageUserName").val(),
+            'Info.SupplierName': $("#SupplierName").val(),
+            'Info.CreatetimeBegin': $("#CreatetimeBegin").val(),
+            'Info.CreatetimeEnd': $("#CreatetimeEnd").val(),
+            'Info.PManageDateBegin': $("#PManageDateBegin").val(),
+            'Info.PManageDateEnd': $("#PManageDateEnd").val(),
+            'Info.OnlineDateBegin': $("#OnlineDateBegin").val(),
+            'Info.OnlineDateEnd': $("#OnlineDateEnd").val(),
+            'Info.CreateByName': $('#CreateByName').val(),
+            'Info.TestUserName': $('#TestUserName').val(),
+            'Info.PManageUserName': $('#PManageUserName').val(),
+            'Info.CreateDate': $('#CreateDate').val(),
+            'Info.CreateEndDate': $('#CreateEndDate').val(),
+            'Info.PManageDateBegin': $('#PManageDateBegin').val(),
+            'Info.PManageDateEnd': $('#PManageDateEnd').val(),
+            'VisaInformationList.PageIndex': page_id,
+            'VisaInformationList.PageSize': 10
+        }
+        $.post('/ProductAdmin/QueryProduct/', param, function (data) {
+            $('#VisaInformationList').html(data);
+        });
+    }
+    //分页控件 end
+
+    $("#VisaInformationList input[name=cboSelAllp]").click(function () {
+        if ($(this).prop("checked")) {
+            $("#VisaInformationList input[name=cboModifyProManager]").prop("checked", true);
+            $("#VisaInformationList input[name=cboModifyProManager]:disabled").prop("checked", false);
+        } else {
+            $("#VisaInformationList input[name=cboModifyProManager]").prop("checked", false);
+        }
+    });
+</script>
+

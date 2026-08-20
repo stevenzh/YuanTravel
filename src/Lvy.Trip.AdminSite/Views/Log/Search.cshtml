@@ -1,0 +1,85 @@
+﻿@model Lvy.VModels.Base.LogVModel
+@{
+    ViewData["Title"] = "操作日志";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources { }
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" method="POST" action="@Url.Action("Search")">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"> 日志列表</h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width: 350px;">
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.BizLog.TeamID, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "form-control pull-right" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.BizLog.TeamID, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "form-control pull-right", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.BizLog.TeamID)
+                        }
+                        @if (Model.IsLeader == 1)
+                        {
+                            @Html.DropDownListFor(a => a.BizLog.ModifiedBy, ViewBag.SalesOfTeam as IEnumerable<SelectListItem>, new { @Class = "form-control pull-right" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(a => a.BizLog.ModifiedBy, ViewBag.SalesOfTeam as IEnumerable<SelectListItem>, new { @Class = "form-control pull-right", @disabled = "disabled" })
+                            @Html.HiddenFor(m => m.BizLog.ModifiedBy)
+                        }
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body" id="divNotices">
+                @Html.Partial("UCSearch", Model)
+            </div>
+        </div>
+    </form>
+</section>
+<script type="text/javascript">
+    $(function () {
+        $("#BizLog_TeamID").change(function () {
+            var teamId = $(this).val();
+            $("#BizLog_ModifiedBy").empty();
+            if (teamId == "") {
+                $("#BizLog_ModifiedBy").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#BizLog_ModifiedBy").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#BizLog_ModifiedBy").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                    });
+                }
+            });
+        });
+    });
+</script>

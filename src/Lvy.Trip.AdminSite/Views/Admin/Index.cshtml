@@ -1,0 +1,742 @@
+﻿@model StatItemVModel
+@using Lvy.VModels.Base
+@using Lvy.Models.BaseDB
+@using Arch.Common
+@{
+    Layout = null;
+    var UserInfo = GlobalContext.Current.UserInfo;
+    var OwnerInfo = GlobalContext.Current.OwnerInfo;
+    string picroot = AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = AppSetting.Get("CDNServerUrl");
+    var banquan = OwnerInfo.ProfileModels.Where(m => m.Key == "host.BanQuanInfo").FirstOrDefault();
+
+    ViewData["Title"] = "工作台";
+
+    var salesDays = "['" + string.Join("','", Model.LineSalesStat.Select(m => m.Days).ToArray()) + "']";
+    var salesAmount = "[" + string.Join(",", Model.LineSalesStat.Select(m => m.Amount).ToArray()) + "]";
+
+
+    var storeDays = "['" + string.Join("','", Model.PlanStoreStat.Select(m => m.Days).ToArray()) + "']";
+    var storeAmount = "['" + string.Join("','", Model.PlanStoreStat.Select(m => m.Amount).ToArray()) + "']";
+    var storeAmount2 = "['" + string.Join("','", Model.PlanStoreStat.Select(m => m.Amount2).ToArray()) + "']";
+}
+@{
+    var msglist = (List<BizLogModel>)ViewData["MsgList"];
+    var noticelist = (List<BaseArticleModel>)ViewData["NoticeList"];
+    var tasklist = (List<BaseTaskModel>)ViewData["TaskList"];
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AdminLTE 3 | Tabbed IFrames</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <!--<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">-->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="@CDNServerUrl/fontawesome-free/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="@CDNServerUrl/adminlte/css/adminlte.min.css">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="@CDNServerUrl/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <style>
+        .content-wrapper.iframe-mode .tab-empty {
+            display: block;
+        }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed" data-panel-auto-height-mode="height">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="/Account/MyAccount" class="nav-link">个人资料</a>
+                </li>
+                @if (UserInfo.CustomerCode == GlobalContext.Current.OwnerCode)
+                {
+                    <li class="nav-item d-none d-sm-inline-block">
+                        <a href="/Log/Search" class="nav-link">操作日志</a>
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block">
+                        <a href="/Task/Search" class="nav-link">我的任务</a>
+                    </li>
+                }
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="@Url.Action("Logout","User")" class="nav-link">安全退出</a>
+                </li>
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Navbar Search -->
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    <div class="navbar-search-block">
+                        <form class="form-inline">
+                            <div class="input-group input-group-sm">
+                                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+                                <div class="input-group-append">
+                                    <button class="btn btn-navbar" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <button class="btn btn-navbar" type="button" data-widget="navbar-search">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </li>
+
+                <!-- Messages Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="far fa-comments"></i>
+                        <span class="badge badge-danger navbar-badge">3</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <a href="#" class="dropdown-item">
+                            <!-- Message Start -->
+                            <div class="media">
+                                <img src="~/images/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
+                                <div class="media-body">
+                                    <h3 class="dropdown-item-title">
+                                        Brad Diesel
+                                        <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
+                                    </h3>
+                                    <p class="text-sm">Call me whenever you can...</p>
+                                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+                                </div>
+                            </div>
+                            <!-- Message End -->
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <!-- Message Start -->
+                            <div class="media">
+                                <img src="~/images/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
+                                <div class="media-body">
+                                    <h3 class="dropdown-item-title">
+                                        John Pierce
+                                        <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
+                                    </h3>
+                                    <p class="text-sm">I got your message bro</p>
+                                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+                                </div>
+                            </div>
+                            <!-- Message End -->
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <!-- Message Start -->
+                            <div class="media">
+                                <img src="~/images/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
+                                <div class="media-body">
+                                    <h3 class="dropdown-item-title">
+                                        Nora Silvester
+                                        <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
+                                    </h3>
+                                    <p class="text-sm">The subject goes here</p>
+                                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
+                                </div>
+                            </div>
+                            <!-- Message End -->
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
+                    </div>
+                </li>
+                <!-- Notifications Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="far fa-bell"></i>
+                        <span class="badge badge-warning navbar-badge">15</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-item dropdown-header">15 Notifications</span>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-envelope mr-2"></i> 4 new messages
+                            <span class="float-right text-muted text-sm">3 mins</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-users mr-2"></i> 8 friend requests
+                            <span class="float-right text-muted text-sm">12 hours</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-file mr-2"></i> 3 new reports
+                            <span class="float-right text-muted text-sm">2 days</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+                        <i class="fas fa-th-large"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="###" class="brand-link">
+                <img src="@(picroot + OwnerInfo.IconPath)" alt="@OwnerInfo.Name" class="brand-image img-circle elevation-3" style="opacity: .8">
+                <span class="brand-text font-weight-light">@OwnerInfo.Name</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        <img src="@(string.IsNullOrEmpty(UserInfo.ProfilePath)?"../../images/user2-160x160.jpg": picroot + UserInfo.ProfilePath)" class="img-circle elevation-2" alt="User Image">
+                    </div>
+                    <div class="info">
+                        <a href="#" onclick="openTabPage('/Account/MyAccount', '个人信息', '0455_myaccount');" title="个人资料" class="d-block">@GlobalContext.Current.UserInfo.Name</a>
+                    </div>
+                </div>
+
+
+                <!-- SidebarSearch Form -->
+                <div class="form-inline">
+                    <div class="input-group" data-widget="sidebar-search">
+                        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-sidebar">
+                                <i class="fas fa-search fa-fw"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+                        with font-awesome or any other icon font library -->
+                        @Html.BootMenuBuild()
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper iframe-mode" data-widget="iframe" data-loading-screen="750">
+            <div class="nav navbar navbar-expand navbar-white navbar-light border-bottom p-0">
+                <div class="nav-item dropdown">
+                    <a class="nav-link bg-danger dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">关闭标签</a>
+                    <div class="dropdown-menu mt-0">
+                        <a class="dropdown-item" href="#" data-widget="iframe-close" data-type="all">全部关闭</a>
+                        <a class="dropdown-item" href="#" data-widget="iframe-close" data-type="all-other">关闭其他页</a>
+                    </div>
+                </div>
+                <a class="nav-link bg-light" href="#" data-widget="iframe-scrollleft"><i class="fas fa-angle-double-left"></i></a>
+                <ul class="navbar-nav overflow-hidden" role="tablist"></ul>
+                <a class="nav-link bg-light" href="#" data-widget="iframe-scrollright"><i class="fas fa-angle-double-right"></i></a>
+                <a class="nav-link bg-light" href="#" data-widget="iframe-fullscreen"><i class="fas fa-expand"></i></a>
+            </div>
+            <div class="tab-content">
+                <div class="tab-empty">
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-lg-3 col-6">
+                                <!-- small box -->
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3>@Model.OrdersInRecentDays</h3>
+                                        <p>近七日订单量</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-bag"></i>
+                                    </div>
+                                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-6">
+                                <!-- small box -->
+                                <div class="small-box bg-success">
+                                    <div class="inner">
+                                        <h3>@Model.TouristsInRecentDays</h3>
+                                        <p>近七日订单人数</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-stats-bars"></i>
+                                    </div>
+                                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-6">
+                                <!-- small box -->
+                                <div class="small-box bg-danger">
+                                    <div class="inner">
+                                        <h3>@Math.Round(Model.AmountInRecentDays)</h3>
+                                        <p>近七日成交金额</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-pie-graph"></i>
+                                    </div>
+                                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+
+                            <!-- ./col -->
+                            <div class="col-lg-3 col-6">
+                                <!-- small box -->
+                                <div class="small-box bg-warning">
+                                    <div class="inner">
+                                        <h3>@Model.NewCutomerRecentDays</h3>
+                                        <p>近七日新客户量</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-person-add"></i>
+                                    </div>
+                                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                                </div>
+                            </div>
+                            <!-- ./col -->
+                        </div>
+                        <!-- /.row -->
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row">
+
+                                    @if (ViewBag.IsSaleLeader == 1)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title"><i class="ion ion-clipboard mr-1"></i>销售组长-待办事项</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="feed-activity-list">
+
+                                                        @foreach (var item in Model.ToAuditCustomer)
+                                                        {
+                                                            <div class="feed-element">
+                                                                <div class="media-body ">
+                                                                    <strong class="pull-right">@item.TeamName  <a href="javascript:parent.openTabPage('/Customer/AuditCustomer?Customer.TeamID=@item.TeamID','客户审核','audit-customer')" target="_self"> @item.Amount</a> 条</strong>
+                                                                    <strong>待审核客户</strong>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (ViewBag.IsSaler == 1)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title"><i class="ion ion-ios-list-outline mr-1"></i>销售-待办事项</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="feed-activity-list">
+                                                        <div class="feed-element">
+                                                            <div class="media-body ">
+                                                                <strong class="pull-right"><a href="javascript:parent.openTabPage('@Url.Action("SearchOrder", "Order", new { IsWaitXiadan = true })','订单管理','search-order')" target="_self">@Model.XiaDanCount</a> 条</strong>
+                                                                <strong>待下单</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="feed-element">
+                                                            <div class="media-body ">
+                                                                <strong class="pull-right"><a href="@Url.Action("SearchOrder", "Order", new { IsWaitJiaoKuan = true })" target="_self"> @Model.JiaoKuanCount</a> 条</strong>
+                                                                <strong>待缴款</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="feed-element">
+                                                            <div class="media-body ">
+                                                                <strong class="pull-right"><a href="javascript:parent.openTabPage('@Url.Action("Search", "Customer", new { IsWaitJiaoKuan = true })','客户管理','search-customer')" target="_self"> @Model.CustomerCount</a> 个</strong>
+                                                                <strong>客户数</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="feed-element">
+                                                            <div class="media-body ">
+                                                                <strong class="pull-right"><a href="javascript:parent.openTabPage('@Url.Action("Search", "Customer")','客户管理','search-customer')" target="_self"> @Model.WaitAuditCustomerCount</a> 条</strong>
+                                                                <strong>待审核客户</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title"><i class="ion ion-ios-paper-outline mr-1"></i>近期订单</h3>
+                                                    <div class="card-tools">
+                                                        <button class="btn btn-info btn-sm" onclick="javascript:parent.openTabPage('/Order/SearchOrder','订单管理','seach-order')" title="更多消息">更多...</button>
+                                                    </div>
+                                                </div>
+                                                <div id="divOrder" class="card-body">
+                                                </div>
+                                                <div class="card-footer">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="col-md-12">
+                                        <!-- LINE CHART -->
+                                        <div class="card card-info">
+                                            <div class="card-header">
+                                                <h3 class="card-title">近30天订单量</h3>
+                                                <div class="card-tools">
+                                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div id="lineChart" style="height:300px"></div>
+                                            </div>
+                                        </div>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+
+                                    <div class="col-md-12">
+                                        <!-- LINE CHART -->
+                                        <div class="card card-info">
+                                            <div class="card-header">
+                                                <h3 class="card-title">后30天库存</h3>
+                                                <div class="card-tools">
+                                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div id="planChart" style="height:300px"></div>
+                                            </div>
+                                        </div>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+
+                                    @if (ViewBag.IsOp == 1)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title"><i class="ion ion-clipboard mr-1"></i>计调-待办事项</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="feed-activity-list">
+                                                        <div class="feed-element">
+                                                            <div class="media-body ">
+                                                                <strong class="pull-right"><a href="@Url.Action("SearchOrder","Order",new { IsWaitQueRenDingWei =true})" target="_self"> @Model.QueRenDingWeiCount</a> 条</strong>
+                                                                <strong>待确认订位</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title">近期收客情况</h3>
+                                                    @*<span class="label label-primary">K+</span>*@
+                                                </div>
+                                                <div id="divPlan" class="box-body">
+                                                </div>
+                                                <div class="card-footer">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (ViewBag.IsCaiWu == 1)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h3 class="card-title">计调-待办事项</h3>
+                                                    @*<span class="label label-primary">K+</span>*@
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="feed-activity-list">
+                                                        <div class="feed-element">
+                                                            <div class="media-body ">
+                                                                <strong class="pull-right"><a href="@Url.Action("Search","Gathering",new { JieSuanState=0})" target="_self"> @Model.AuditPayInCount</a> 条</strong>
+                                                                <strong>待确认收款</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                @if (noticelist.Count > 0)
+                                {
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="ion ion-clipboard mr-1"></i>系统公告</h3>
+                                            <div class="card-tools">
+                                                <button class="btn btn-info btn-sm" onclick="javascript:parent.openTabPage('/Article/Search','系统公告','search-article')" title="更多消息">更多...</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table ">
+                                                @foreach (var item in noticelist)
+                                                {
+                                                    <tr>
+                                                        <td><a href="javascript:parent.openTabPage('@("/Article/Details/" + item.Id)','公告[@item.Id]','article-@item.Id')">@item.Title</a></td>
+                                                        <td><i class="fa fa-calendar-alt"></i> @item.ModifiedTime.ToString("MM-dd HH:mm:ss")</td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+
+
+                                @if (tasklist.Count > 0)
+                                {
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="ion ion-clipboard mr-1"></i>我的任务</h3>
+                                            <div class="card-tools">
+                                                <button class="btn btn-info btn-sm" onclick="javascript:parent.openTabPage('/Task/Search','我的任务','task-search')" title="更多消息">更多...</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table ">
+                                                @foreach (var item in tasklist)
+                                                {
+                                                    <tr>
+                                                        <td><a href="javascript:parent.openTabPage('@("/Task/Details/" + item.TaskID)','公告[@item.TaskID]','task-@item.TaskID')">@DictionaryTools.GetEnumValue(Enums.WorkFlowEnum, item.WorkFlowID.ToString(), false)</a></td>
+                                                        <td><i class="fa fa-calendar-alt"></i> @item.CreatedTime.ToString("MM-dd HH:mm:ss")</td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="ion ion-android-notifications mr-1"></i>最新消息</h3>
+                                        <div class="card-tools">
+                                            <button class="btn btn-info btn-sm" onclick="javascript:parent.openTabPage('/Log/Search','操作日志','search-log')" title="更多消息">更多...</button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="feed-activity-list">
+                                            @if (msglist.Count > 0)
+                                            {
+                                                foreach (var item in msglist)
+                                                {
+                                                    <div class="feed-element">
+                                                        @*<a href="profile.html" class="pull-left">
+                                                                <img alt="image" class="img-circle" src="http://ozwpnu2pa.bkt.clouddn.com/profile.jpg">
+                                                            </a>*@
+                                                        <div class="media-body ">
+                                                            @*<small class="pull-right">5分钟前</small>*@
+                                                            <strong>订单号 @item.JoinCode</strong> @item.Event <br>
+                                                            <small class="text-muted">@string.Format("{0:G}", item.ModifiedTime)</small>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="tab-loading">
+                    <div>
+                        <h2 class="display-4">加载页面... <i class="fa fa-sync fa-spin"></i></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            @(banquan == null?"": banquan.Value)
+        </footer>
+
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+
+    <!-- ./wrapper -->
+    <!-- jQuery -->
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <!-- jQuery UI 1.11.4 -->
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script>
+        $.widget.bridge('uibutton', $.ui.button)
+    </script>
+    <!-- Bootstrap 4 -->
+    <script src="@CDNServerUrl/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- overlayScrollbars -->
+    <script src="@CDNServerUrl/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="@CDNServerUrl/adminlte/js/adminlte.js"></script>
+    <script>
+        function openTabPage(url, title, uName) {
+            $('.content-wrapper').IFrame('createTab', title, url, uName, true);
+        }
+    </script>
+    <!-- ECharts单文件引入 -->
+    <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+    <script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+    </script>
+
+    <script>
+        $().ready(function () {
+            refreshPage();
+            setInterval(function () { refreshPage(); }, 90000)
+        });
+
+        function getDateTime(time) {
+            if (typeof (time) !== "undefined" && time !== "") {
+                var date = new Date(parseInt(time.replace(/\D/igm, "")));
+                return date.getFullYear() + "-" + eval(date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes();
+            }
+            return "";
+        }
+
+        function refreshPage() {
+
+            // 加载OP最近开班
+            $.post("/Admin/RecentPlan", { suggest: "123" }, function (result) {
+                $("#divPlan").html(result);
+            });
+
+            $.post("/Admin/RecentOrder", { suggest: "123" }, function (result) {
+                $("#divOrder").html(result);
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        // 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('lineChart'));
+                myChart.setOption({
+                    xAxis: {
+                        type: 'category',
+                        data: @Html.Raw(salesDays)
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: @salesAmount ,
+                        type: 'line'
+                    }]
+                });
+
+                var myChart1 = ec.init(document.getElementById('planChart'));
+                myChart1.setOption({
+                    //title: {
+                    //    text: '折线图堆叠'
+                    //},
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['计划名额', '已定名额']
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: @Html.Raw(storeDays)
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [
+                        {
+                            name: '计划名额',
+                            type: 'line',
+                            stack: '总量',
+                            data: @Html.Raw(storeAmount)
+                        },
+                        {
+                            name: '已定名额',
+                            type: 'line',
+                            stack: '总量',
+                            data: @Html.Raw(storeAmount2)
+                        }
+                    ]
+                });
+            }
+        );
+    </script>
+</body>
+</html>

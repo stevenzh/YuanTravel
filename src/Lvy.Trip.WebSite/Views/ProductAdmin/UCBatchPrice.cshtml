@@ -1,0 +1,335 @@
+﻿@model Lvy.VModels.Ticket.BatchPriceVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources{
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="@CDNServerUrl/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+<!-- Main content -->
+<section class="content">
+    <form id="otherPriceForm1">
+        @Html.HiddenFor(m => m.ProductID)
+
+        <div class="card">
+            @*<div class="card-header">
+                    <h3 class="card-title">批量设置</h3>
+                </div>*@
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-2">操作</label>
+                    <div class="col-sm-10">
+                        <div class="icheck-primary d-inline">
+                            <input type="radio" id="radioPrimary1" name="Operation" value="1" checked="">
+                            <label for="radioPrimary1">更新价格和库存</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="radio" id="radioPrimary2" name="Operation" value="2">
+                            <label for="radioPrimary2">清除价格和库存</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-2">日期区间</label>
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(m => m.DateRange, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-md-2">选择周期</label>
+                    <div class="col-md-10">
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="selectAll" checked="">
+                            <label for="selectAll">全选</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="selectWeekend" checked="">
+                            <label for="selectWeekend">周末</label>
+                        </div>
+                        <br />
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary2" name="SelectedDays" value="Monday" checked="">
+                            <label for="checkboxPrimary2">周一</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary3" name="SelectedDays" value="Tuesday" checked="">
+                            <label for="checkboxPrimary3">周二</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary4" name="SelectedDays" value="Wednesday" checked="">
+                            <label for="checkboxPrimary4">周三</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary5" name="SelectedDays" value="Thursday" checked="">
+                            <label for="checkboxPrimary5">周四</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary6" name="SelectedDays" value="Friday" checked="">
+                            <label for="checkboxPrimary6">周五</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary7" name="SelectedDays" value="Saturday" checked="">
+                            <label for="checkboxPrimary7">周六</label>
+                        </div>
+                        <div class="icheck-primary d-inline">
+                            <input type="checkbox" id="checkboxPrimary8" name="SelectedDays" value="Sunday" checked="">
+                            <label for="checkboxPrimary8">周日</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row editQuotaA">
+                    <label class="col-md-2">选择价格</label>
+                    <div class="col-md-10">
+                        @Html.DropDownListFor(m => m.RuleID, ViewData["RuleList"] as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                </div>
+                @if (Model.TkcketProduct.TuiJianType == 3)
+                {
+                    <div class="form-group row editQuotaA">
+                        <label class="col-md-2">库存</label>
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(m => m.PlanQuota, new { @class = "form-control form-control-sm" })
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-info" type="button" id="btnClose">关闭</button>
+                <button class="btn btn-success" type="button" id="btnSubmit">提交</button>
+            </div>
+        </div>
+    </form>
+</section>
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            $("#btnClose").click(function () {
+                // 弹出框关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            });
+
+            $("#btnSubmit").click(function () {
+                var $otherForm = $('#otherPriceForm1');
+
+                // 检查
+                var $weeks = $otherForm.find(':checkbox[name="SelectedDays"]');
+                if ($weeks.filter(':checked').length == 0) {
+                    Utils.alert('周期不能为空。');
+                    $weeks.eq(0).focus().select();
+                    return false;
+                }
+
+                var $checkedRule = $otherForm.find(':radio[name="Operation"]').filter(':checked');
+                if (Number($checkedRule.val()) == 1) {
+                    var ruleid = $("#RuleID").val();
+                    var quota = $("#PlanQuota").val();
+                    if (ruleid == "" && quota == "0") {
+                        Utils.alert('选择价格或输入库存。');
+                        $("#RuleID").focus();
+                        return false;
+                    }
+                }
+
+
+                layer.confirm('确定要更新日期价格和库存吗？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    var $otherForm = $('#otherPriceForm1');
+                    var weeks = "";
+                    var $allWeeks = $otherForm.find('input[name=SelectedDays]');
+                    $allWeeks.each(function () {
+                        if ($(this).prop("checked"))
+                            weeks += $(this).val() + ",";
+                    });
+
+                    var params = {
+                        'ProductId': $('#ProductID').val(),
+                        'DateRange': $("#DateRange").val(),
+                        'SelectedDays': weeks,
+                        'RuleID': $("#RuleID").val(),
+                        'PlanQuota': $("#PlanQuota").val(),
+                        'Operation': $("input[name='Operation']:checked").val()
+                    };
+                    $.post('/TktManage/UCBatchPrice', params, function (data) {
+                        if (data.Code == '1') {
+                            layer.msg('设置成功。');
+
+                            parent.refetchEvents();
+                            // 弹出框关闭
+                            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                            parent.layer.close(index);
+                        }
+                        else
+                            Utils.alert(date.Message);
+                    });
+                }, function () {
+                });
+            });
+
+            $('#DateRange').daterangepicker({
+                autoUpdateInput: true,
+                locale: {
+                    format: "YYYY/MM/DD", //设置显示格式
+                    applyLabel: '确定', //确定按钮文本
+                    cancelLabel: '清空', //取消按钮文本
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    customRangeLabel: "自定义",
+                    firstDay: 1
+                }
+            }, function (start, end) {
+                $('#DateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+            });
+            $('#DateRange').on('cancel.daterangepicker', function (ev, picker) {
+                //do something, like clearing an input
+                $('#DateRange').val('');
+            });
+
+            $(':radio[name="Operation"]').change(function () {
+                if ($(this).val() == '1') {  // 固定库存
+                    $('.editQuotaA').show();
+                }
+                else {
+                    $('.editQuotaA').hide();
+                }
+            });
+
+            initialWeekCheck();
+            //initialRuleTypeClick();
+            //initialWeekCheck();
+        });
+
+        //初始化规则类型选择事件
+        function initialRuleTypeClick() {
+            var $ruleTypeRadio = $(':radio[name="PriceRule.RuleType"]');
+            $ruleTypeRadio.change(function () {
+                var $this = $(this);
+                var $checkWeekRow = $('#checkWeekRow');
+                if ($this.prop('checked')) {
+                    var ruleType = Number($this.val());
+                    if (ruleType == 1) {
+                        $checkWeekRow.hide();
+                        $checkWeekRow.prev().children('td').eq(0).attr('rowspan', '1');
+                    } else {
+                        $checkWeekRow.show();
+                        $checkWeekRow.prev().children('td').eq(0).attr('rowspan', '2');
+                    }
+                }
+            });
+        }
+
+        //初始化其他报价弹窗的星期选择事件
+        function initialWeekCheck() {
+            var $otherForm = $('#otherPriceForm1');
+            var $checkWeekend = $otherForm.find('#selectWeekend');
+            var $checkAll = $otherForm.find('#selectAll');
+            var $allWeeks = $otherForm.find('input[name=SelectedDays]');
+            var $friday = $otherForm.find('input[name=SelectedDays]:checkbox[value="Friday"]');
+            var $saturday = $otherForm.find('input[name=SelectedDays]:checkbox[value="Saturday"]');
+
+            //首先禁用所有
+            //$checkAll.attr('disabled', 'disabled');
+            //$checkWeekend.attr('disabled', 'disabled');
+            //$allWeeks.each(function () {
+            //    if ($(this).prop('checked') == false) {
+            //        $(this).attr('disabled', 'disabled');
+            //    }
+            //});
+
+            //选择周末 事件
+            $checkWeekend.bind('change', function () {
+                if ($(this).prop('checked')) {
+                    $friday.prop('checked', true);
+                    $saturday.prop('checked', true);
+                    if ($allWeeks.filter(':checked').length == 7) {
+                        $checkAll.prop('checked', true);
+                    }
+                } else {
+                    $friday.prop('checked', false);
+                    $saturday.prop('checked', false);
+                    $checkAll.prop('checked', false);
+                }
+            });
+            //选择整个星期 事件
+            $checkAll.bind('change', function () {
+                if ($(this).prop('checked')) {
+                    $allWeeks.prop('checked', true);
+                    $checkWeekend.prop('checked', true);
+                } else {
+                    $allWeeks.prop('checked', false);
+                    $checkWeekend.prop('checked', false);
+                }
+            });
+            //星期选择 事件
+            $allWeeks.bind('change', function () {
+                if ($(this).prop('checked')) {
+                    if ($allWeeks.filter(':checked').length == 7) {
+                        $checkAll.prop('checked', true);
+                    }
+                    if ($friday.prop('checked') && $saturday.prop('checked')) {
+                        $checkWeekend.prop('checked', true);
+                    }
+                }
+                else {
+                    $checkAll.prop('checked', false);
+                    if ($(this).val() == 'Friday' || $(this).val() == 'Saturday')
+                        $checkWeekend.prop("checked", false);
+                }
+            });
+        }
+
+        //其他报价规则日期选择后，验证释放星期锁定
+        function validWeek() {
+            var $otherForm = $('#otherPriceForm1');
+            var $checkWeekend = $otherForm.find('#selectWeekend');
+            var $checkAll = $otherForm.find('#selectAll');
+            var $allWeeks = $otherForm.find('input[name=SelectedDays]');
+
+            $allWeeks.each(function () {
+                $(this).prop("checked", false);
+            });
+
+            var dateRange = $otherForm.find('#DateRange').val();
+            var d = dateRange.split('-');
+            var startValue = new Date($.trim(d[0]));
+            var endValue = new Date($.trim(d[1]));
+            var diff = (endValue - startValue) / 1000 / 60 / 60 / 24;
+            if (diff < 6) {
+                $checkAll.attr('disabled', 'disabled');
+                $checkWeekend.attr('disabled', 'disabled');
+                $('input[name=SelectedDays]').attr('disabled', 'disabled');
+                while (startValue <= endValue) {
+                    switch (startValue.getDay()) {
+                        case 0: $otherForm.find('input[name=SelectedDays][value="Sunday"]').removeAttr('disabled'); break;
+                        case 1: $otherForm.find('input[name=SelectedDays][value="Monday"]').removeAttr('disabled'); break;
+                        case 2: $otherForm.find('input[name=SelectedDays][value="Tuesday"]').removeAttr('disabled'); break;
+                        case 3: $otherForm.find('input[name=SelectedDays][value="Wednesday"]').removeAttr('disabled'); break;
+                        case 4: $otherForm.find('input[name=SelectedDays][value="Thursday"]').removeAttr('disabled'); break;
+                        case 5: $otherForm.find('input[name=SelectedDays][value="Friday"]').removeAttr('disabled'); break;
+                        case 6: $otherForm.find('input[name=SelectedDays][value="Saturday"]').removeAttr('disabled'); break;
+                        default: break;
+                    }
+                    startValue = DateAdd('d', 1, startValue);
+                }
+            }
+            else {
+                $allWeeks.each(function () {
+                    $(this).removeAttr('disabled');
+                });
+                $checkAll.removeAttr('disabled');
+                $checkWeekend.removeAttr('disabled');
+            }
+        }
+    </script>
+
+}

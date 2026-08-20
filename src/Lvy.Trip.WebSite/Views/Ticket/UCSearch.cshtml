@@ -1,0 +1,58 @@
+﻿@model  Lvy.VModels.Ticket.SearchVModel
+<div class="now_position">
+    <span>目的地</span> <span>></span> <span>搜索关键字</span>
+    <div class="clear"></div>
+</div>
+<div class="line_list">
+    <table width="100%" border="0" style="text-align: center">
+        <tr height="30px;" class="line_list_title">
+            <th style="width:5px;">&nbsp;</th>
+            <th>产品名称</th>
+            <th style="width:60px;">市场价</th>
+            <th style="width:60px;">结算价</th>
+            <th style="width:110px;">签单价</th>
+            <th style="width:50px;">数量</th>
+            <th style="width:70px;">购买方式</th>
+            <th style="width:130px;">预定须知</th>
+            <th style="width:50px;">操作</th>
+            <th style="width:10px;">&nbsp;</th>
+        </tr>
+        @foreach (var item in Model.Products.Items)
+        {
+            <tr>
+                <td>&nbsp;</td>
+                <td align="left">@item.ProductName</td>
+                <td><a name="priceLink" productId="@item.ProductId" href="javascript:void(0);"> @item.MarketPrice </a></td>
+                <td><a name="priceLink" productId="@item.ProductId" href="javascript:void(0);"> @item.SettlePrice</a> </td>
+                <td><a name="priceLink" productId="@item.ProductId" href="javascript:void(0);">@item.SysPriceDesc</a></td>
+                <td>@item.NumberDesc</td>
+                <td>
+                    @DictionaryTools.GetEnumValue(Enums.TktTypeEnum, item.TktType.ToString())
+                </td>
+                <td name="tdbookingdesc" rel="descShow-@item.Id" style=" text-align:left;text-indent:1em;">
+                    @item.BookingDesc.ToNoHTML().TrimWithElipsis(6)
+                    <div id="descShow-@item.Id" style="display: none; background-color:rgb(228, 241, 250);" class="shadow">
+                        @Html.Raw(item.BookingDesc)
+                    </div>
+                </td>
+                <td align="center" style="padding-top: 5px;">
+                    @if (DateTime.Now >= item.BeginBuyTime)
+                    {
+                        <a href="@Url.Action("Booking", "TktBooking", new { productId = item.ProductId })">预订</a>
+                    }
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr height="1px">
+                <td></td>
+                <td colspan="8" class="line_list_border"></td>
+                <td></td>
+            </tr>
+        }
+    </table>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("table td[name='tdbookingdesc']").powerFloat({ width: 250 });
+    });
+</script>

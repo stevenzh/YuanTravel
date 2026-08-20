@@ -1,0 +1,62 @@
+﻿@model Lvy.VModels.Online.SearchProductVModel
+@{
+    int i = 0;
+}
+@foreach (var product in Model.ProductPagedList.Items)
+{
+    i++;
+    <tr height="30">
+        <td align="center"> @product.TourNo</td>
+        <td class="search_result">
+            @Html.ActionLink(product.LineName, "TourRouteDetail", new { tourId = product.TourId, lineId = product.LineId }, new { target = "_blank" })
+        </td>
+        <td align="center">
+            @product.OutDate.ToDateFormat().Remove(0, 5) @product.OutDate.DayOfWeek.ToWeekCn()
+        </td>
+        <td align="center">
+            <a name="priceLink" tourId="@product.TourId" href="javascript:void(0);">@((product.Price - product.TeJiaFanLi).ToInteger())</a>
+        </td>
+        <td align="center">
+            @product.SingleRoom.ToInteger()
+        </td>
+        <td align="center">
+            @DictionaryTools.GetEnumValue(Enums.TrafficTypeEnum, product.TrafficType.ToString())
+        </td>
+        <td align="center">
+            @product.PlanQuota
+        </td>
+        <td align="center">
+            @product.UsedQuota
+        </td>
+        <td align="center">
+            @product.UseQuota
+        </td>
+        <td height="35" align="center" valign="bottom">
+            @if (GlobalContext.Current.UserInfo != null && GlobalContext.Current.IsOwnerUser == false)
+            {
+                <a href="@Url.Action("Booking", "Online", new { tourId = @product.TourId })">预订</a>
+            }
+        </td>
+    </tr>
+
+    <tr height="30">
+        <td class="search_result_td_border">&nbsp; </td>
+        <td colspan="4" valign="top" class="search_result_td_border" title="@product.LineSpecial">
+            <font class="colorFF8D26">@product.LineSpecial.TrimWithElipsis(30)</font>
+        </td>
+        <td colspan="5" style="text-align: right; padding-right: 8px; margin-right: 8px;"
+            valign="top" class="search_result_td_border">
+            @if (GlobalContext.Current.UserInfo != null)
+            {
+                <a href="javascript:void(0);" name="showBusinessCard" rel="/Online/BusinessCard?lineId=@product.LineId" lineId="@product.LineId">
+                    @DictionaryTools.GetCachedCustomer(product.CustomerCode).ShortName
+                    <img style="vertical-align: bottom" src="~/images/icon_phone.png" alt="联系我" />
+                </a>
+            }
+        </td>
+    </tr>
+
+}
+<script type="text/javascript">
+    $('input:hidden[name="ProductPagedList.PageCount"]').val(@Model.ProductPagedList.PageCount);
+</script>

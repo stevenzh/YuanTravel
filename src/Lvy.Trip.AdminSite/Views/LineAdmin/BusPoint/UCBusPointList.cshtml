@@ -1,0 +1,221 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.SelectBusPointVModel
+
+<div class="btnlist">
+    <label>
+        <input type="checkbox" id="checkAllBusPoint" />全选
+    </label>
+</div>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th style="width:60px;">选择</th>
+            <th>发车地点</th>
+            <th>返回地点</th>
+            <th>备注</th>
+            @*<th style="width: 60px;">接价</th>
+                <th style="width: 60px;">送价</th>*@
+            <th style="width: 120px;">接送时间</th>
+            <th style="width: 100px;">接送服务</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.BusPointList.Count(); i++)
+        {
+            <tr>
+                <td name="checkCell">
+                    <input type="hidden" name="BusPointList[@i].BusPointModel.Id" value="@Model.BusPointList[i].BusPointModel.Id" />
+                    <input type="hidden" name="BusPointList[@i].BusPointModel.LineId" value="@Model.BusPointList[i].BusPointModel.LineId" />
+                    <input type="hidden" name="BusPointList[@i].BusPointModel.BusPointId" value="@Model.BusPointList[i].BusPointModel.BusPointId" />
+                    <input type="hidden" name="BusPointList[@i].Checked" value="@Model.BusPointList[i].Checked.ToString()" />
+                    @if (Model.BusPointList[i].Checked)
+                    {
+                        <input type="checkbox" name="BusPointList[@i].Checked" checked="checked" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="BusPointList[@i].Checked" />
+                    }
+                </td>
+                <td name="buspointnamecell" title="@Model.BusPointList[i].BusPointModel.BusPoint">
+                    <input type="hidden" name="BusPointList[@i].BusPointModel.BusPoint" value="@Model.BusPointList[i].BusPointModel.BusPoint" />
+                    @Model.BusPointList[i].BusPointModel.BusPoint.TrimWithElipsis(25)
+                </td>
+                <td>
+                    <textarea name="BusPointList[@i].BusPointModel.PlaceOfReturn" class="form-control form-control-sm" rows="3">@Model.BusPointList[i].BusPointModel.PlaceOfReturn</textarea>
+                </td>
+                <td>
+                    <textarea name="BusPointList[@i].BusPointModel.Remarks" class="form-control form-control-sm" rows="3">@Model.BusPointList[i].BusPointModel.Remarks</textarea>
+                </td>
+                @*
+                    <td style="text-align: center;">
+                        @if (Model.BusPointList[i].IsJie)
+                        {
+                            <input type="text" name="BusPointList[@i].BusPointModel.JiePrice" value="@Model.BusPointList[i].BusPointModel.JiePrice" class="form-control form-control-sm" contentlimit="number" style="text-align: right;" />
+                        }
+                        else
+                        {
+                            <input type="text" name="BusPointList[@i].BusPointModel.JiePrice" value="@Model.BusPointList[i].BusPointModel.JiePrice" class="form-control form-control-sm" contentlimit="number" style="text-align: right;" disabled="disabled" />
+                        }
+                    </td>
+                    <td style="text-align: center;">
+                        @if (Model.BusPointList[i].IsSong)
+                        {
+                            <input type="text" name="BusPointList[@i].BusPointModel.SongPrice" value="@Model.BusPointList[i].BusPointModel.SongPrice" class="form-control form-control-sm" contentlimit="number" style="text-align: right;" />
+                        }
+                        else
+                        {
+                            <input type="text" name="BusPointList[@i].BusPointModel.SongPrice" value="@Model.BusPointList[i].BusPointModel.SongPrice" class="form-control form-control-sm" contentlimit="number" style="text-align:right;" disabled="disabled" />
+                        }
+                    </td>
+                *@
+                <td>
+                    <div class="input-group datetimepicker" id="@("datetimepicker" + Model.BusPointList[i].BusPointModel.BusPointId)" data-target-input="nearest">
+                        <input type="text" class="form-control form-control-sm datetimepicker-input" name="BusPointList[@i].BusPointModel.JsTime" value="@Model.BusPointList[i].BusPointModel.JsTime" data-target="@("#datetimepicker" + Model.BusPointList[i].BusPointModel.BusPointId)" />
+                        <div class="input-group-append" data-target="@("#datetimepicker" + Model.BusPointList[i].BusPointModel.BusPointId)" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+                        </div>
+                    </div>
+                </td>
+                <td name="jsTypeCell">
+                    <input type="hidden" name="BusPointList[@i].IsJie" value="@Model.BusPointList[i].IsJie.ToString()" />
+                    <label>
+                        @if (Model.BusPointList[i].IsJie)
+                        {
+                            <input type="checkbox" name="BusPointList[@i].IsJie" targetInput="BusPointList[@i].BusPointModel.JiePrice" checked="checked" />
+                        }
+                        else
+                        {
+                            <input type="checkbox" name="BusPointList[@i].IsJie" targetInput="BusPointList[@i].BusPointModel.JiePrice" />
+                        }
+                        接
+                    </label>
+                    <input type="hidden" name="BusPointList[@i].IsSong" value="@Model.BusPointList[i].IsSong.ToString()" />
+                    <label>
+                        @if (Model.BusPointList[i].IsSong)
+                        {
+                            <input type="checkbox" name="BusPointList[@i].IsSong" targetInput="BusPointList[@i].BusPointModel.SongPrice" checked="checked" />
+                        }
+                        else
+                        {
+                            <input type="checkbox" name="BusPointList[@i].IsSong" targetInput="BusPointList[@i].BusPointModel.SongPrice" />
+                        }
+                        送
+                    </label>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<input class="btn btn-success" id="saveBtn" type="button" value="保存" />
+<input class="btn btn-secondary" id="backBtn" type="button" value="返回列表" />
+@*</div>*@
+<script type="text/javascript">
+
+    // 接送类型选择
+    $('td[name="jsTypeCell"] input:checkbox').click(function () {
+        var $this = $(this);
+        var $td = $this.parent().parent();
+        var targetName = $this.attr('targetInput');
+        var $targetInput = $(':text[name="' + targetName + '"]');
+        var name = $this.attr('name');
+        if ($this.prop('checked')) {
+            $td.children(':hidden[name="' + name + '"]').val(true);
+            $targetInput.removeAttr('disabled');
+        } else {
+            $td.children(':hidden[name="' + name + '"]').val(false);
+            $targetInput.val('0.00');
+            $targetInput.attr('disabled', 'disabled');
+        }
+    });
+
+    //单选
+    $('td[name="checkCell"] input:checkbox').click(function () {
+        if ($(this).prop('checked') == false) {
+            $('#checkAllBusPoint').prop('checked', false);
+        }
+        var name = $(this).attr('name');
+        if ($(this).prop('checked')) {
+            $('td[name="checkCell"] input:hidden[name="' + name + '"]').val(true);
+        }
+        else {
+            $('td[name="checkCell"] input:hidden[name="' + name + '"]').val(false);
+        }
+        return true;
+    });
+
+    //全选
+    $('#checkAllBusPoint').click(function () {
+        //        var t1 = new Date();
+        var $tr = $('#bpListContainer>table>tbody>tr');
+        if ($(this).prop('checked')) {
+            $tr.each(function () {
+                var $firstTd = $(this).children('td').first();
+                var $checkBox = $firstTd.children(':checkbox');
+                $checkBox.prop('checked', true);
+                var name = $checkBox.attr('name');
+                $firstTd.children(':hidden[name="' + name + '"]').val(true);
+            });
+        }
+        else {
+            $tr.each(function () {
+                var $firstTd = $(this).children().first();
+                var $checkBox = $firstTd.children(':checkbox');
+                $checkBox.prop('checked', false);
+                var name = $checkBox.attr('name');
+                $firstTd.children(':hidden[name="' + name + '"]').val(false);
+            });
+        }
+        //        var t2 = new Date();
+        //        Utils.alert(t2 - t1);
+        return true;
+    });
+
+    //单元格选中
+    $('td[name="buspointnamecell"]').click(function () {
+        var $check = $(this).parent().children().first().children('[type="checkbox"]');
+        var name;
+        if ($check.prop('checked')) {
+            $check.prop('checked', false);
+            name = $check.attr('name');
+            $('td[name="checkCell"] input:hidden[name="' + name + '"]').val(false);
+            $('#checkAllBusPoint').prop('checked', false);
+        }
+        else {
+            $check.prop('checked', true);
+            name = $check.attr('name');
+            $('td[name="checkCell"] input:hidden[name="' + name + '"]').val(true);
+        }
+    });
+
+    //限定输入内容为数字
+    $('form input[contentlimit="number"]').keypress(function () {
+        InputLimitNumber();
+    });
+
+    //提交
+    $('#saveBtn').click(function () {
+        var params = $("#theForm").serialize();
+        $.ajax({
+            url: $("#theForm").attr("action"),
+            data: params,
+            type: "post",
+            success: function (data) {
+                if (data.Code == "1") {
+                    Utils.alert("保存成功！");
+                    //$('#tab-1').html(data);
+                    //保存成功后 加载预定须知.
+                    $("a[name='tabTitle']")[4].click();
+
+                } else {
+
+                    Utils.alert('提交发生异常，请稍后再试！');
+                }
+            }, error: function (ex) {
+
+                Utils.alert("出错了！请联系管理员！");
+            }
+        })
+    });
+
+</script>

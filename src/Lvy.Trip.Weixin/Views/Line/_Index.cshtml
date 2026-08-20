@@ -1,0 +1,176 @@
+﻿@model ProductModel
+@{
+    Layout = null;
+    MemberModel cuser = (MemberModel)HttpContext.Current.Session["WeixinUser"]; //当前用户
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>@Model.ProductTitle - 商品详情</title>
+    @Styles.Render("~/Content/adminlte/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <link href="@CDNServerUrl/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <style>
+        .wrapper { padding-bottom: 40px; }
+        .content { padding: 5px; }
+        .btn-app { border-radius: 0px; margin: 0px; padding: 10px 5px; min-width: 65px; height: 47px; height: 50px; background-color: #fff; border: none; }
+        .box-success .box-header { padding: 15px; background-color: #d2d6de; }
+        .box-header > .fa, .box-header > .glyphicon, .box-header > .ion, .box-header .box-title { font-size: 16px; }
+    </style>
+</head>
+<body class="skin-blue-light">
+    <div class="wrapper">
+        <section class="content-header">
+            <h1>@Model.ProductTitle</h1>
+        </section>
+        <section class="content">
+            <div class="row">
+                @if (cuser == null)
+                {
+                    <div id="pagelink" class="col-md-6">
+                        <div class="box box-primary">
+                            <div class="box-body box-profile">
+                                <div class="alert Utils.alert-info Utils.alert-dismissible">
+                                    <h4><i class="icon fa fa-info"></i> 提示!</h4>
+                                    请关注微信公众号，在我们的公众号页面预定.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @*<div class="col-md-6">
+                        <img class="img-responsive " src="@Model.ImageMain">
+                    </div>*@
+
+                @if (Model.Items.Count() > 0)
+                {
+                    <script>
+                        var currentItemID = @Model.Items.First().ItemId;
+                    </script>
+                    <div class="col-md-6">
+                        <div class="box box-widget no-padding">
+                            <div class="box-header">
+                                <h3 class="box-title">套餐选择</h3>
+                            </div>
+                            <div class="box-body no-padding">
+                                <div class="box-group" id="accordion">
+                                    @for (int i = 0; i <= Model.Items.Count - 1; i++)
+                                    {
+                                        var item = Model.Items[i];
+                                        <div class="box box-success">
+                                            <a class="box-header " data-toggle="collapse" data-parent="#accordion" href="@("#collapse"+ item.ItemId)">
+                                                <h4 class="box-title">
+                                                    @item.ProductTitle
+                                                </h4>
+                                                <i class="indicator glyphicon glyphicon-chevron-up pull-right"></i>
+                                            </a>
+                                            <div id="@("collapse"+ item.ItemId)" class="panel-collapse collapse ">
+                                                <div class="box-body">
+                                                    <strong>销售价</strong>
+                                                    <p class="pull-right">@item.Price.ToString("c")</p>
+                                                    <hr />
+                                                    @if (cuser != null && cuser.Approved == 1)
+                                                    {
+                                                        <strong>同业价</strong>
+                                                        <p class="pull-right">@item.TradePrice.ToString("c")</p>
+                                                        <hr />
+                                                    }
+                                                    @*<strong>库存</strong>
+                                                        <p class="pull-right">@item.Stock</p>
+                                                        <hr />*@
+                                                    <strong>商品说明</strong>
+                                                    <p class="text-muted">@Html.Raw(item.Instruction)</p>
+                                                    <hr />
+                                                    <strong>费用包含</strong>
+                                                    <p class="text-muted">@item.PriceNote</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @Html.Partial("_ChatPartial")
+
+        </section>
+
+        <footer class="main-footer" style="position:fixed;bottom:0;width:100%;padding:2px;">
+            <a class="btn btn-app btn-default" href="/Line/List"><i class="fa fa-home"></i>首页</a>
+            <a id="btn-chat1" class="btn btn-app btn-default"><i class="fa fa-comments-o"></i>客服</a>
+            <a id="wxlink" class="btn btn-app bg-maroon" href="@("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxdc59ec5a5d1dbd1f&redirect_uri=http%3A%2F%2Fwap.sh-cct.cn%2Fline%2Forder%2F%3F&response_type=code&scope=snsapi_base&state="+Model.ProductId+"#wechat_redirect")"><i class="fa fa-check"></i>直接购买</a>
+            <a id="btn-cart" href="/Line/ShoppingCart" class="btn btn-app">
+                @if (cuser != null && cuser.CartProductNum > 0)
+            {
+                    <span class="badge bg-purple">@cuser.CartProductNum</span>
+                }
+                <i class="fa fa-shopping-cart"></i>购物车
+            </a>
+            <div class="pull-right">
+                <a id="btn-addcart" class="btn btn-app bg-maroon" style="height:47px;"><i class="fa fa-plus"></i>加入购物车</a>
+            </div>
+        </footer>
+    </div>
+    <script type="text/javascript">
+        var flag = /MicroMessenger/i.test(navigator.userAgent);
+        if (flag == false) {
+            $("#wxlink").hide();
+        } else {
+            $("#pagelink").hide();
+        }
+
+        $(document).ready(function () {
+            // 设置咨询当前页面
+            $("#CurrentPage").val("P: @Model.ProductTitle");
+
+            $("#btn-chat1").click(function () {
+                $("#divChat").show();
+                document.body.scrollTop = document.body.scrollHeight;
+            });
+
+
+            function toggleChevron(e) {
+                $(e.target)
+                    .prev('.box-header')
+                    .find("i.indicator")
+                    .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
+            }
+            $('.collapse').on('shown.bs.collapse', function (e) {
+                toggleChevron(e);
+                currentItemID = $(e.target).attr("id").substring(8);
+
+                // 滚动
+                var scroll_offset = $(this).prev().offset();
+                $("body,html").animate({ scrollTop: scroll_offset.top }, 'slow');
+            })
+            $('.collapse').on('hidden.bs.collapse', toggleChevron);
+        });
+
+        function downdoc() {
+            var flag = /MicroMessenger/i.test(navigator.userAgent);
+            if (flag == true)
+                Utils.alert("从浏览器打来页面，可以下载行程单");
+        }
+    </script>
+    @if (cuser != null)
+    {
+        <script type="text/javascript">
+            $("#btn-addcart").click(function() {
+                $.post("/Line/AddCart", { "openID": '@cuser.OpenID',"itemID":currentItemID  }, function(data) {
+                    $('#btn-cart span').html(data);
+                });
+            });
+        </script>
+    }
+
+</body>
+</html>

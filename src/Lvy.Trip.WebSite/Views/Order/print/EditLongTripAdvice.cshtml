@@ -1,0 +1,34 @@
+﻿@model Lvy.VModels.Order.GoNoticePrintVModel
+@{
+    ViewBag.Title = "EditLongTripAdvice";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+@Html.Partial("print/UCNotificationHead", Model.OrderModel)
+<div class="station" style="height: 0px;"></div>
+<div class="in_box">
+    <div class="xboxcontent">
+        @Html.Partial("print/UCNotificationBasicInfo", Model)
+        @Html.Partial("print/UCNotificationTourists", Model)
+        @Html.Partial("print/UCNotificationAddition", Model.OrderModel)
+        @Html.Partial("print/UCNotificationBody", Model)
+    </div>
+    <div style="text-align: center;">
+        <input class="btn btn1" id="btnPrint" type="button" value="打印" />
+        <input class="btn btn1" id="btnBill" type="button" value="确认单" />
+        <input class="btn btn1" id="btnBack" onclick="javascript:history.go(-1);" type="button" value="返回列表" />
+    </div>
+</div>
+<script type="text/javascript">
+    //确认单
+    $("#btnBill").click(function () {
+        location.href = "/Online/OrderConfirmPrint?orderCode=@Model.OrderModel.OrderCode";
+    });
+    //打印
+    $("#btnPrint").click(function () {
+        window.open("/Online/PrintTourNotice?orderCode=@Model.OrderModel.OrderCode");
+    });
+</script>

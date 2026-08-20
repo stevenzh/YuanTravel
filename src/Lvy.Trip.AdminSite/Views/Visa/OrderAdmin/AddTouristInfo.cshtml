@@ -1,0 +1,136 @@
+﻿@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+@section AdditionalResources
+{
+    <script src="~/Scripts/Validation.js" type="text/javascript"></script>
+    <link href="~/WebRes/scripts/My97DatePicker/skin/default/datepicker.css" rel="stylesheet" />
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+}
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <form id="theForm">
+                        <input type="hidden" id="hiddenordercode" value="@ViewData["ordercode"]" />
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label class="col-3">申请人姓名：</label>
+                                <div class="col-9"><input name="" type="text" id="appname" class="form-control form-control-sm" /></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">性别：</label>
+                                <div class="col-9">
+                                    <select name="" id="appsex" class="form-control form-control-sm">
+                                        <option value="0">女</option>
+                                        <option value="1">男</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">申请人手机：</label>
+                                <div class="col-9"><input name="" type="text" id="apptel" class="form-control form-control-sm" /></div>
+
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">申请人生日：</label>
+                                <div class="col-9">
+                                    <input name="appbirthday" type="text" class="form-control form-control-sm Wdate" id="appbirthday" onfocus="WdatePicker()" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">证件类型：</label>
+                                <div class="col-9">
+                                    <select id="cardtype" class="form-control form-control-sm">
+                                        <option value="2">护照</option>
+                                        @* <option value="1">身份证</option>*@
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">证件号码：</label>
+                                <div class="col-9"><input type="text" id="cardno" class="form-control form-control-sm" /></div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">类别：</label>
+                                <div class="col-9">
+                                    <select name="" id="apptype" class="form-control form-control-sm">
+                                        <option value="2">儿童</option>
+                                        <option value="1" selected="selected">成人</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">材料分类：</label>
+                                <div class="col-9">
+                                    @Html.DropDownList("Category", ViewData["List"] as List<SelectListItem>, "--请选择--", new { @id = "category", @class = "form-control form-control-sm" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-3">备注：</label>
+                                <div class="col-9">
+                                    <textarea id="appnote" class="form-control form-control-sm" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <input type="button" value="添 加" id="appinfoadd" class="btn btn-info" />&nbsp;&nbsp;
+                            <input type="button" value="关闭" id="colsebtn" class="btn btn-info" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript" language="javascript">
+
+    $(document).ready(function () {
+
+        $("#colsebtn").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+
+        $("#appinfoadd").click(function () {
+            if ($("#appname").val() == "") { alert("申请人姓名不能为空！"); $("#appname").focus(); return; }
+            // if ($("#apptel").val() == "") { alert("申请人手机不能为空！"); $("#apptel").focus(); return; }
+            if ($("#apptel").val() == "") { }
+            else if (!ValidationData('mobilephone', $("#apptel").val())) { alert("申请人手机格式不正确！"); $("#apptel").focus(); return; }
+            //  if ($("#appbirthday").val() == "") { alert("申请人生日不能为空！"); $("#appbirthday").focus(); return; }
+            if ($("#cardno").val() == "") { alert("申请人证件号码不能为空！"); $("#cardno").focus(); return; }
+            if ($("#category").val() == "") { alert("请选择职业类别！"); $("#category").focus(); return; }
+            // alert($("#appbirthday").val());
+
+            var param = {
+                "Name": $("#appname").val(),
+                "Phone": $("#apptel").val(),
+                "Sex": $("#appsex").val(),
+                "Type": $("#apptype").val(),
+                "Birthday": $("#appbirthday").val(),
+                // "Note": $("#appnote").val(),
+                "OrderCode": $("#hiddenordercode").val(),
+                "CardNo": $("#cardno").val(),
+                "CardType": $("#cardtype").val(),
+                "Categorycode": $("#category").val(),
+                "Status": 0
+            };
+
+            $.post("/OrderAdmin/AddTouristInfo/", param, function (data) {
+                alert("添加成功！");
+
+                // 弹出框关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            });
+        });
+
+    });
+</script>

@@ -1,0 +1,59 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Base.ArticleVModel
+
+<div class="row">
+    <div class="col">
+        <div class="blog_posts d-flex flex-row align-items-start justify-content-between">
+            @if (Model.ArticlePageList.Items.Count > 0)
+            {
+                foreach (var item in Model.ArticlePageList.Items)
+                {
+                    <!-- Blog post -->
+                    <div class="blog_post">
+                        <div class="blog_image" style="background-image:url(@item.ImgUrl)"></div>
+                        <div>@item.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
+                        <div class="blog_text">@item.Title</div>
+                        <div class="blog_button"><a href="/blog/details/@item.Id">阅读博客</a></div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div>
+                    当前没有数据！
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@Html.HiddenFor(a => a.ArticlePageList.PageIndex)
+<div id="Pagination" class="digg"></div>
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function() {
+        $("#Pagination").pagination(
+            Number('@Model.ArticlePageList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.ArticlePageList.PageSize'),
+                current_page: @Model.ArticlePageList.PageIndex-1
+            });
+    });
+
+    //回调方法
+     function pageselectCallback(page_id, jq) {
+         var load_iii = Utils.layerLoad();
+         $("#ArticlePageList_PageIndex").val(page_id + 1);
+         var params = $("#theForm").formSerialize();
+
+         $.post('@Url.Action("Search")', params, function(data) {
+             if (data.length<1) {
+                 Utils.alert("查询出错，请稍后查询！");
+                 return false;
+             }
+             $('#divNotices').html(data);
+             Utils.layerClose(load_iii);
+         });
+     }
+
+</script>

@@ -1,0 +1,66 @@
+﻿@model Lvy.VModels.Order.OrderConfirmPrintVModel
+<table style="border: 0px;" class="listtbl" width="100%">
+    <thead>
+        <tr>
+            <td align="left">价格类型</td>
+            <td align="left">销售价</td>
+            <td align="center">F</td>
+            <td align="center">自费</td>
+            <td align="center">单房差</td>
+            <td align="center">接送费</td>
+            <td align="center">人数</td>
+            <td align="center">结算金额</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.BusTravellerVModels.Count > 0)
+        {
+            var models = Model.BusTravellerVModels.Where(a => a.State == 2); // 有效客户
+            foreach (var item in models)
+            {
+                <tr>
+                    <td align="left">@item.PriceContent</td>
+                    <td align="left">@item.ShouJia.ToInteger()</td>
+                    <td align="center">@item.FanLi.ToInteger()</td>
+                    <td align="center">@item.ZiFei.ToInteger()</td>
+                    <td align="center">@item.SingleRoom.ToInteger()</td>
+                    <td align="center">
+                        @{ var jsPrice = (item.JiePrice + item.SongPrice);}
+                        @jsPrice.ToInt()
+                    </td>
+                    <td align="center">@item.PeopleCount</td>
+                    <td align="center">@item.GroupYsPrice</td>
+                </tr>
+                            }
+                            var tuiTuanModels = Model.BusTravellerVModels.Where(a => a.State == 1); // 退团产生费用
+                            foreach (var item in tuiTuanModels)
+                            {
+                                <tr>
+                                    <td align="left">已退团</td>
+                                    <td align="left"></td>
+                                    <td align="center"></td>
+                                    <td align="center"></td>
+                                    <td align="center"></td>
+                                    <td align="center"></td>
+                                    <td align="center">@item.PeopleCount</td>
+                                    <td align="center">@item.GroupYsPrice</td>
+                                </tr>
+                            }
+
+                            <tr>
+                                <td align="right" colspan="8">
+                                    <label class="label" style="padding-right: 28px;">结算总金额：</label>
+                                </td>
+                                <td align="center">
+                                    <label class="label">@Model.OrderModel.TolYsPrice</label>
+                                </td>
+                            </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" align="center" style="color: red;">当前没有数据！</td>
+                                </tr>
+                            }
+    </tbody>
+</table>

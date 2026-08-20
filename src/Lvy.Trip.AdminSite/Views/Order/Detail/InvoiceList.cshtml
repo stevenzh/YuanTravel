@@ -1,0 +1,46 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2; padding:10px;">
+    发票列表
+    <div class="fr">
+        @if (GlobalContext.Current.LoginUserRoles.Any(t => t.Name == "销售"))
+        {
+            <button type="button" id="btnAddInvoice" class="btn btn1">添加发票申请</button>
+        }
+    </div>
+</div>
+
+<table id="tbTrallers" class="listtbl" style="width:100%;">
+    <thead>
+        <tr>
+            <th align="center">编号</th>
+            <th align="center">客户名称</th>
+            <th align="center">项目名称</th>
+            <th align="center">开票金额</th>
+            <th align="center">申请人</th>
+            <th align="center">状态</th>
+            <th align="center">开票日期</th>
+            <th align="center">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ListTpInvoiceInfo)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.CustomerName</td>
+                <td>@item.ServiceItems</td>
+                <td>@item.Amount</td>
+                <td>@DictionaryTools.GetCachedAccount(item.CreatedBy).Name</td>
+                <td>@(item.State == 0 ? "申请中" : "已开具")</td>
+                <td>@(item.CreatedTime.ToString("yyyy-MM-dd"))</td>
+                <td>
+                    <button type="button" onclick="invoiceDetail('@item.Id')">详情</button>
+                    @if (item.State < 1)
+                    {
+                        <button type="button" onclick="invoiceDelete('@item.Id')">删除</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

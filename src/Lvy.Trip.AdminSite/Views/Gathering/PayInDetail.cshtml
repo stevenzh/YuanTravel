@@ -1,0 +1,171 @@
+﻿@model Lvy.Models.OrderDB.TpOrderPayInModel
+@using Arch.Common
+@{
+    var picroot = AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <link href="@CDNServerUrl/jquery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.min.js"></script>
+    <link href="~/WebRes/css/jquery.suggest.css" rel="stylesheet" type="text/css" />
+    <script src="~/WebRes/Scripts/suggest.customer2.js" type="text/javascript"></script>
+    <style>
+        .borderless > tbody > tr > td { border: none; }
+    </style>
+}
+
+<div class="in_box">
+    @Html.HiddenFor(a => a.OrderCode)
+    <table id="TB_TOUR_PAY" class="table borderless">
+        <tbody>
+            <tr>
+                <td style="text-align:left">旅行社：@DictionaryTools.GetCachedCustomer(Model.CustomerCode).Name</td>
+                <td style="text-align:left">汇款人：@Model.Remitter </td>
+                <td style="text-align:left">订单编号：@Model.OrderCode </td>
+                <td style="text-align:right">税号：@Model.TaxNumber </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <table style="width:100%" class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td style="width:40%">
+                                    <b>团队名称：</b> @Model.TourNo<br />
+                                    <b>旅游线路：</b>@Model.ProductName
+                                </td>
+                                <td style="width:30%">
+                                    <b>付款类型：</b>@DictionaryTools.GetEnumValue(Enums.PayTypeEnum, Model.PaymentType.ToString()) <br />
+                                    <b>缴款金额：</b>@Model.Amount<b>元</b> <br />
+                                    <b>加款金额：</b>@Model.AddAmount<b>元</b>
+                                </td>
+                                <td style="width:40%">
+                                    <b>关联编号：</b> @Model.JoinNo
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">备注:@Model.Remark</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>缴款人: @DictionaryTools.GetCachedAccount(Model.PayInBy).Name</b>
+                                    @Html.Hidden("PayInModel.SalerCode", Model.PayInBy)
+                                </td>
+                                <td><b>审核人:</b></td>
+                                <td><b>收款人：（盖章）</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:5PX 0PX;">
+                    注：收款人签名或盖章有效
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-bordered">
+        <tr>
+            <td colspan="3"><span style="font-weight:500;font-size:16px; ">打印附件</span></td>
+        </tr>
+        <tr>
+            <td align="center">
+                @if (!string.IsNullOrEmpty(Model.BillFileUrl))
+                {
+                    <div style="width:33%; float:left;">
+                        <a class="go" href="@(picroot + Model.BillFileUrl)" rel="gallery">
+                            <img style="width:60px;" src="@(picroot + Model.BillFileUrl)">
+                        </a>
+                    </div>
+                }
+            </td>
+            <td>
+                @if (!string.IsNullOrEmpty(Model.BankFileUrl))
+                {
+                    <div style="width:33%; float:left;">
+                        <a class="go" href="@(picroot + Model.BankFileUrl)" rel="gallery">
+                            <img style="width:60px;" src="@(picroot + Model.BankFileUrl)">
+                        </a>
+                    </div>
+                }
+            </td>
+        </tr>
+    </table>
+
+    <table class="sotable">
+        <tr>
+            <td align="center">
+                @if (Model.State < 20)
+                {
+                    <button class="btn btn-info" id="btnConfirmPayIn" type="button">确认收款</button>
+                }
+                <button class="btn btn-info" id="btnPrint" type="button">打印</button>
+                <a class="btn btn-info" href="@Url.Action("Search")">返回列表</a>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="iviewer">
+    <div class="loader"></div>
+    <div class="viewer"></div>
+    <ul class="controls">
+        <li class="close"></li>
+        <li class="zoomin"></li>
+        <li class="zoomout"></li>
+        <li class="rotate_left"></li>
+        <li class="rotate_right"></li>
+    </ul>
+    <div class="info">
+        <a href="#" id="prevLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_prev.png" /></a>
+        <p id="imageCount"></p>
+        <a href="#" id="nextLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_next.png" /></a>
+    </div>
+</div>
+<script src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/main.js"></script>
+<script>
+
+    $(function () {
+
+        $("#btnConfirmPayIn").click(function () {
+            var params = { "payInId": '@Model.Id' };
+            $.post('/Gathering/SingleOrderShowKuanCheck', params, function(data) {
+                if(data){
+                    layer.open({
+                        type: 1, title: '确认收款', maxmin: false
+                        , shadeClose: false, area: ['500px', '300px']
+                        , content: data
+                        , btn: ["确认", "关闭"]
+                        , yes: function (index, layero) {
+                            $.post('/Gathering/PayInToConfirmed',params,function (result) {
+                                if(result.Result=="1") {
+                                    Utils.alert('确认收款成功！');
+                                    location.href='@Url.Action("Search", "Gathering")';
+                                }
+                                else {
+                                    Utils.alert('提交失败');
+                                }
+                            });
+                        }
+                        , btn2: function (index, layero) {
+                            // 取消
+                        }
+                    });
+                }
+                else  {
+                    Utils.alert('请求发生异常');
+                }
+            });
+        });
+
+        //打印
+        $("#btnPrint").click(function () {
+            window.location.href = "/Order/PayinPrint/" + @Model.Id;
+        });
+
+    });
+</script>

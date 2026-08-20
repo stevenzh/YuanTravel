@@ -1,0 +1,79 @@
+﻿@model Lvy.VModels.Finance.BusPointCountVModel
+<div class="xbox clear">
+    <div class="btnlist">
+        <div class="fl">
+            <a id="exportLink" href="javascript:void(0);">
+                <img src="../../../WebRes/images/icons/drive-download.png" />导出</a>
+        </div>
+    </div>
+    <table class="listtbl" width="100%">
+        <thead>
+            <tr style="text-align: center;">
+                <td>序号</td>
+                <td style="text-align: left;">产品名称</td>
+                <td>接送类型</td>
+                <td>订单数量</td>
+                <td>人数</td>
+                <td>接价</td>
+                <td>送价</td>
+                <td>时间</td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.BusPointCountList.Count == 0)
+            {
+                <tr>
+                    <td colspan="7" style="text-align: center; color: red;">
+                        当前没有数据！
+                    </td>
+                </tr>
+            }
+            else
+            {
+                int rowIndex = 1;
+                var busPointIds = Model.BusPointCountList.Where(p => p.BusPointModel != null).Select(p => p.BusPointModel.BusPointId).Distinct();
+                foreach (var id in busPointIds)
+                {
+                    var orders = Model.BusPointCountList.Where(p => p.BusPointModel.BusPointId == id);
+                <tr style="text-align: center;">
+                    <td>
+                        @(rowIndex++)
+                    </td>
+                    <td style="text-align: left;">
+                        @orders.FirstOrDefault().BusPointModel.BusPoint
+                    </td>
+                    <td>
+                        @switch (orders.FirstOrDefault().BusPointModel.JsType)
+                        {
+                            case 1:
+                            <span>接</span>
+                                break;
+                            case 2:
+                            <span>送</span>
+                                break;
+                            case 3:
+                            <span>接/送</span>
+                                break;
+                            default:
+                                break;
+                        }
+                    </td>
+                    <td>@orders.Count()</td>
+                    <td>@orders.Sum(p => p.PeopleCount)</td>
+                    <td>@orders.FirstOrDefault().BusPointModel.JiePrice</td>
+                    <td>@orders.FirstOrDefault().BusPointModel.SongPrice</td>
+                    <td>@orders.FirstOrDefault().BusPointModel.JsTime</td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    //导出预订单
+    $('#exportLink').click(function () {
+        var params = $('#theForm').formSerialize();
+        $.fileDownload('/Stat/ExportBusPointCount', { httpMethod: "POST", data: params });
+    });
+
+</script>

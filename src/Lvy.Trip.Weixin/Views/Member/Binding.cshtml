@@ -1,0 +1,54 @@
+﻿@model Lvy.Models.WeixinDB.Member
+@{
+    ViewBag.Title = "微信公众号";
+}
+@section HeaderContent{}
+
+<!-- settings -->
+@using (Html.BeginForm("Submit", "Member", FormMethod.Post, new { id = "frm" }))
+{
+
+
+
+    <div class="ui form " style="padding-top:24px;">
+        <div class="ui basic segment">
+            <div class="ui relaxed divided list">
+
+                <div class="item">
+                    <div class="content">
+                        <input type="hidden" name="OpenID" value='@Model.OpenID' />
+                        <div class="required inline field">
+                            <label>姓　　名</label>
+                            @Html.TextBoxFor(t => t.RealName, new { @placeholder = "姓名" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <div class="content">
+                        <div class="required inline field">
+                            <label>联系电话</label>
+                            @Html.TextBoxFor(t => t.PhoneNumber, new { @placeholder = "联系电话" })
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <div class="required inline field">
+                            <label>企业全称</label>
+                            @Html.TextBoxFor(t => t.CustomerName, new { @placeholder = "企业全称" })
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <div class="required inline field">
+                            <label>联系销售</label>
+                            @Html.TextBoxFor(t => t.Sales, new { @placeholder = "销售姓名或手机号码" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

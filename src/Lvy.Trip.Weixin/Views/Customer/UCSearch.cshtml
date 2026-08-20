@@ -1,0 +1,66 @@
+﻿@model Lvy.VModels.Crm.CustomerVModel
+@{
+    Layout = null;
+}
+
+<table class="table table-bordered table-sm text-nowrap" style="min-width:650px;">
+    <thead>
+        <tr>
+            <th>客户名称</th>
+            <th style="width:80px;">销售</th>
+            <th style="width:95px;">状态</th>
+            <th style="width:160px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Customers.Items)
+        {
+            string color = "#fff";
+            if (item.IsValid == 0)
+            {
+                color = "#f3f3f4";
+            }
+            else if (item.CustomerState == 1)
+            {
+                color = "#e0f9e4";
+            }
+            else if (item.CustomerState == 2)
+            {
+                color = "#fdfab6";
+            }
+            <tr style="background-color:@color">
+                <td><a href="@Url.Action("Details", new{id = item.Code })">@item.Name</a></td>
+                <td>@item.SalerName</td>
+                <td>@DictionaryTools.GetEnumValue(Enums.CustomerStateEnum, item.CustomerState.ToString(), false)</td>
+                <td>
+                    @if (item.CustomerState != 1 && item.SalerCode == GlobalContext.Current.UserInfo.Code)
+                    {
+                        <a class="sendMsg btn btn-info btn-sm" href="javascript:void(0)" data-code="@item.Code">提交审核</a>
+                        <a class="btn btn-info btn-sm" href="@Url.Action("Edit", new{id = item.Code })">编辑</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+
+    $(function () {
+        $(".sendMsg").click(function () {
+            var str = $(this).attr("data-code");
+            var load_iii = Utils.layerLoad();
+            $.post("/Custmer/SendAuditMsg", { "code": str },
+                function (data) {
+                    if (data == "yes") {
+                        Utils.alert("已发送申请.");
+                    }
+                    else {
+                        Utils.alert(data);
+                    }
+                    Utils.layerClose(load_iii);
+                });
+        });
+    });
+
+</script>

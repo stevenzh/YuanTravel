@@ -1,0 +1,36 @@
+﻿@model Lvy.VModels.Order.GoNoticePrintVModel
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+    游客列表
+</div>
+<table style="border: 0px;width:100%;">
+    <thead>
+        <tr style="text-align: center;">
+            <td>姓名</td>
+            <td>电话</td>
+            <td>证件类型</td>
+            <td>证件号</td>
+            <td>报价种类</td>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TravellerModels.Count > 0)
+        {
+            foreach (var item in Model.TravellerModels)
+            {
+                <tr style="text-align: center;">
+                    <td>@item.Name</td>
+                    <td>@item.Phone</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.PassTypeEnum, item.PassType.ToString())</td>
+                    <td>@item.PassNo</td>
+                    <td>@item.PriceContent</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" align="center" style="color: red;">当前没有数据！</td>
+            </tr>
+        }
+    </tbody>
+</table>

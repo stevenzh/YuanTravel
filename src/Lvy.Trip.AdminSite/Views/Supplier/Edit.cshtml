@@ -1,0 +1,404 @@
+﻿@model Lvy.Models.CrmDB.CrmCustomerModel
+@{
+    ViewBag.Title = "编辑客户";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="~/WebRes/css/jquery.suggest.css" rel="stylesheet" type="text/css" />
+    <script src="~/WebRes/scripts/suggest.customer2.js" type="text/javascript"></script>
+    <!-- Bootstrap Switch -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" />
+    <script src="@CDNServerUrl/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+}
+@Html.Partial("UCTabTitle", Model.Code)
+<form id="theForm" action="@Url.Action("Edit")" method="POST" enctype="multipart/form-data" onsubmit="return CheckControls();">
+    @Html.HiddenFor(a => a.Code)
+    @Html.HiddenFor(a => a.CustomerState)
+
+    <div class="inform">
+        <div class="in_box">
+            <table class="edittbl" style="width:auto">
+                <tr>
+                    <td class="label"><span class="point">*</span>客户名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Name, new { @class = "text400" })
+                        <div id='suggest1' class="ac_results" style="width: 250px; margin-left: 1.2em;"></div>
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label"><span class="point">*</span>客户简称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.ShortName, new { @class = "text220" })
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">快捷码：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.FastCode, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">父公司：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.ParentName, new { id = "ParentName" })
+                        <select id="mySelect2" name="ParentCode" class="text300">
+                            @if (Model != null && !Model.ParentCode.IsNullOrEmpty())
+                            {
+                                <option value="@Model.ParentCode">@DictionaryTools.GetCachedCustomer(Model.ParentCode).Name</option>
+                            }
+                        </select> <span style="color:crimson"> (有统一结算需求 请填写)</span>
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">负责人：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Head, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label">公司电话：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Phone, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>地址：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Province, ViewBag.ProvinceList as IEnumerable<SelectListItem>, new { @class = "select150", @onchange = "ProvinceChange()" })
+                        @Html.DropDownListFor(a => a.City, ViewBag.CityList as IEnumerable<SelectListItem>, new { @class = "select150", @onchange = "CityChange()" })
+                        @Html.DropDownListFor(a => a.County, ViewBag.CountyList as IEnumerable<SelectListItem>, new { @class = "select150" })
+
+                        @Html.TextBoxFor(a => a.Address, new { @class = "text300" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"> 税号：</td>
+                    <td>
+                        <input type="text" name="TaxNumber" id="TaxNumber" class="text150" maxlength="50" value="@Model.TaxNumber" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>结算方式：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.PaymentType, ViewBag.PaymentTypes as IEnumerable<SelectListItem>, new { @class = "select150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>信用额度：</td>
+                    <td>
+                        <input type="text" name="CreditLine" id="CreditLine" class="text150" value="@Model.CreditLine" input-limit="number" />
+                        0为没有限制
+                    </td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="label">是否分销商：</td>
+                    <td>@Html.CheckBoxFor(m => m.IsDistributors, new { @class = "js-switch" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>渠道来源：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.ChannelType, ViewBag.ChannelTypes as IEnumerable<SelectListItem>, new { @class = "select150" })
+                    </td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="label">是否下设门市或门店</td>
+                    <td>@Html.CheckBoxFor(m => m.HasChild, new { @class = "js-switch" })</td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="label">账单是否显示折让：</td>
+                    <td>@Html.CheckBoxFor(m => m.RebateInBill, new { @class = "js-switch" })</td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="label">是否自家门店：</td>
+                    <td>@Html.CheckBoxFor(m => m.IsBranch, new { @class = "js-switch" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>销售组：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.TeamID, ViewBag.Teams as IEnumerable<SelectListItem>, new { @class = "seletct150", @disabled = "disabled" })
+                        @Html.HiddenFor(t => t.TeamID)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>对应销售：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150", @disabled = "disabled" })
+                        @Html.HiddenFor(t => t.SalerCode)
+                    </td>
+                </tr>
+                <tr style="background-color:gainsboro;">
+                    <td colspan="2"><b>以下为供应商设置</b> </td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="label">是否供应商：</td>
+                    <td>@Html.CheckBoxFor(m => m.IsSupplier, new { @class = "js-switch" })</td>
+                </tr>
+                <tr style="height:45px;">
+                    <td class="label">是否组团社：</td>
+                    <td>@Html.CheckBoxFor(m => m.IsGroupTour, new { @class = "js-switch" })</td>
+                </tr>
+                <tr style="background-color:gainsboro;">
+                    <td colspan="2"><b>以下为供应商上线产品设置</b> </td>
+                </tr>
+                <tr>
+                    <td class="label">获许经营范围：</td>
+                    <td>
+                        @Html.CheckboxList("BusinessPermitSelect", ViewBag.SupplyProdutType as IEnumerable<SelectListItem>, Model.BusinessPermit)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">输入产品负责部门：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.ImportTeam, ViewBag.ImportTeams as IEnumerable<SelectListItem>, new { @class = "select150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">备注：</td>
+                    <td>@Html.TextAreaFor(a => a.Remarks, new { @class = "textarea440" })</td>
+                </tr>
+                @if (ViewData["Alert"] != null)
+                {
+                    <tr>
+                        <td colspan="2" style="color:orangered; font-size:large;">※  @ViewData["Alert"]</td>
+                    </tr>
+                }
+                <tr>
+                    <td></td>
+                    <td>
+                        @if (Model.CustomerState == 0)
+                        {
+                            <input class="btn btn1" id="btnAudit" type="button" value="申请审核" />
+                        }
+
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                        <a class="btn btn1" href="@Url.Action("Search")">返回列表</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.ParentCode, new { id = "hiddenParentCode" })
+</form>
+<script type="text/javascript">
+
+    $(function () {
+
+        if ($("#CustomerState").val()=="1") {
+            $("input[type=text]").attr("disabled", "disabled");
+            $("input[type=radio]").attr("disabled", "disabled");
+            $("input[type=checkbox]").attr("disabled", "disabled");
+            $("select").prop("disabled", "false");
+            //$("select option").each(function () {
+            //     $(this).attr("disabled","disabled");
+            // });
+        }
+
+        $(".js-switch").each(function () {
+            $(this).bootstrapSwitch({ 'state': $(this).prop('checked'), onText: "是", offText:"否" });
+        });
+
+        $("#Name").suggestCustomer({
+            dataContainer: null, anyInput:true,
+            attachObject: '#suggest1', requestUrl: '/Customer/GetCustomersPopup', hasChild: true
+        });
+
+        $('#mySelect2').select2({
+            ajax: {
+                url: '/Customer/GetCustomerSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        hasChild: true,
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 0;
+                    return {
+                        results: data.rows,
+                        pagination: {
+                            more: (params.page * 10) < data.total
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+            //templateResult: formatState
+        });
+        $('#mySelect2').on('select2:select', function (e) {
+            var data = e.params.data;
+            $("#ParentName").val(data.text);
+        });
+
+        $("#Name").blur(function () {
+            //$("#ShortName").val($("#Name").val());
+            debugger;
+            var str = $(this).val();
+            idx = str.indexOf("营业部");
+            idx1 = str.indexOf("分公司");
+            if (idx > -1 || idx1 > -1) {
+                var isChecked = $("#HasChild").is(':checked');
+                if (isChecked == false) {
+                    $('#HasChild').bootstrapSwitch("state", true);
+                }
+            }
+        });
+
+        $("#TeamID").change(function () {
+            var teamId = $(this).val();
+            $("#SalerCode").empty();
+            if (teamId == "") {
+                $("#SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#SalerCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                    });
+                }
+            });
+        });
+
+
+        $("#btnAudit").click(function () {
+            var load_iii = Utils.layerLoad();
+            $.post("/Customer/SendAuditMsg", { "code": $("#Code").val() },
+                function (data) {
+                    if (data == "yes") {
+                        Utils.alert("已发送申请.");
+                    }
+                    else {
+                        Utils.alert(data);
+                    }
+                    Utils.layerClose(load_iii);
+                });
+        });
+    });
+
+
+    function CheckControls() {
+
+        if ($("#CustomerState").val() == "1") {
+            return true;
+        }
+
+        if (Utils.Trim($("#Name").val()) == "") {
+            Utils.alert("客户名称不能为空！");
+            $("#Name").select().focus();
+            return false;
+        }
+        if (Utils.Trim($("#Address").val()) == "") {
+            Utils.alert("请输入地址！");
+            $("#Address").select().focus();
+            return false;
+        }
+
+        if (Utils.Trim($("#ChannelType").val()) == "") {
+            Utils.alert("请选择渠道来源！");
+            $("#ChannelType").select().focus();
+            return false;
+        }
+        //if (!$("#IsDistributors").prop("checked") && !$("#IsSupplier").prop("checked")) {
+        //    Utils.alert("请选择客户角色！");
+        //    return false;
+        //}
+
+        if ($("#PaymentType").val() == "") {
+            Utils.alert("请选择结算方式！");
+            $("#PaymentType").select().focus();
+            return false;
+         } else {
+            var pt = $("#PaymentType").val();
+            var cl = $("#CreditLine").val();
+            if (pt != '1' && Number(cl) == 0) {
+                Utils.alert("非现结客户，信用额度不能为零！");
+                return false;
+            }
+        }
+        if (Utils.Trim($("#CreditLine").val()) == "") {
+            Utils.alert("信用额度不能为空！");
+            $("#CreditLine").select().focus();
+            return false;
+        }
+        if ($("#TeamID").val() == "") {
+            Utils.alert("请选择销售组！");
+            return false;
+        }
+        if ($("#SalerCode") == "") {
+            Utils.alert("请选择对应销售！");
+            return false;
+        }
+
+        // 名称重复验证
+        var result = false;
+        $.ajax({
+            url: '/Customer/CheckCustomerName',
+            data: { customerName: $.trim($("#Name").val()), code: '@Model.Code' },
+            type: 'post',
+            async: false,
+            success: function (data) {
+                if (data.Code == "1") {
+                    result = true;
+                }
+            }
+        });
+        if (result) {
+            Utils.alert("客户名称已存在！");
+            return false;
+        }
+
+        return true;
+    }
+
+    function ProvinceChange() {
+        var provinceId = $("#Province").val();
+        if (provinceId != "") {
+            var cityOption = '<option value="">-- 请选择 --</option>';
+            $("#City").empty();
+            $.ajax({
+                url: '@Url.Action("GetCityListByProvinceId")',
+                data: { provinceId: provinceId },
+                type: 'post',
+                async: false,
+                success: function (data) {
+                    $.each(data, function (index, item) {
+                        cityOption += '<option value="' + item.Id + '">' + item.Name + '</option>';
+                    });
+                }
+            });
+
+            $("#City").append(cityOption);
+        }
+    }
+
+    function CityChange() {
+        var cityId = $("#City").val();
+        var cityOption = '<option value="">-- 请选择 --</option>';
+        $("#County").empty();
+        $.ajax({
+            url: '@Url.Action("GetCountyListByCityId")',
+            data: { cityId: cityId },
+            type: 'post',
+            async: false,
+            success: function (data) {
+                $.each(data, function (index, item) {
+                    cityOption += '<option value="' + item.Id + '">' + item.Name + '</option>';
+                });
+            }
+        });
+
+        $("#County").append(cityOption);
+    }
+
+</script>

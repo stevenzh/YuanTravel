@@ -1,0 +1,55 @@
+﻿@model Lvy.VModels.Weixin.MemberQModel
+@{
+    Layout = null;
+}
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+            <th>昵称</th>
+            <th>姓名</th>
+            <th>手机</th>
+            <th>同业审核</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.MemberPageList.Items)
+        {
+            <tr>
+                <td>
+                    <img src="@item.HeadImgUrl" style="height:48px; width:48px" />
+                </td>
+                <td>
+                    @if (item.NickName != null)
+                    {
+                        @Html.ActionLink(item.NickName, "Details", new { id = item.OpenID })
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RealName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+                <td>
+                    @*<div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+                                审核
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a tabindex="-1" href="#">通过</a></li>
+                                <li><a tabindex="-1" href="#">不通过</a></li>
+                            </ul>
+                        </div>*@
+
+                    @if (item.Approved == 0)
+                    {
+                        @Html.ActionLink("审核", "Details", new { id = item.OpenID })
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

@@ -1,0 +1,116 @@
+﻿@model Lvy.Visa.Models.VisaDataQModel
+@{
+    Layout = null;
+}
+
+<div class="content_box" style="border-top:none;">
+    <div class="content_main product_info">
+        <h5>不同人群所需材料详情</h5>
+        <div style="border-bottom: 1px solid #ddd; border-left: 0px solid #ddd; border-right: 0px solid #ddd; margin: 2px;">
+            <div width="98%" id="divVisaCategroy">
+                @{ Html.RenderAction("VisaCategoryList", new { informationCode = Model.InformationCode }); }
+            </div>
+            <div id="divCategoryPartial">
+
+            </div>
+        </div>
+        @{ Html.RenderAction("ProductProcessManage","VisaProduct", new { InformationCode = Model.InformationCode }); }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var categoryCode = $("#hidCategoryCode").val();
+        var prodCode = '@Model.InformationCode';
+        //获取材料列表
+        funGetVisaDatas(categoryCode, prodCode);
+    });
+    //样式控制
+    function setSpanClass(n) {
+        $("#ulCatagoryList a").each(function (x) {
+            if (x == n) {
+                $(this).removeClass("btn-default").addClass("btn-info");
+            }
+            else {
+                $(this).removeClass("btn-info").addClass("btn-default");
+            }
+        });
+        //调用span的click
+        var procode = '@Model.InformationCode';
+    }
+    //获取资料列表
+    function funDataPartial(n, categoryCode) {
+        setSpanClass(n-1);
+        var procode = '@Model.InformationCode';
+        var url = "/VisaData/SearchVisaDatasCount";
+        var param = {
+            "CategoryCode": categoryCode,
+            "InformationCode": procode
+        };
+        $.post(url, param, function (data) {
+            if (data != "" && data != "-1") {
+                if (data == 0) {
+                    if (confirm("需要添加模板中的材料吗？")) {
+                        var urlTemp = "/VisaData/SearchVisaDatasTemplate?informationCode=" + procode + "&&categoryCode="+categoryCode;
+                        layer.open({ type: 2, title: '添加分类', maxmin: true, shadeClose: true, area: ['900px', '500px'], content: urlTemp });
+                    }
+                }
+               funGetVisaDatas(categoryCode, procode);
+            }
+        });
+
+    }
+    //获取材料
+    function funGetVisaDatas(categoryCode, prodCode) {
+        var param = {
+            "CategoryCode": categoryCode,
+            "InformationCode": prodCode
+        };
+        $.post("/VisaData/GetVisaData", param, function (data) {
+            if (data != "") {
+                $("#divCategoryPartial").html(data);
+            }
+        });
+    }
+    //增加一行
+    function funAddVisaDatas() {
+        var listhtml = $("#ulCatagoryList").find("a[id^='li']").length;
+        if (listhtml == "" || listhtml == null) {
+            alert("必须先添加分类！再添加该分类下面的材料！");
+            return false;
+        }
+        var url = "";
+
+    }
+    //添加分类
+    function funAddCategory(proCode) {
+        var url = "/VisaData/VisaCategoryAdd/?InformationCode=" + proCode + "&IsFirst=1";
+        layer.open({ type: 2, title: '添加分类', maxmin: true, shadeClose: true, area: ['380px', '100px'], content: url });
+    }
+    //删除分类
+    function funDelCategory(obj, categoryid, categoryCode,proCode) {
+        if (confirm("确定要删除分类吗？？\n 删除后，分类关联的资料将一并删除。")) {
+            obj.style.display = "none";
+            if (categoryid != 0) {
+                var param = {
+                    "CategoryId": categoryid,
+                    "CategoryCode": categoryCode,
+                    "InformationCode": proCode
+                };
+                $.post("/VisaData/DeleteVisaCategory", param, function (data) {
+                    if (data != "") {
+                        if (data == "1") {
+                            //删除成功  重新请求页面
+                            var parlist = { "InformationCode": procode };
+                            var procode = '@Model.InformationCode';
+                            window.location.href = "../Product/ShowTabModifyProduct?InformationCode=" + procode + "&&CurrentTabNum=1";
+                        }
+                        else {
+                            //删除失败
+                        }
+                    }
+                });
+            }
+        }
+    }
+</script>

@@ -1,0 +1,83 @@
+﻿@model Lvy.VModels.Crm.CustomerVModel
+@{
+    ViewBag.Title = "供应商管理";
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+    @Html.HiddenFor(m => m.FirstTime)
+    <div class="xbox clear">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                过滤条件
+            </div>
+            <table class="sotable" align="center">
+                <tr>
+                    <td class="label">客户编码：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Code, new { @class = "text150" })
+                    </td>
+                    <td class="label">客户名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Name, new { @class = "text150" })
+                    </td>
+                    <td width="100" class="label">结算方式：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Customer.PaymentType, ViewBag.PaymentTypes as IEnumerable<SelectListItem>, new { @class = "select150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="4">
+                        <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+                        <input class="btn btn1" id="btnClear" type="button" value="清空" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divSearch">
+        @Html.Partial("UCSearch")
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#btnSearch").click(function () {
+            $("#Customers_PageIndex").val("1");
+            $("#theForm").submit();
+        });
+
+        $("#Customer_TeamID").change(function () {
+            // Utils.alert($(this).val());
+            var teamId = $(this).val();
+            $("#Customer_SalerCode").empty();
+            if (teamId == "") {
+
+                $("#Customer_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#Customer_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+
+                        $("#Customer_SalerCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+
+                    });
+                }
+            });
+        });
+    });
+
+    //重置
+    $("#btnClear").click(function () {
+        $(".sotable td input[type=text]").val("");
+        $(".sotable td input[type=hidden]").val("");
+        $(".sotable td select[id='Customer_TeamID']").val("");
+        $("#Customer_TeamID").change();
+        $("[name='Customer.PaymentType']").val("");
+    });
+</script>

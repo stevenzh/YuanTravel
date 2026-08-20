@@ -1,0 +1,118 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+@{
+    ViewBag.Title = "后台订单";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section HeaderContent {
+
+    <link href="@CDNServerUrl/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="@CDNServerUrl/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        @using (Html.BeginForm("Index", "Booking", FormMethod.Post, new { role = "form" }))
+        {
+            <div class="card-header">
+                @*<h3 class="card-title">数据</h3>*@
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width:380px">
+                        @Html.TextBoxFor(t => t.CustomerName, new { @class = "form-control pull-right", @placeholder = "客户名称"})
+                        @Html.TextBoxFor(t => t.OutDateRange, new { @id = "OutDateRange", @class = "form-control pull-right", @placeholder = "出发日期" })
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="questionListsDiv" class="card-body table-responsive p-0">
+                @Html.Partial("PageList", Model)
+            </div>
+        }
+        <div class="card-footer">
+            <ul id="pagination-demo" class="pagination-sm"></ul>
+        </div>
+    </div>
+
+</section>
+
+<script src="@CDNServerUrl/moment/moment.min.js"></script>
+<!-- date-range-picker -->
+<script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+<script>
+    $(function () {
+
+        $('#OutDateRange').daterangepicker({
+            autoUpdateInput: true,
+            ranges: {
+                '今天': [moment(), moment()],
+                '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '本周': [moment().startOf('week'), moment()],
+                '上周': [moment().subtract(6, 'days'), moment()],
+                '本月': [moment().startOf('month'), moment().endOf('month')],
+                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            locale: {
+                format: "YYYY/MM/DD", //设置显示格式
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        }, function (start, end) {
+                $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+        });
+        $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#OutDateRange').val('');
+        });
+        // 初始
+        //$('#OutDateRange').val('');
+
+       $('#pagination-demo').twbsPagination({
+            totalPages: Number('@Math.Ceiling((decimal)Model.PagedList.TotalCount/(decimal)Model.PagedList.PageSize)'),
+            visiblePages: 3,
+            first: "首页",
+            prev: "上一页",
+            next: "下一页",
+            last: "末页",
+            onPageClick: function (event, page) {
+                page_id = page;
+                var param = {
+                    'StartOutDate': $("#StartOutDate").val(),
+                    'EndOutDate': $("#EndOutDate").val(),
+                    'CustomerName': $("#CustomerName").val(),
+                    'PagedList.PageIndex': page_id,
+                    'PagedList.PageSize': @Model.PagedList.PageSize
+                };
+                $.post('/Booking/PageList/', param, function (data) {
+                    $('#questionListsDiv').html(data);
+                });
+            }
+        });
+    });
+</script>

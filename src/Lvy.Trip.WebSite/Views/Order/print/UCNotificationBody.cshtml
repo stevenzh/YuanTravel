@@ -1,0 +1,109 @@
+﻿@model Lvy.VModels.Order.GoNoticePrintVModel
+<div id="divXingCheng">
+    <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+        行程安排
+    </div>
+    <div style="padding: 10px; text-align: left;">
+        <table class="xingcheng" style="border: 0px;width:100%;">
+            @foreach (var item in Model.LineRoutes)
+            {
+                <tr>
+                    <td colspan="2">
+                        <p class="day_step">
+                            <font class="font2">
+                                第 @item.Days 天
+                            </font> &nbsp;&nbsp;&nbsp;&nbsp; <font class="font3">@item.Title </font>
+                        </p>
+                        <p class="day_introduction"> @Html.Raw(item.Contents)</p>
+                        <p class="catering"></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p>
+                            <font class="font3">餐饮：</font>
+                            <font class="font4">@Html.Raw(item.Catering)</font>
+                        </p>
+                    </td>
+                    <td>
+                        <font class="font3">住宿：</font>
+                        <font class="font4"> @item.Hotel</font>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="2">
+                    <table class="no_padding" style="border: 0px;width:100%;">
+                        <tr>
+                            <td valign="top" width="80px;">
+                                <font class="font3">购物点</font>
+                            </td>
+                            <td>@Html.Raw(Model.LineModel.Shopping)</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <font class="font5">* 以上行程仅供参考，最终行程以出团通知为准。</font>
+                    <div style="padding-bottom: 10px;" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="divFeiYong">
+    <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+        费用描述
+    </div>
+    <div style="padding: 10px;">
+        <table class="no_padding price_contain " style="border: 0px;width:100%;">
+            <tr valign="top">
+                <td width="50%" style="padding-left: 15px;">
+                    <p class="font3">费用包含：</p>
+                    @Html.Raw(Model.LineModel.PriceContain)
+                </td>
+                <td>
+                    <p class="font3">费用不包含：</p>
+                    @Html.Raw(Model.LineModel.PriceNoContain)
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="divYuDing">
+    <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+        预定须知
+    </div>
+    <table class="edittbl" style="border: 0px;width:100%;">
+        <tr>
+            <td style="padding: 5px 15px 10px 10px">
+                @Html.Raw(Model.LineModel.BookingNodes)
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="divTeBie">
+    <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+        出行提示
+    </div>
+    <table class="edittbl" style="border: 0px;width:100%;">
+        <tr>
+            <td style="padding: 5px 15px 10px 10px">
+                @Html.Raw(Model.LineModel.FootNotes)
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="divCaoZuo">
+    <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+        退改规则
+    </div>
+    <table class="edittbl" style="border: 0px;width:100%;">
+        <tr>
+            <td style="padding: 5px 15px 10px 10px">
+                @Html.Raw(Model.LineModel.OpDesc)
+            </td>
+        </tr>
+    </table>
+</div>

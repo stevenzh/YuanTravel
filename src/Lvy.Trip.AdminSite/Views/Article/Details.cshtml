@@ -1,0 +1,78 @@
+﻿@model Lvy.Models.BaseDB.BaseArticleModel
+@{
+    ViewBag.Title = "文章详情";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1">
+                    @if (!Model.ImgUrl.IsNullOrEmpty())
+                    {
+                        <img src="@Model.ImgUrl" class="img-fluid" />
+                    }
+                    @Html.Raw(Model.Contents)
+                </div>
+                <div class="col-12 col-md-12 col-lg-4 order-1 order-md-2">
+                    <h3 class="text-primary"><i class="fas fa-list-alt"></i> @Model.Title</h3>
+                    <div class="text-muted">
+                        <p class="text-sm">
+                            类型
+                            <b class="d-block">@DictionaryTools.GetEnumValue(Enums.NoticeTypeEnum, Model.NoticeType.ToString())</b>
+                        </p>
+                        <p class="text-sm">
+                            发布时间
+                            <b class="d-block">@Model.ModifiedTime.ToString()</b>
+                        </p>
+                        <p class="text-sm">
+                            是否置顶
+                            <b class="d-block">@Model.IsTop</b>
+                        </p>
+                        <p class="text-sm">
+                            标签
+                            <b class="d-block">@Model.Tags</b>
+                        </p>
+                        <p class="text-sm">
+                            发布人
+                            <b class="d-block">@DictionaryTools.GetCachedAccount(Model.ModifiedBy).Name</b>
+                        </p>
+                        <p class="text-sm">
+                            网址
+                            <b class="d-block">@Model.Url</b>
+                        </p>
+                        <p>
+                            <img class="img-responsive" src="/QrCode/Page/@Model.Id">
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    $(function () {
+
+    });
+
+</script>

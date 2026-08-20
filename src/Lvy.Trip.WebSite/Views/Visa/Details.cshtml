@@ -1,0 +1,141 @@
+﻿@model Lvy.Visa.VModels.OnLineProductQModel
+@{
+    ViewBag.Title = "签证_各国旅游签证";
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources {
+    <link href="~/lib/slick-1.8.0/slick.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="@CDNServerUrl/jquery-ui/jquery-ui.min.css" />
+}
+
+<!-- Shop -->
+<div class="deals_featured">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <!-- Shop Sidebar -->
+                <div class="shop_sidebar">
+                    @{Html.RenderAction("HotVisaCountry"); }
+                    @Html.Partial("VisaFAQ")
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <a href="javascript:void(0);" title="">
+                            <img src="@(picroot+ Model.VisaModel.ImgUrl)" style="height:120px;" />
+                        </a>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>&lt;@Model.VisaModel.VisaIssuePlaceName.Trim()送签&gt;@Model.VisaModel.InformationName</h3>
+                            </div>
+       
+                            <div class="card-body">
+                                办理费用：<span class="f18">¥ @Math.Round(Model.VisaModel.SellPrice, 0)</span>
+                                <ul class="clear ovf">
+                                    <li class="ovf">签证有效期：@Model.VisaModel.VisaExpiryDate</li>
+                                    <li class="ovf">办理时长：@Model.VisaModel.AcceptedTime</li>
+                                    <li class="ovf">入境次数：@Model.VisaModel.EnterCount</li>
+                                    <li class="ovf">最长停留时间：@Model.VisaModel.StayDays</li>
+                                    <li class="ovf">面试：@Model.VisaModel.InterviewTypeValue</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer">
+                                <a  class="btn btn-info" href="/Visa/Booking?ProductCode=@Model.VisaModel.InformationCode">立即预订</a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="clear prompt ovf">
+                    @if (!string.IsNullOrEmpty(Model.VisaModel.WarmTips))
+                    {
+                        <div class="f14">友情提示</div>
+                        <p class="ovf">
+                            <span> @Html.Raw(Model.VisaModel.WarmTips)</span>
+                            <a href="@("/search-country-" + Model.VisaModel.VisaCountry + "-0.html")" title="" target="_blank">@("更多" + Model.VisaModel.VisaCountry.Trim() + "签证办理")</a>
+                        </p>
+                    }
+                </div>
+
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <h4>@(Model.VisaModel.InformationName + "办理所需材料")</h4>
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            @{
+                                var _tempCurCategoryIndex = 0;
+                                foreach (var visaCategory in Model.VisaCategoryModels)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(_tempCurCategoryIndex==0?"active":"")" id="@("custom-tabs-four-" + visaCategory.CategoryId + "-tab")" data-toggle="pill"
+                                           href="@("#custom-tabs-four-" + visaCategory.CategoryId )" role="tab" aria-controls="@("custom-tabs-four-" + visaCategory.CategoryId)"
+                                           aria-selected="true">@visaCategory.CategoryName</a>
+                                    </li>
+                                    _tempCurCategoryIndex++;
+                                }
+                            }
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            @{
+                                var _tabIndex = 0;
+                                foreach (var categoryModel in Model.VisaCategoryModels)
+                                {
+                                    var tempVisaDatas = Model.VisaDataModels.Where(a => categoryModel.CategoryCode.Equals(a.CategoryCode));
+
+                                    <div class="tab-pane fade @(_tabIndex==0?"show active":"")" id="@("custom-tabs-four-" + categoryModel.CategoryId)" role="tabpanel"
+                                         aria-labelledby="@("custom-tabs-four-" + categoryModel.CategoryId + "-tab")">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th width="128">需提交材料</th>
+                                                    <th>详细说明</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var dataModel in tempVisaDatas)
+                                                {
+                                                    var tempDataFiles = Model.VisaDataFileModels.Where(a => a.DataCode.Equals(dataModel.DataCode));
+                                                    <tr>
+                                                        <td class="b" valign="top">@dataModel.DataName</td>
+                                                        <td valign="top">
+                                                            <div>@Html.Raw(dataModel.DataExplain)</div>
+                                                            @if (tempDataFiles.Count() > 0)
+                                                            {
+                                                                <br /><br /><span> 附下载：</span>
+                                                                foreach (var dataFileModel in tempDataFiles)
+                                                                {
+                                                                    <a href="@dataFileModel.FileUrl" title="@dataFileModel.FileName" target="_blank">@dataFileModel.FileName</a>
+                                                                }
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    _tabIndex++;
+                                }
+                            }
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+
+                <form id="frmOrder" method="post" action="/booking/visaorder">
+                    <input type="hidden" value="@Model.VisaModel.InformationCode" id="ProductCode" name="ProductCode" />
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+

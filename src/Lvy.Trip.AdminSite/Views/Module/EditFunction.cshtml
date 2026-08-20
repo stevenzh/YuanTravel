@@ -1,0 +1,105 @@
+﻿@model Lvy.VModels.Crm.FunctionVModel
+@{
+    ViewBag.Title = "编辑功能";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Destop">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" action="@Url.Action("UpdateFunction", "Module")" method="POST">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">所属模块：</label>
+                    <div class="col-sm-10">@Model.ModuleName</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">所属菜单：</label>
+                     <div class="col-sm-10">@Model.MenuName</div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label"><span class="point">*</span>功能名称：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(a => a.Function.Name, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label"><span class="point">*</span>排序：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(a => a.Function.Sort, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label"><span class="point">*</span>平台模块：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(a => a.Function.IsSuper, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Url：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(a => a.Function.URL, new { @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">内容：</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(a => a.Function.Description, new { @Class = "form-control" })
+                    </div>
+                </div>
+            </div>  
+            <div class="card-footer">
+                <input class="btn btn-info" id="btnSave" type="submit" value="保存" />
+                <input class="btn btn-info" id="btnBack" onclick="location.href='@Url.Action("Search")';" type="button" value="返回列表" />
+            </div>
+        </div>
+        @Html.HiddenFor(a => a.Function.Id)
+    </form>
+</section>
+<script type="text/javascript">
+    $(function () {
+        $("#theForm").submit(function () {
+            if (!CheckControls()) {
+                return false;
+            }
+        });
+    });
+
+    //验证用户输入
+    function CheckControls() {
+
+        if (Utils.Trim($("#Function_Name").val()) == "") {
+            Utils.alert("功能名称不得为空！");
+            $("#Function_Name").focus().select();
+            return false;
+        }
+        if (Utils.Trim($("#Function_Sort").val()) == "") {
+            Utils.alert("排序不得为空！");
+            $("#Function_Sort").focus().select();
+            return false;
+        }
+        if (Utils.Check.IsInt($("#Function_Sort").val()) == "") {
+            Utils.alert("排序只能为整数！");
+            $("#Function_Sort").focus().select();
+            return false;
+        }
+        return true;
+
+    }
+</script>

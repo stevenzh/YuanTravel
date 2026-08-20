@@ -1,0 +1,161 @@
+﻿@model Lvy.Visa.VModels.BookingQModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<section class="content">
+    <div id="mains" class="card">
+        <div class="card-header">
+            <h3 class="card-title">核对订单</h3>
+        </div>
+        <div class="card-body">
+            <p>产品信息</p>
+            <div class="content_main">
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th>出行日期</th>
+                            <th>产品名称</th>
+                            <th>单价</th>
+                            <th>预订人数</th>
+                            <th>预定日期</th>
+                            <th>订单总金额</th>
+                        </tr>
+                        <tr>
+                            <td>@(Model.ReadyDate != null ? Model.ReadyDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                            <td>
+                                @Model.ProductModel.InformationName
+                            </td>
+                            <td>
+                                @Math.Round(Model.ProductModel.SellPrice, 0)元/人
+                            </td>
+                            <td>
+                                <span>@Model.AudltNum</span> 成人/<span>@Model.ChildNum</span> 儿童
+                            </td>
+                            <td>@DateTime.Now</td>
+                            <td>
+                                <span style="font-size: 14px; color: #ff0000;">RMB&nbsp;@Math.Round(Model.TotAmount, 2)</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="title">联系人信息</div>
+            <div class="content_main">
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>联系电话</th>
+                        </tr>
+                        <tr>
+                            <td>@Model.LinkName</td>
+                            <td>@Model.LinkEmail</td>
+                            <td>@Model.LinkPhone</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="title">申请人信息</div>
+            <div class="content_main">
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th>姓名</th>
+                            <th>类型</th>
+                            <th>性别</th>
+                            <th>证件类型</th>
+                            <th>证件号码</th>
+                            <th>手机号码</th>
+                        </tr>
+                        @foreach (var item in Model.TripModels)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@(item.Type == 1 ? "成人" : "儿童")</td>
+                                <td>@(item.Sex == 0 ? "女" : "男")</td>
+                                <td>@(item.CardType == 2 ? "护照" : "")</td>
+                                <td>@item.CardNo</td>
+                                <td>@item.Phone</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!String.IsNullOrEmpty(Model.CustMessage))
+            {
+                <div class="title">备注</div>
+                <div class="content_main">
+                    <table class="table table-sm table-bordered">
+                        <tbody>
+                            <tr>
+                                <td align="left">@Model.CustMessage</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            @if (Model.IsneedInvoice == 1)
+            {
+                <div class="title">配送/发票信息</div>
+                <div class="content_main">
+                    <table class="table table-sm table-bordered">
+                        <tbody>
+                            <tr>
+                                <th>发票抬头</th>
+                                <th>发票内容</th>
+                            </tr>
+                            <tr>
+                                <td>@Model.DetailTitle</td>
+                                <td>@Model.DetailItem</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="padding: 5px;">
+                        <span style="font-weight: bold;">地址：</span>@Model.Adress &nbsp;&nbsp;
+                    </div>
+                </div>
+            }
+            <div class="title">签约付款方式</div>
+            <div class="content_main">
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                        <tr>
+                            <td style="height: 32px; line-height: 24px;">
+                                @(Model.ContractType == "1" ? "网上" : "门市") 签约付款：<span style="color: #ff0000; font-size: 14px;">
+                                    RMB&nbsp;@Math.Round(Model.TotAmount, 2)
+                                </span>（全款）@*&nbsp;+&nbsp;&nbsp;电子合同*@
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="content_main" style="text-align: center; margin-bottom: 10px;">
+                <input type="button" value="[上一步]" id="Button1" class="btn btn-info" onclick="window.location.href = '/Booking/GoBackBookingInfo'" />
+                <input type="button" value="[提交订单]" id="btnAddBooking" class="btn btn-info" />
+            </div>
+        </div>
+    </div>
+</section>
+
+@section PageScripts
+{
+    <script type="text/javascript">
+
+        $("#btnAddBooking").click(function () {
+            $("#btnAddBooking").attr("disabled", "true");
+            $("#btnAddBooking").css({ "background-color": "", "color": "black" });
+            $.post("/Booking/AddBooking/", function (data) {
+                if (data != "-1") {
+                    var url = "/Booking/BookingOk?ordercode=" + data;
+                    toastr.success('成功');
+                }
+                else {
+                    toastr.error('预定失败！！')
+                }
+            });
+        });
+
+    </script>
+}

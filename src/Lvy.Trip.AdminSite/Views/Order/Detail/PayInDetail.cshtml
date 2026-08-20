@@ -1,0 +1,136 @@
+﻿@model Lvy.VModels.Order.OrderPayInVModel
+@{
+    var pingzheng = Model.OrderFiles.Where(m => m.SourceType == "2" && m.Id == Model.PayInModel.BankFileId).FirstOrDefault();
+    var zhangdan = Model.OrderFiles.Where(m => m.SourceType == "4" && m.Id == Model.PayInModel.BillFileId).FirstOrDefault();
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link href="@CDNServerUrl/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <link href="@CDNServerUrl/jquery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.min.js"></script>
+    <link href="~/WebRes/css/jquery.suggest.css" rel="stylesheet" type="text/css" />
+    <script src="~/WebRes/Scripts/suggest.customer2.js" type="text/javascript"></script>
+    <style>
+        .borderless > tbody > tr > td { border: none; }
+    </style>
+}
+
+<div class="in_box">
+    @Html.HiddenFor(a => a.PayInModel.OrderCode)
+    <table id="TB_TOUR_PAY" class="table borderless">
+        <tbody>
+            <tr>
+                <td style="text-align:left">旅行社：@DictionaryTools.GetCachedCustomer(Model.PayInModel.CustomerCode).Name</td>
+                <td style="text-align:left">汇款人：@Model.PayInModel.Remitter </td>
+                <td style="text-align:left">订单编号：@Model.PayInModel.OrderCode </td>
+                <td style="text-align:right">税号：@Model.PayInModel.TaxNumber </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <table style="width:100%" class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td style="width:40%">
+                                    <b>团队名称：</b> @Model.OrderModel.LineName <br />
+                                    <b>团队人数：</b>@Model.OrderModel.TravellerCount <br />
+                                    <b>旅游线路：</b>@Model.OrderModel.LineName
+                                </td>
+                                <td style="width:30%">
+                                    <b>付款类型：</b>@DictionaryTools.GetEnumValue(Enums.PayTypeEnum, Model.PayInModel.PaymentType.ToString()) <br />
+                                    <b>缴款金额：</b>@Model.PayInModel.Amount<b>元</b> <br />
+                                    <b>加款金额：</b>@Model.PayInModel.AddAmount<b>元</b>
+                                </td>
+                                <td style="width:40%">
+                                    <b>关联编号：</b> @Model.PayInModel.JoinNo
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">备注:@Model.PayInModel.Remark</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>缴款人: @DictionaryTools.GetCachedAccount(Model.PayInModel.PayInBy).Name</b>
+                                    @Html.Hidden("PayInModel.SalerCode", Model.PayInModel.PayInBy)
+                                </td>
+                                <td><b>审核人:</b></td>
+                                <td><b>收款人：（盖章）</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="padding:5PX 0PX;">
+                    注：收款人签名或盖章有效
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-bordered">
+        <tr>
+            <td colspan="3"><span style="font-weight:500;font-size:16px; ">打印附件</span></td>
+        </tr>
+        <tr>
+            <td align="center">
+                @if (zhangdan != null)
+                {
+                    <div style="width:33%; float:left;">
+                        <a class="go" href="@(picroot + zhangdan.FilePath)" title="@zhangdan.FileName" rel="gallery">
+                            <img style="width:60px;" src="@(picroot + zhangdan.FilePath)">
+                        </a>
+                    </div>
+                }
+            </td>
+            <td>
+                @if (pingzheng != null)
+                {
+                    <div style="width:33%; float:left;">
+                        <a class="go" href="@(picroot + pingzheng.FilePath)" title="@pingzheng.FileName" rel="gallery">
+                            <img style="width:60px;" src="@(picroot + pingzheng.FilePath)">
+                        </a>
+                    </div>
+                }
+            </td>
+        </tr>
+    </table>
+
+    <table class="sotable">
+        <tr>
+            <td align="center">
+                <input class="btn btn-info" id="btnPrint" type="button" value="打印" />
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="iviewer">
+    <div class="loader"></div>
+    <div class="viewer"></div>
+    <ul class="controls">
+        <li class="close"></li>
+        <li class="zoomin"></li>
+        <li class="zoomout"></li>
+        <li class="rotate_left"></li>
+        <li class="rotate_right"></li>
+    </ul>
+    <div class="info">
+        <a href="#" id="prevLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_prev.png" /></a>
+        <p id="imageCount"></p>
+        <a href="#" id="nextLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_next.png" /></a>
+    </div>
+</div>
+<script src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/main.js"></script>
+<script>
+    $(function () {
+
+        //打印
+        $("#btnPrint").click(function () {
+            window.location.href = "/Order/PayinPrint/" + @Model.PayInModel.Id;
+        });
+
+    });
+</script>

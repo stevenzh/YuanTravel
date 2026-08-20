@@ -1,0 +1,281 @@
+﻿@using Arch.Common
+@using Arch.Common.Utils
+@model Lvy.VModels.Order.OrderConfirmPrintVModel
+@{
+    var dijie = DictionaryTools.GetCachedCustomer(Model.LineModel.CustomerCode);
+    string strImgSrc = AppSetting.Get("UploadFileRoot") + DictionaryTools.GetCachedCustomer(GlobalContext.Current.OwnerCode).ElecCertifyPath;
+    var amount = Model.OrderModel.TolYsPrice;
+    if (Model.OrderModel.RebateInBill == false)
+    {
+        amount = Model.OrderModel.InvoiceAmount;
+    }
+    var rmb = new RmbTools().ToDaxie(amount);
+}
+<div style="font-size: 24px; text-align: center; color: black; padding: 5px;">
+    确认账单
+</div>
+
+<div class="in_box">
+    <div align="center" class="xboxcontent">
+        <div class="sotable_tit">基本信息</div>
+        <table class="edittbl" style="width:100%;">
+            <tr>
+                <td>致：</td>
+                <td> @DictionaryTools.GetCachedCustomer(Model.OrderModel.BookingCustomer).Name</td>
+                <td>组团社：</td>
+                <td>@(Model.LineModel.IsSelfGroup ? "自组团" : Model.LineModel.CustomerName)</td>
+            </tr>
+            <tr>
+                <td>款项种类：</td>
+                <td>团款</td>
+            </tr>
+            <tr>
+                <td>定金设定：</td>
+                <td>@Html.TextBoxFor(m => m.OrderModel.Deposit)</td>
+                <td>定金缴纳时限</td>
+                <td>@Html.TextBoxFor(m => m.OrderModel.DepositDate, new { Value = String.Format("{0:yyyy-MM-dd}", Model.OrderModel.DepositDate), @readonly = "readonly", @onfocus = "WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})" })</td>
+            </tr>
+            <tr>
+                <td>本期金额：</td>
+                <td>@Html.TextBoxFor(m => m.OrderModel.BillAmount)</td>
+                <td>付款时限</td>
+                <td>@Html.TextBoxFor(m => m.OrderModel.BillDeadline, new { Value = String.Format("{0:yyyy-MM-dd}", Model.OrderModel.BillDeadline), @readonly = "readonly", @onfocus = "WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd'})" })</td>
+            </tr>
+            <tr>
+                <td>账单是否显示协议折扣</td>
+                <td>
+                    <select name="OrderModel.RebateInBill" id="OrderModel_RebateInBill">
+                        @if (Model.OrderModel.RebateInBill)
+                        {
+                            <option value="true" selected="selected">显示</option>
+                            <option value="false">不显示</option>
+                        }
+                        else
+                        {
+                            <option value="true">显示</option>
+                            <option value="false" selected="selected">不显示</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <div id="divJieSuanDetails">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">订单详情</div>
+            <table style="border: 1px; width:100%;" class="listtbl">
+                <tr>
+                    <td>线路名称：</td>
+                    <td colspan="3">@Model.OrderModel.LineName</td>
+                    <td>出团日期：</td>
+                    <td>@Model.OrderModel.OutDate.ToDateFormat()</td>
+                </tr>
+                @*<tr>
+                        <td class="label">游客姓名：</td>
+                        <td colspan="3">@Model.OrderModel.LinkMan  【@Model.OrderModel.LinkPhone】</td>
+                        <td class="label">游客电话：</td>
+                        <td>@Model.OrderModel.LinkPhone</td>
+                    </tr>
+                    <tr>
+                        <td class="label" style="width: 80px;">座位编号：</td>
+                        <td colspan="3">@Model.SeatNums</td>
+                    </tr>
+                    <tr>
+                        <td class="label">上车地点：</td>
+                        <td colspan="3">
+                            @{
+                                string strBusPonint = Model.LineBusPointModel.BusPoint;
+                                if (Model.LineBusPointModel.JsType == 1)
+                                {
+                                    strBusPonint += "（只接不送）";
+                                }
+                                if (Model.LineBusPointModel.JsType == 2)
+                                {
+                                    strBusPonint += "（只送不接）";
+                                }
+                            }
+                            @strBusPonint  【@Model.LineBusPointModel.JsTime】
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">订单备注：</td>
+                        <td colspan="3">@Model.OrderModel.Remark</td>
+                    </tr>*@
+                @if (Model.PersonModels != null && Model.PersonModels.Count > 0)
+                {
+                    foreach (var item in Model.PersonModels)
+                    {
+                        <tr>
+                            <td align="left">@item.PersonType</td>
+                            <td align="center">@item.Count</td>
+                            <td align="left">单价</td>
+                            <td align="left">@item.Price</td>
+                            @if (item.Discount != 0)
+                            {
+                                <td> 折让合计: @item.Discount</td>
+                            }
+                            else
+                            {
+                                <td>&nbsp;</td>
+                            }
+                            <td align="left">合计金额: </td>
+                            <td>@item.Total</td>
+                            @*<td align="left">@item.Note</td>*@
+                        </tr>
+                    }
+
+                    <tr>
+                        <td>结算总金额：</td>
+                        <td colspan="2">@amount</td>
+                        <td></td>
+                        <td>大写人名币合计</td>
+                        <td colspan="2">@rmb</td>
+                    </tr>
+                }
+
+                <tr>
+                    <td>已付</td>
+                    <td colspan="3">@Model.OrderModel.TolPaid</td>
+                    <td>尚欠金额</td>
+                    <td colspan="3">@(amount - Model.OrderModel.TolPaid)</td>
+                </tr>
+                <tr>
+                    <td rowspan="2">特别约定：</td>
+                    <td colspan="7">包机/包船产品一经预定，无法退改。如贵方需要退改，定金将直接冲抵损失，无法退还。</td>
+                </tr>
+                <tr>
+                    <td colspan="7">
+                        @Html.TextAreaFor(a => a.OrderModel.BillOffers, new { @style = "width:90%", @rows = "5" })
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="8">账户信息(人民币账户)：</td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        开户行：中国银行瑞金一路支行<br>
+                        户名：上海新康辉国际旅行社有限责任公司<br />
+                        户号：442963866192<br />
+                        公司支付宝账号:2355369626@qq.com
+                    </td>
+                    <td colspan="4">▼ 请将款项汇入我公司上述账户。如因汇款至非指定账户导致的损失，我公司概不负责。</td>
+                </tr>
+                <tr>
+                    <td colspan="8">账单说明：</td>
+                </tr>
+                <tr>
+                    <td colspan="8">
+                        1、请在账单标明的付款期限内，根据双方的合作协议，支付或确认本账单。如果逾期不予确认或支付，本公司有权随时终止操作，由此造成的损失将由贵方承担。<br />
+                        2、款项支付后，请将汇款底单发送至：QQ :1109206696新康辉计调。我司将在收到贵方的汇款底单后，立即安排团队操作。<br />
+                        3、款项支付后，本司即开始业务操作。如贵方需要修改或取消，本司将尽最大努力配合，但是由此产生的我司或第三方损失，需贵方全额承担。
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+        <div id="divAccountDetails">
+            <div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">账号信息</div>
+            <div style="margin-top: 10px;"></div>
+            <table style="border: 0px; width:100%;" class="edittbl">
+                <tbody>
+                    <tr>
+                        <td align="left" colspan="2" style="padding-bottom: 10px; margin-bottom: 10px;">
+                            <div style="padding-left: 15px;">@Html.Raw(Model.PlatformModel.AccountInfo)</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left" valign="top" style="padding-left: 10px; padding-bottom: 10px; width: 45%;">
+                            @Html.Raw(Model.PlatformModel.ZuTuanInfo)
+                            @if (Model.LocalTravelAgency != null || Model.OrganizingTravelAgency != null)
+                            {
+                                <table style="width: 100%; padding: 0px; margin: 0px; border-collapse: collapse; border-spacing: 0;">
+                                    @if (Model.LocalTravelAgency != null)
+                                    {
+                                        <tr style="height: 15px;">
+                                            <td class="label" style="width: 80px;">地接社：</td>
+                                            <td> <b>@Model.LocalTravelAgency.Customer.Name</b></td>
+                                        </tr>
+                                        <tr style="height: 15px;">
+                                            <td class="label" style="width: 80px;"> 专管员：</td>
+                                            <td><b>@Model.LocalTravelAgency.Name</b></td>
+                                        </tr>
+                                        <tr style="height: 15px;">
+                                            <td class="label" style="width: 80px;"> TEL：</td>
+                                            <td> @Model.LocalTravelAgency.Phone </td>
+                                        </tr>
+                                    }
+                                    @if (Model.OrganizingTravelAgency != null)
+                                    {
+                                        <tr style="height: 15px;">
+                                            <td class="label" style="width: 80px;"> 组团社：</td>
+                                            <td><b>@Model.OrganizingTravelAgency.Customer.Name</b> </td>
+                                        </tr>
+                                        <tr style="height: 15px;">
+                                            <td class="label" style="width: 80px;">专管员： </td>
+                                            <td><b>@Model.OrganizingTravelAgency.Name</b></td>
+                                        </tr>
+                                        <tr style="height: 15px;">
+                                            <td class="label" style="width: 80px;"> TEL：</td>
+                                            <td> @Model.OrganizingTravelAgency.Phone</td>
+                                        </tr>
+                                    }
+                                </table>
+                            }
+                        </td>
+                        <td align="left" valign="top">
+                            <table style="border: 0px;">
+                                <tbody>
+                                    <tr>
+                                        <td style="padding-left: 20px;">
+                                            <table style="width: 100%; padding: 0px; margin: 0px; border-collapse: collapse; border-spacing: 0;">
+                                                <tr style="height: 15px;">
+                                                    <td class="label"> 分销商：</td>
+                                                    <td style="font-weight: bold;">
+                                                        @{
+                                                            string BookingCustomer = "";
+                                                            if (!string.IsNullOrEmpty(Model.OrderModel.BookingCustomer))
+                                                            {
+                                                                BookingCustomer = DictionaryTools.GetCachedCustomer(Model.OrderModel.BookingCustomer).Name;
+                                                            }
+
+
+                                                        }
+                                                        @BookingCustomer
+                                                    </td>
+                                                </tr>
+                                                <tr style="height: 15px;">
+                                                    <td class="label">联系人姓名：</td>
+                                                    <td> @Model.OrderModel.Managers</td>
+                                                </tr>
+                                                <tr style="height: 15px;">
+                                                    <td class="label">联系人电话：</td>
+                                                    <td>  @Model.OrderModel.ManagerPhone</td>
+                                                </tr>
+                                                <tr style="height: 15px;">
+                                                    <td class="label">  预定日期： </td>
+                                                    <td> @Model.OrderModel.CreatedTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                                </tr>
+                                                <tr style="height: 15px;">
+                                                    <td colspan="2" style="color: red;">
+                                                        ★请于报名后２４小时内盖章回传有效★
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+                <tr>
+                    <td align="left" valign="top" colspan="2"></td>
+                </tr>
+            </table>
+            @*<div align="left" style="vertical-align: top; float: left;z-index: 9999">
+                    <img id="imgElecCertifyPath" style="margin-left: 40px;margin-top: -90px;z-index: 9999" src="@strImgSrc" />
+                </div>*@
+            <div style="margin-top: 30px;"> </div>
+        </div>
+    </div>
+</div>

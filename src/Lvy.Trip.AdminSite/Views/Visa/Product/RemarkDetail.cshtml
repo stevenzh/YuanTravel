@@ -1,0 +1,31 @@
+﻿@model Lvy.Visa.VModels.VisaInformationQModel
+@{
+    Layout = null;
+}
+<div id="divShowPCurrenRemarks"
+     style="width:500px; height:260px;float:left; padding-right:-30px; background:#fff;
+        border:1px #6da4cb solid; display:none; padding:5px 2px 2px 2px; overflow:auto;" class="remark_table">
+    <table width="99%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <th style="white-space:nowrap; background-color:#f6f6f6;">序号</th>
+            <th style="white-space:nowrap; background-color:#f6f6f6;">备注</th>
+            <th style="white-space:nowrap; background-color:#f6f6f6;">提交人</th>
+            <th style="white-space:nowrap; background-color:#f6f6f6;">提交时间</th>
+        </tr>
+        @foreach (var remarkModel in Model.InfoRemarksModels)
+        {
+            var index = Model.InfoRemarksModels.IndexOf(remarkModel) + 1;
+            <tr>
+                <td style="white-space:nowrap;">@index</td>
+                <td style="width:50%">@remarkModel.Remarks</td>
+                <td style="white-space:nowrap;">@remarkModel.CreatedByName</td>
+                <td style="white-space:nowrap;">@remarkModel.CreatedDate</td>
+            </tr>
+        }
+    </table>
+</div>
+<div style="float:left; width:30px;">
+    <button>查看</button>
+</div>
+
+

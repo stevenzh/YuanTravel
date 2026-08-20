@@ -1,0 +1,44 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+<table class="edittbl" border="0" style="margin-top: 5px; display: block; padding-right: 20px; margin-left: -20px;width:100%;">
+    <tr>
+        <td style="font-weight: bold; text-align: right; width:100px;">订单编号：</td>
+        <td style="text-align: left;"><span id="OrderCodeSpan">@ViewBag.orderCode</span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">线路名称：</td>
+        <td style="text-align: left;"><span id="ProductNameASpan">@ViewBag.productname</span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">应收款：</td>
+        <td style="text-align: left;"><span id="OrderPriceASpan">@ViewBag.orderprice </span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">已收款：</td>
+        <td style="text-align: left;"><span id="TolPaidASpan">@ViewBag.TolPaid</span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">分销商：</td>
+        <td style="text-align: left;"><span id="BookingNameASpan">@ViewBag.bookingname</span></td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; text-align: right; width: 100px;">跟单状态：</td>
+        <td style="text-align: left;">
+            <select id="SelectTraceState">
+                <option value=""></option>
+                <option value="20" @(ViewBag.traceState == 20 ? "selected='selected'" : "")>游客材料输入</option>
+                <option value="30" @(ViewBag.traceState == 30 ? "selected='selected'" : "")>账单已发送</option>
+                <option value="40" @(ViewBag.traceState == 40 ? "selected='selected'" : "")>账单已确认</option>
+                <option value="50" @(ViewBag.traceState == 50 ? "selected='selected'" : "")>出团通知已发送</option>
+                <option value="90" @(ViewBag.traceState == 50 ? "selected='selected'" : "")>处理完成</option>
+            </select>
+            @* 10 跟单初始；20 游客材料输入；30 账单已发送；40 账单已确认（通知OP占位）；50 出团通知已发送；90 处理完成*@
+
+        </td>
+    </tr>
+</table>
+
+<input type="hidden" id="hiddenOrderCode" />
+<input type="hidden" id="hiddenTolYsPrice" />
+
+@*@Html.HiddenFor(a => a.OrderModel.OrderCode, new { id = "hiddenOrderCode" })
+    @Html.HiddenFor(a => a.OrderModel.TolYsPrice, new { id = "hiddenTolYsPrice" })*@

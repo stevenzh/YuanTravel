@@ -1,0 +1,212 @@
+﻿@{
+    ViewBag.Title = "导航项目管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link rel="stylesheet" href="~/Content/jstree/themes/default/style.min.css" />
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/Content/jstree/jstree.min.js"></script>
+    <script src="~/Content/jstree/jstreegrid.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/SiteNav/Index">导航设置</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    @Html.DropDownList("SelectNavId", ViewBag.NavList as List<SelectListItem>, new { @id = "SelectNavId" })
+                    <button type="button" class="btn btn-info" id="refresh">刷新</button>
+                </div>
+                <div class="card-body">
+                    <div id="jstree" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script type="text/javascript">
+    var treeData, menu, actionNodeText, actionNodeId, parentNode;
+
+    $(function () {
+
+        $("div#jstree").jstree({
+            plugins: ["themes", "json", "grid", "contextmenu", "sort"],
+            core: {
+                data: {
+                    "url": "/SiteNav/GetJsTreeData",
+                    "dataType": "json"
+                }
+            },
+            grid: {
+                columns: [
+                    { width: 300, header: "名称", title: "_DATA_" },
+                    { width: 70, cellClass: "col1", value: "outcity", header: "口岸", title: "outcity", valueClass: "spanclass" },
+                    { width: 70, cellClass: "col1", value: "code", header: "编码", title: "code", valueClass: "spanclass" },
+                    { width: 110, cellClass: "col1", value: "region", header: "区域编码", title: "region", valueClass: "spanclass" },
+                    { width: 70, cellClass: "col2", value: "level", header: "等级", title: "level", valueClass: "spanclass" },
+                    { width: 300, cellClass: "col2", value: "linkurl", header: "链接", title: "linkurl", valueClass: "spanclass" },
+                    { width: 70, cellClass: "col2", value: "isvalid", header: "是否有效", title: "isvalid", valueClass: "spanclass" },
+                    { width: 70, cellClass: "col2", value: "sortorder", header: "权重", title: "sortorder", valueClass: "spanclass" }
+                ],
+                resizable: true,
+                draggable: false,
+                contextmenu: false,
+                gridcontextmenu: function (grid, tree, node, val, col, t, target) {
+                    return {
+                        "edit": {
+                            label: "编辑",
+                            icon: "fas fa-edit",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                //grid._edit(obj, col, target);
+                                var sv = $("#SelectNavId").val();
+                                var url = '/SiteNav/EditNavItem?id=' + obj.data["id"] + "&pid=0&navCode=" + sv;
+                                layer.open({ type: 2, title: '修改项目', maxmin: true, shadeClose: true, area: ['900px', '550px'], content: url });
+                            }
+                        }, "addroot": {
+                            label: "添加根",
+                            icon: "fas fa-plus",
+                            "action": function (data) {
+                                var sv = $("#SelectNavId").val();
+                                var url = '/SiteNav/EditNavItem?id=0&pid=0&navCode=' + sv;
+                                layer.open({ type: 2, title: '添加根项目', maxmin: true, shadeClose: true, area: ['900px', '550px'], content: url });
+                            }
+                        }, "addchild": {
+                            label: "添加子节点",
+                            icon: "fas fa-plus-square",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                var sv = $("#SelectNavId").val();
+                                var url = '/SiteNav/EditNavItem?id=0&pid=' + obj.data["id"] + "&navCode=" + sv;
+                                layer.open({ type: 2, title: '添加子项目', maxmin: true, shadeClose: true, area: ['900px', '550px'], content: url });
+
+                            }
+                        }, "delete": {
+                            label: "删除",
+                            icon: "fas fa-trash",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                //grid._edit(obj, col, target);
+                                if (t.is_leaf(obj) == false) {
+                                    Utils.alert("包含子节点，无法删除");
+                                    return;
+                                }
+                                if (window.confirm("你确定要删除目的地【" + obj.data["id"] + "】吗？")) {
+                                    $.post('/SiteNav/SetValidStateById?id=' + obj.data["id"], function (data) {
+                                        if (data == "1") {
+                                            t.refresh();
+                                        }
+                                    });
+                                }
+                            }
+                        }, "tuijian": {
+                            label: "设置产品列表",
+                            icon: "fas fa-list",
+                            "action": function (data) {
+                                var obj = t.get_node(node);
+                                var url = '/SiteNav/EditList/' + obj.data["id"];
+                                layer.open({ type: 2, title: '设置产品列表', maxmin: true, shadeClose: true, area: ['900px', '570px'], content: url });
+
+                            }
+                        }
+                    }
+                },
+                //width: 500,
+                height: 400
+            },
+            'sort': function (a, b) {
+                a1 = this.get_node(a);
+                b1 = this.get_node(b);
+                return (a1.sortorder > b1.sortorder) ? -1 : 1;
+            }
+        });
+
+        $("a#refresh").click(function () {
+            refreshTree();
+        });
+
+        $("#SelectNavId").change(function () {
+            refreshTree();
+        });
+    });
+
+    function refreshTree() {
+        var load_iii = Utils.layerLoad();
+        var sv = $("#SelectNavId").val();
+        var tree = $("div#jstree").jstree();
+        var data = {
+            "url": "/SiteNav/GetJsTreeData?navCode=" + sv,
+            "dataType": "json"
+        };
+        tree.settings.core.data = data;
+        tree.refresh();
+        Utils.layerClose(load_iii);
+    }
+
+    //验证目的地是否存在
+    function CheckDesName(e) {
+        var newDesName = $.trim($(e).val());
+        if (newDesName != $("#oldDesName").val()) {
+            $.post('/SiteNav/CheckDesName?name=' + encodeURIComponent(newDesName) + '&parentId=' + encodeURIComponent($("#parentId").val()), function (data) {
+                if (data == "1") {
+                    Utils.alert("改目的地已存在！");
+                    $("#DesName").val("").focus();
+                }
+            });
+        }
+    }
+
+    //验证用户输入
+    function CheckControl() {
+        if ($.trim($("#DesName").val()).length == 0) {
+            Utils.alert("目的地不得为空！");
+            $("#DesName").select().focus();
+            return false;
+        }
+        if ($.trim($("#Level").val()).length == 0) {
+            Utils.alert("请选择级别！");
+            $("#Level").select().focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    //验证该省份下的目的地是否存在
+    function UpdateData() {
+        $.post('/SiteNav/UpdateData', function (data) {
+            Utils.alert("数据更新条数" + data, 1500);
+        });
+    }
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+        // reload
+        var tree = $("div#jstree").jstree();
+        tree.refresh();
+    }
+
+</script>

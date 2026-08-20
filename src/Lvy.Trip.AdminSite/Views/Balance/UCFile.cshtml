@@ -1,0 +1,143 @@
+﻿@model  Lvy.VModels.Tour.TourBalanceVModel
+@using Arch.Common
+@{
+    var picroot = AppSetting.Get("UploadFileRoot");
+}
+<div class="card-header">
+    <h4 class="card-title"><i class="fas fa-chart-pie mr-1"></i>附件列表</h4>
+</div>
+<div class="card-body">
+    <div class="form-group row">
+        <div class="col-1 col-form-label"><strong> 附件上传</strong></div>
+        <div class="col-auto col-form-label">文件类型：</div>
+        <div class="col-auto">@Html.DropDownList("sourceType", (List<SelectListItem>)ViewBag.FileEnum, new { @id = "sourceType", @class = "form-control" })</div>
+        <div class="col-auto col-form-label" id="tdKeyTitle">选择交款单：</div>
+        <div class="col-auto"><select id="keyId" class="form-control"></select></div>
+        <div class="col-auto col-form-label">描述：</div>
+        <div class="col-auto"><input type="text" name="Remark" id="Remark" class="form-control"/></div>
+        <div class="col-3 input-group">
+            <div class="custom-file">
+                <input type="file"  class="custom-file-input" name="tourFileName" />
+                <label class="custom-file-label" data-browse="选择文件" for="tourFileName">选择文件</label>
+            </div>
+        </div>
+            <div class="col-auto"><button type="button" class="btn btn-info" id="btnUpload">上传</button></div>
+        </div>
+    <hr />
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>文件名称</th>
+                <th>类型</th>
+                <th>上传时间</th>
+                <th>描述</th>
+                <th>版本</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @Html.HiddenFor(m => m.Balance.TourId)
+            @foreach (var item in Model.FileList)
+            {
+                <tr>
+                    @if (item.MediaType == "image")
+                    {
+                        <td>
+                            <a class="go" href="@(picroot + item.FilePath)" title="@item.FileName" rel="gallery">
+                                <img style="width:60px;" src="@(picroot + item.FilePath)">
+                            </a>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@item.FileName</td>
+                    }
+                    <td>@DictionaryTools.GetEnumValue(Enums.FileBusinessEnum, item.SourceType)</td>
+                    <td>@DictionaryTools.GetCachedAccount(item.CreatedBy).Name</td>
+                    <td>@item.Remark</td>
+                    <td>@item.Revision</td>
+                    <td>
+                        <a href="javascript:DeleteTourFile(@item.Id)">删除</a>
+                        <a href="@Url.Action("DownLoadFile",new { id=item.Id})">下载</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#sourceType").change(function () {
+            var sourceType = $(this).val();
+            if (sourceType == '2') {
+                $("#keyId").empty();
+
+                // 游客选择
+                $.ajax({
+                    url: '@Url.Action("JsonOrderInfo")',
+                    type: 'POST',
+                    data: { "tourId": '@Model.Balance.MasterOrderCode' },
+                    success: function (data) {
+                        var html = "";
+                        $("#tdKeyTitle").html("<b>选择缴款单</b>");
+                        $(data.PayInList).each(function (i, item) {
+                            html += "<option value=\"" + item.Id + "\">ID:" + item.Id + ",金额:" + item.Amount + "</option>";
+                        });
+                        $("#keyId").html(html);
+                    }
+                });
+            } else {
+                $("#keyId").empty();
+                $("#tdKeyTitle").html("");
+            }
+        });
+
+        $("#btnUpload").click(function () {
+
+            if ($.trim($("[name='tourFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("#sourceType").val()) == "") {
+                Utils.alert("请选择文件类型！");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("tourFileName", $("[name='tourFileName']")[0].files[0]);
+            formData.append("FileModel.SourceType", $("#sourceType").val());
+            formData.append("FileModel.KeyId", $("#keyId").val());
+            formData.append("FileModel.TourId", $("#Balance_TourId").val());
+            formData.append("FileModel.Remark", $("#Remark").val());
+            $.ajax({
+                url: '@Url.Action("AddUpLoadFile")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    $('#divFile').html(data);
+                }
+            });
+        });
+    })
+
+    function DeleteTourFile(Id) {
+        if (!confirm("确定删除？")) {
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("DeleteTourFile")',
+            type: 'POST',
+            data: { id: Id },
+            success: function (data) {
+                $('#divFile').html(data);
+            }
+        });
+    }
+
+</script>

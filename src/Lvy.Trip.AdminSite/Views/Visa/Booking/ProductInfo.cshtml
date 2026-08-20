@@ -1,0 +1,45 @@
+﻿@model Lvy.Visa.VModels.OnLineProductQModel
+@using Arch.Common
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<div class="content">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">签证信息</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">预订须知</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill" href="#custom-tabs-one-messages" role="tab" aria-controls="custom-tabs-one-messages" aria-selected="false">特别提示</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="custom-tabs-one-settings-tab" data-toggle="pill" href="#custom-tabs-one-settings" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false">签证材料</a>
+                </li>
+            </ul>
+            <span><a href='@(AppSetting.Get("Visa") + Model.VisaModel.InformationCode.ToLower())' style="color: Blue;" target="_blank">查看网站产品</a></span>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="custom-tabs-one-tabContent">
+                <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                    @Html.Partial("~/Views/Booking/ProductBaseInfo.cshtml", Model.VisaModel)
+                </div>
+                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                    @Html.Raw(Model.VisaModel.BookingNodes)
+                </div>
+                <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel" aria-labelledby="custom-tabs-one-messages-tab">
+                    @(String.IsNullOrEmpty(Model.VisaModel.WarmTips) ? "无" : Model.VisaModel.WarmTips)
+                </div>
+                <div class="tab-pane fade" id="custom-tabs-one-settings" role="tabpanel" aria-labelledby="custom-tabs-one-settings-tab">
+                    @Html.Partial("~/Views/Booking/VisaMaterial.cshtml")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

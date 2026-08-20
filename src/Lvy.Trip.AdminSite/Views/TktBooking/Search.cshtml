@@ -1,0 +1,138 @@
+﻿@model Lvy.VModels.Ticket.SearchTicketVModel
+@{
+    ViewBag.Title = "商品管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources {
+    <link href="~/Content/ComboTree/style.css" rel="stylesheet" />
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        @*<div class="card-header">
+                <h5>请输入过滤条件</h5>
+            </div>*@
+        <form id="theForm">
+            <div class="card-body p-2">
+                <table id="searchTable" class="table table-borderless table-sm">
+                    <tr>
+                        <td style="width:70px;">部门：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.TeamID, ViewData["TeamList"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                        </td>
+                        <td style="width:90px;">商品名称：</td>
+                        <td>
+                            @Html.TextBoxFor(m => m.ProductName, new { id = "qProductNameTxt", @class = "form-control form-control-sm" })
+                        </td>
+                        <td style="width:90px;">商品类型：</td>
+                        <td>
+                            @Html.DropDownListFor(m => m.ProductType, DictionaryTools.GetEnumsBy(Enums.ProductAllTypeEnum).ToSelectListFor(Model.ProductType), new { id = "qTuiJianTypeDp", @class = "form-control form-control-sm" })
+                        </td>
+                        <td style="width:90px;">分类：</td>
+                        <td>
+                            @Html.TextBoxFor(m => m.ProductCategory, new { @class = "form-control form-control-sm" })
+                        </td>
+                        <td style="width:80px;">目的地：</td>
+                        <td style="width:200px;">
+                            @Html.HiddenFor(m => m.ArriveDestName, new { id = "qDestTxt" })
+                            <select id="qDestHidden" name="ArriveDest" class="form-control form-control-sm"></select>
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-default" id="searchBtn" type="button">搜索</button>
+                @*<a href="@Url.Action("CreateTicket")" title="添加商品" class="btn btn-success float-right">添加商品</a>*@
+            </div>
+        </form>
+    </div>
+
+    <div class="card" id="ticketContainer">
+        @Html.Partial("UCTicketList", Model)
+    </div>
+</section>
+
+@section PageScripts
+{
+    <script src="~/Content/ComboTree/comboTreePlugin.js"></script>
+    <script type="text/javascript">
+
+        var comboTree;
+
+        $(function () {
+            //目的地筛选
+            $('#qDestHidden').select2({
+                ajax: {
+                    url: function (params) {
+                        return ApiServerUrl + '/Dest/GetDestSelect2';
+                    },
+                    dataType: 'json',
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                        var arr = data.items
+                        for (item in arr) {
+                            itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                        }
+                        return {
+                            results: itemList,
+                            pagination: {
+                                more: (params.page * 30) < data.total_count
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                //templateResult: formatState
+                //allowClear: true
+            });
+
+            //查询
+            $('#searchBtn').click(function () {
+                pageselectCallback(0);
+            });
+
+
+            $("#qTuiJianTypeDp").change(function () {
+                var param = { productType: $(this).val() };
+                $.post('/TktCategory/GetJsTreeData2', param, function (result) {
+                    if (result.Code == '1') {
+
+                        if (comboTree != null) {
+                            comboTree.clearSelection();
+                            comboTree.setSource(result.data);
+                        } else
+
+                            comboTree = $('#ProductCategory').comboTree({
+                                source: result.data,
+                                isMultiple: false
+                            });
+                    }
+                }, "json");
+            });
+        });
+
+
+    </script>
+}

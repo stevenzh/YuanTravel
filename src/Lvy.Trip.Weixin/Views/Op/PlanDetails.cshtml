@@ -1,0 +1,270 @@
+﻿@model Lvy.VModels.Product.EditTourVModel
+@{
+    ViewBag.Title = "出团计划详情";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/Op/PlanList">开班计划</a></li>
+                    <li class="breadcrumb-item active">@(ViewBag.Title + "/" + Model.Tour.Id)</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h3 class="card-title">开班信息</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered">
+                        <tr>
+                            <td>线路名称：</td>
+                            <td>@Model.Line.LineName</td>
+                        </tr>
+                        <tr>
+                            <td>团号：</td>
+                            <td>@Model.Tour.TourNo</td>
+                        </tr>
+                        <tr>
+                            <td>出发日期：</td>
+                            <td>@Model.Tour.OutDate.ToDateFormat()</td>
+                        </tr>
+                        @if (Model.Map.Source == 1 || Model.IsCopy == 1)
+                        {
+                            //标准团
+                            <tr id="trBeforeQuota">
+                                <td>是否共享：</td>
+                                <td>否</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            //共享团(Model.Map.Source == 2)
+                            <tr id="trBeforeQuota">
+                                <td>是否共享：</td>
+                                <td>是</td>
+                            </tr>
+                            <tr>
+                                <td>共享库存ID：</td>
+                                <td> @Model.Quota.Id</td>
+                            </tr>
+                        }
+                        <tr style="display:none;">
+                            <td>选择巴士：</td>
+                            <td><div id="busSeatContainer"></div></td>
+                        </tr>
+                        <tr>
+                            <td>最小成团人数：</td>
+                            <td>@Model.Tour.MixedNum</td>
+                        </tr>
+                        <tr>
+                            <td>报名截止日期：</td>
+                            <td>@Model.Tour.BookingLastDays.ToDateFormat()</td>
+                        </tr>
+                        <tr>
+                            <td>最后开票日期：</td>
+                            <td>@(Model.Tour.LastKaiPiaoDate == null ? "" : Model.Tour.LastKaiPiaoDate.Value.ToString("yyyy-MM-dd"))</td>
+                        </tr>
+                        <tr>
+                            <td>计划库存：</td>
+                            <td>
+                                @(Model.Quota.HoldQuota > 0 ? (Model.Quota.PlanQuota - Model.Quota.HoldQuota) + "+" + Model.Quota.HoldQuota : Model.Quota.PlanQuota.ToString())
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>可用库存：</td>
+                            <td>@Model.Quota.UseQuota</td>
+                        </tr>
+                        <tr>
+                            <td>锁定库存：</td>
+                            <td>@Model.Quota.UnLockQuota</td>
+                        </tr>
+                        <tr>
+                            <td>推荐方式：</td>
+                            <td>@Model.Tour.TuiJianType</td>
+                        </tr>
+                        <tr>
+                            <td>团队性质：</td>
+                            <td>@Model.Tour.TourType</td>
+                        </tr>
+                        <tr>
+                            <td>是否销售：</td>
+                            <td>@Model.Tour.TourState.ToString()</td>
+                        </tr>
+
+                        @if (@Model.Line.TrafficType != 1)
+                        {
+                            <tr>
+                                <td>附加信息：</td>
+                                <td>
+                                    <span style="color: red;">主要描述航班信息、行程变化等。</span>
+                                    <br />
+                                    @Model.Tour.AdditionInfo
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>备注：</td>
+                            <td>@Model.Tour.Remarks</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-primary" href="/Booking/CreateOpOrder?tourId=@Model.Tour.Id">开单</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h3 class="card-title">航班信息</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered">
+                        <tbody>
+                            <tr>
+                                <td>航班类型</td>
+                                <td>航空公司</td>
+                                <td>航班号</td>
+                                <td>出发时间</td>
+                                <td>抵达时间</td>
+                                <td>飞行时间</td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            @foreach (var item in Model.TourFlightList)
+                            {
+                                <tr>
+                                    <td valign="top">@item.FlightType</td>
+                                    <td>@item.AirlineCode</td>
+                                    <td valign="top">@item.FlightNum</td>
+                                    <td valign="top">@item.StartingTime</td>
+                                    <td valign="top">@item.ArrivaTime</td>
+                                    <td valign="top">@item.TotalTravelTime</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h3 class="card-title">报价列表</h3>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-sm" style="min-width:600px;">
+                        <thead>
+                            <tr style="text-align: center;">
+                                <td>报价说明</td>
+                                <td>市场价</td>
+                                <td>同业价</td>
+                                <td>自费</td>
+                                <td>小费</td>
+                                <td>有效</td>
+                                <td>标准价</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.PriceList)
+                            {
+                                <tr>
+                                    <td>@item.PriceRemark</td>
+                                    <td>@decimal.Ceiling(item.Price)</td>
+                                    <td>@decimal.Ceiling(item.SettlePrice) @(item.TeJiaFanLi > 0 ? "-" + decimal.Ceiling(item.TeJiaFanLi) : "")</td>
+                                    <td>@decimal.Ceiling(item.ZiFei)</td>
+                                    <td>@item.Tips</td>
+                                    <td>@item.IsValid</td>
+                                    <td>@item.IsStandard</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    税:@Model.Tour.Tax <br />
+                    签证费:@Model.Tour.VisaPrice <br />
+                    单房差：@Model.Tour.SingleRoom,  <br />
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"> 订单列表</h3>
+                </div>
+                <div class="card-body table-responsive">
+                    <table id="tbllist" class="table table-sm table-hover" style="min-width:900px;">
+                        <thead>
+                            <tr>
+                                <td align="center">分销商</td>
+                                <td align="center">销售</td>
+                                <td align="center">游客</td>
+                                @*<td align="center">订单号</td>
+                                    <td align="left">线路名称</td>
+                                    <td align="center">出发日期</td>*@
+                                <td align="center">联系人</td>
+                                <td align="center">人数</td>
+                                <td align="center">订单状态</td>
+                                <td align="center">应收</td>
+
+                                <td align="center" style="width: 150px;">操作</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OrderList.Count > 0)
+                            {
+                                foreach (var item in Model.OrderList)
+                                {
+                                    <tr>
+                                        <td align="left">@item.CustomerName</td>
+                                        <td align="center">@DictionaryTools.GetCachedAccount(item.SalerCode).Name</td>
+                                        <td align="center">@item.LinkMan</td>
+                                        @*<td name="orderCode" align="center" orderCode='@item.OrderCode'>@item.Id</td>
+                                            <td align="left" title="@item.LineName">@item.LineName.TrimWithElipsis(17)</td>
+                                            <td align="center">@item.OutDate.ToDateFormat()</td>*@
+                                        <td align="center">@item.Managers</td>
+                                        <td align="center">@item.TravellerCount</td>
+                                        <td name="orderState" align="center"> @DictionaryTools.GetEnumValue("OrderStateEnum", item.OrderState.ToString())</td>
+                                        <td align="center">@item.TolYsPrice</td>
+                                        <td align="left">
+                                            <a title="查看订单" href="@Url.Action("Details","Booking", new { id = item.OrderCode })">查看订单</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" align="center" style="color: red; font-weight: bold;">
+                                        当前没有数据！
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

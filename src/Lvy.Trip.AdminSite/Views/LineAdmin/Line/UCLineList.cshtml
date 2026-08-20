@@ -1,0 +1,299 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.TpLineVModel
+<div class="btnlist">
+    <div class="fr">
+        <a class="btn btn1" href="@Url.Action("AddLineInfo")">添加线路</a>
+    </div>
+</div>
+<table class="listtbl" style="width:100%;">
+    <thead>
+        <tr style="text-align: center;">
+            <th>#</th>
+            <th>线路<br />编号</th>
+            <th>线路名称</th>
+            <th>行程<br />天数</th>
+            <th>线路<br />类型</th>
+            <th>出发-目的地</th>
+            <th>供应商</th>
+            <th>部门</th>
+            <th style="width: 120px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.LineList.Items)
+        {
+            <tr style="text-align:center;">
+                <td>
+                    @if (item.IsImport)
+                    {
+                        switch (item.ImportState)
+                        {
+                            case 0:
+                                @:<span>#</span>
+                                break;
+                            case 1:
+                                @:<span style="color: #17a2b8">#</span>
+                                break;
+                            case 2:
+                                @:<span style="color: #ffc107">#</span>
+                                break;
+                            default:
+                                @:<span style="color: #28a745">#</span>
+                                break;
+                        }
+                    }
+                </td>
+                <td>@item.LineId</td>
+                <td title="@item.LineName" style="text-align:left;">
+                    @item.LineName.TrimWithElipsis(35)
+                </td>
+                <td>@item.Night 晚 @item.TravelDays 天</td>
+                <td>
+                    @DictionaryTools.GetEnumValue(Enums.LineScopeEnum, item.LineScope.ToString(CultureInfo.InvariantCulture))
+                    -
+                    @DictionaryTools.GetEnumValue(Enums.LineTypeEnum, item.LineType.ToString(CultureInfo.InvariantCulture))
+                </td>
+                <td>
+                    @(string.IsNullOrEmpty(item.DepartDest)?"多地": DictionaryTools.GetEnumValue(Enums.OutCityEnum, item.DepartDest)) -
+                    @DictionaryTools.GetDestNameStr(item.ArriveDest)
+                </td>
+                <td style="text-align:left;">@DictionaryTools.GetCachedCustomer(item.CustomerCode).Name.TrimWithElipsis(15)</td>
+                <td style="text-align:left;">@DictionaryTools.GetCachedTeam(item.TeamID).TeamName</td>
+                <td style="width:165px;">
+                    <table class="toolbar">
+                        <tr>
+                            @if (item.Admins != null && item.Admins.Count > 0)
+                            {
+                                <td><a href="javascript:void(0);" class="audit1" title="编辑专管员" lineId="@item.LineId" data-teamId="@item.TeamID"><i class="fa fa-user"></i></a></td>
+                            }
+                            else
+                            {
+                                <td><a href="javascript:void(0);" class="audit2" title="添加专管员" lineId="@item.LineId" data-teamId="@item.TeamID"><i class="fa fa-user"></i></a></td>
+                            }
+                            @if (item.LineState == 2)
+                            {
+                                <td>
+                                    <a name="changelineState" url="/LineAdmin/ChangeOnline/@item.LineId" state="offline" data-id="@item.LineId" deleteState="@item.IsValid" title="上线" href="javascript:void(0);">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <a name="changelineState" url="/LineAdmin/ChangeOffline/@item.LineId" data-id="@item.LineId" state="online" deleteState="@item.IsValid" title="下线" href="javascript:void(0);">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                </td>
+                            }
+                            <td><a title="编辑" class="edit" href="javascript:void(0);" check-url="@Url.Action("CheckOrdered", new { lineId = item.LineId })" edit-url="@Url.Action("AddLineInfo", new { lineId = item.LineId })"><i class="fa fa-edit"></i></a></td>
+                            <td><a title="复制" href="@Url.Action("CopyLine", new { id = item.LineId })"><i class="fa fa-copy"></i></a></td>
+                            @*@Html.DeleteActionLink("SetLineValidState", "LineAdmin", item.IsValid, new { id = item.LineId })*@
+                            <td>
+                                <a href="@Url.Action("UCTourStore", new { lineId = item.LineId })" title="库存团期">
+                                    <i class="fa fa-calendar"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a title="删除" class="delete" href="javascript:void(0);" check-url="@Url.Action("CheckOrdered", new { lineId = item.LineId })" delete-url="@Url.Action("DeleteLine", new { id = item.LineId })">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(m => m.LineList.PageIndex, new { id = "hiddenIndex" })
+@Html.HiddenFor(m => m.LineList.PageSize)
+<div id="divPagination" class="digg"></div>
+
+<script type="text/javascript">
+    //分页回调函数
+    function pageselectCallback(pageId) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchLine")',params,function (data) {
+
+            if (data=="no") {
+                Utils.alert('权限不足！');
+
+            } else {
+                $('#lineListContent').html(data);
+                hoverChangeStyle();
+            }
+
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    $(function () {
+        // 创建分页
+        $("#divPagination").pagination(Number('@Model.LineList.TotalCount'), {
+            callback : pageselectCallback,
+            items_per_page : ( @Model.LineList.PageSize),
+            num_display_entries : 5,
+            num_edge_entries : 2,
+            current_page : ( @Model.LineList.PageIndex - 1)
+        });
+
+        //更改上线、下线状态
+        $("a[name=changelineState]").click(function () {
+            if(Number($(this).attr('deleteState'))==0) {
+                Utils.alert('该线路已被删除！');
+                return false;
+            }
+            var load_iii = Utils.layerLoad();
+            var $link = $(this);
+            $.post( $link.attr("url"),function (data) {
+                if (data=="no") {
+                    Utils.alert('权限不足！');
+                }
+                else if (Number(data) > 0) {
+                    var state = $link.attr("state");
+                    if (state == "online") {
+                        $link.attr("state", "offline");
+                        $link.attr("title", "上线");
+                        $link.attr("url", "/LineAdmin/ChangeOnline/"+ $link.attr("data-id"));
+
+                        var $i=$($link).find("i");
+                        $i.removeClass();
+                        $i.addClass('fa fa-arrow-up');
+
+                    } else {
+                        $link.attr("state", "online");
+                        $link.attr("title", "下线");
+                        $link.attr("url", "/LineAdmin/ChangeOffline/" + $link.attr("data-id"));
+
+                        var $i=$($link).find("i");
+                        $i.removeClass();
+                        $i.addClass('fa fa-arrow-down');
+                    }
+                }
+                Utils.layerClose(load_iii);
+            });
+            return false;
+        });
+
+        // 编辑线路
+        $('.listtbl a.edit').click(function(){
+            var $this = $(this);
+            var lineState=$this.prev().attr('state');
+            if(lineState=='online'){
+                var load_iii = Utils.layerLoad();
+                $.post($this.attr('check-url'), function(data) {
+                    if(data&&Number(data)==1) {
+                        Utils.alert('该线路已产生订单，无法编辑！');
+                    }
+                    else if(data&&Number(data)==0) {
+                        window.location = $this.attr('edit-url');
+                    }
+                    else {
+                        //请求错误
+                    }
+                    Utils.layerClose(load_iii);
+                });
+            }
+            else {
+                window.location = $this.attr('edit-url');
+            }
+            return false;
+        });
+
+        // 删除线路
+        $('.listtbl a.delete').click(function(){
+            var $this = $(this);
+            var load_iii = Utils.layerLoad();
+            $.post($this.attr('check-url'), function(data) {
+                if(data&&Number(data)==1) {
+                    Utils.alert('该线路已产生订单，无法删除！');
+                }
+                else if(data&&Number(data)==0) {
+                    if(confirm('确定删除吗？')) {
+                        window.location = $this.attr('delete-url');
+                    }
+                }
+                else {
+                    Utils.alert('删除发生异常。');
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        $('.listtbl a.audit1,a.audit2').click(function() {
+            var load_iii = Utils.layerLoad();
+            var param = { lineId: $(this).attr('lineId'), teamId: $(this).attr('data-teamId') };
+            $.post('@Url.Action("EditLineAdmin")',param, function (data) {
+                Utils.layerClose(load_iii);
+                layer.open({
+                    type: 1, title: '编辑专管员', maxmin: false
+                    , shadeClose: false, area: ['570px', '540px']
+                    , content: data
+                    , success: function (layero, index) {
+                        rengerEditLineAdmin();
+                    }
+                    , btn: ["保存", "关闭"]
+                    , yes: function (index, layero) {
+                        var $form = $('#lineAdminForm');
+                        var action = $form.attr('action');
+                        var params = $form.formSerialize();
+                        $.post(action, params, function (result) {
+                            if (result && result == 'success') {
+                                layer.msg('保存成功。');
+                                layer.close(index);
+                            }
+                            else {
+                                layer.msg('保存失败。');
+                            }
+                        });
+                    }
+                    , btn2: function (index, layero) {
+                        // 取消
+                    }
+                });
+            });
+        });
+    });
+
+    function rengerEditLineAdmin() {
+        $('#lineAdminForm').find(':checkbox[name="Check4Customer"]').click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $this.prev().val(1);
+            } else {
+                $this.prev().val(0);
+            }
+        });
+        $('#lineAdminForm').find(':checkbox[name="Check4Plat"]').click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $this.prev().val(1);
+            } else {
+                $this.prev().val(0);
+            }
+        });
+        var $radioCustomer = $('#lineAdminForm').find(':radio[name="Primary4Customer"]');
+        $radioCustomer.click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $radioCustomer.each(function () {
+                    $(this).parent().prev().val(0);
+                });
+                $this.parent().prev().val(1);
+            }
+        });
+        var $radioPlat = $('#lineAdminForm').find(':radio[name="Primary4Plat"]');
+        $radioPlat.click(function () {
+            var $this = $(this);
+            if ($this.prop('checked')) {
+                $radioPlat.each(function () {
+                    $(this).parent().prev().val(0);
+                });
+                $this.parent().prev().val(1);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,40 @@
+﻿@model Lvy.VModels.Base.AirlineVModel
+@{
+    ViewBag.Title = "航空公司";
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("SearchAirline")" method="POST">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                航空公司列表查询
+            </div>
+            <table align="center" class="sotable" style="width:60%;">
+                <tr>
+                    <td class="label">编码：</td>
+                    <td>@Html.TextBoxFor(a => a.AirlineInfo.Code, new { @class = "text150" })</td>
+                    <td class="label">名称：</td>
+                    <td>@Html.TextBoxFor(a => a.AirlineInfo.ShortName, new { @class = "text150" })</td>
+                    @*<td class="label">联系人：</td>
+                        <td>@Html.TextBoxFor(a => a.AirlineInfo.ContactName, new { @class = "text150" })</td>*@
+                </tr>
+            </table>
+            <input class="btn btn1" id="btnSearch" type="submit" value="搜索" />
+            <input class="btn btn1" id="btnClear" type="button" value="清空" />
+        </div>
+    </div>
+    @* 列表*@
+    <div class="xbox clear">
+        <div id="divSearch">
+            @Html.Partial("UCAirlineSearch", Model)
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+
+    //重置
+    $("#btnClear").click(function () {
+        $(".sotable td input[type=text]").val("");
+        $(".sotable td input[type=hidden]").val("");
+    });
+</script>

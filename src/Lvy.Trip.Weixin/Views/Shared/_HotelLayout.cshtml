@@ -1,0 +1,262 @@
+﻿@{
+    //UserInfo user = (UserInfo)HttpContext.Current.Session["LoginUser"];
+    string OutCityCode = (String)HttpContext.Current.Session["OutCity"];
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@using Arch.Common
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="~/favicon.ico">
+    <title>@ViewBag.Title - @AppSetting.Get("WeixinSubject")  </title>
+    <link rel="stylesheet" href="@CDNServerUrl/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="@CDNServerUrl/semanticUI/semantic.min.css">
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.carousel.css" />
+    <link rel="stylesheet" href="@CDNServerUrl/owl-carousel/assets/owl.theme.default.css" />
+    <link rel="stylesheet" href="~/css/style.css">
+    @RenderSection("HeaderContent", false)
+</head>
+
+<body>
+    <!-- sidebar left -->
+    <div class="ui sidebar sidebar-left vertical menu">
+        <div class="item">
+            <a href="/"><b>选择出发城市</b></a>
+        </div>
+        <a class="item" href="/home?outcity=31">上海出发</a>
+        <a class="item" href="/home?outcity=3201">南京出发</a>
+        <a class="item" href="/home?outcity=3202">无锡出发</a>
+        <a class="item" href="/home?outcity=3401">合肥出发</a>
+    </div>
+    <!-- end sidebar left -->
+    <!-- sidebar search -->
+    <div class="ui sidebar search inverted right vertical menu">
+        <div class="ui form">
+            <input type="search">
+            <button class="button">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <h5>热门搜索</h5>
+        <ul>
+            <li>
+                <a href="">巴厘岛</a>
+            </li>
+            <li>
+                <a href="">长滩</a>
+            </li>
+        </ul>
+    </div>
+    <!-- end sidebar search -->
+    <!-- sidebar cart -->
+    <div class="ui sidebar cart inverted right vertical menu">
+        <div class="content">
+            <div class="cart-img">
+                <img src="images/product1.png" alt="">
+            </div>
+            <div class="cart-title">
+                <a href="">Watch Modern for Men &Women</a>
+                <h5>$69</h5>
+            </div>
+            <div class="cart-remove">
+                <i class="fa fa-remove"></i>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="content">
+            <div class="cart-img">
+                <img src="images/product2.png" alt="">
+            </div>
+            <div class="cart-title">
+                <a href="">Women Trending Bags for Girls</a>
+                <h5>$94</h5>
+            </div>
+            <div class="cart-remove">
+                <i class="fa fa-remove"></i>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="content">
+            <div class="cart-img">
+                <img src="images/product3.png" alt="">
+            </div>
+            <div class="cart-title">
+                <a href="">Hat Blue Trending for Men &Women</a>
+                <h5>$79</h5>
+            </div>
+            <div class="cart-remove">
+                <i class="fa fa-remove"></i>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="cart-button">
+            <ul>
+                <li>
+                    <button class="button">
+                        <i class="fa fa-shopping-cart"></i>
+                        View Cart
+                    </button>
+                </li>
+                <li>
+                    <button class="button">
+                        <i class="fa fa-send"></i>
+                        Checkout
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- end sidebar cart -->
+
+    <div class="ui vertical inverted sidebar menu left" id="menu_from">
+        <div class="item">
+            <a href="/"><b>选择出发城市</b></a>
+        </div>
+        <a class="item" href="/home?outcity=31">上海出发</a>
+        <a class="item" href="/home?outcity=3201">南京出发</a>
+        <a class="item" href="/home?outcity=3202">无锡出发</a>
+        <a class="item" href="/home?outcity=3401">合肥出发</a>
+    </div>
+
+    <!-- wrap content -->
+    <div class="wrap-content pusher">
+        <!-- navbar -->
+        <div class="navbar">
+            <div class="ui container">
+                <div class="ui grid">
+                    <!-- navbar toggle left -->
+                    <div class="five wide column">
+                        <div class="navbar-toggle-left navbar-icon">
+                            <i class="fa fa-location-arrow"></i>
+                            @if (OutCityCode.Equals("31"))
+                            {
+                                <span> 上海出发</span>
+                            }
+                            else if (OutCityCode.Equals("3201"))
+                            {
+                                <span> 南京出发</span>
+                            }
+                            else
+                            {
+                                <span> 无锡出发</span>
+                            }
+                        </div>
+                    </div>
+                    <!-- navbar logo -->
+                    <div class="six wide column">
+                        <div class="navbar-logo">
+                            <a href="/home/index">
+                                <img src="~/images/logo_1.png" alt="">
+                            </a>
+                        </div>
+                    </div>
+                    <!-- navbar toggle right -->
+                    <div class="five wide column">
+                        <div class="navbar-toggle-right">
+                            <div class="navbar-toggle-search">
+                                <i class="fa fa-search"></i>
+                            </div>
+                            @*<div class="navbar-toggle-cart">
+                                    <i class="fa fa-shopping-cart">
+                                        <sup>3</sup>
+                                    </i>
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end navbar -->
+
+        @RenderBody()
+
+        <!-- footer -->
+        <footer>
+            @*<div class="ui container">
+                    <div class="content">
+                        <img src="images/logo_1.png" alt="" class="logo">
+                        <p>地址: 上海市武定路458号12-13楼</p>
+                        <p>电子邮箱: help@sh-cct.com</p>
+                        <p>客服电话: 400-620-7888</p>
+                        <div class="social-link">
+                            <a href="">
+                                <i class="fa fa-facebook"></i>
+                            </a>
+                            <a href="">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                            <a href="">
+                                <i class="fa fa-instagram"></i>
+                            </a>
+                            <a href="">
+                                <i class="fa fa-google"></i>
+                            </a>
+                        </div>
+                        <div class="payment-logo">
+                            <ul>
+                                <li>
+                                    <img src="images/payment1.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="images/payment2.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="images/payment3.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="images/payment4.png" alt="">
+                                </li>
+                                <li>
+                                    <img src="images/payment5.png" alt="">
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>*@
+            <div class="reserved">
+                <p>@AppSetting.Get("BanQuanInfo")</p>
+            </div>
+        </footer>
+        <!-- end footer -->
+
+    </div>
+    <!-- end wrap content -->
+
+    <div class="ui grey bottom fixed four item menu">
+        <a class="item" href="/Home/Index">
+            <i class="home icon"></i>首页
+        </a>
+        <a class="item" href="/Home/Categories">
+            <i class="bars icon"></i> 分类
+        </a>
+        <a class="item" href="/Blog/Index">
+            <i class="location arrow icon"></i>发现
+        </a>
+        <a class="item" id="menuitem_info" href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fmymember%2Fbinding%2F&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect">
+            <i class="user icon"></i> 我的
+        </a>
+    </div>
+
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="@CDNServerUrl/semanticUI/semantic.min.js"></script>
+    <script src="@CDNServerUrl/owl-carousel/owl.carousel.js"></script>
+    <script src="/js/main.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+        $(function () {
+            $("#menuitem_from").click(function () {
+                $('#menu_from').sidebar('toggle');
+            });
+            $("#btnsearch").click(function () {
+                location.href = "/hotel/list?outcity=@OutCityCode" + "&words=" + $("#inputkey").val();
+            });
+            //var flag = /MicroMessenger/i.test(navigator.userAgent);
+            //if (flag == false)
+            //    $("#menuitem_info").hide();
+        });
+    </script>
+</body>
+
+</html>

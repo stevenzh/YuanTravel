@@ -1,0 +1,97 @@
+﻿@model Lvy.Visa.Models.VisaDataQModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+
+<div class="card">
+    <div class="card-body">
+        <table id="tblVisaDatas" class="table table-bordered">
+            <tr>
+                <td style="width:80px;">序号<input type="hidden" id="hidinfoCodeTemp" value='@Model.InformationCode' /></td>
+                <td>项目</td>
+                <td>说明</td>
+                <td style="width:150px;">操作<input type="checkbox" name="cheDataAll" onclick="funSelAll()" />全选</td>
+            </tr>
+            @if (Model.DataList != null)
+            {
+                var m = 1;
+                foreach (var item in Model.DataList)//签证材料
+                {
+                    <tr>
+                        <td rowspan="@(item.DataFilesList != null && item.DataFilesList.Count >0 ? 2 : 1)">
+                            <div align="center">
+                                @m
+                            </div>
+                        </td>
+                        <td>
+                            <div align="center">
+                                @item.DataName
+                            </div>
+                        </td>
+                        <td>
+                            <div align="left">
+                                @item.DataExplain
+                            </div>
+                        </td>
+                        <td>
+                            <div align="center">
+                                <input type="checkbox" name="cheData" value='@item.DataCode' />选择
+                            </div>
+                        </td>
+                    </tr>
+                    if (item.DataFilesList != null && item.DataFilesList.Count > 0)//签证材料附件
+                    {
+                        <tr>
+                            <td colspan="3">
+                                <p>
+                                    附件：
+                                    @foreach (var files in item.DataFilesList)
+                                    {
+                                        <a href='@files.FileUrl' title="点击下载">@files.FileName</a>
+                                    }
+                                </p>
+                            </td>
+                        </tr>
+                    }
+                    m++;
+                }
+            }
+
+            <tr>
+                <td colspan="4" style="margin-right:10px; padding:10px 20px 20px 15px; text-align:right;">
+                    <input type="button" value="确 定" class="btn_2" style="color:Red;" onclick="funAddVisaDatasTemp()" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    //全选
+    function funSelAll() {
+        if ($("input[name='cheDataAll']").prop("checked")) {
+            $("input[name='cheData']").prop("checked", true);
+        }
+        else {
+            $("input[name='cheData']").prop("checked", false);
+        }
+    }
+    //确定
+    function funAddVisaDatasTemp() {
+        var chklist = $("input[name='cheData']:checked");
+        var dataCode = "";
+        $(chklist).each(function () {
+            dataCode = dataCode + $(this).val() + ",";
+        });
+        var url = "/VisaData/SaveDatasByVisaDataStr";
+        var param = { "VisaDatasStr": dataCode, "CategoryCode": '@Model.CategoryCode', "infoCode": $("#hidinfoCodeTemp").val() };
+        $.post(url, param, function (data) {
+            parent.funGetVisaDatas('@Model.CategoryCode', '@Model.InformationCode');
+
+            //获取窗口索引
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+        });
+    }
+</script>}

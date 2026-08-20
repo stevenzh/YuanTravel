@@ -1,0 +1,609 @@
+﻿@model Lvy.VModels.Ticket.BookingVModel
+@{
+    ViewBag.Title = "编辑订单";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <link rel="stylesheet" href="@CDNServerUrl/select2/css/select2.min.css" />
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <link href="@CDNServerUrl/fullcalendar/main.min.css" rel="stylesheet" />
+    <style>
+        .fc .fc-toolbar.fc-header-toolbar { margin-bottom: .5em; }
+        .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events { min-height: 1em; }
+        .fc .fc-daygrid-body-natural .fc-daygrid-day-events { margin-bottom: .3em; }
+        .fc-h-event .fc-event-title { font-size: .65em; }
+    </style>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <form id="theForm">
+            @Html.HiddenFor(a => a.Order.MasterOrderCode)
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">商品列表</h4>
+                </div>
+                <div id="divProducts" class="card-body">
+                    @{
+                        int index = 0;
+                    }
+                    @foreach (var product in Model.OrderedProducts)
+                    {
+                        <div class="card card-info card-outline" id="product-@Model.Product.Id">
+                            <div class="card-header">
+                                <h5 class="card-title">@Model.Product.ProductName</h5>
+                                <div class="card-tools">
+                                    <a href="javascript:;" class="btn btn-sm btn-danger" onclick="delProduct(@Model.Product.Id);">删除</a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div id="product-@product.Id" class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><b>产品名称</b></td>
+                                                <td>@product.ProductName</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>预定须知</b></td>
+                                                <td>@Html.Raw(product.BookingDesc)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>游玩时间</b></td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="outdates" value="@Model.Order.OrderDetails[index].OutDate.ToDateFormat()" />
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <div id="divPrices-@product.Id" class="price_table">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <th>报价类型</th>
+                                                    <th>市场价</th>
+                                                    <th>结算价</th>
+                                                    @if (product.TktType == 1 || product.TktType == 2)
+                                                    {
+                                                        <th>签单价</th>
+                                                    }
+                                                    else
+                                                    {
+                                                        <th>返利</th>
+                                                    }
+                                                    <th>价格政策</th>
+                                                    <th style="width:100px;">人数</th>
+                                                    <th>结算金额</th>
+                                                    <th style="display: none"></th>
+                                                </tr>
+                                                @foreach (var item in Model.ProductsCurrentDatePrices.Where(a => a.ProductId == product.ProductId))
+                                                {
+                                                    <tr>
+                                                        <td title="@item.PriceType">@item.PriceType</td>
+                                                        <td>@item.MarketPrice</td>
+                                                        <td name="tdSettlePrice">@item.SettlePrice</td>
+                                                        <td name="tdSysPrice">@item.SysPrice</td>
+                                                        <td title="@item.PriceDesc">@item.PriceDesc.TrimWithElipsis(10)</td>
+                                                        <td>
+                                                            @*<input name="PeopleNum" type="text" input-limit='number' class="form-control form-control-sm" value="@item.PeopleNum" onkeyup="CalcOneYsPrice(this);" />*@
+                                                            @if (Model.Product.TuiJianType == 2)
+                                                            {
+                                                                <input name="PeopleNum" type="text" input-limit='number' class="form-control form-control-sm" onkeyup="checkPeopleNum(this,@Model.Product.Id,@item.PeopleNum);" value="@item.PeopleNum" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <input name="PeopleNum" type="text" input-limit='number' class="form-control form-control-sm" value="@item.PeopleNum" onkeyup="CalcOneYsPrice(this);" />
+                                                            }
+                                                            <input name="PriceIds" type="hidden" value="@item.Id" />
+                                                        </td>
+                                                        <td name="tdOneYsPrice">0</td>
+                                                        <td style="display: none" name="tdTktType">@item.TktType</td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                        <div class="bac_money_table"></div>
+                                        <input type="hidden" name="ProductIds" value="@product.ProductId" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id='@("calendar"+ product.Id)' class="calendar" data-id="@product.ProductId"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        index++;
+                    }
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card card-primary card-outline card-outline-tabs">
+                        <div class="card-header p-0 border-bottom-0">
+                            <ul class="nav nav-tabs" id="custom-tabs-two-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="tabs-two-contact-tab" data-toggle="pill" href="#tabs-two-contact" role="tab" aria-controls="tabs-two-home" aria-selected="true">联系人信息</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="tabs-two-home-tab" data-toggle="pill" href="#tabs-two-home" role="tab" aria-controls="tabs-two-home" aria-selected="true">游客列表</a>
+                                </li>
+                                @*<li class="nav-item">
+                                        <a class="nav-link" id="tabs-two-profile-tab" data-toggle="pill" href="#tabs-two-profile" role="tab" aria-controls="tabs-two-profile" aria-selected="false">子订单列表</a>
+                                    </li>*@
+                                <li class="nav-item">
+                                    <a class="nav-link" id="tabs-two-payin-tab" data-toggle="pill" href="#tabs-two-payin" role="tab" aria-controls="tabs-two-payin" aria-selected="false">缴款列表</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="tabs-two-file-tab" data-toggle="pill" href="#tabs-two-file" role="tab" aria-controls="tabs-two-file" aria-selected="false">附件列表</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="tabs-two-tabContent">
+                                <div class="tab-pane fade show active" id="tabs-two-contact" role="tabpanel" aria-labelledby="tabs-two-contact-tab">
+                                    <table class="table table-sm ">
+                                        <tr>
+                                            <td>客户：</td>
+                                            <td colspan="3">
+                                                <select id="mySelect2" class="form-control " name="Order.AgentCode">
+                                                    @if (!string.IsNullOrEmpty(Model.Order.AgentCode))
+                                                    {
+                                                        <option value="@Model.Order.AgentCode" selected> @DictionaryTools.GetCachedCustomer(Model.Order.AgentCode).Name </option>
+                                                    }
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="text-danger">*</span>联系人姓名：</td>
+                                            <td>
+                                                @Html.TextBoxFor(a => a.Order.ContactName, new { @Id = "Managers", @class = "form-control" })
+                                            </td>
+                                            <td><span class="text-danger">*</span>联系人电话：</td>
+                                            <td>
+                                                @Html.TextBoxFor(a => a.Order.ContactPhone, new { @Id = "ManagerPhone", @class = "form-control" })
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="text-danger">*</span>销售部门：</td>
+                                            <td>
+                                                @Html.DropDownListFor(m => m.Order.SalesTeamId, ViewData["Teams"] as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                                            </td>
+                                            <td><span class="text-danger">*</span>销售员：</td>
+                                            <td>
+                                                @Html.DropDownListFor(m => m.Order.SalerCode, ViewData["Salers"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="tab-pane fade show" id="tabs-two-home" role="tabpanel" aria-labelledby="tabs-two-home-tab">
+                                    @Html.Partial("TouristList")
+                                </div>
+                                @*<div class="tab-pane fade" id="tabs-two-profile" role="tabpanel" aria-labelledby="tabs-two-profile-tab">
+                                        @Html.Partial("~/Views/Visa/OrderAdmin/ShowChildOrderInfo.cshtml")
+                                    </div>*@
+                                <div class="tab-pane fade" id="tabs-two-payin" role="tabpanel" aria-labelledby="tabs-two-payin-tab">
+                                    @Html.Partial("UCPayIn")
+                                </div>
+                                <div class="tab-pane fade" id="tabs-two-file" role="tabpanel" aria-labelledby="tabs-two-file-tab">
+                                    @Html.Partial("UCFile")
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.card -->
+                        <!--订单处理-->
+                        @Html.Partial("~/Views/Visa/OrderAdmin/OrderFlowLayer.cshtml")
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">订单信息</h4>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td>导游：</td>
+                                    <td>
+                                        @Html.TextBoxFor(a => a.Order.GuideName, new { @Id = "GuideName", @class = "form-control" })
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>导游电话：</td>
+                                    <td>
+                                        @Html.TextBoxFor(a => a.Order.GuidePhone, new { @Id = "GuidePhone", @class = "form-control" })
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>备注：</td>
+                                    <td>@Html.TextAreaFor(a => a.Order.Remarks, new { @Id = "Remarks", @class = "form-control" })</td>
+                                </tr>
+                                <tr>
+                                    <td>合计：</td>
+                                </tr>
+                                <tr>
+                                    <td>景区现付 </td>
+                                    <td><span id="tdTaskPay">0</span>元</td>
+                                </tr>
+                                <tr>
+                                    <td>返利 </td>
+                                    <td><span id="tdTaskFanli">0</span>元</td>
+                                </tr>
+                                <tr>
+                                    <td>签单 </td>
+                                    <td><span id="tdQiandanPay">0</span>元</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>预定人：</strong></td>
+                                    <td>@DictionaryTools.GetCachedAccount(Model.Order.CreatedBy).Name</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>预定日期：</strong></td>
+                                    <td>@Model.Order.CreatedTime.ToString()</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="button" id="btnSaveOrder" class="btn btn-success">保存订单</button>
+                            <a class="btn btn-secondary" href='@Url.Action("Search","TktOrder")'>返回列表</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</section>
+
+@section PageScripts
+{
+    <script src="~/WebRes/scripts/My97DatePicker/WdatePicker.js"></script>
+    <script src="@CDNServerUrl/select2/js/select2.full.min.js"></script>
+    <script src="@CDNServerUrl/select2/js/i18n/zh-CN.js"></script>
+
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/moment/locale/zh-cn.js"></script>
+    <!-- Full Calendar -->
+    <script src="@CDNServerUrl/fullcalendar/main.min.js"></script>
+    <script src="@CDNServerUrl/fullcalendar/locales/zh-cn.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            $(".calendar").each(function () {
+
+                var calendarEl = document.getElementById($(this).attr("id"));
+                var productId = $(this).attr("data-id");
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    header: { left: 'prev', center: 'title', right: 'next' },
+                    locale: 'zh-cn',
+                    height: 'auto',
+                    defaultView: 'dayGridMonth',//默认视图
+                    buttonText: { today: '今天', dayGridMonth: '月', dayGridWeek: '周', },
+                    events: function (info, successCallback, failureCallback) {
+                        $.ajax({
+                            type: "post",
+                            url: '/TktManage/GetCalendar/' + productId,
+                            data: { start: moment(info.start).format('YYYY-MM-DD'), end: moment(info.end).format('YYYY-MM-DD') },
+                            dataType: "json",
+                            success: function (result) {
+                                successCallback(result);
+                            }
+                        });
+                    },
+                    eventClick: function (info) {
+                        $("#datetimepicker1").val(moment(info.event.start).format('YYYY-MM-DD'));
+                        getPricesCallBack(moment(info.event.start).format('YYYY-MM-DD'));
+                    }
+                });
+                calendar.render();
+
+            });
+
+
+
+            bsCustomFileInput.init();
+
+            CalcOneYsPrice();
+
+            $("#Order_SalesTeamId").change(function () {
+                var teamId = $(this).val();
+                $("#Order_SalerCode").empty();
+                if (teamId == "") {
+                    $("#Order_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    return;
+                }
+                $.ajax({
+                    url: '@Url.Action("GetTeamUserByTeamId", "Customer")',
+                    type: 'post',
+                    data: { teamId: teamId },
+                    success: function (data) {
+                        $("#Order_SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                        $.each(data, function (i, item) {
+                            $("#Order_SalerCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                        });
+                    }
+                });
+            });
+
+            // 保存订单
+            $("#btnSaveOrder").click(function () {
+                if (!CheckControls()) {
+                    return false;
+                }
+
+                var params = decodeURIComponent($("#theForm").formSerialize());
+                var load_iii = Utils.layerLoad();
+                $.post('/TktOrder/UpdateOrder', params, function (data) {
+                    if (data) {
+                        if (data == "no") {
+                            Utils.alert("权限不足！");
+                        }
+                        else if (data.State == "0") {
+                            Utils.alert(data.Msg);
+                        }
+                        else {
+                            Utils.alert("保存成功!");
+                            location.href = data.ReturnUrl;
+                            return;
+                        }
+                    } else {
+                        Utils.alert("保存失败！");
+                    }
+
+                    Utils.layerClose(load_iii);
+                });
+
+            });
+
+            //添加游客
+            $("#showcustInfo").click(function () {
+                var url = "/TktOrder/AddTouristInfo/?ordercode=" + $("#Order_MasterOrderCode").val();
+                layer.open({ type: 2, title: '添加游客信息', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+            });
+
+            // 添加缴款单
+            $("#btnAddPayInfo").click(function () {
+                var url = '@Url.Action("EditPayIn","Balance", new { id=0, type=9, orderCode = Model.Order.MasterOrderCode })';
+                layer.open({ type: 2, title: '添加缴款单', maxmin: true, shadeClose: true, area: ['950px', '500px'], content: url });
+            });
+
+            $('#mySelect2').select2({
+                ajax: {
+                    url: '/Customer/GetCustomerSelect2',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            team: '',
+                            keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                            page: params.page || 0,
+                            size: 10,
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 0;
+                        return {
+                            results: data.rows,
+                            pagination: {
+                                more: (params.page * 10) < data.total
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择',//默认文字提示
+                allowClear: true,
+                //templateResult: formatState
+            });
+        });
+
+        // 删除产品
+        function delProduct(productId) {
+            if (!confirm("确定要删除吗？")) {
+                return false;
+            }
+            $("#divProducts").find("#product-" + productId).remove();
+            CalcOneYsPrice();
+        }
+
+        // 获取报价数据的回调函数
+        function getPricesCallBack(obj) {
+            if ($(obj).attr("class") != "Wdate") {
+                obj = this;
+            }
+            if ($(obj).val() == "") {
+                return;
+            }
+
+            var pId = $(obj).attr('productId');
+            var params = { selectDate: $(obj).val(), productId: pId };
+            var d = layer.load(1, { shade: [0.1, '#fff'] });
+
+            $.post('/TktOrder/GetCurrentPrices', params, function (html) {
+                layer.close(d);
+                $("#divPrices-" + pId).html(html);
+                // 过滤 只能输入数字
+                $("form input[input-limit='number']").keypress(function () {
+                    InputLimitNumber();
+                });
+                CalcOneYsPrice();
+            });
+        }
+
+        //检查人数
+        function checkPeopleNum(_this, productId, oldNum) {
+            var $this = $(_this);
+            var peopleCount = Number($this.val());
+            if (Number(oldNum) < peopleCount) {
+                peopleCount = peopleCount - Number(oldNum);
+                var param = { ProductId: productId, PeopleCount: peopleCount };
+                $.post('/TktBooking/CheckQuota', param, function (data) {
+                    if (data) {
+                        if (data.State == 1) {
+                            CalcOneYsPrice(_this);
+                        } else {
+                            Utils.alert(data.Msg);
+                            $this.val(oldNum);
+                            CalcOneYsPrice(_this);
+                            $this.focus().select();
+                        }
+                    } else {
+                        Utils.alert('系统出现异常，请联系管理员。');
+                    }
+                });
+            }
+        }
+
+        // 计算结算金额
+        function CalcOneYsPrice(_this) {
+            $("#tdTaskPay").html(0);
+            $("#tdTaskFanli").html(0);
+            $("#tdQiandanPay").html(0);
+            $(".price_table input[name='PeopleNum']").each(function () {
+                _this = this;
+                var model = new Object();
+                var obj = $(_this).parents("tr");
+                if (Utils.Trim($(_this).val()) == "") {
+                    model.Num = 0;
+                } else {
+                    model.Num = parseInt($(_this).val());
+                }
+
+                model.TktType = parseInt(Utils.Trim(obj.find("td[name='tdTktType']").html()));
+                model.SettlePrice = parseInt(Utils.Trim(obj.find("td[name='tdSettlePrice']").html()));
+                model.SysPrice = parseInt(Utils.Trim(obj.find("td[name='tdSysPrice']").html()));
+
+
+                if (model.TktType == 1 || model.TktType == 2) { // 签单
+                    model.OneYsPrice = model.SettlePrice * model.Num;
+                } else {
+                    model.OneYsPrice = (model.SettlePrice - model.SysPrice) * model.Num;
+                }
+                // 显示一个报价类型的结算价
+                obj.find("td[name='tdOneYsPrice']").html(model.OneYsPrice);
+
+
+                // 景区先付  任务单
+                var taskPay = parseInt(Utils.Trim($("#tdTaskPay").html()));
+                // 任务单 返利
+                var taskFanli = parseInt(Utils.Trim($("#tdTaskFanli").html()));
+                // 签单
+                var qiandanPay = parseInt(Utils.Trim($("#tdQiandanPay").html()));
+                if (model.TktType == 1 || model.TktType == 2) { // 签单
+                    qiandanPay = qiandanPay + model.SettlePrice * model.Num;
+                } else {
+                    taskPay = taskPay + model.SettlePrice * model.Num;
+                    taskFanli = taskFanli + model.SysPrice * model.Num;
+                }
+                $("#tdTaskPay").html(taskPay);
+                $("#tdTaskFanli").html(taskFanli);
+                $("#tdQiandanPay").html(qiandanPay);
+            });
+        }
+
+        // 验证控件
+        function CheckControls() {
+
+            var num = 0;
+            $(".price_table input[name='PeopleNum']").each(function () {
+                var _this = this;
+
+                if (Utils.Trim($(_this).val()) == "") {
+                    num = num + 0;
+                } else {
+                    num = num + parseInt($(_this).val());
+                }
+            });
+
+            if (num <= 0) {
+                Utils.alert("必须输入人数！");
+                return false;
+            }
+
+            if (Utils.Trim($("#GuideName").val()) == "") {
+                Utils.alert("必须输入导游姓名！");
+                $("#GuideName").focus().select();
+                return false;
+            }
+            if (Utils.Trim($("#GuidePhone").val()) == "") {
+                Utils.alert("必须输入导游电话！");
+                $("#GuidePhone").focus().select();
+                return false;
+            }
+
+            if (Utils.Trim($("#Managers").val()) == "") {
+                Utils.alert("必须输入联系人姓名！");
+                $("#Managers").focus().select();
+                return false;
+            }
+            if (Utils.Trim($("#ManagerPhone").val()) == "") {
+                Utils.alert("必须输入联系人电话！");
+                $("#ManagerPhone").focus().select();
+                return false;
+            }
+
+            return true;
+        }
+
+
+        //修改申请人（团队游，自助游）
+        function funModifyGuestInfo(orderCode, applicanterId) {
+            var url = "/TktOrder/EditTouristInfo?OrderCode=" + orderCode + "&ID=" + applicanterId;
+            layer.open({ type: 2, title: '修改申请人', maxmin: true, shadeClose: false, area: ['600px', '550px'], content: url });
+        }
+        //取消申请人（单签）
+        function DeleteTouristInfo(id) {
+            if (confirm("确定要取消申请人吗！")) {
+                $.post("/TktOrder/DeleteTouristInfo/", { "id": id }, function (data) {
+                    window.location.href = "/OrderAdmin/ModifyOrder?OrderCode=" + $("#Order_MasterOrderCode").val();
+                });
+            }
+        }
+
+        // 重新加载游客
+        function reloadTourist() {
+            $.get("/TktOrder/ReLoadTourist?orderCode=" + $("#Order_MasterOrderCode").val(), function (result) {
+                $("#tabs-two-home").html(result);
+            });
+        }
+
+        // 缴款单详情
+        function payInfoDetail(id, orderCode) {
+            var url = "/Balance/EditPayIn?id=" + id + "&orderCode=" + orderCode;
+            layer.open({ type: 2, title: '缴款单详情', maxmin: true, shadeClose: true, area: ['950px', '450px'], content: url });
+        }
+
+        // 重新加载缴款记录
+        function reloadPayIn() {
+            $.get("/TktOrder/ReLoadPayIn?orderCode=" + $("#Order_MasterOrderCode").val(), function (result) {
+                $("#tabs-two-payin").html(result);
+            });
+        }
+
+        function reloadFiles() {
+            $.get("/TktOrder/ReloadFile?orderCode=" + $("#Order_MasterOrderCode").val(), function (result) {
+                $("#tabs-two-file").html(result);
+            });
+        }
+    </script>
+
+}
+

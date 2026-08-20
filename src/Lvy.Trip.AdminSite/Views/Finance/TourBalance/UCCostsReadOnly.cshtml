@@ -1,0 +1,69 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Tour.TourBalanceVModel
+
+<h4>成本</h4>
+<table class="table table-sm" id="shourutable">
+    <thead>
+        <tr>
+            <th></th>
+            <th>项目</th>
+            <th>供应商</th>
+            <th>单价(金额)</th>
+            <th>份数</th>
+            <th>总收入</th>
+            <th>备注</th>
+            <th>付款方式</th>
+            <th>状态</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.CostModels.Count(); i++)
+        {
+            <tr>
+                <td style="text-align: center;">
+                    @if (Model.CostModels[i].Status < 3)
+                    {
+                        <input type="checkbox" data-content="@Model.CostModels[i].Id" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" data-content="@Model.CostModels[i].Id" checked />
+                    }
+                </td>
+                <td style="text-align: center;">
+                    @DictionaryTools.GetEnumValue(Enums.SupplierCostItemsEnum, Model.CostModels[i].Item.ToString())
+                </td>
+                <td style="text-align: center;">
+                    @DictionaryTools.GetCachedCustomer(Model.CostList[i].SupplierId).Name
+                </td>
+                <td style="text-align: center;">
+                    @Model.CostModels[i].Cost
+                </td>
+                <td style="text-align: center;">
+                    @Model.CostModels[i].Num
+                </td>
+                <td style="text-align: center;">
+                    @{
+                        var itemcost = Model.CostModels[i].Cost * Model.CostModels[i].Num;
+                    }@itemcost
+                </td>
+                <td title="@Model.CostModels[i].Remark">
+                    @Model.CostModels[i].Remark.TrimWithElipsis(10)
+                </td>
+                <td style="text-align: center;">
+                    @DictionaryTools.GetEnumValue(Enums.PaymentTypeEnum, Model.CostList[i].PaymentType.ToString(), false)
+                </td>
+                <td style="text-align: center;">
+                    @DictionaryTools.GetEnumValue(Enums.CostStatusEnum, Model.CostModels[i].Status.ToString(), false)
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="8" style="text-align: right; padding-right: 15px">
+                现结：@Model.SumCost.XianShou 签单：@Model.SumCost.Qiandan  总计：@Model.SumCost.SumPaidCost
+            </td>
+        </tr>
+    </tfoot>
+</table>

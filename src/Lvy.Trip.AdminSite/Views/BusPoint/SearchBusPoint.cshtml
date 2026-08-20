@@ -1,0 +1,132 @@
+﻿@using Lvy.Models.BaseDB
+@model Lvy.VModels.Base.BusPointVModel
+@{
+    ViewBag.Title = "上车点模板管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources {
+
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h3>
+                    @ViewData["Title"]
+                    <small>汽车班线路使用</small>
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <form id="theForm" action="">
+            <div class="card-header">
+                <div class="card-tools float-left">
+                    <div class="input-group input-group-sm">
+                        @Html.DropDownListFor(m => m.OutCity, ViewData["CityList"] as List<SelectListItem>, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="card card-primary card-outline">
+                            <div class="card-header">
+                                <div class="card-tools">
+                                    <div class="input-group input-group-sm">
+                                        @Html.TextBoxFor(m => m.BusPoint, new { id = "conditionBp", @class = "form-control", @placeholder = "" })
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-default" id="searchBtn"><i class="fas fa-search"></i></button>
+                                            <button type="button" class="btn btn-success" id="btnAdd">添加上车点</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="busPointListContent" class="card-body">
+                                @Html.Partial("UCBusPointList", Model)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-4">
+                        <div class="card card-light card-outline">
+                            <div class="card-header">
+                                <h4 class="card-title">标签列表</h4>
+                                <div class="card-tools">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-success" onclick="EditGroup(0);"><i class="fas fa-plus"></i> 添加标签</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="divGroups" class="card-body">
+                                @Html.Partial("UCGroups", Model)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(function () {
+        $("#OutCity").change(function () {
+            ReloadBusPoint();
+            ReloadGroup();
+        });
+        // 查询上车点
+        $('#searchBtn').click(function () {
+            pageselectCallback(0);
+        });
+
+        $("#btnAdd").click(function () {
+            layer.open({ type: 2, title: '添加上下车点', maxmin: true, shadeClose: false, area: ['540px', '400px'], content: '@Url.Action("CreateBusPoint")' });
+        });
+    });
+
+    // 编辑标签
+    function EditGroup(id) {
+        var url =  '@Url.Action("EditGroup")' + "?groupId=" + id;
+        layer.open({ type: 2, title: '添加标签', maxmin: true, shadeClose: false, area: ['600px', '220px'], content: url });
+    }
+    // 删除标签
+    function DeleteGroup(id) {
+        var load_iii = Utils.layerLoad();
+        var params = "groupId=" + id;
+        $.get('@Url.Action("DeleteGroup")', params, function (data) {
+            $('#divGroups').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+    function ReloadBusPoint() {
+        var load_iii = Utils.layerLoad();
+        var params = "outCity=" + $("#OutCity").val();
+        $.get('@Url.Action("SearchBusPoint")', params, function (data) {
+            $('#busPointListContent').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+    function ReloadGroup() {
+        var load_iii = Utils.layerLoad();
+        var params = "outCity=" + $("#OutCity").val();
+        $.get('@Url.Action("ReloadGroup")', params, function (data) {
+            $('#divGroups').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+
+</script>

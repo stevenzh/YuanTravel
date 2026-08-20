@@ -1,0 +1,14 @@
+﻿@using Lvy.Models
+<p>热门目的地 ：</p>
+@foreach (var item in ViewBag.HotDests as List<KeyValueBean>)
+{
+    <a style="padding-left: 5px;" destId="@item.Key" href="#" onclick="HotDestLink(this)">@item.Value</a>
+}
+
+<p style="height: 15px;"></p>
+@* <p>热门产品 ：</p>
+    @foreach(var item in ViewBag.HotProducts as List<KeyValueBean>)
+    {
+        <a style="padding-left: 5px;" href="@Url.Action("Search",new{ProductId=item.Key})">@item.Value</a>
+    }
+*@

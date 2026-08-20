@@ -1,0 +1,29 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+
+<div class="sotable_tit">
+    &nbsp;结算明细
+</div>
+<table class="edittbl" style="width:100%;">
+    <tr>
+        <td class="label">营业收入：</td>
+        <td>@Model.Balance.YingShou</td>
+        <td class="label">已收：</td>
+        <td>@Model.Balance.YiShou</td>
+        <td class="label">未收：</td>
+        <td>
+            @{ var ws = Model.Balance.YingShou - Model.Balance.YiShou;}@ws
+        </td>
+    </tr>
+    <tr>
+        <td width="100" class="label">结算人数：</td>
+        <td>@Model.Balance.Num</td>
+        <td width="100" class="label">成本合计：</td>
+        <td>@Model.Balance.TotalCost</td>
+        <td width="100" class="label">该团毛利：</td>
+        <td>@Model.Balance.MaoLi</td>
+        <td width="100" class="label">毛利率：</td>
+        <td>
+            @{ var per = string.Format("{0:0.00%}", (Model.Balance.TotalCost == 0 ? 0 : Model.Balance.MaoLi / Model.Balance.TotalCost)); } @per
+        </td>
+    </tr>
+</table>

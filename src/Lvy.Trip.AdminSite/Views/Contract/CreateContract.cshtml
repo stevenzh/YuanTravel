@@ -1,0 +1,2532 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+@using Lvy.VModels.Contract
+@{
+    ViewBag.Title = "";
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    ContractVModel contractVModel = ViewBag.Contract;
+    if (contractVModel == null)
+    {
+        contractVModel = new ContractVModel();
+    }
+}
+
+@section AdditionalResources{
+    <link href="@CDNServerUrl/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="@CDNServerUrl/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/simple-line-icons.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/layout.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/components.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/style.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/default.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/dropload.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/edslider.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/inform.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/jquery.mCustomScrollbar.css" rel="stylesheet" />
+    @*<link href="~/WebRes/contract/laydate.css" rel="stylesheet" />*@
+    <link href="~/WebRes/contract/css/layer.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/main.css" rel="stylesheet" />
+    <link href="~/WebRes/contract/wangEditor-3.1.1/wangEditor.min.css" rel="stylesheet" />
+
+    <script src="~/WebRes/contract/datepicker.js"></script>
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/contract/wangEditor-3.1.1/wangEditor.min.js"></script>
+    <script src="~/WebRes/contract/layer/layer.js"></script>
+    <style type="text/css">
+        body { overflow: auto; background-color: #808080; }
+        .content-wrapper { margin: 0; }
+    </style>
+}
+
+<div class="contract-wrapper">
+    <div class="fixed-header">
+        <div class="title">上海出境游合同</div>
+        <div class="btns">
+            <div class="clear-20"></div>
+            <a class="btn btn1" id="backBtn" href="@Url.Action("Index","Contract")">&nbsp;&nbsp;&nbsp;返回&nbsp;&nbsp;&nbsp;</a>
+        </div>
+        <div class="stepInfo">
+            <ul>
+                <li></li>
+                <li></li>
+            </ul>
+            <div class="stepIco stepIco1 active">
+                <span>1</span>
+                <div class="stepText">产品信息和费用</div>
+            </div>
+            <div class="stepIco stepIco2">
+                <span>2</span>
+                <div class="stepText">游客代表和游客信息</div>
+            </div>
+            <div class="stepIco stepIco3">
+                <span>3</span>
+                <div class="stepText">其他约定信息</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="clear-200"></div>
+
+    @if (Model != null)
+    {
+        <form id="contractForm">
+
+            <input id="orderCode" type="hidden" name="orderCode" value="@ViewBag.OrderCode" />
+            <input id="contractNumber" type="hidden" name="contractNumber" value="@contractVModel.Contract.contractNumber" />
+            <input id="picroot" type="hidden" name="picroot" value="@picroot" />
+            <input id="travelItineraryhidden" type="hidden" name="travelItineraryhidden" value="@contractVModel.Contract.travelItinerary" />
+
+            <div id="step1" class="step-wrapper">
+                <!-- 合同主体 -->
+                <div class="contract-box">
+                    <div class="title">
+                        合同主体
+                    </div>
+                    <div class="content">
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">旅行社名称:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="agencyName" name="agencyName" class="form-control btn-circle input-icon" value="上海新康辉国际旅行社有限责任公司" type="text" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">旅行社地址:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">经营许可证号:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="agencyAddress" name="agencyAddress" class="form-control btn-circle input-icon" value="上海市杨浦区国和路36号15幢3598室" type="text" readonly="readonly">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="licenseCode" name="licenseCode" class="form-control btn-circle input-icon" value="L-SH-CJ00042" type="text" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">统一社会信用代码:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <input id="creditCode" name="creditCode" class="form-control btn-circle input-icon" value="913101107345589190" type="text" readonly="readonly">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">旅行社经办人:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">经办人电话:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="transactorName" name="transactorName" value="@Html.Raw(string.IsNullOrEmpty(contractVModel.Contract.transactorName)?"安琪":contractVModel.Contract.transactorName)" class="form-control btn-circle input-icon" nullmsg="请输入经办人" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="transactorPhone" name="transactorPhone" value="@Html.Raw(string.IsNullOrEmpty(contractVModel.Contract.transactorPhone)?"18964072143":contractVModel.Contract.transactorPhone)" class="form-control btn-circle input-icon" errormsg="请输入经办人联系电话" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 线路行程时间 -->
+                <div class="contract-box">
+                    <div class="title">
+                        线路行程时间
+                    </div>
+                    <div class="content">
+                        <div class="form-group">
+                            <label class="col-md-12 form-lable font-size-14 line-height-30 required">旅游产品名称:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-10">
+                                <input id="routeName" name="routeName" class="form-control btn-circle input-icon" autocomplete="off" value="@Model.Order.Line.LineName" datatype="*" nullmsg="请输入线路名称" placeholder="请输入线路名称" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30">团号:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="groupId" name="groupId" class="form-control btn-circle input-icon" value="@Model.TourPlan.TourNo" nullmsg="请输入团号" placeholder="请输入团号" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-12 form-lable font-size-14 line-height-30 required">组团方式:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <label class="fl form-lable font-size-14 line-height-30">
+                                    <input class="fl m-10" type="radio" data-mode="1" name="groupMode" @Html.Raw(contractVModel.Contract.groupMode == 1 ? "checked=checked" : "")>
+                                    <span class="fl pl-20">自行组团</span>
+                                </label>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="fl form-lable font-size-14 line-height-30">
+                                    <input class="fl m-10" type="radio" data-mode="2" name="groupMode" @Html.Raw(contractVModel.Contract.groupMode == 2 ? "checked=checked" : "")>
+                                    <span class="fl pl-20">委托组团</span>
+
+                                </label>
+                                <label class="fl form-lable font-size-14 line-height-30">（委托社名称</label>
+                                <div class="col-md-3">
+                                    <input id="entrustAgency" name="entrustAgency" class="form-control btn-circle input-icon" nullmsg="请输入委托社名称" placeholder="请输入委托社名称" type="text" value="@contractVModel.Contract.entrustAgency">
+                                </div>
+                                <label class="fl form-lable font-size-14 line-height-30">）</label>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="fl form-lable font-size-14 line-height-30">
+                                    <input class="fl m-10" type="radio" data-mode="3" name="groupMode" @Html.Raw(contractVModel.Contract.groupMode == 3 ? "checked=checked" : "")>
+                                    <span class="fl pl-20">拼团</span>
+                                </label>
+                                <label class="fl form-lable font-size-14 line-height-30">（其他社全称</label>
+                                <div class="col-md-3">
+                                    <input id="otherAgency" name="otherAgency" class="form-control btn-circle input-icon" nullmsg="请输入其他社全称" placeholder="请输入其他社全称" type="text" value="@contractVModel.Contract.otherAgency">
+                                </div>
+                                <label class="fl form-lable font-size-14 line-height-30">）</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">出发日期:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">出发地点:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="startDate" name="startDate" class="form-control btn-circle input-icon input-readonly" readonly="" value="@Model.Order.OutDate.ToDateFormat()" datatype="*" onfocus="WdatePicker({isShowClear:false,readOnly:true})" nullmsg="请选择出发日期" placeholder="请选择出发日期" type="text" lay-key="1">
+                            </div>
+
+                            <div class="col-md-6">
+                                <input id="departureCity" name="departureCity" value="@(contractVModel.Contract.departureCity.IsNullOrEmpty()? DictionaryTools.GetDestNameStr(@Model.Order.Line.DepartDest):contractVModel.Contract.departureCity)" class="form-control btn-circle input-icon" datatype="*" nullmsg="请输入出发地点" placeholder="请输入出发地点" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30">途径地点（经停地点）:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">目的地:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="passCity" name="passCity" value="见行程" class="form-control btn-circle input-icon" autocomplete="off" placeholder="途径地点（经停地点）" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="arrivalCity" name="arrivalCity" value="@(contractVModel.Contract.arrivalCity.IsNullOrEmpty()? DictionaryTools.GetDestNameStr(@Model.Order.Line.ArriveDest):contractVModel.Contract.arrivalCity)" class="form-control btn-circle input-icon" datatype="*" nullmsg="请输入目的地" placeholder="请输入目的地" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">结束日期:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">返回地点:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="endDate" name="endDate" value="@Model.Order.OutDate.AddDays(Model.Order.Line.TravelDays).ToString("yyyy-MM-dd")" class="form-control btn-circle input-icon input-readonly" readonly="" datatype="*" onfocus="WdatePicker({isShowClear:false,readOnly:true})" nullmsg="请选择结束日期" placeholder="请选择结束日期" type="text" lay-key="2">
+                            </div>
+
+                            <div class="col-md-6">
+                                <input id="endCity" name="endCity" value="@(contractVModel.Contract.endCity.IsNullOrEmpty()? DictionaryTools.GetDestName(Model.TourPlan.PortOfExit.ToString()):contractVModel.Contract.endCity)" class="form-control btn-circle input-icon" datatype="*" nullmsg="请输入返回地点" placeholder="请输入返回地点" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-12 form-lable font-size-14 line-height-30 required">景点名称和浏览时间:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-10">
+                                <input id="attraction" name="attraction" value="见行程" class="form-control btn-circle input-icon" autocomplete="off" placeholder="景点名称和浏览时间" datatype="*" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">往返交通:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">标准:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="longTransport" name="longTransport" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入往返交通" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="longStandard" name="longStandard" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入标准" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">浏览交通:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">标准:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="localTransport" name="localTransport" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入浏览交通" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="localStandard" name="localStandard" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入标准" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">旅游者自由活动时间:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">次数:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="freeTime" name="freeTime" class="form-control btn-circle input-icon" placeholder="请输入旅游者自由活动时间" type="text" value="见行程">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="freeNumber" name="freeNumber" class="form-control btn-circle input-icon" placeholder="请输入次数" type="text" value="见行程">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-12 form-lable font-size-14 line-height-30 ">住宿安排（名称）及标准和住宿天数：:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-10">
+                                <input id="hotelDesc" name="hotelDesc" class="form-control btn-circle input-icon" autocomplete="off" placeholder="住宿安排（名称）及标准和住宿天数：" value="见行程" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">用餐次数:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">标准:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="mealNumber" name="mealNumber" class="form-control btn-circle input-icon" placeholder="请输入用餐次数" type="text" value="见行程">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="mealStandard" name="mealStandard" class="form-control btn-circle input-icon" placeholder="请输入标准" type="text" value="见行程">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">地接社名称:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">地址:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="localAgencyName" name="localAgencyName" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入地接社名称" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="localAgencyAddress" name="localAgencyAddress" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入地址" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">地接社联系人:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">联系电话:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="localAgencyContact" name="localAgencyContact" value="见行程" class="form-control btn-circle input-icon" placeholder="请输入地接社联系人" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="localAgencyPhone" name="localAgencyPhone" value="见行程" class="form-control btn-circle input-icon" errormsg="请输入联系电话" placeholder="请输入联系电话" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 ">行程信息:</label>
+                        </div>
+                        <div class="form-group">
+                            <div style="width:100%">
+                                <span id="travelItinerary" name="travelItinerary" nullmsg="请填写行程信息"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 旅游费用及支付 -->
+                <div class="contract-box">
+                    <div class="title">
+                        旅游费用及支付
+                    </div>
+                    <div class="content">
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14 line-height-30 required">甲方应交纳旅游费用:</label>
+                            <div class="col-md-2">
+                                <input id="totalCost" name="totalCost" class="form-control btn-circle input-icon" value="@Model.Order.TolYsPrice" datatype="money" errormsg="请正确输入金额格式(小数点后两位)" nullmsg="请输入甲方应交纳旅游费" placeholder="甲方应交纳旅游费" type="text">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">元（含领队、导游服务费用</label>
+                            <div class="col-md-2">
+                                <input id="guideServiceCost" name="guideServiceCost" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" class="form-control btn-circle input-icon" value="@contractVModel.Contract.guideServiceCost" datatype="money" errormsg="请正确输入金额格式(小数点后两位)" nullmsg="请输入领队、导游服务费" placeholder="领队、导游服务费" type="text">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">元/人，合计</label>
+                            <div class="col-md-2">
+                                <input id="totalGuideServiceCost" name="totalGuideServiceCost" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" class="form-control btn-circle input-icon" value="@contractVModel.Contract.totalGuideServiceCost" datatype="money" errormsg="请正确输入金额格式(小数点后两位)" nullmsg="请输入合计金额" placeholder="合计金额" type="text">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">元）</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30 required">旅游费用交纳期限:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <input id="deadline" name="deadline" class="form-control btn-circle input-icon" datatype="*" placeholder="请输入旅游费用交纳期限" type="text" value="@contractVModel.Contract.deadline" onfocus="WdatePicker({isShowClear:false,readOnly:true})" lay-key="3">
+                            </div>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14 line-height-30 required">旅游费用支付方式:</label>
+                            <div class="col-md-1">
+                                <select id="paymentMethod" name="paymentMethod" class="form-control required" nullmsg="请选择支付方式" placeholder="旅游费用支付方式">
+                                    <option value="现金" @Html.Raw(contractVModel.Contract.payMethod == "现金" ? "selected=selected" : "")>1</option>
+                                    <option value="支票" @Html.Raw(contractVModel.Contract.payMethod == "支票" ? "selected=selected" : "")>2</option>
+                                    <option value="信用卡" @Html.Raw(contractVModel.Contract.payMethod == "信用卡" ? "selected=selected" : "")>3</option>
+                                    <option value="其他" @Html.Raw(contractVModel.Contract.payMethod == "其他" ? "selected=selected" : "")>4</option>
+                                </select>
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">种方式缴纳费用:</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14">（1）现金；</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14">（2）支票；</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14">（3）信用卡；</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14">（4）其他；</label>
+                            <div class="col-md-2">
+                                <input id="otherPaymethod" name="otherPaymethod" class="form-control btn-circle input-icon" type="text" nullmsg="请输入其他缴纳费用方式" placeholder="请输入其他缴纳费用方式" value="@contractVModel.Contract.otherPaymethod">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group ta-c">
+                    <a href="#2" class="btn step-btn next-btn">下一步</a>
+                </div>
+            </div>
+
+            <div id="step2" class="step-wrapper dn">
+                <!-- 游客代表和游客信息 -->
+                <div class="contract-box">
+                    <div class="title" style="position: relative;">游客信息</div>
+                    <div class="content">
+                        <div id="btour">
+                            <div class="behalf-tourist-box">
+                                <div class="behalf-tourist-title">
+                                    签署人/游客代表信息
+                                </div>
+                                <div class="content">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 required">联系人:</label>
+                                            <div class="col-md-8">
+                                                <input id="signingName" name="signingName" value="@contractVModel.Contract.signingName" class="form-control btn-circle input-icon" datatype="*" nullmsg="请输入联系人姓名" placeholder="请输入联系人姓名" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="fl form-lable font-size-14 line-height-30 required">手机:</label>
+                                            <div class="col-md-8">
+                                                <input id="signingPhone" name="signingPhone" value="@contractVModel.Contract.signingPhone" class="form-control btn-circle input-icon" datatype="m" nullmsg="请输入联系人手机" errormsg="请输入正确的手机号码" placeholder="请输入联系人手机" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="fl form-lable font-size-14 line-height-30 required">证件号码:</label>
+                                            <div class="col-md-9">
+                                                <div class="col-md-3">
+                                                    @Html.DropDownList("signingPassType", DictionaryTools.GetEnumsBy(Enums.PassTypeEnum).ToSelectListFor(contractVModel.Contract.signingPassType.ToString()), new { id = "signingPassType", @class = "form-control" })
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <input id="signingPassNo" name="signingPassNo" value="@contractVModel.Contract.signingPassNo" class="form-control btn-circle input-icon" style="text-transform:uppercase;" datatype="*" nullmsg="请输入证件号码" errormsg="证件号码格式错误" placeholder="请输入证件号码" type="text">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="clear-20"></div>
+                                    <div class="form-group" style="display:none;">
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">游客类别:</label>
+                                            <div class="col-md-9 mt-radio-inline">
+                                                <label class="mt-radio mt-radio-outline col-md-4 mb-0 ta-c">
+                                                    个人
+                                                    <input name="signingTouristType" type="radio" value="0" checked="">
+                                                    <span style="left:10px;"></span>
+                                                </label>
+
+                                                <label class="mt-radio mt-radio-outline col-md-6 mb-0 ta-c">
+                                                    单位/机构
+                                                    <input name="signingTouristType" type="radio" value="1">
+                                                    <span style="left:10px;"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">单位:</label>
+                                            <div class="col-md-10">
+                                                <input id="signingCompanyName" name="beCompanyName" class="form-control btn-circle input-icon" value="" nullmsg="请输入联系人单位" placeholder="请输入联系人单位" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">统一信用代码:</label>
+                                            <div class="col-md-8">
+                                                <input id="signingLicenseNo" name="beBusinessLicenseNumber" class="form-control btn-circle input-icon" value="" nullmsg="请输入统一信用代码" placeholder="请输入统一信用代码" type="text">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clear-20"></div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">地址:</label>
+                                            <div class="col-md-10">
+                                                <input id="signingAddress" name="signingAddress" value="@contractVModel.Contract.signingAddress" class="form-control btn-circle input-icon" nullmsg="请输入联系人地址" placeholder="请输入联系人地址" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">邮箱:</label>
+                                            <div class="col-md-10">
+                                                <input id="signingEmail" name="signingEmail" value="@contractVModel.Contract.signingEmail" class="form-control btn-circle input-icon" nullmsg="请输入联系人电子邮箱" errormsg="请输入正确的邮件格式" placeholder="请输入联系人电子邮箱" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">性别:</label>
+                                            <div class="col-md-8 mt-radio-inline">
+                                                <label class="mt-radio mt-radio-outline col-md-4 mb-0 ta-c">
+                                                    男
+                                                    <input name="signingSex" type="radio" value="0" @Html.Raw(contractVModel.Contract.signingSex == "0" ? "checked=checked" : "")>
+                                                    <span style="left:10px;"></span>
+                                                </label>
+
+                                                <label class="mt-radio mt-radio-outline col-md-4 mb-0 ta-c">
+                                                    女
+                                                    <input name="signingSex" type="radio" value="1" @Html.Raw(contractVModel.Contract.signingSex == "1" ? "checked=checked" : "")>
+                                                    <span style="left:10px;"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4" style="display:none;">
+                                            <label class="fl form-lable font-size-14 line-height-30 ">联系人参团:</label>
+                                            <div class="col-md-8 mt-radio-inline">
+                                                <label class="mt-radio mt-radio-outline col-md-4 mb-0 ta-c">
+                                                    是
+                                                    <input name="signingIsJoin" type="radio" value="true" checked="">
+                                                    <span style="left:10px;"></span>
+                                                </label>
+
+                                                <label class="mt-radio mt-radio-outline col-md-4 mb-0 ta-c">
+                                                    否
+                                                    <input name="signingIsJoin" type="radio" value="false">
+                                                    <span style="left:10px;"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clear-20"></div>
+                                    <div class="form-group">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-scrollable ml-10" id="table_list_tourist">
+                            <table id="departmentTable" class="table table-bordered table-hover mb-0">
+                                <thead>
+                                    <tr class="active">
+                                        <th width="60" class="border-bottom-0 line-height-30">序号</th>
+                                        <th width="80" class="required border-bottom-0 line-height-30">姓名</th>
+                                        <th width="70" class="required border-bottom-0 line-height-30">性别</th>
+                                        <th width="70" class="required border-bottom-0 line-height-30">年龄</th>
+                                        <th width="50" class="border-bottom-0 line-height-30">儿童</th>
+                                        <th width="80" class="border-bottom-0 line-height-30">证件类型</th>
+                                        <th width="170" class="border-bottom-0 line-height-30">证件号码</th>
+                                        <th width="120" class="required border-bottom-0 line-height-30">联系电话（手机）</th>
+                                        <th width="150" class="border-bottom-0 line-height-30">个人健康信息</th>
+                                        <th width="50" class="border-bottom-0 line-height-30">签署</th>
+                                        @*<th width="120" class="border-bottom-0 ta-c line-height-30">操作</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="touristList">
+
+                                    @if (contractVModel.TouristList.Count > 0)
+                                    {
+                                        int count = 1;
+                                        foreach (var item in contractVModel.TouristList)
+                                        {
+                                            <tr>
+                                                <td class="vertical-align-middle ta-c">
+                                                    @count
+                                                </td>
+                                                <td>
+                                                    <input name="id" type="hidden" value="@item.id" />
+                                                    <input name="name" class="form-control" width="80" value="@item.name" nullmsg="游客姓名不能为空" placeholder="姓名" data-state="edit" data-index="0" readonly="readonly">
+                                                </td>
+                                                <td align="center">
+                                                    <select name="gender" class="form-control required">
+                                                        <option value="男" @Html.Raw(item.gender == "男" ? "selected=selected" : "")>男</option>
+                                                        <option value="女" @Html.Raw(item.gender != "男" ? "selected=selected" : "")>女</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input name="age" type="text" value="@item.age" readonly="readonly" />
+                                                </td>
+                                                <td class="ta-c">
+                                                    <label class="mt-checkbox mt-checkbox-outline ml-10 mt-5">
+                                                        <input type="checkbox" value="0" name="isChildren" @Html.Raw(item.isChildren? "checked='checked'" : "")>
+                                                        <span></span>
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <select name="passType" class="form-control required" nullmsg="请选择证件类型" placeholder="证件类型">
+                                                        <option value="1" @Html.Raw(item.passType == 1 ? "selected=selected" : "")>身份证</option>
+                                                        <option value="2" @Html.Raw(item.passType == 2 ? "selected=selected" : "")>护照</option>
+                                                        <option value="4" @Html.Raw(item.passType == 4 ? "selected=selected" : "")>港澳通行证</option>
+                                                        <option value="5" @Html.Raw(item.passType == 5 ? "selected=selected" : "")>军官证</option>
+                                                        <option value="8" @Html.Raw(item.passType == 8 ? "selected=selected" : "")>港澳回乡证</option>
+                                                        <option value="9" @Html.Raw(item.passType == 9 ? "selected=selected" : "")>台胞证</option>
+                                                        <option value="10" @Html.Raw(item.passType == 10 ? "selected=selected" : "")>香港身份证</option>
+                                                        <option value="11" @Html.Raw(item.passType == 11 ? "selected=selected" : "")>其他</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input name="passNo" class="form-control" style="text-transform:uppercase;" value="@item.passNo" nullmsg="游客证件号码" placeholder="证件号码">
+                                                </td>
+                                                <td>
+                                                    <input name="phone" class="form-control" value="@item.phone" placeholder="联系电话" errormsg="手机号码格式不正确">
+                                                </td>
+                                                <td>
+                                                    <input name="health" class="form-control" value="@item.health" placeholder="个人健康信息">
+                                                </td>
+                                                <td class="line-height-30 font-size-14 ta-c">
+                                                    <label class="mt-checkbox mt-checkbox-outline ml-10 mt-5">
+                                                        <input name="isSign" type="checkbox" value="0" @Html.Raw(item.isSign == true ? "checked=checked" : "") data-index="0">
+                                                        <span></span>
+                                                    </label>
+                                                </td>
+                                                @*<td class="ta-c vertical-align-middle">
+                                                    <button type="button" class="btn btn-success btn-sm saveTourist" data-index="0">保存</button>
+                                                    <button type="button" class="btn btn-danger btn-sm removeTourist" data-index="0">删除</button>
+                                                </td>*@
+                                            </tr>
+                                            count++;
+                                        }
+                                    }
+                                    else if (Model.Travellers2 != null && Model.Travellers2.Count > 0)
+                                    {
+                                        int count = 1;
+                                        foreach (var item in Model.Travellers2)
+                                        {
+                                            int age = 0;
+                                            if (item.DateOfBirth != null)
+                                            {
+                                                DateTime birthdate = Convert.ToDateTime(item.DateOfBirth);
+                                                DateTime now = DateTime.Now;
+                                                age = now.Year - birthdate.Year;
+                                                if (now.Month < birthdate.Month || (now.Month == birthdate.Month && now.Day < birthdate.Day))
+                                                {
+                                                    age--;
+                                                }
+                                            }
+                                            <tr>
+                                                <td class="vertical-align-middle ta-c">
+                                                    @count
+                                                </td>
+                                                <td>
+                                                    <input name="id" type="hidden" value="0" />
+                                                    <input name="name" class="form-control" width="80" value="@item.Name" nullmsg="游客姓名不能为空" placeholder="姓名" data-state="edit" data-index="0" readonly="readonly">
+                                                </td>
+                                                <td align="center">
+                                                    <select name="gender" class="form-control required">
+                                                        <option value="男" @Html.Raw(item.Sex == "1"? "selected=selected" : "")>男</option>
+                                                        <option value="女" @Html.Raw(item.Sex != "1" ? "selected=selected" : "")>女</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input name="age" type="text" value="@age" readonly="readonly" />
+                                                </td>
+                                                <td class="ta-c">
+                                                    <label class="mt-checkbox mt-checkbox-outline ml-10 mt-5">
+                                                        <input type="checkbox" value="0" name="isChildren">
+                                                        <span></span>
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <select name="passType" class="form-control required" nullmsg="请选择证件类型" placeholder="证件类型">
+                                                        <option value="1">身份证</option>
+                                                        <option value="2" selected="selected">护照</option>
+                                                        <option value="4">港澳通行证</option>
+                                                        <option value="5">军官证</option>
+                                                        <option value="8">港澳回乡证</option>
+                                                        <option value="9">台胞证</option>
+                                                        <option value="10">香港身份证</option>
+                                                        <option value="11">其他</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input name="passNo" class="form-control" readonly="readonly" style="text-transform:uppercase;" value="@item.PassNo" nullmsg="游客证件号码" placeholder="证件号码">
+                                                </td>
+                                                <td>
+                                                    <input name="phone" class="form-control" readonly="readonly" value="@item.Phone" placeholder="联系电话" errormsg="手机号码格式不正确">
+                                                </td>
+                                                <td>
+                                                    <input name="health" class="form-control" value="健康" placeholder="个人健康信息">
+                                                </td>
+                                                <td class="line-height-30 font-size-14 ta-c">
+                                                    <label class="mt-checkbox mt-checkbox-outline ml-10 mt-5">
+                                                        <input name="isSign" type="checkbox" value="0" data-index="0">
+                                                        <span></span>
+                                                    </label>
+                                                </td>
+                                                @*<td class="ta-c vertical-align-middle">
+                                                    <button type="button" class="btn btn-success btn-sm saveTourist" data-index="0">保存</button>
+                                                    <button type="button" class="btn btn-danger btn-sm removeTourist" data-index="0">删除</button>
+                                                </td>*@
+                                            </tr>
+                                            count++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group ta-c">
+                    <a href="#1" class="btn step-btn mr-10 prev-btn">上一步</a>
+                    <a href="#3" class="btn step-btn ml-10 next-btn">下一步</a>
+                </div>
+
+            </div>
+
+            <div id="step3" class="step-wrapper dn">
+                <div class="contract-box">
+                    <div class="title">
+                        旅游者保险
+                    </div>
+                    <div class="content">
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14 line-height-30 required">乙方提示甲方购买旅游意外险。经乙方推荐，甲方</label>
+                            <div class="col-md-1">
+                                <select id="agreeToBuy" class="form-control required">
+                                    <option value="true" @Html.Raw(contractVModel.Contract.agreeToBuy == true ? "selected=selected" : "")>同意</option>
+                                    <option value="false" @Html.Raw(contractVModel.Contract.agreeToBuy == false ? "selected=selected" : "")>不同意</option>
+                                </select>
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30 required">委托乙方办理个人投保的旅游意外保险。</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30">保险公司名称:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30">产品名称:</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <div class="col-md-6">
+                                <input id="company" name="company" value="@contractVModel.Contract.company" class="form-control btn-circle input-icon" nullmsg="请输入保险公司名称" placeholder="保险公司名称" type="text">
+                            </div>
+                            <div class="col-md-6">
+                                <input id="productName" name="productName" value="@contractVModel.Contract.productName" class="form-control btn-circle input-icon" nullmsg="请输入保险产品名称" placeholder="保险产品名称" type="text">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-6 form-lable font-size-14 line-height-30">保险费:</label>
+                            <label class="col-md-6 form-lable font-size-14 line-height-30">保险金额:</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input id="premium" name="premium" value="@contractVModel.Contract.premium" class="form-control btn-circle input-icon" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" nullmsg="请输入保险费" placeholder="保险费" type="text">
+                                    <div class="input-group-addon">元</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input id="coverage" name="coverage" value="@contractVModel.Contract.coverage" class="form-control btn-circle input-icon" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" nullmsg="请输入保险金额" placeholder="保险金额" type="text">
+                                    <div class="input-group-addon">元</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contract-box">
+                    <div class="title">成团人数与不成团的约定</div>
+                    <div class="content">
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14 line-height-30">成团人数与不成团的约定（二选一）</label>
+                            <div class="col-md-1">
+                                <select id="groupAgreementResolution" name="groupAgreementResolution" class="form-control required">
+                                    <option value="1" selected="selected">选择(1)</option>
+                                    <option value="2" )>选择(2)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14 line-height-30 ">（1）最低成团人数</label>
+                            <div class="col-md-1">
+                                <input id="leastCustomerNumber" name="leastCustomerNumber" value="@Model.TourPlan.MixedNum" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" nullmsg="请输入最低成团人数" placeholder="请输入最低成团人数">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30 ">人。低于此人数不能成团时，乙方应当提前30日通知甲方，本合同解除，向甲方退还已收取的全部费用。</label>
+                        </div>
+                        <div class="form-group mt-20">
+                            <label class="fl form-lable font-size-14">（2）本团成团不受最低人数限制。</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成团人数与不成团的约定 -->
+                <div class="contract-box">
+                    <div class="title">
+                        甲方解除合同及承担必要费用
+                    </div>
+                    <div class="content">
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">因甲方自身原因导致合同解除，乙方按下列标准扣除必要费用后，将余款退还甲方（二选一）</label>
+                            <div class="col-md-1">
+                                <select id="solutionA" name="solutionA" class="form-control required">
+                                    <option value="1" @Html.Raw(contractVModel.Contract.solutionA == "1" ? "selected=selected" : "")>选择(一)</option>
+                                    <option value="2" @Html.Raw(contractVModel.Contract.solutionA == "2" ? "selected=selected" : "")>选择(二)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                (一)双方可以进行约定并从其约定：
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-30">
+                                1．在行程前解除合同的，必要的费用扣除标准为：
+                            </label>
+                        </div>
+                        @{
+                            string deductStandardA = contractVModel.Contract.deductStandardA;
+                            string[] arry = deductStandardA.Split('|');
+                            if (arry.Length > 0)
+                            {
+                                for (int i = 0; i < arry.Length; i++)
+                                {
+                                    string partAStartId = "partAStart" + i;
+                                    string partAEndId = "partAEnd" + i;
+                                    string partARatioId = "partARatio" + i;
+                                    string partAStartValue = arry[i].Split(',')[0];
+                                    string partAEndValue = arry[i].Split(',')[1];
+                                    string partARatioValue = arry[i].Split(',')[2];
+                                    int no = i + 1;
+                                    if (i == arry.Length - 1)
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程开始当日，旅游费用
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partARatioId" value="@partARatioValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                %
+                                            </label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程前
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partAStartId" value="@partAStartValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日至
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partAEndId" value="@partAEndValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日，旅游费用
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partARatioId" value="@partARatioValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                %；
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (int i = 0; i <= 4; i++)
+                                {
+                                    string partAStart = "partAStart" + i;
+                                    string partAEnd = "partAEnd" + i;
+                                    string partARatio = "partARatio" + i;
+                                    int no = i + 1;
+                                    if (i == 4)
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程开始当日，旅游费用
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partARatio" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                %
+                                            </label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程前
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partAStart" value="" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日至
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partAEnd" value="" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日，旅游费用
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partARatio" value="" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                %；
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            }
+                        }
+
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                甲方行程前逾期支付旅游费用超过
+                            </label>
+                            <div class="col-md-1">
+                                <input id="overdueDaysA" value="@contractVModel.Contract.overdueDaysA" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                日的，或者甲方未按约定时间到达约定集合出发地点，也未能在中途加入旅游团队的，乙方可以视为甲方解除合同，乙方可以按本款规定扣除必要的费用后，将余款退还甲方。
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-30">
+                                2．在行程中解除合同的，必要的费用扣除标准为：
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            @{
+                                string partAformula0 = "";
+                                string partAformula1 = "";
+                                string partAformula2 = "";
+                                string partAformula3 = "";
+                                if (!string.IsNullOrEmpty(contractVModel.Contract.formulaA))
+                                {
+                                    string[] formulaArry = contractVModel.Contract.formulaA.Split('|');
+
+                                    if (formulaArry.Length > 0)
+                                    {
+                                        partAformula0 = formulaArry[0];
+                                        partAformula1 = formulaArry[1];
+                                        partAformula2 = formulaArry[2];
+                                        partAformula3 = formulaArry[3];
+                                    }
+                                }
+                            }
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                旅游费用-（
+                            </label>
+                            <div class="col-md-1">
+                                <input id="partAformula0" value="@partAformula0" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                ） - （
+                            </label>
+                            <div class="col-md-1">
+                                <input id="partAformula1" value="@partAformula1" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                ）- （
+                            </label>
+                            <div class="col-md-1">
+                                <input id="partAformula2" value="@partAformula2" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                ）- （
+                            </label>
+                            <div class="col-md-1">
+                                <input id="partAformula3" value="@partAformula3" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                ）
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                (二)双方没有约定的，按照下列标准扣除必要的费用
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-30">
+                                1．在行程前解除合同的，机（车、船）票费用按实结算后，其余必要的费用扣除标准为：
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （1）行程前30日至15日，旅游费用5％；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （2）行程前14日至7日，旅游费用10％；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （3）行程前6日至4日，旅游费用15％；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （4）行程前3日至1日，旅游费用25％；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （5）行程开始当日，旅游费用30％。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-90">
+                                甲方行程前逾期支付旅游费用超过
+                            </label>
+                            <div class="col-md-1">
+                                <input id="overdueDaysA2" value="@contractVModel.Contract.overdueDaysA2" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                日的，或者甲方未按约定时间到达约定集合出发地点，也未能在中途加入旅游团队的，乙方可以视为甲方解除合同，乙方可以按本款规定扣除必要的费用后，将余款退还甲方。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-30">
+                                2．在行程中解除合同的，必要的费用扣除标准为：
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （旅游费用-旅游费用×行程开始当日扣除比例）÷旅游天数×已经出游的天数+旅游费用×行程开始当日扣除比例。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                如按上述1、2方式支付的必要费用低于实际发生的费用，按照实际发生的费用扣除，但最高额不应超过旅游费用总额。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                行程前解除合同的，乙方扣除必要费用后，应当在合同解除之日起
+                            </label>
+                            <div class="col-md-1">
+                                <input id="timeLimitA" name="timeLimitA" value="@contractVModel.Contract.timeLimitA" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                个工作日内向甲方退还剩余旅游费用；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                行程中解除合同的，乙方扣除必要费用后，应当在协助甲方返回出发地或者到达甲方指定的合理地点后
+                            </label>
+                            <div class="col-md-1">
+                                <input id="timeLimitA2" name="timeLimitA2" value="@contractVModel.Contract.timeLimitA2" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                个工作日内向甲方退还剩余旅游费用。
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contract-box">
+                    <div class="title">
+                        违约责任
+                    </div>
+                    <div class="content">
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">（一）乙方在行程前30日以内（不含第30日，下同）提出解除合同的，向甲方退还全额旅游费用（不得扣除签证／签注等费用），并按下列标准向甲方支付违约金（二选一）</label>
+                            <div class="col-md-1">
+                                <select id="solutionB" class="form-control required">
+                                    <option value="1">选择(1)</option>
+                                    <option value="2">选择(2)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-30">
+                                1．双方可以进行约定并从其约定。
+                            </label>
+                        </div>
+                        @{
+                            string deductStandardB = contractVModel.Contract.deductStandardB;
+                            string[] deductB = deductStandardB.Split('|');
+                            if (deductB.Length > 0)
+                            {
+                                for (int i = 0; i < deductB.Length; i++)
+                                {
+                                    string partBStartId = "partBStart" + i;
+                                    string partBEndId = "partBEnd" + i;
+                                    string partBRatioId = "partBRatio" + i;
+                                    string partBStartValue = deductB[i].Split(',')[0];
+                                    string partBEndValue = deductB[i].Split(',')[1];
+                                    string partBRatioValue = deductB[i].Split(',')[2];
+                                    int no = i + 1;
+                                    if (i == deductB.Length - 1)
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程开始当日，支付旅游费用总额
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBRatioId" value="@partBRatioValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                ％的违约金。
+                                            </label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程前
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBStartId" value="@partBStartValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日至
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBEndId" value="@partBEndValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日，支付旅游费用总额
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBRatioId" value="@partBRatioValue" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                ％的违约金；
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (int i = 0; i <= 4; i++)
+                                {
+                                    string partBStart = "partBStart" + i;
+                                    string partBEnd = "partBEnd" + i;
+                                    string partBRatio = "partBRatio" + i;
+                                    int no = i + 1;
+                                    if (i == 4)
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程开始当日，支付旅游费用总额
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBRatio" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" value="">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                ％的违约金。
+                                            </label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-group">
+                                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                                （@no）行程前
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBStart" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" value="">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日至
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBEnd" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" value="">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                日，支付旅游费用总额
+                                            </label>
+                                            <div class="col-md-1">
+                                                <input id="@partBRatio" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" value="">
+                                            </div>
+                                            <label class="fl form-lable font-size-14 line-height-30">
+                                                ％的违约金；
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            }
+                        }
+
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-30">
+                                2．双方没有约定的，按照下列标准承担违约责任。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （1）行程前30日至15日，支付旅游费用2％的违约金；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （2）行程前14日至7日，支付旅游费用5％的违约金；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （3）行程前6日至4日，支付旅游费用10％的违约金；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （4）行程前3日至1日，支付旅游费用总额15％的违约金；
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                （5）行程开始当日，支付旅游费用20％的违约金。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 pl-60">
+                                如上述违约金不足以赔偿甲方的实际损失，乙方应当按实际损失对甲方予以赔偿。乙方应当在取消出团通知到达日起
+                            </label>
+                            <div class="col-md-1">
+                                <input id="compensationPeriod" value="@contractVModel.Contract.compensationPeriod" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">
+                                个工作日内，向甲方退还全额旅游费用并支付违约金。
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">（二）甲方逾期支付旅游费用的，应当每日按照逾期支付的旅游费用的</label>
+                            <div class="col-md-1">
+                                <input id="overduePenaltyDayRatio" value="@contractVModel.Contract.overduePenaltyDayRatio" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">％，向乙方支付违约金。</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">（三）乙方具备履行条件，经甲方要求仍拒绝履行合同，造成甲方人身损害、滞留等严重后果的，甲方除要求乙方承担相应的赔偿责任外，还可以要求乙方支付旅游费用</label>
+                            <div class="col-md-1">
+                                <input id="seriousCompensateRatio" value="@contractVModel.Contract.seriousCompensateRatio" class="form-control input-icon" type="text" onblur="if(isNaN(value))execCommand('undo')" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">倍（1倍以上3倍以下）的赔偿金。</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">（四）其他违约责任：</label>
+                            <div class="col-md-10">
+                                <input id="otherLiability" class="form-control input-icon" value="@contractVModel.Contract.otherLiability" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 争议的解决方式 -->
+                <div class="contract-box">
+                    <div class="title">
+                        争议的解决方式
+                    </div>
+                    <div class="content">
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30 required">发生争议不能解决的，按下列第</label>
+                            <div class="col-md-1">
+                                <select id="disputeResolution" name="disputeResolution" class="form-control col-md-2">
+                                    <option value="1" @Html.Raw(contractVModel.Contract.disputeResolution == 1 ? "selected=selected" : "")>1</option>
+                                    <option value="2" @Html.Raw(contractVModel.Contract.disputeResolution == 2 ? "selected=selected" : "")>2</option>
+                                </select>
+                            </div>
+                            <label class="fl form-lable font-size-14 line-height-30">种方式解决:</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">1、提交仲裁委员会仲裁</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">2、依法向人民法院起诉</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他约定事项 -->
+                <div class="contract-box">
+                    <div class="title">
+                        其他约定事项
+                    </div>
+                    <div class="content">
+                        <div class="form-group">
+                            <label class="fl form-lable font-size-14 line-height-30">未尽事宜,经旅游者与旅行社双方协商一致,可以列入补充条款</label>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-8">
+                                <textarea id="additionContent" value="@contractVModel.Contract.additionContent" name="additionContent" rows="10" cols="10" class="form-control"></textarea>
+                                <div class="btns mt-20">
+                                    <a id="clearnAddition" class="btn step-btn-apple" href="javascript:void(0);">清空上述内容</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <input class="form-control btn-circle input-icon" id="content" name="content" value="" placeholder="请输入查询关键字" type="text">
+                                <div id="additionContentList" class="additionContentList bordered">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="contractEnclosure">
+                    <div class="contract-box">
+                        <div class="title" style="position: relative;">
+                            上传合同附件（选填项，仅可上传三个附件，格式为PDF,DOC格式）
+                            <!-- <a class="btn btn1" href="javascript:void(0)" id="file_upload_btn">上传附件</a> -->
+                            <div class="upload-boxs fr" style="clear: both;">
+                                <input id="manager-recode-btn" name="ContractFileName" type="file">
+                                <button id="btnUpload" type="button" class="btn blue btn-circle upload-btn">文件上传</button>
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="form-group">
+                                <div class="col-md-12" id="manager_recode_url">
+                                    <ul class="image-box upload-image">
+                                        @if (contractVModel.FilesList != null)
+                                        {
+                                            foreach (var item in contractVModel.FilesList)
+                                            {
+                                                <li>
+                                                    <div class="data-image" data-path="@item.filePath" data-name="@item.fileName">
+                                                        <a href="@item.filePath" class="file-name">@item.fileName</a>
+                                                        <a href="javascript:void(0);" class="del-img-btn">删除</a>
+                                                    </div>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--自愿购物活动补充协议-->
+                <div class="contract-box">
+                    <div class="title">
+                        自愿购物活动补充协议(选填项)
+                    </div>
+                    <div class="content">
+                        <div class="form-group  ">
+                            <div class="col-md-12 pos-relative">
+                                <table id="avoluntaryBuyTemplate" border="0" class="form-table">
+                                    <thead>
+                                        <tr>
+                                            <th>具体时间</th>
+                                            <th>地点</th>
+                                            <th>购物场所名称</th>
+                                            <th>主要商品信息</th>
+                                            <th>最长停留时间（分钟）</th>
+                                            <th>其他说明</th>
+                                            <th width="5%">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="addBuyTemplate">
+
+                                        @if (contractVModel.ShoppingList != null)
+                                        {
+                                            foreach (var item in contractVModel.ShoppingList)
+                                            {
+                                                <tr>
+                                                    <td><input name="date" datatype="d" value="@Html.Raw(item.date==null?"":item.date.ToString("yyyy-MM-dd"))" onfocus="WdatePicker({isShowClear:false,readOnly:true})" style="display: inline-block!important;width: 60%!important;" class="form-control" nullmsg="请填写自愿购物时间" placeholder="时间" /></td>
+                                                    <td><input name="place" datatype="*" class="form-control" value="@item.place" nullmsg="请填写自愿购物地点" placeholder="地点"></td>
+                                                    <td><input name="shoppingPlace" datatype="*" class="form-control" value="@item.shoppingPlace" nullmsg="请填写自愿购物场所名称" placeholder="名称"></td>
+                                                    <td><input name="goods" datatype="*" class="form-control" value="@item.goods" nullmsg="请填写自愿购物商品信息" placeholder="商品信息"></td>
+                                                    <td><input name="stayDuration" datatype="n" class="form-control" value="@item.stayDuration" nullmsg="请填写自愿购物停留时间" placeholder="停留时间"></td>
+                                                    <td><input name="memo" datatype="*" class="form-control" value="@item.memo" nullmsg="请填写自愿购物其他说明" placeholder="其他说明"></td>
+                                                    <td> <a href="javascript:void(0);" class="delBuyTemplate">删除</a></td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                                <p class="add-p"><a href="javascript:void(0);" id="addBuyTemplate">＋添加记录</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 自愿付费项目补充协议-->
+                <div class="contract-box">
+                    <div class="title">
+                        自愿付费项目补充协议(选填项)
+                    </div>
+                    <div class="content">
+                        <div class="form-group  ">
+                            <div class="col-md-12 pos-relative">
+                                <table id="avoluntaryCostTemplate" border="0" class="form-table">
+                                    <thead>
+                                        <tr>
+                                            <th>具体时间</th>
+                                            <th>地点</th>
+                                            <th>项目名称和内容</th>
+                                            <th>费用(元)</th>
+                                            <th>项目时长（分钟）</th>
+                                            <th>其他说明</th>
+                                            <th width="5%">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="addCostTemplate">
+                                        @if (contractVModel.PayItemList != null)
+                                        {
+                                            foreach (var item in contractVModel.PayItemList)
+                                            {
+                                                <tr>
+                                                    <td><input name="date" datatype="d" value="@Html.Raw(item.date==null?"":item.date.ToString("yyyy-MM-dd"))" onfocus="WdatePicker({isShowClear:false,readOnly:true})" style="display: inline-block!important;width: 60%!important;" class="form-control" nullmsg="请填写自愿付费项目时间" placeholder="时间" /></td>
+                                                    <td><input datatype="*" class="form-control" name="place" value="@item.place" nullmsg="请填写自愿付费项目地点" placeholder="地点"></td>
+                                                    <td><input datatype="*" class="form-control" name="item" value="@item.item" nullmsg="请填写自愿购付费项目名称" placeholder="名称"></td>
+                                                    <td><input datatype="*" class="form-control" name="fee" value="@item.fee" nullmsg="请填写自愿付费项目费用" placeholder="费用"></td>
+                                                    <td><input datatype="n" class="form-control" name="stayDuration" value="@item.stayDuration" nullmsg="请填写自愿付费项目时长" placeholder="项目时长"></td>
+                                                    <td><input class="form-control" name="memo" value="@item.memo" nullmsg="请填写自愿付费项目其他说明" placeholder="其他说明"></td>
+                                                    <td> <a href="javascript:void(0);" class="delBuyTemplate">删除</a>  </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                    </tbody>
+                                </table>
+                                <p class="add-p"><a href="javascript:void(0);" id="addCostTemplate">＋添加记录</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group ta-c">
+                    <a href="#2" class="btn step-btn mr-10 prev-btn">上一步</a>
+                    <button type="button" class="btn step-btn ml-10 create-btn">生成合同</button>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+<script type="text/javascript">
+
+    var editor, step = 1, signNum = 0;
+
+    var ajaxConfig = {
+        saveContractUrl: "@Url.Action("SaveContract")",
+        applyContractUrl: "@Url.Action("ApplyContract")",
+        fileUploadUrl: "@Url.Action("UploadContractFile")",
+        updateContractUrl: "@Url.Action("UpdateContract")"
+    };
+
+    var contractTemplate = {
+        outTrip: "C310000",
+        domesticTrip: "A310000"
+    }
+
+    $(document).ready(function () {
+        editor = new wangEditor('#travelItinerary');
+        editor.create();
+        initEvent();
+        editor.txt.html($("#travelItineraryhidden").val());
+    });
+
+    function initEvent() {
+        $('body').on('click', '#addBuyTemplate', function () {
+            createBuyTemplate();
+        });
+
+        $('body').on('click', '.delBuyTemplate', function () {
+            var _this = this;
+            $(this).parents('tr').remove();
+        });
+
+        $('body').on('click', '#addCostTemplate', function () {
+            createCostTemplate();
+        });
+
+        $('body').on('click', '.delBuyTemplate', function () {
+            var _this = this;
+            $(this).parents('tr').remove();
+        });
+
+        $('body').on('click', '.next-btn', function (e) {
+            // e.preventDefault();
+            step++;
+            showStepWrapper();
+        })
+
+        $('body').on('click', '.prev-btn', function (e) {
+            // e.preventDefault();
+            step--;
+            showStepWrapper();
+        })
+
+        $('body').on('click', '.create-btn', function (e) {
+            e.preventDefault();
+            var _thisLink = this;
+            var contractNumber = $("#contractNumber").val();
+            if (contractNumber != "") {
+                layer.confirm('该订单已生成合同，是否更改？', {
+                    btn: ['是', '否'],
+                }, function (index, layero) {
+                    layer.close(index);
+                    saveCreateContract();
+                }, function (index, layero) {
+                    layer.close(index);
+                });
+            } else {
+                saveCreateContract();
+            }
+        });
+
+        $("#btnUpload").click(function () {
+            if ($('.upload-image li').length >= 3) {
+                layer.msg("只允许上传三个附件");
+                return;
+            }
+            if ($.trim($("[name='ContractFileName']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            var formData = new FormData();
+            var name = $("[name='ContractFileName']").val();
+            formData.append("ContractFileName", $("[name='ContractFileName']")[0].files[0]);
+            //formData.append("name", name);
+            formData.append("orderCode", orderCode);
+            $.ajax({
+                url: ajaxConfig.fileUploadUrl,
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    if (data.code == "0") {
+                        createFileTemplate(data.data);
+                        $("#manager-recode-btn").val();
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                }
+            });
+        });
+
+        //返回提醒
+        $('body').on("click", "#backBtn", function (e) {
+            e.preventDefault();
+            var _thisLink = this;
+            var contractNumber = $("#contractNumber").val();
+            if (contractNumber != "") {
+                layer.confirm('确认返回并放弃本次操作吗？', {
+                    btn: ['取消', '立即返回'],
+                }, function (index, layero) {
+                    layer.close(index);
+                }, function (indx, layero) {
+                    window.location.href = "/Contract/Index";
+                });
+
+            } else {
+                layer.confirm('是否要保存合同数据后再返回?', {
+                    btn: ['保存', '立即返回'],
+                }, function (index, layero) {
+                    layer.close(index);
+                    saveCreateContract();
+                }, function (indx, layero) {
+                    window.location.href = $(_thisLink).attr('href');
+                });
+            }
+        });
+
+        additionContentList();
+
+    }
+
+    //其他约定事项请求函数
+    function additionContentList() {
+        var param = { content: $('#content').val() };
+        $.ajax({
+            url: '/Contract/UCAdditions',
+            "type": 'post',
+            data: { content: $('#content').val() },
+            dataType: 'html',
+            success: function (data) {
+                $("#additionContentList").html(data);
+                $("#additionContentList li").on("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if ($(this).find("span").hasClass("additionContentListClick")) {
+                        $(this).find("span").removeClass("additionContentListClick")
+                    } else {
+                        $(this).find("span").addClass("additionContentListClick")
+                        var additionContent = $(this).parents().find("#additionContent").val();
+                        if (additionContent == "") {
+                            var val = additionContent + $(this).attr("title");
+                        } else {
+                            var val = additionContent + "\n" + $(this).attr("title");
+                        }
+                        $("#additionContent").val(val);
+                    }
+
+                });
+                $('#content').unbind();
+                $('#content').bind("input propertychange", function () {
+                    additionContentList();
+                });
+
+                $("#clearnAddition").unbind();
+                $("#clearnAddition").on("click", function (e) {
+                    $("#additionContent").val("")
+                })
+            },
+            error: function (jqXHR) {
+                layer.msg('登录异常，请重新登录。');
+            }
+        })
+    };
+
+    function createBuyTemplate() {
+        var element = $('.addBuyTemplate');
+        var html = "<tr>";
+        html += ' <td><input name="date" datatype="d" onfocus="WdatePicker({isShowClear:false,readOnly:true})" style="display: inline-block!important;width: 60%!important;" class="form-control" nullmsg="请填写自愿购物时间" placeholder="时间" /></td> ';
+        html += ' <td><input name="place" datatype="*" class="form-control" value="" nullmsg="请填写自愿购物地点" placeholder="地点"></td>';
+        html += ' <td><input name="shoppingPlace" datatype="*" class="form-control" value="" nullmsg="请填写自愿购物场所名称" placeholder="名称"></td>';
+        html += ' <td><input name="goods" datatype="*" class="form-control" value="" nullmsg="请填写自愿购物商品信息" placeholder="商品信息"></td>';
+        html += ' <td><input name="stayDuration" datatype="n" class="form-control" value="" nullmsg="请填写自愿购物停留时间" placeholder="停留时间"></td>';
+        html += ' <td><input name="memo" datatype="*" class="form-control" value="" nullmsg="请填写自愿购物其他说明" placeholder="其他说明"></td>';
+        html += ' <td> <a href="javascript:void(0);" class="delBuyTemplate">删除</a></td>';
+        html += "</tr>";
+        element.append(html);
+    }
+
+    function createCostTemplate() {
+        var element = $('.addCostTemplate');
+        var html = "<tr>";
+        html += ' <td><input name="date" datatype="d" onfocus="WdatePicker({isShowClear:false,readOnly:true})" style="display: inline-block!important;width: 60%!important;" class="form-control" nullmsg="请填写自愿付费项目时间" placeholder="时间" /></td> ';
+        html += '  <td><input datatype="*" class="form-control" name="place" value="" nullmsg="请填写自愿付费项目地点" placeholder="地点"></td>';
+        html += '  <td><input datatype="*" class="form-control" name="item" value="" nullmsg="请填写自愿购付费项目名称" placeholder="名称"></td>';
+        html += '  <td><input datatype="*" class="form-control" name="fee" value="" nullmsg="请填写自愿付费项目费用" placeholder="费用"></td>';
+        html += '  <td><input datatype="n" class="form-control" name="stayDuration" value="" nullmsg="请填写自愿付费项目时长" placeholder="项目时长"></td>';
+        html += '  <td><input class="form-control" name="memo" value="" nullmsg="请填写自愿付费项目其他说明" placeholder="其他说明"></td>';
+        html += '  <td> <a href="javascript:void(0);" class="delBuyTemplate">删除</a>  </td>';
+        html += "</tr>";
+        element.append(html);
+    }
+
+    function createFileTemplate(jsonData) {
+        console.log(jsonData);
+        var element = $('.upload-image');
+        var filePath = $("#picroot").val() + jsonData.filePath;
+        var html = "";
+        html += " <li> ";
+        html += "      <div class=\"data-image\" data-path=\"" + filePath + "\" data-name='" + jsonData.fileName + "' >";
+        html += "          <a href='" + filePath + "' class=\"file-name\">" + jsonData.fileName + "</a>";
+        html += "          <a href=\"javascript:void(0);\" class=\"del-img-btn\">删除</a>";
+        html += "      </div>";
+        html += "  </li>";
+        element.append(html);
+        $(".del-img-btn").click(function () {
+            var _this = this;
+            $(_this).parents('li').remove();
+        });
+    }
+
+    function showStepWrapper() {
+        var _this = this;
+        $('.step-wrapper').addClass('dn');
+        $('#step' + _this.step).removeClass('dn');
+
+        $('.stepIco').removeClass('active');
+        $('.stepIco:eq(' + (_this.step - 1) + ')').addClass('active');
+    }
+
+    function initPageOption() {
+        var pageOption = {};
+        pageOption.Contract = {};
+        pageOption.Contract.contractNumber = $("#contractNumber").val();
+        pageOption.Contract.templateId = contractTemplate.outTrip;
+        pageOption.Contract.orderCode = $("#orderCode").val();
+        pageOption.Contract.agencyName = $("#agencyName").val();//旅行社名称
+        pageOption.Contract.agencyAddress = $("#agencyAddress").val();//联系地址
+        pageOption.Contract.licenseCode = $("#licenseCode").val();//许可证书
+        pageOption.Contract.creditCode = $("#creditCode").val();
+        pageOption.Contract.transactorName = $("#transactorName").val();//联系人
+        pageOption.Contract.transactorPhone = $("#transactorPhone").val();//联系人电话
+        pageOption.Contract.routeName = $("#routeName").val();//旅游产品名称
+        pageOption.Contract.groupId = $("#groupId").val();//团号
+        pageOption.Contract.groupMode = $("input[name=groupMode]:checked").attr('data-mode');//组团方式
+        pageOption.Contract.entrustAgency = $("#entrustAgency").val();//委托社名称
+        pageOption.Contract.otherAgency = $("#otherAgency").val();//其他社名称
+        pageOption.Contract.startDate = $("#startDate").val();//出发日期
+        pageOption.Contract.departureCity = $("#departureCity").val();//出发地点
+        pageOption.Contract.passCity = $("#passCity").val();//途径地点
+        pageOption.Contract.arrivalCity = $("#arrivalCity").val();//目的地
+        pageOption.Contract.endDate = $("#endDate").val();//结束日期
+        pageOption.Contract.endCity = $("#endCity").val();//结束地点
+        pageOption.Contract.attraction = $("#attraction").val();//游览景点
+        pageOption.Contract.longTransport = $("#longTransport").val();//往返交通
+        pageOption.Contract.longStandard = $("#longStandard").val();//往返交通标准
+        pageOption.Contract.localTransport = $("#localTransport").val();//浏览交通
+        pageOption.Contract.localStandard = $("#localStandard").val();//浏览交通标准
+        pageOption.Contract.freeTime = $("#freeTime").val();//自由活动时间
+        pageOption.Contract.freeNumber = $("#freeNumber").val();//自由活动次数
+        pageOption.Contract.hotelDesc = $("#hotelDesc").val();//住宿安排
+        pageOption.Contract.mealNumber = $("#mealNumber").val();//用餐次数
+        pageOption.Contract.mealStandard = $("#mealStandard").val();//用餐标准
+        pageOption.Contract.localAgencyName = $("#localAgencyName").val();//地接社名称
+        pageOption.Contract.localAgencyAddress = $("#localAgencyAddress").val();//地接社地址
+        pageOption.Contract.localAgencyContact = $("#localAgencyContact").val();//地接社联系人
+        pageOption.Contract.localAgencyPhone = $("#localAgencyPhone").val();//地地接社联系电话
+        pageOption.Contract.travelItinerary = editor.txt.html();//行程信息
+        pageOption.Contract.totalCost = $("#totalCost").val();//旅游费用
+        pageOption.Contract.guideServiceCost = $("#guideServiceCost").val();//导游服务费（元）/每人
+        pageOption.Contract.totalGuideServiceCost = $("#totalGuideServiceCost").val();//导游服务费总费用（元）
+        pageOption.Contract.deadline = $("#deadline").val();//费用缴纳期限
+        pageOption.Contract.paymentMethod = $("#paymentMethod option:selected").val();//支付方式
+        pageOption.Contract.otherPaymethod = $("#otherPaymethod").val();//其他支付方式描述
+        pageOption.Contract.signingName = $("#signingName").val();//代表名称
+        pageOption.Contract.signingPhone = $("#signingPhone").val();//代表电话
+        pageOption.Contract.signingPassType = $("#signingPassType option:selected").val() == "" ? 0
+            : $("#signingPassType option:selected").val();//代表身份证类型
+        pageOption.Contract.signingPassNo = $("#signingPassNo").val();//代表证件号
+        pageOption.Contract.signingTouristType = $("input[name=signingTouristType]:checked").val();//游客类别
+        pageOption.Contract.signingCompanyName = $("#signingCompanyName").val(); //单位
+        pageOption.Contract.signingLicenseNo = $("#signingLicenseNo").val();//企业统一信用代码
+        pageOption.Contract.signingAddress = $("#signingAddress").val();//地址
+        pageOption.Contract.signingEmail = $("#signingEmail").val();//邮箱
+        pageOption.Contract.signingIsJoin = $("input[name=signingIsJoin]:checked").val();//是否参团
+        pageOption.Contract.signingSex = $("input[name=signingSex]:checked").val();//性别
+        pageOption.Contract.agreeToBuy = $("#agreeToBuy option:selected").val();//是否购买保险
+        pageOption.Contract.company = $("#company").val();//保险公司名称
+        pageOption.Contract.productName = $("#productName").val();//产品名称
+        pageOption.Contract.coverage = $("#coverage").val();//保险费
+        pageOption.Contract.premium = $("#premium").val(); //保险金额
+
+        pageOption.Contract.groupAgreementResolution = $("#groupAgreementResolution option:selected").val();//成团人数约定
+        pageOption.Contract.leastCustomerNumber = $("#leastCustomerNumber").val();//最低人数限制
+        pageOption.Contract.solutionA = $("#solutionA option:selected").val();//解约责任选项
+        pageOption.Contract.overdueDaysA = $("#overdueDaysA").val();//有约定逾期天数扣除
+        pageOption.Contract.formulaA = $("#partAformula0").val() + "|" + $("#partAformula1").val() + "|"
+            + $("#partAformula2").val() + "|" + $("#partAformula3").val();
+        pageOption.Contract.overdueDaysA2 = $("#overdueDaysA2").val();//无约定逾期天数扣除
+        pageOption.Contract.timeLimitA = $("#timeLimitA").val();//行程前解除合同退还费用日期
+        pageOption.Contract.timeLimitA2 = $("#timeLimitA2").val(); //行程中解除合同退还费用日期
+        pageOption.Contract.deductStandardA = $("#partAStart0").val() + "," + $("#partAEnd0").val() + "," + $("#partARatio0").val()
+            + "|" + $("#partAStart1").val() + "," + $("#partAEnd1").val() + "," + $("#partARatio1").val()
+            + "|" + $("#partAStart2").val() + "," + $("#partAEnd2").val() + "," + $("#partARatio2").val()
+            + "|" + $("#partAStart3").val() + "," + $("#partAEnd3").val() + "," + $("#partARatio3").val()
+            + "|" + "" + "," + "" + "," + $("#partARatio4").val();
+        pageOption.Contract.solutionB = $("#solutionB option:selected").val();//违约责任选项
+        pageOption.Contract.deductStandardB = $("#partBStart0").val() + "," + $("#partBEnd0").val() + "," + $("#partBRatio0").val()
+            + "|" + $("#partBStart1").val() + "," + $("#partBEnd1").val() + "," + $("#partBRatio1").val()
+            + "|" + $("#partBStart2").val() + "," + $("#partBEnd2").val() + "," + $("#partBRatio2").val()
+            + "|" + $("#partBStart3").val() + "," + $("#partBEnd3").val() + "," + $("#partBRatio3").val()
+            + "|" + "" + "," + "" + "," + $("#partBRatio4").val();
+        pageOption.Contract.compensationPeriod = $("#compensationPeriod").val();//出团通知后违约金间隔
+        pageOption.Contract.overduePenaltyDayRatio = $("#overduePenaltyDayRatio").val();//逾期每日费用
+        pageOption.Contract.seriousCompensateRatio = $("#seriousCompensateRatio").val();//严重违约
+        pageOption.Contract.otherLiability = $("#otherLiability").val();//其他违约
+        pageOption.Contract.disputeResolution = $("#disputeResolution option:selected").val();//争议解决方法
+        pageOption.Contract.additionContent = $("#additionContent").val();//其他约定事项
+        pageOption.TouristList = initTouristOption();
+        pageOption.FilesList = initFilesOption();
+        pageOption.ShoppingList = initShoppingOption();
+        pageOption.PayItemList = initPayItemOption();
+        pageOption.Contract.isMultiSign = signNum <= 1 ? false : true;
+        pageOption.Contract.shoppingViewSpot = "";
+        return pageOption;
+    }
+
+    function initTouristOption() {
+        var touristList = [];
+        var element = $("#touristList tr");
+        if (element.length > 0) {
+            for (var i = 0; i < element.length; i++) {
+                var touristInfo = {};
+                touristInfo.id = $(element[i]).find("input[name=id]").val();
+                touristInfo.name = $(element[i]).find("input[name=name]").val();
+                touristInfo.gender = $(element[i]).find("select[name=gender] option:selected").val();
+                touristInfo.passType = $(element[i]).find("select[name=passType] option:selected").val();
+                touristInfo.passNo = $(element[i]).find("input[name=passNo]").val();
+                touristInfo.phone = $(element[i]).find("input[name=phone]").val();
+                touristInfo.health = $(element[i]).find("input[name=health]").val();
+                touristInfo.isSign = $(element[i]).find("input[name=isSign]").is(':checked');
+                touristInfo.isChildren = $(element[i]).find("input[name=isChildren]").is(':checked');
+                touristInfo.age = $(element[i]).find("input[name=age]").val();
+                touristInfo.address = "";
+                if (touristInfo.isSign) signNum = signNum + 1;
+                touristList.push(touristInfo);
+            }
+        }
+        return touristList;
+    }
+
+    function initFilesOption() {
+        var fileList = [];
+        var element = $('.upload-image li');
+        if (element.length > 0) {
+            for (var i = 0; i < element.length; i++) {
+                var fileInfo = {};
+                fileInfo.fileName = $(element[i]).find("div").attr("data-name");
+                fileInfo.filePath = $(element[i]).find("div").attr("data-path");
+                fileList.push(fileInfo);
+            }
+        }
+        return fileList;
+    }
+
+    function initShoppingOption() {
+        var shoppingList = [];
+        var element = $(".addBuyTemplate tr");
+        if (element.length > 0) {
+            for (var i = 0; i < element.length; i++) {
+                var shoppingInfo = {};
+                shoppingInfo.date = $(element[i]).find("input[name=date]").val();
+                shoppingInfo.place = $(element[i]).find("input[name=place]").val();
+                shoppingInfo.shoppingPlace = $(element[i]).find("input[name=shoppingPlace]").val();
+                shoppingInfo.stayDuration = $(element[i]).find("input[name=stayDuration]").val();
+                shoppingInfo.goods = $(element[i]).find("input[name=goods]").val();
+                shoppingInfo.memo = $(element[i]).find("input[name=memo]").val();
+                shoppingList.push(shoppingInfo);
+            }
+        }
+        return shoppingList;
+    }
+
+    function initPayItemOption() {
+        var payItemList = [];
+        var element = $(".addCostTemplate tr");
+        if (element.length > 0) {
+            for (var i = 0; i < element.length; i++) {
+                var payItemInfo = {};
+                payItemInfo.date = $(element[i]).find("input[name=date]").val();
+                payItemInfo.place = $(element[i]).find("input[name=place]").val();
+                payItemInfo.item = $(element[i]).find("input[name=item]").val();
+                payItemInfo.fee = $(element[i]).find("input[name=fee]").val();
+                payItemInfo.stayDuration = $(element[i]).find("input[name=stayDuration]").val();
+                payItemInfo.memo = $(element[i]).find("input[name=memo]").val();
+                payItemList.push(payItemInfo);
+            }
+        }
+        return payItemList;
+    }
+
+    function saveCreateContract() {
+
+        var orderCode = $("#orderCode").val();
+        var pageOption = initPageOption();
+        if (!validForm(pageOption)) return false;
+        console.log(JSON.stringify(pageOption));
+        var load_iii = Utils.layerLoad();
+        $.ajax({
+            url: ajaxConfig.saveContractUrl,
+            type: 'POST',
+            data: JSON.stringify(pageOption),
+            dataType: 'json',
+            success: function (data) {
+                if (data.code == 0) {
+                    var contractObj = createContractObj(pageOption);
+                    console.log(JSON.stringify(contractObj));
+                    createContract(orderCode, contractObj);
+                } else {
+                    layer.msg(data.msg);
+                    Utils.layerClose(load_iii);
+                }
+            },
+            error: function (jqXHR) {
+                layer.msg('登录异常，请重新登录。');
+                Utils.layerClose(load_iii);
+            }
+        })
+    }
+
+    function createContract(orderCode, contractObj) {
+        $.ajax({
+            url: ajaxConfig.applyContractUrl + "?orderCode=" + orderCode,
+            type: 'POST',
+            data: JSON.stringify(contractObj),
+            dataType: 'json',
+            async: false,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                if (data.code == "0") {
+                    var jsonData = eval('(' + data.data + ')');
+                    if (jsonData.error != undefined && jsonData.error) {
+                        console.log(jsonData.error.message);
+                        if (jsonData.error.code != 0) {
+                            layer.msg(jsonData.error.message);
+                            if (jsonData.error.errors != "[]") {
+                                jsonData.error.errors.map(function (o) {
+                                    layer.msg(o.reason);
+                                });
+                            }
+                        }
+                        Utils.layerClose(load_iii);
+                    } else if (jsonData.data != undefined && jsonData.data) {
+                        console.log(jsonData.data.fileURL);
+                        console.log(jsonData.data.signingURL);
+                        console.log(jsonData.data.contractNumber);
+                        console.log(jsonData.data.QRCodeURL);
+                        updateContract(jsonData.data);
+                    }
+
+                } else {
+                    layer.msg(data.msg);
+                    Utils.layerClose(load_iii);
+                }
+            },
+            error: function (jqXHR) {
+                Utils.layerClose(load_iii);
+                layer.msg('登录异常，请重新登录。');
+            }
+        })
+    }
+
+    function updateContract(jsonData) {
+        var dataObj = {};
+        dataObj.Contract = {};
+        dataObj.Contract.orderCode = $("#orderCode").val();
+        dataObj.Contract.qrCodeURL = jsonData.QRCodeURL;
+        dataObj.Contract.signingURL = jsonData.signingURL;
+        dataObj.Contract.viewURL = jsonData.viewURL;
+        dataObj.Contract.contractNumber = jsonData.contractNumber;
+        dataObj.Contract.fileURL = jsonData.fileUrl;
+        $.ajax({
+            url: ajaxConfig.updateContractUrl,
+            type: 'POST',
+            data: JSON.stringify(dataObj),
+            dataType: 'json',
+            async: false,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                if (data.code == "0") {
+                    Utils.layerClose(load_iii);
+                    layer.confirm('合同已生成', {
+                        btn: ['确认', '预览合同'],
+                    }, function (index, layero) {
+                        window.location.href = '/Order/SearchOrder';
+                    }, function (indx, layero) {
+                        window.location.href = jsonData.viewURL;
+                    });
+                } else {
+                    layer.msg(data.msg);
+                    Utils.layerClose(load_iii);
+                }
+            },
+            error: function (jqXHR) {
+                Utils.layerClose(load_iii);
+                layer.msg('登录异常，请重新登录。');
+            }
+        })
+
+    }
+
+    function idCardVerify(idCard) {
+        if (idCard.charAt(idCard.length - 1) == "x") {
+            idCard = idCard.replace(idCard[idCard.length - 1], "X")
+        }
+        var reg = /^\d{17}(X|\d)$/;
+        if (!reg.test(idCard)) {
+            return false;
+        }
+        var actCheckBit = idCard.substr(17, 1);
+        idCard = idCard.substr(0, 17);
+        var checkBit = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+        var v = [2, 4, 8, 5, 10, 9, 7, 3, 6, 1, 2, 4, 8, 5, 10, 9, 7];
+        var n = 0;
+        for (var i = 0; i < idCard.length; i++) {
+            var num = +idCard[16 - i];
+            n = n + num * v[i]
+        }
+        var r = n % 11;
+        var t = checkBit[r];
+        return t === actCheckBit;
+    };
+
+    function validForm(contractObj) {
+
+        var _this = this;
+        var phoneReg = /^1[3-9][0-9]{9}$/;
+        var moneyReg = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
+        //经办人
+        if (contractObj.Contract.transactorName == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#transactorName').attr('nullmsg'));
+            $('#transactorName').focus();
+            $('#transactorName').addClass("redBorder");
+            $('#transactorName').blur(function () {
+                $('#transactorName').removeClass("redBorder")
+            });
+            return false;
+        }
+        //经办人电话
+        if (contractObj.Contract.transactorPhone == "" && !phoneReg.test(contractObj.Contract.transactorPhone)) {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#transactorPhone').attr('errormsg'));
+            $('#transactorPhone').focus();
+            $('#transactorPhone').addClass("redBorder");
+            $('#transactorPhone').blur(function () {
+                $('#transactorPhone').removeClass("redBorder")
+            });
+            return false;
+        }
+        if (contractObj.Contract.startDate == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#startDate').attr('nullmsg'));
+            $('#startDate').focus();
+            $('#startDate').addClass("redBorder");
+            $('#startDate').blur(function () {
+                $('#startDate').removeClass("redBorder")
+            });
+            return false;
+        }
+        if (contractObj.Contract.departureCity == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#departureCity').attr('nullmsg'));
+            $('#departureCity').focus();
+            $('#departureCity').addClass("redBorder");
+            $('#departureCity').blur(function () {
+                $('#departureCity').removeClass("redBorder")
+            });
+            return false;
+        }
+        if (contractObj.Contract.departureCity == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#arrivalCity').attr('nullmsg'));
+            $('#arrivalCity').focus();
+            $('#arrivalCity').addClass("redBorder");
+            $('#arrivalCity').blur(function () {
+                $('#arrivalCity').removeClass("redBorder")
+            });
+            return false;
+        }
+        if (contractObj.Contract.endDate == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#endDate').attr('nullmsg'));
+            $('#endDate').focus();
+            $('#endDate').addClass("redBorder");
+            $('#endDate').blur(function () {
+                $('#endDate').removeClass("redBorder")
+            });
+            return false;
+        }
+        if (contractObj.Contract.endCity == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#endCity').attr('nullmsg'));
+            $('#endCity').focus();
+            $('#endCity').addClass("redBorder");
+            $('#endCity').blur(function () {
+                $('#endCity').removeClass("redBorder")
+            });
+            return false;
+        }
+        var checkedMode = 0;
+        $("input[name='groupMode']").each(function (idx, ele) {
+            if ($(ele).prop("checked")) {
+                checkedMode++;
+            }
+        })
+        if (checkedMode == 0) {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg("请选择组团方式!");
+            return false;
+        }
+
+        if ($("input[name='groupMode']").eq(1).prop("checked")) {
+            if (contractObj.Contract.entrustAgency == "") {
+                _this.step = 1;
+                _this.showStepWrapper();
+                layer.msg($('#entrustAgency').attr('nullmsg'));
+                $('#entrustAgency').focus();
+                $('#entrustAgency').addClass("redBorder");
+                $('#entrustAgency').blur(function () {
+                    $('#entrustAgency').removeClass("redBorder")
+                });
+                return false;
+            }
+        }
+
+        if ($("input[name='groupMode']").eq(2).prop("checked")) {
+            if (optionObject.groupAgreement.mergeToCompanyName == "") {
+                _this.step = 1;
+                _this.showStepWrapper();
+                layer.msg($('#otherAgency').attr('nullmsg'));
+                $('#otherAgency').focus();
+                $('#otherAgency').addClass("redBorder");
+                $('#otherAgency').blur(function () {
+                    $('#otherAgency').removeClass("redBorder")
+                });
+                return false;
+            }
+        }
+
+        if (contractObj.Contract.travelItinerary == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#travelItinerary').attr('nullmsg'));
+            $('#travelItinerary').focus();
+            $('#travelItinerary').addClass("redBorder");
+            $('#travelItinerary').blur(function () {
+                $('#travelItinerary').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.guideServiceCost == "" && !moneyReg.test(contractObj.guideServiceCost)) {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#guideServiceCost').attr('errormsg'));
+            $('#guideServiceCost').focus();
+            $('#guideServiceCost').addClass("redBorder");
+            $('#guideServiceCost').blur(function () {
+                $('#guideServiceCost').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.totalGuideServiceCost == "" && !moneyReg.test(contractObj.totalGuideServiceCost)) {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#totalGuideServiceCost').attr('errormsg'));
+            $('#totalGuideServiceCost').focus();
+            $('#totalGuideServiceCost').addClass("redBorder");
+            $('#totalGuideServiceCost').blur(function () {
+                $('#totalGuideServiceCost').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.paymentMethod == "其他" && contractObj.Contract.otherPaymethod == "") {
+            _this.step = 1;
+            _this.showStepWrapper();
+            layer.msg($('#otherPaymethod').attr('nullmsg'));
+            $('#otherPaymethod').focus();
+            $('#otherPaymethod').addClass("redBorder");
+            $('#otherPaymethod').blur(function () {
+                $('#otherPaymethod').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.signingName == "") {
+            _this.step = 2;
+            _this.showStepWrapper();
+            layer.msg($('#signingName').attr('nullmsg'));
+            $('#signingName').focus();
+            $('#signingName').addClass("redBorder");
+            $('#signingName').blur(function () {
+                $('#signingName').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.signingPhone == "" && !phoneReg.test(contractObj.Contract.signingPhone)) {
+            _this.step = 2;
+            _this.showStepWrapper();
+            layer.msg("请输入签署人正确的手机号码");
+            $('#signingPhone').focus();
+            $('#signingPhone').addClass("redBorder");
+            $('#signingPhone').blur(function () {
+                $('#signingPhone').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.signingPassType == 0) {
+            _this.step = 2;
+            _this.showStepWrapper();
+            layer.msg("请选择签署人证件类型");
+            $('#signingPassType').focus();
+            $('#signingPassType').addClass("redBorder");
+            $('#signingPassType').blur(function () {
+                $('#signingPassType').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.signingPassType == 1 && !idCardVerify(contractObj.Contract.signingPassNo)) {
+            layer.msg($('#signingPassNo').attr('errormsg'));
+            _this.step = 2;
+            _this.showStepWrapper();
+            $('#signingPassNo').focus();
+            $('#signingPassNo').addClass("redBorder");
+            $('#signingPassNo').blur(function () {
+                $('#signingPassNo').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        var re1 = /^([a-zA-Z0-9-]*)$/
+        if (contractObj.Contract.signingPassType == 2 && !re1.test(contractObj.Contract.signingPassNo)) {
+            layer.msg("游客代表护照号码格式错误！");
+            _this.step = 2;
+            _this.showStepWrapper();
+            $('#signingPassNo').focus();
+            $('#signingPassNo').addClass("redBorder");
+            $('#signingPassNo').blur(function () {
+                $('#signingPassNo').removeClass("redBorder")
+            });
+            return false;
+        }
+
+
+        if (contractObj.Contract.groupAgreementResolution == 1 && contractObj.Contract.leastCustomerNumber == "") {
+            _this.step = 3;
+            _this.showStepWrapper();
+            layer.msg($('#leastCustomerNumber').attr('nullmsg'));
+            $('#leastCustomerNumber').focus();
+            $('#leastCustomerNumber').addClass("redBorder");
+            $('#leastCustomerNumber').blur(function () {
+                $('#leastCustomerNumber').removeClass("redBorder")
+            });
+            return false;
+        }
+
+
+        var emailReg = /^(\w)+(\.\w+)*@@(\w)+((\.\w{2,3}){1,3})$/;
+        if (contractObj.Contract.signingEmail != "" && !emailReg.test(contractObj.Contract.signingEmail)) {
+            layer.msg($("#signingEmail").attr("errormsg"));
+            _this.step = 2;
+            _this.showStepWrapper();
+            $('#signingEmail').focus();
+            $('#signingEmail').addClass("redBorder");
+            $('#signingEmail').blur(function () {
+                $('#signingEmail').removeClass("redBorder")
+            });
+            return false;
+        }
+
+        if (contractObj.Contract.agreeToBuy == "true") {
+            if (contractObj.Contract.company == "") {
+                _this.step = 3;
+                _this.showStepWrapper();
+                layer.msg($('#company').attr('nullmsg'));
+                $('#company').focus();
+                $('#company').addClass("redBorder");
+                $('#company').blur(function () {
+                    $('#company').removeClass("redBorder")
+                });
+                return false;
+            }
+            if (contractObj.Contract.productName == "") {
+                _this.step = 3;
+                _this.showStepWrapper();
+                layer.msg($('#productName').attr('nullmsg'));
+                $('#productName').focus();
+                $('#productName').addClass("redBorder");
+                $('#productName').blur(function () {
+                    $('#productName').removeClass("redBorder")
+                });
+                return false;
+            }
+            if (contractObj.Contract.premium == "") {
+                _this.step = 3;
+                _this.showStepWrapper();
+                layer.msg($('#premium').attr('nullmsg'));
+                $('#premium').focus();
+                $('#premium').addClass("redBorder");
+                $('#premium').blur(function () {
+                    $('#premium').removeClass("redBorder")
+                });
+                return false;
+            }
+            if (contractObj.Contract.coverage == "") {
+                _this.step = 3;
+                _this.showStepWrapper();
+                layer.msg($('#coverage').attr('nullmsg'));
+                $('#coverage').focus();
+                $('#coverage').addClass("redBorder");
+                $('#coverage').blur(function () {
+                    $('#coverage').removeClass("redBorder")
+                });
+                return false;
+            }
+        }
+
+        //自愿购物列表
+        if (contractObj.ShoppingList.length > 0) {
+
+            //倒叙删除不改变数组起始位置
+            for (var i = contractObj.ShoppingList.length - 1; i >= 0; i--) {
+                var o = contractObj.ShoppingList[i];
+                if (o.date == "" && o.place == "") {
+                    contractObj.ShoppingList.splice(i);
+                }
+            }
+            //contractObj.ShoppingList.map(function (o,index) {
+            //    console.log(o + "," + index);
+            //    if (o.date == "" && o.place == "") {
+            //        console.log(o.date);
+            //        contractObj.ShoppingList.splice(index, 1);
+            //    }
+            //});
+        }
+
+        //自愿付费项目
+        if (contractObj.PayItemList.length > 0) {
+            for (var i = contractObj.PayItemList.length - 1; i >= 0; i--) {
+                if (o.date == "" && o.place) {
+                    contractObj.PayItemList.splice(i);
+                }
+            }
+            //contractObj.PayItemList.map(function (o) {
+            //    if (o.date == "" && o.place) {
+            //        contractObj.PayItemList.splice(0, 1);
+            //    }
+            //});
+        }
+        return true;
+    }
+
+    function createContractObj(contractObj) {
+        var apiContractObj = {};
+        apiContractObj.ERPContractId = "";
+        apiContractObj.templateId = contractObj.Contract.templateId;
+        apiContractObj.contractNumber = contractObj.Contract.contractNumber;
+        apiContractObj.isMultiSignatory = contractObj.Contract.isMultiSign;
+        apiContractObj.supplementaryClause = contractObj.Contract.additionContent;
+        apiContractObj.publicAttachments = [];
+        apiContractObj.attachments = [];
+        if (contractObj.FilesList.length > 0) {
+            contractObj.FilesList.map(function (o) {
+                var attactInfo = {};
+                attactInfo.url = o.filePath;
+                attactInfo.type = o.filePath.substring(o.filePath.indexOf('.') + 1, o.filePath.length);
+                apiContractObj.attachments.push(attactInfo);
+            });
+        }
+
+        //「旅行社」部分
+        apiContractObj.travelAgency = {};
+        apiContractObj.travelAgency.transactorName = contractObj.Contract.transactorName;
+        apiContractObj.travelAgency.transactorPhone = contractObj.Contract.transactorPhone;
+        apiContractObj.travelAgency.agencyName = contractObj.Contract.agencyName;
+        apiContractObj.travelAgency.travelAgencyLicenseNumber = contractObj.Contract.licenseCode;
+        apiContractObj.travelAgency.businessLicenseNumber = contractObj.Contract.creditCode;
+        apiContractObj.travelAgency.agencyAddress = {};//地址
+        apiContractObj.travelAgency.agencyAddress.country = "";
+        apiContractObj.travelAgency.agencyAddress.state = "";
+        apiContractObj.travelAgency.agencyAddress.city = "";
+        apiContractObj.travelAgency.agencyAddress.district = "";
+        apiContractObj.travelAgency.agencyAddress.zip = "";
+        apiContractObj.travelAgency.agencyAddress.description = "";
+        apiContractObj.travelAgency.contactName = "";
+        apiContractObj.travelAgency.contactPhone = "";
+        apiContractObj.travelAgency.servicePhone = "";
+        apiContractObj.travelAgency.fax = "";
+        apiContractObj.travelAgency.email = "";
+        //「行程」部分
+        apiContractObj.itinerary = {};
+        apiContractObj.itinerary.groupMode = contractObj.Contract.groupMode;
+        apiContractObj.itinerary.departureCity = {};
+        apiContractObj.itinerary.departureCity.description = contractObj.Contract.departureCity;
+        apiContractObj.itinerary.passCity = {};
+        apiContractObj.itinerary.passCity.description = contractObj.Contract.passCity;
+        apiContractObj.itinerary.arrivalCity = {};
+        apiContractObj.itinerary.arrivalCity.description = contractObj.Contract.arrivalCity;
+        apiContractObj.itinerary.endCity = {};
+        apiContractObj.itinerary.endCity.description = contractObj.Contract.endCity;
+        apiContractObj.itinerary.attraction = {};
+        apiContractObj.itinerary.attraction.description = contractObj.Contract.attraction;
+        apiContractObj.itinerary.hotel = {};
+        apiContractObj.itinerary.hotel.description = contractObj.Contract.hotelDesc;
+        apiContractObj.itinerary.startDate = contractObj.Contract.startDate;
+        apiContractObj.itinerary.endDate = contractObj.Contract.endDate;
+        apiContractObj.itinerary.groupId = contractObj.Contract.groupId;
+        apiContractObj.itinerary.longTransport = {};
+        apiContractObj.itinerary.longTransport.description = contractObj.Contract.longTransport;
+        apiContractObj.itinerary.longTransport.standard = contractObj.Contract.longStandard;
+        apiContractObj.itinerary.localTransport = {};
+        apiContractObj.itinerary.localTransport.description = contractObj.Contract.localTransport;
+        apiContractObj.itinerary.localTransport.standard = contractObj.Contract.localStandard;
+        apiContractObj.itinerary.freeTime = {};
+        apiContractObj.itinerary.freeTime.description = contractObj.Contract.freeTime;
+        apiContractObj.itinerary.freeTime.number = 0;
+        apiContractObj.itinerary.meal = {};
+        apiContractObj.itinerary.meal.number = 0;
+        apiContractObj.itinerary.meal.standard = contractObj.Contract.mealStandard;
+        apiContractObj.itinerary.tourGuideServiceType = "";
+        apiContractObj.itinerary.routeName = contractObj.Contract.routeName;
+        apiContractObj.itinerary.inputType = 1;//行程模式：0/标准；1/简易模式
+        apiContractObj.itinerary.routes = [];
+        var routeInfo = {};
+        routeInfo.day = 1;
+        routeInfo.stop = 1;
+        routeInfo.departure = {};
+        routeInfo.description = contractObj.Contract.travelItinerary;
+        routeInfo.transport = {};
+        routeInfo.meals = [];
+        apiContractObj.itinerary.routes.push(routeInfo);
+
+        //「签署人/游客代表」部分
+        apiContractObj.signatory = {};
+        apiContractObj.signatory.name = contractObj.Contract.signingName;
+        apiContractObj.signatory.ID = {};
+        apiContractObj.signatory.ID.IDType = contractObj.Contract.signingPassType;
+        apiContractObj.signatory.ID.IDNumber = contractObj.Contract.signingPassNo;
+        apiContractObj.signatory.phone = contractObj.Contract.signingPhone;
+        apiContractObj.signatory.address = contractObj.Contract.signingAddress;
+        apiContractObj.signatory.email = contractObj.Contract.signingEmail;
+        apiContractObj.signatory.fax = "";
+        apiContractObj.signatory.mode = 1;//默认短信签约
+        apiContractObj.signatory.signingPlace = "";
+
+        //「游客名单」部分
+        apiContractObj.touristsInfo = {};
+        apiContractObj.touristsInfo.totalNumber = contractObj.TouristList.length;
+
+        apiContractObj.touristsInfo.tourists = [];
+        var childNumber = 0;
+        if (contractObj.TouristList.length > 0) {
+            contractObj.TouristList.map(function (o, index) {
+                var touristInfo = {};
+                touristInfo.number = index;
+                touristInfo.isSigner = o.isSign;
+                touristInfo.name = o.name;
+                touristInfo.gender = o.gender;
+                touristInfo.age = 0;
+                touristInfo.isChild = o.isChildren;
+                touristInfo.phone = o.phone;
+                touristInfo.health = o.health;
+                touristInfo.address = o.address;
+                touristInfo.ID = {};
+                touristInfo.ID.IDType = o.passType;
+                touristInfo.ID.IDNumber = o.passNo;
+                if (touristInfo.isChild) {
+                    childNumber = childNumber + 1;
+                }
+                apiContractObj.touristsInfo.tourists.push(touristInfo);
+            });
+        }
+
+        apiContractObj.touristsInfo.adultNumber = contractObj.TouristList.length - childNumber;
+        apiContractObj.touristsInfo.childNumber = childNumber;
+
+        //「委托社」部分
+        apiContractObj.entrustedTravelAgency = {};
+        apiContractObj.entrustedTravelAgency.agencyName = contractObj.Contract.entrustAgency;
+
+        //「费用」部分
+        apiContractObj.cost = {};
+        apiContractObj.cost.guideServiceCost = contractObj.Contract.guideServiceCost;
+        apiContractObj.cost.totalGuideServiceCost = contractObj.Contract.totalGuideServiceCost;
+        apiContractObj.cost.totalCost = contractObj.Contract.totalCost;
+        apiContractObj.cost.deadline = contractObj.Contract.deadline;
+        apiContractObj.cost.paymentMethodDescription = contractObj.Contract.paymentMethod;
+        apiContractObj.cost.overduePenaltyDayRatio = contractObj.Contract.overduePenaltyDayRatio;
+        //「地接社」部分
+        apiContractObj.localTravelAgencies = [];
+        var localTripInfo = {};
+        localTripInfo.description = "";
+        localTripInfo.agencyName = contractObj.Contract.localAgencyName;
+        localTripInfo.agencyAddress = {};
+        localTripInfo.agencyAddress.description = contractObj.Contract.localAgencyAddress;
+        localTripInfo.contactName = contractObj.Contract.localAgencyContact;
+        localTripInfo.contactPhone = contractObj.Contract.localAgencyPhone;
+        //「保险」部分
+        apiContractObj.insurance = {};
+        apiContractObj.insurance.agreeToBuy = contractObj.Contract.agreeToBuy;
+        apiContractObj.insurance.productName = contractObj.Contract.productName;
+        apiContractObj.insurance.company = contractObj.Contract.company;
+        apiContractObj.insurance.coverage = contractObj.Contract.coverage;
+        apiContractObj.insurance.premium = contractObj.Contract.premium;
+
+        //「争议解决」部分
+        apiContractObj.dispute = {};
+        apiContractObj.dispute.resolution = contractObj.Contract.disputeResolution;
+        apiContractObj.dispute.tribunalName = "";
+
+        //「自费项目」部分
+        apiContractObj.activities = [];
+        if (contractObj.PayItemList.length > 0) {
+            contractObj.PayItemList.map(function (o) {
+                var payItemInfo = {};
+                payItemInfo.date = o.date;
+                payItemInfo.place = o.place;
+                payItemInfo.item = o.item;
+                payItemInfo.fee = o.fee;
+                payItemInfo.stayDuration = o.stayDuration;
+                payItemInfo.memo = o.memo;
+                apiContractObj.activities.push(payItemInfo);
+            });
+        }
+
+        //「购物」部分
+        apiContractObj.hasShopping = contractObj.ShoppingList.length > 0 ? true : false;
+        apiContractObj.shoppingViewSpot = contractObj.Contract.shoppingViewSpot;
+        apiContractObj.shoppings = [];
+        if (contractObj.ShoppingList.length > 0) {
+            contractObj.ShoppingList.map(function (o) {
+                var shoppingInfo = {};
+                shoppingInfo.date = o.date;
+                shoppingInfo.place = o.place;
+                shoppingInfo.shoppingPlace = o.shoppingPlace;
+                shoppingInfo.goods = o.goods;
+                shoppingInfo.stayDuration = o.stayDuration;
+                shoppingInfo.memo = o.memo;
+                apiContractObj.shoppings.push(shoppingInfo);
+            });
+        }
+        //「成团约定」部分
+        apiContractObj.groupAgreement = {};
+        apiContractObj.groupAgreement.resolution = 4;
+        apiContractObj.groupAgreement.leastCustomerNumber = contractObj.Contract.leastCustomerNumber;
+        apiContractObj.groupAgreement.agreeToChangeLine = false;
+        apiContractObj.groupAgreement.mergeToCompanyName = contractObj.Contract.otherAgency;
+        apiContractObj.groupAgreement.partAPenalty = {};
+        apiContractObj.groupAgreement.partAPenalty.solution = contractObj.Contract.solutionA;
+        apiContractObj.groupAgreement.partAPenalty.overdueDaysA = contractObj.Contract.overdueDaysA;
+        apiContractObj.groupAgreement.partAPenalty.overdueDaysB = contractObj.Contract.overdueDaysA2;
+        apiContractObj.groupAgreement.partAPenalty.cancel = {};
+        apiContractObj.groupAgreement.partAPenalty.cancel.timeLimit = contractObj.Contract.timeLimitA;
+        apiContractObj.groupAgreement.partAPenalty.cancel.interrupt = {};
+        apiContractObj.groupAgreement.partAPenalty.cancel.interrupt.timeLimit = contractObj.Contract.timeLimitA2;
+        apiContractObj.groupAgreement.partAPenalty.cancel.interrupt.formula = contractObj.Contract.formulaA.split('|');
+        apiContractObj.groupAgreement.partAPenalty.cancel.standards = [];
+        if (contractObj.Contract.deductStandardA != "" && contractObj.Contract.deductStandardA.split('|').length > 0) {
+            var arry = contractObj.Contract.deductStandardA.split('|');
+            console.log(arry);
+            if (arry.length > 0) {
+                arry.map(function (o) {
+                    var standardInfo = {};
+                    standardInfo.start = o.split(',')[0];
+                    standardInfo.end = o.split(',')[1];
+                    standardInfo.ratio = o.split(',')[2];
+                    apiContractObj.groupAgreement.partAPenalty.cancel.standards.push(standardInfo);
+                });
+            }
+        }
+        apiContractObj.groupAgreement.partBPenalty = {};
+        apiContractObj.groupAgreement.partBPenalty.solution = contractObj.Contract.solutionB;
+        apiContractObj.groupAgreement.partBPenalty.overdueDaysA = contractObj.Contract.overdueDaysB;
+        apiContractObj.groupAgreement.partBPenalty.overdueDaysB = contractObj.Contract.overdueDaysB2;
+        apiContractObj.groupAgreement.partBPenalty.cancel = {};
+        apiContractObj.groupAgreement.partBPenalty.cancel.timeLimit = contractObj.Contract.timeLimitB;
+        apiContractObj.groupAgreement.partBPenalty.cancel.interrupt = {};
+        apiContractObj.groupAgreement.partBPenalty.cancel.interrupt.timeLimit = contractObj.Contract.timeLimitB2;
+        apiContractObj.groupAgreement.partBPenalty.cancel.interrupt.formula = "";
+        apiContractObj.groupAgreement.partBPenalty.cancel.standards = [];
+        if (contractObj.Contract.deductStandardB != "" && contractObj.Contract.deductStandardB.split('|').length > 0) {
+            var arry = contractObj.Contract.deductStandardB.split('|');
+            if (arry.length > 0) {
+                arry.map(function (o) {
+                    var standardInfo = {};
+                    standardInfo.start = o.split(',')[0];
+                    standardInfo.end = o.split(',')[1];
+                    standardInfo.ratio = o.split(',')[2];
+                    apiContractObj.groupAgreement.partBPenalty.cancel.standards.push(standardInfo);
+                });
+            }
+        }
+        apiContractObj.compensationPeriod = contractObj.Contract.compensationPeriod;
+        apiContractObj.seriousCompensateRatio = contractObj.Contract.seriousCompensateRatio;
+        apiContractObj.otherLiability = contractObj.Contract.otherLiability;
+        return apiContractObj;
+    }
+
+
+</script>

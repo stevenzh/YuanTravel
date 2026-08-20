@@ -1,0 +1,65 @@
+﻿@model Lvy.VModels.Order.OrderBalanceVModel
+@{
+    ViewBag.Title = "打印单团核算";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="~/WebRes/css/manage.css" rel="stylesheet" type="text/css" />
+    <title>@ViewBag.Title</title>
+    <script src="~/WebRes/scripts/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+    <div id="divPrint" style="width: 700px; margin: 0 auto;">
+        <div align="center" class="xboxcontent">
+            @Html.Partial("TourBalance/UCTourInfo")
+        </div>
+        <div class="margintop10">
+            &nbsp;
+        </div>
+        <div align="center" class="xboxcontent">
+            @Html.Partial("TourBalance/UCTourCalc")
+        </div>
+        <div class="margintop10">
+            &nbsp;
+        </div>
+        <div align="center" class="xboxcontent">
+            @Html.Partial("TourBalance/UCBussinessIncomm", Model)
+        </div>
+        <div class="margintop10">
+            &nbsp;
+        </div>
+        <div align="center" class="xboxcontent">
+            @Html.Partial("TourBalance/UCCostsReadOnly", Model)
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        window.onload = function () {
+            printView();
+        };
+
+        $(function () {
+            //打印
+            $("#btnPrintTourAccount").click(function () {
+                printView();
+            });
+            //关闭
+            $("#btnClose").click(function () {
+                window.close();
+            });
+        });
+
+        //打印
+        function printView() {
+            document.title = "";
+            $("input[type=button]").hide();
+            window.print();
+            $("input[type=button]").show();
+            document.title = "核算明细";
+        }
+
+    </script>
+</body>
+</html>

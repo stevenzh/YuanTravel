@@ -1,0 +1,167 @@
+﻿@model Lvy.VModels.Ticket.TktOrderVModel
+@{
+    ViewBag.Title = "订单查询";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+ {
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+    <script src="~/WebRes/scripts/jquery.fileDownload.1.3.3.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" action="@Url.Action("Search")" method="POST">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">订单查询</h3>
+            </div>
+            <div class="card-body p-2">
+                <div class="form-group row">
+                    <div class="col-auto">
+                        @Html.TextBoxFor(a => a.OrderCode, new { @class = "form-control", @placeholder = "订单编号" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.TextBoxFor(a => a.DateRange, new { @class = "form-control", @placeholder = "出发日期" })
+                    </div>
+                    <div class="col-auto">
+                        <select id="mySelect2" name="BookingCustomer" class="form-control" style="width:250px;">
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        @Html.TextBoxFor(a => a.ProductName, new { @class = "form-control", @placeholder = "产品名称" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.DropDownListFor(a => a.OrderState, ViewBag.OrderStateBean as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-default" id="btnSearch" type="button">搜索</button>
+                <button id="productGroupLink" type="button" class="btn btn-info">账单（产品分组）</button>
+                <button id="customerGroupLink" type="button" class="btn btn-info">账单（客户分组）</button>
+                @*<button id="btnBatchShouKuan" type="button" class="btn btn-info">批量收款</button>*@
+            </div>
+        </div>
+
+        <div class="card" id="divOrderSearch">
+            @Html.Partial("UCSearch", Model)
+        </div>
+    </form>
+</section>
+
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            //查询
+            $('#btnSearch').click(function () {
+                pageselectCallback(0);
+            });
+
+            $('#DateRange').daterangepicker({
+                autoUpdateInput: true,
+                ranges: {
+                    '今天': [moment(), moment()],
+                    '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '本周': [moment().startOf('week'), moment()],
+                    '上周': [moment().subtract(6, 'days'), moment()],
+                    '本月': [moment().startOf('month'), moment().endOf('month')],
+                    '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: "YYYY/MM/DD", //设置显示格式
+                    applyLabel: '确定', //确定按钮文本
+                    cancelLabel: '清空', //取消按钮文本
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    customRangeLabel: "自定义",
+                    firstDay: 1
+                }
+            }, function (start, end) {
+                $('#DateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+            });
+            $('#DateRange').on('cancel.daterangepicker', function (ev, picker) {
+                //do something, like clearing an input
+                $('#DateRange').val('');
+            });
+            $('#DateRange').val('');
+
+
+            $('#mySelect2').select2({
+                ajax: {
+                    url: '/Customer/GetCustomerSelect2',
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                            hasChild: true,
+                            page: params.page || 0,
+                            size: 10,
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 0;
+                        return {
+                            results: data.rows,
+                            pagination: {
+                                more: (params.page * 10) < data.total
+                            }
+                        };
+                    },
+                    cache: true,
+                },
+                language: "zh-CN",
+                placeholder: '请选择分销商',//默认文字提示
+                allowClear: true,
+            });
+
+            $('#productGroupLink').click(function () {
+                var $start = $('#d4311');
+                if ($start.val() == '') {
+                    Utils.alert('开始时间不能为空。');
+                    $start[0].focus();
+                    return false;
+                }
+                var $end = $('#d4312');
+                if ($end.val() == '') {
+                    Utils.alert('结束时间不能为空。');
+                    $end[0].focus();
+                    return false;
+                }
+                var params = $('#theForm').formSerialize();
+                $.fileDownload('/TktOrder/DownloadTicketInfo', { httpMethod: "POST", data: params });
+                return false;
+            });
+
+            $('#customerGroupLink').click(function () {
+                var params = $('#theForm').formSerialize();
+                $.fileDownload('/TktOrder/ReportCustomerGroup', { httpMethod: "POST", data: params });
+            });
+
+        });
+
+    </script>
+}

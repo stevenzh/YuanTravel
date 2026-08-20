@@ -1,0 +1,97 @@
+﻿@using System.Web.Mvc
+@using Lvy.Web.Common
+
+@helper DisplayTicketState(int state)
+{
+string className = "";
+switch (state)
+{
+    case 1:
+        className = "badge badge-1";
+        break;
+    case 2:
+        className = "badge badge-2";
+        break;
+    case 8:
+        className = "badge badge-8";
+        break;
+    case 10:
+        className = "badge badge-10";
+        break;
+    default:
+        className = "badge badge-1";
+        break;
+}
+
+    <span class="@className">
+        @DictionaryTools.GetEnumValue(Enums.VisaOrderStatusEnum, state.ToString())
+    </span>
+}
+
+@helper DisplayState(int state)
+{
+string className = "";
+switch (state)
+{
+    case 1:
+        className = "badge badge-1";
+        break;
+    case 2:
+        className = "badge badge-2";
+        break;
+    default:
+        className = "badge badge-1";
+        break;
+}
+
+    <span class="@className">
+        @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, state.ToString())
+    </span>
+}
+
+@helper DisplayTraceState(int state)
+{
+string className = "";
+switch (state)
+{
+    case 10:
+        className = "badge badge-1";
+        break;
+    case 20:
+        className = "badge badge-2";
+        break;
+    case 30:
+        className = "badge badge-2";
+        break;
+    case 40:
+        className = "badge badge-2";
+        break;
+    case 50:
+        className = "badge badge-8";
+        break;
+    case 60:
+        className = "badge badge-8";
+        break;
+    case 70:
+        className = "badge badge-9";
+        break;
+    case 90:
+        className = "badge badge-10";
+        break;
+    default:
+        className = "badge badge-1";
+        break;
+}
+
+    <span class="@className">
+        @DictionaryTools.GetEnumValue(Enums.OrderTraceStateEnum, state.ToString())
+    </span>
+}
+
+
+
+
+
+
+
+

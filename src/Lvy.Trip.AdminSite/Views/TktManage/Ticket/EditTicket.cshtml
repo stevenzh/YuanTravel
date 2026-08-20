@@ -1,0 +1,868 @@
+﻿@using System.Globalization
+@using Lvy.VModels.Ticket
+@using Lvy.Models.BaseDB
+@model EditTicketVModel
+@{
+    ViewBag.Title = "编辑商品";
+    Layout = "~/Views/Shared/_Single.cshtml";
+
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+    string submitUrl = string.Empty;
+    string title = string.Empty;
+    switch (Model.Operation)
+    {
+        case TicketOperation.Add:
+            submitUrl = Url.Action("SaveAdd");
+            title = "添加产品基本信息";
+            break;
+        case TicketOperation.Edit:
+            submitUrl = Url.Action("SaveEdit");
+            title = "编辑产品基本信息";
+            break;
+        case TicketOperation.Copy:
+            submitUrl = Url.Action("SaveCopy");
+            title = "复制产品基本信息";
+            break;
+        default:
+            break;
+    }
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+    <script src="@CDNServerUrl/summernote-ext-elfinder.js"></script>
+
+    <link href="@CDNServerUrl/elfinder/css/elfinder.full.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/elfinder/js/elfinder.min.js"></script>
+    <script src="@CDNServerUrl/elfinder/js/i18n/elfinder.zh_CN.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="@CDNServerUrl/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+
+    <link href="~/Content/ComboTree/style.css" rel="stylesheet" />
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <form id="theForm" action="@submitUrl">
+        @Html.HiddenFor(m => m.TicketProduct.Id)
+        @Html.HiddenFor(m => m.TicketProduct.ProductId)
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">基本信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label"><span class="text-danger">*</span>名称：</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.TicketProduct.ProductName, new { id = "productNameTxt", @class = "form-control form-control-sm", @maxlength = "200" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label"><span class="text-danger">*</span>部门：</label>
+                            <div class="col-sm-10">
+                                @Html.DropDownListFor(m => m.TicketProduct.TeamID, ViewData["TeamList"] as IEnumerable<SelectListItem>, new { @Class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label"><span class="text-danger">*</span>类型：</label>
+                            <div class="col-sm-10">
+                                @Html.DropDownListFor(m => m.TicketProduct.ProductType, DictionaryTools.GetEnumsBy(Enums.ProductAllTypeEnum).ToSelectListFor(Model.TicketProduct.ProductType.ToString()), new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">分类：</label>
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.TicketProduct.ProductCategory, new { @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">景区：</label>
+                            <div class="col-sm-10">
+                                <select id="mySelect1" name="TicketProduct.PlaceCode" class="form-control form-control-sm">
+                                    @if (!string.IsNullOrEmpty(Model.TicketProduct.PlaceCode))
+                                    {
+                                        <option value="@Model.TicketProduct.PlaceCode">@DictionaryTools.GetPlaceName(Model.TicketProduct.PlaceCode)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">目的地：</label>
+                            <div class="col-sm-10">
+                                @Html.HiddenFor(m => m.ArriveDestName, new { id = "ArriveDestName" })
+                                <select id="mySelect2" name="TicketProduct.ArriveDest" class="form-control form-control-sm">
+                                    <option value="@Model.TicketProduct.ArriveDest">@DictionaryTools.GetDestNameStr(Model.TicketProduct.ArriveDest)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">主题：</label>
+                            <div class="col-sm-10">
+                                <select id="themeListTxt" name="Themes" multiple="multiple" class="form-control form-control-sm" style="width:90%;">
+                                    @{
+                                        string[] ll = (Model.TicketProduct.Themes == null ? new string[] { } : Model.TicketProduct.Themes.Split('|'));
+                                        foreach (var item in ViewBag.ThemesList as List<BaseTagModel>)
+                                        {
+                                            if (ll.Contains(item.TagName))
+                                            {
+                                                <option value="@item.TagName" selected="selected">@item.TagName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.TagName">@item.TagName</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label"><span class="text-danger">*</span>供应商：</label>
+                            <div class="col-sm-10">
+                                <select id="mySelect3" name="TicketProduct.SupplierCode" class="form-control form-control-sm">
+                                    <option value="@Model.TicketProduct.SupplierCode">@DictionaryTools.GetCachedCustomer(Model.TicketProduct.SupplierCode).Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">说明：</label>
+                            <div class="col-sm-10">
+                                @Html.TextAreaFor(m => m.TicketProduct.ProductDesc, new { id = "productDescTxtA", @class = "form-control form-control-sm summernote" })
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">预订设置</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label"><span class="text-danger">*</span>购买方式：</label>
+                            <div class="col-sm-9">
+                                @Html.DropDownListFor(m => m.TicketProduct.TktType, DictionaryTools.GetEnumsBy(Enums.TktTypeEnum).ToSelectListFor(Model.TicketProduct.TktType.ToString(CultureInfo.InvariantCulture)), new { id = "tktTypeDp", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">订单限额：</label>
+                            <div class="col-sm-6">
+                                @Html.TextBoxFor(m => m.TicketProduct.LimitQuota, new { id = "limitQuotaTxt", @class = "form-control form-control-sm" })
+                            </div>
+                            <div class="col-sm-3">
+                                <span class="danger">*0 为没有限额</span>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">预订须知：</label>
+                            <div class="col-sm-9">
+                                @Html.TextAreaFor(m => m.TicketProduct.BookingDesc, new { id = "bookingDescTxtA", @class = "form-control form-control-sm", @rows = "5" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label"><span class="text-danger">*</span>提前预定天数：</label>
+                            <div class="col-sm-4">
+                                @Html.TextBoxFor(m => m.TicketProduct.PreDays, new { @class = "form-control form-control-sm" })
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="input-group date" id="timepicker" data-target-input="nearest">
+                                    <input type="text" id="TicketProduct_PreTime" name="TicketProduct.PreTime" value="@Model.TicketProduct.PreTime" class="form-control form-control-sm datetimepicker-input" data-target="#timepicker" />
+                                    <div class="input-group-append" data-target="#timepicker" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="far fa-clock"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">预订时限：</label>
+                            <div class="col-sm-9">
+                                @{
+                                    var d1 = @Model.TicketProduct.BeginBuyTime == null ? "" : @Model.TicketProduct.BeginBuyTime.Value.ToString("yyyy/MM/dd HH:mm tt", DateTimeFormatInfo.InvariantInfo);
+                                    var d2 = @Model.TicketProduct.LastDate == null ? "" : @Model.TicketProduct.LastDate.Value.ToString("yyyy/MM/dd HH:mm tt", DateTimeFormatInfo.InvariantInfo);
+                                    var bookRange = "";
+
+                                    if (!d1.IsNullOrEmpty() && d2.IsNullOrEmpty())
+                                        bookRange = d1 + " - " + DateTime.Today.ToDateFormat();
+                                    else if (d1.IsNullOrEmpty() && !d2.IsNullOrEmpty())
+                                        bookRange = DateTime.Today.ToDateFormat() + " - " + d2;
+                                    else if (!d1.IsNullOrEmpty() && !d2.IsNullOrEmpty())
+                                        bookRange = d1 + " - " + d2;
+                                }
+                                <input id="BookingRange" type="text" value="@bookRange" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">使用期限：</label>
+                            @{
+                                var d3 = @Model.TicketProduct.StartTime == null ? "" : @Model.TicketProduct.StartTime.Value.ToString("yyyy/MM/dd");
+                                var d4 = @Model.TicketProduct.EndTime == null ? "" : @Model.TicketProduct.EndTime.Value.ToString("yyyy/MM/dd");
+                                var outRange = "";
+
+                                if (!d3.IsNullOrEmpty() && d4.IsNullOrEmpty())
+                                    outRange = d3 + " - " + DateTime.Today.ToDateFormat();
+                                else if (d3.IsNullOrEmpty() && !d4.IsNullOrEmpty())
+                                    outRange = DateTime.Today.ToDateFormat() + " - " + d4;
+                                else if (!d3.IsNullOrEmpty() && !d4.IsNullOrEmpty())
+                                    outRange = d3 + " - " + d4;
+                            }
+                            <div class="col-sm-9">
+                                <input type="text" id="OutDateRange" value="@outRange" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">库存设置</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label"><span class="text-danger">*</span>库存方式：</label>
+                            <div class="col-sm-9">
+                                @Html.RadioGroup("TicketProduct.TuiJianType", DictionaryTools.GetEnumsBy(Enums.TktTuiJianTypeEnum), Model.TicketProduct.TuiJianType.ToString(CultureInfo.InvariantCulture))
+                            </div>
+                        </div>
+                        <div class="editQuotaA form-group row">
+                            <label class="col-sm-3 col-form-label"><span class="point">*</span>总库存：</label>
+                            <div class="col-sm-9">
+                                @Html.TextBoxFor(m => m.TicketProduct.PlanQuota, new { id = "planQuotaTxt", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="editQuotaA form-group row">
+                            <label class="col-sm-3 col-form-label">预留库存：</label>
+                            <div class="col-sm-9">
+                                @Html.TextBoxFor(m => m.TicketProduct.HoldQuota, new { id = "holdQuotaTxt", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                        <div class="editQuotaA form-group row">
+                            <label class="col-sm-3 col-form-label">已用库存：</label>
+                            <div class="col-sm-9">
+                                <span id="usedQuotaSpan">@Model.TicketProduct.UsedQuota</span>
+                            </div>
+                        </div>
+                        <div class="editQuotaA form-group row">
+                            <label class="col-sm-3 col-form-label">剩余库存：</label>
+                            <div class="col-sm-9">
+                                @{
+                                    var useQuota = @Model.TicketProduct.PlanQuota - @Model.TicketProduct.HoldQuota - @Model.TicketProduct.UsedQuota;
+                                }
+                                <span id="useQuotaSpan">@useQuota</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Operation == TicketOperation.Edit)
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">图片</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label class="col-sm-2 control-label" for="UploadFile">图片上传</label>
+                                <div class="col-sm-3">
+                                    <input type="text" name="FileName" class="form-control" id="FileName" placeholder="图片说明" />
+                                </div>
+                                <div class="input-group col-sm-7">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="UploadFile">
+                                        <label class="custom-file-label" data-browse="选择文件" for="UploadFile">选择文件</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <input type="button" id="btnUpload" class="btn btn-info" value="上传" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 control-label">景点图片</label>
+                                <div class="col-sm-10">
+                                    <div id="photoView" class="row">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <input class="btn btn-success" id="btnSubmit" type="button" value="保存" />
+
+                @if (Model.Operation == TicketOperation.Edit)
+                {
+                    <input class="btn btn-warning" id="btnSetPrice" type="button" value="设置报价" />
+                }
+                <input class="btn btn-secondary float-right" id="btnShowList" type="button" value="返回列表" />
+            </div>
+        </div>
+    </form>
+</section>
+
+@section PageScripts
+{
+    <script src="~/WebRes/scripts/common.js"></script>
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <script src="@CDNServerUrl/moment/locale/zh-cn.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <!-- bs-custom-file-input -->
+    <script src="@CDNServerUrl/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="@CDNServerUrl/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    <script src="~/Content/ComboTree/comboTreePlugin.js"></script>
+
+    <script type="text/javascript">
+
+    var comboTree;
+
+        $(function () {
+
+            bsCustomFileInput.init();
+
+            //Timepicker
+            $('#timepicker').datetimepicker({
+                format: 'LT'
+            })
+
+        initialProduct();
+
+        initialQuota();
+
+        $('#OutDateRange').daterangepicker({
+            autoUpdateInput: true,
+            locale: {
+                format: "YYYY/MM/DD", //设置显示格式
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        }, function (start, end) {
+            $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+        });
+        $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#OutDateRange').val('');
+        });
+        // 初始
+        $('#OutDateRange').val('@outRange');
+
+        //Date range picker with time picker
+        $('#BookingRange').daterangepicker({
+            autoUpdateInput: true,
+            timePicker: true,
+            timePickerIncrement: 30,
+            locale: {
+                format: 'YYYY/MM/DD hh:mm A',
+                applyLabel: '确定', //确定按钮文本
+                cancelLabel: '清空', //取消按钮文本
+                daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                customRangeLabel: "自定义",
+                firstDay: 1
+            }
+        })
+        $('#BookingRange').on('cancel.daterangepicker', function (ev, picker) {
+            //do something, like clearing an input
+            $('#BookingRange').val('');
+        });
+        $('#BookingRange').val('@bookRange');
+
+        // 商品类型 联动
+        $("#TicketProduct_ProductType").change(function () {
+            typeChange();
+        });
+        typeChange();
+
+        //提交
+        $('#btnSubmit').click(function () {
+            //提交验证
+            if (submitValidate()) {
+                var operation = '@Model.Operation';
+                if (operation != 'Edit' && operation != '2') {
+                    var $proudctName = $('#productNameTxt');
+                    var param = { productName: $proudctName.val() };
+                    $.post('/TktManage/ValidProductName', param, function (result) {
+                        if (result == 'true') {
+                            Utils.alert('商品名称已存在。');
+                            $proudctName.focus().select();
+                        } else {
+                            submitForm();
+                        }
+                    });
+                } else {
+                    submitForm();
+                }
+            }
+        });
+
+        //选择图片
+        $("#btnPicture").click(function () {
+            var parentStr = $("#mySelect1").val();
+            var url = "/Product/SearchImages/?ParentStr=" + $.trim(parentStr) + "&Rnd=" + Math.random();
+            layer.open({ type: 2, title: '选择图片', maxmin: true, shadeClose: true, area: ['900px', '400px'], content: url });
+        });
+
+        $("#btnUpload").click(function () {
+
+            if ($.trim($("[name='UploadFile']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("[name='FileName']").val()) == "") {
+                Utils.alert("上传文件的说明不能空！");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("UploadFile", $("[name='UploadFile']")[0].files[0]);
+            formData.append("ProductID", $("#TicketProduct_ProductId").val());
+            formData.append("FileName", $("#FileName").val());
+            formData.append("Type",'31');  // 固定值 31 酒店图片  32 房间图片
+            $.ajax({
+                url: '@Url.Action("UploadPhoto")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    if (parseInt(data) > 0) {
+                        photoView();
+                    }
+                }
+            });
+        });
+
+    });
+
+    function typeChange() {
+        var param = { productType: $("#TicketProduct_ProductType").val() };
+        $.post('/TktCategory/GetJsTreeData2', param, function (result) {
+            if (result.Code == '1') {
+
+                if (comboTree != null) {
+                    comboTree.clearSelection();
+                    comboTree.setSource(result.data);
+                } else
+
+                    comboTree = $('#TicketProduct_ProductCategory').comboTree({
+                        source: result.data,
+                        selected: ['@Model.TicketProduct.ProductCategory'],
+                        isMultiple: false
+                    });
+            }
+        }, "json");
+    }
+
+    function submitForm() {
+        var load_iii = Utils.layerLoad();
+        var action = $('#theForm').attr('action');
+        var params = {
+            'TicketProduct.Id': $("#TicketProduct_Id").val(),
+            'TicketProduct.ProductId': $("#TicketProduct_ProductId").val(),
+            'TicketProduct.TeamID': $("#TicketProduct_TeamID").val(),
+            'TicketProduct.ProductName': $('#productNameTxt').val(),
+            'TicketProduct.PlaceCode': $('#mySelect1').val(),
+            'TicketProduct.ArriveDest': $('#mySelect2').val(),
+            'TicketProduct.TktType': $('#tktTypeDp').val(),
+            'TicketProduct.SupplierCode': $('#mySelect3').val(),
+            'TicketProduct.TuiJianType': $(":radio[name='TicketProduct.TuiJianType']:checked").val(),
+            'TicketProduct.ProductType': $("#TicketProduct_ProductType").val(),
+            'TicketProduct.ProductCategory': comboTree.getSelectedIds(),
+            'TicketProduct.BookingDesc': $('#bookingDescTxtA').val(),
+            'TicketProduct.ProductDesc': $('#productDescTxtA').val(),
+            'TicketProduct.PlanQuota': $("#planQuotaTxt").val(),
+            'TicketProduct.HoldQuota': $("#holdQuotaTxt").val(),
+            'TicketProduct.LimitQuota': $("#limitQuotaTxt").val(),
+            'TicketProduct.ImgUrl': $('#ImgUrl').val(),
+            'OutDateRange': $("#OutDateRange").val(),
+            'BookingRange': $("#BookingRange").val(),
+            'Themes': $('#themeListTxt').val(),
+            'TicketProduct.PreDays': $('#TicketProduct_PreDays').val(),
+            'TicketProduct.PreTime': $('#TicketProduct_PreTime').val()
+        };
+        $.post(action, params, function (data) {
+            if (data.State == 'success' && data.ProductId != '') {
+                layer.confirm('提交成功，是否继续：编辑价格？', {
+                    btn: ["返回列表", "编辑价格", "关闭"]
+                }, function () {
+                    window.location = '@Url.Action("SearchTicket")';
+                }, function () {
+                    window.location = '@Url.Action("EditPrice")' + '?productId=' + data.ProductId;
+                }, function () {
+                    window.location = '@Url.Action("EditTicket")' + '?productId=' + data.ProductId;
+                });
+            }
+            else {
+                Utils.alert('请求发生异常，请稍后重试。');
+            }
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    // START********************门票部分********************
+
+    //门票初始化
+    function initialProduct() {
+        //门票名称失去焦点事件
+        $('#productNameTxt').blur(function () {
+            var operation = '@Model.Operation';
+            if (operation != 'Edit' && operation != '2') {
+                var name = $(this).val();
+                if (name.length > 0) {
+                    var param = { productName: name };
+                    $.post('/TktManage/ValidProductName', param, function (data) {
+                        if (data == 'false') {
+                        } else {
+                            Utils.alert('商品名称已存在。');
+                        }
+                    });
+                }
+            }
+        });
+
+        // 景区设置
+        $('#mySelect1').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetPlaceSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].PlaceCode, text: arr[item].PlaceName, pinyin: arr[item].PinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+            //allowClear: true
+        });
+
+        //目的地筛选
+        $('#mySelect2').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+            //allowClear: true
+        });
+
+        $('#mySelect3').select2({
+            ajax: {
+                url: '/Customer/GetSupplierSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        hasChild: true,
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            allowClear: true,
+        });
+
+        //主题标签
+        $('#themeListTxt').select2({ language: "zh-CN"});
+
+        //设置报价
+        $('#btnSetPrice').click(function () {
+            window.location = '@Url.Action("EditPrice", new { productId = Model.TicketProduct.ProductId })';
+        });
+
+        //返回列表
+        $('#btnShowList').click(function () {
+            window.location = '@Url.Action("SearchTicket")';
+        });
+
+        $('.summernote').summernote({
+            lang: 'zh-CN',
+            height: 300,
+            tabsize: 2,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                // ['insert', ['link', 'picture', 'video']],
+                ['insert', ['link', 'elfinder']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+    }
+
+    //  END ********************门票部分********************
+
+    // START********************库存部分********************
+
+    //库存初始化
+    function initialQuota() {
+        $('#planQuotaTxt,#holdQuotaTxt,#limitQuotaTxt').keydown(function () {
+            InputLimitNumber();
+        });
+        $('#planQuotaTxt,#holdQuotaTxt').keyup(function () {
+            var $plan = $('#planQuotaTxt'), $hold = $('#holdQuotaTxt'), $used = $('#usedQuotaSpan'), $use = $('#useQuotaSpan');
+            var plan = Number($plan.val()), hold = Number($hold.val()), used = Number($used.text()), use = Number($use.text());   //计划，预留，已用，剩余
+            $use.text(plan - hold - used);
+        });
+
+        $(':radio[name="TicketProduct.TuiJianType"]').change(function () {
+            if ($(this).val() == '2') {  // 固定库存
+                $('.editQuotaA').show();
+            }
+            else {
+                $('.editQuotaA').hide();
+            }
+        });
+        var tj = '@Model.TicketProduct.TuiJianType';
+        if (tj != '2')
+            $('.editQuotaA').hide();
+    }
+
+    //验证库存
+    function validQuota() {
+        var $plan = $('#planQuotaTxt'), $hold = $('#holdQuotaTxt'), $used = $('#usedQuotaSpan'), $use = $('#useQuotaSpan'), $limit = $('#limitQuotaTxt');
+        var plan = Number($plan.val()), hold = Number($hold.val()), used = Number($used.text()), use = Number($use.text()), limit = Number($limit.val());
+        if (plan < 0 || hold < 0 || used < 0 || use < 0) {
+            Utils.alert('库存数据不能小于零。');
+            return false;
+        }
+        if (plan == 0) {
+            Utils.alert('总库存需大于零。');
+            return false;
+        }
+        if (limit < 0 || limit > use) {
+            Utils.alert('限额需不能大于剩余库存。');
+            return false;
+        }
+        return true;
+    }
+
+    //  END ********************库存部分********************
+
+    //提交验证
+    function submitValidate() {
+        var $pName = $('#productNameTxt');
+        if ($.IsEmpty( $pName)) {
+            Utils.alert('商品名称不能为空。');
+            $pName.focus().select();
+            return false;
+        }
+
+        //if ($.IsEmpty($('#mySelect1'))) {
+        //    Utils.alert('景区不能为空。');
+        //    $('#mySelect1').focus().select();
+        //    return false;
+        //}
+
+        if ($.IsEmpty($('#mySelect2'))) {
+            Utils.alert('目的地不能为空。');
+            $('#mySelect2').focus().select();
+            return false;
+        }
+        var $tktType = $('#tktTypeDp');
+        if ($.IsEmpty($tktType)) {
+            Utils.alert('购买方式不能为空。');
+            $tktType.focus().select();
+            return false;
+        }
+        var $theme = $('#themeListTxt');
+        if ($.IsEmpty($theme)) {
+            Utils.alert('主题不能为空。');
+            $theme.focus().select();
+            return false;
+        }
+
+        var $tuiJianType = $(':radio[name="TicketProduct.TuiJianType"]:checked');
+        if ($tuiJianType.val() == 2) {
+            if (!validQuota()) {
+                openQuotaDialog();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // 图片列表
+    function photoView() {
+       $.get("/TktManage/PhotoView", { productId: '@Model.TicketProduct.ProductId' }, function(html) {
+
+            $("#photoView").html(html);
+
+            $('.delimg').click(function () {
+                var param = { "Id": $(this).attr("data-bind") }
+                 layer.confirm('确定删除图片吗?', { btn: ['是', '否'] }, function () {
+                    $.post("/TktManage/DeletePicture/", param, function (data) {
+                        if (data.Code == "1") {
+                            layer.close(layer.index);
+                            photoView();
+                        } else {
+                            toastr.warning(data);
+                        }
+                    });
+                }, function () {
+                    //console.log("选择的否");
+                });
+            });
+        });
+        }
+
+    function SetPrimaryPic(Id, LineId) {
+        $.ajax({
+            url: '@Url.Action("SetPrimaryImage")',
+            type: 'POST',
+            data: { id: Id, ProductID: LineId },
+            success: function (data) {
+                $('#photoView').html(data);
+            }
+        });
+    }
+
+    function elfinderDialog(editor) {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'resize', 'help', 'select', 'upload']; // Not yet implemented commands in ElFinder.Net
+        $.each(disabled, function (i, cmd)
+        {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+
+        var fm = $('<div />').dialogelfinder({
+            url: '@(picroot+"connector")', // change with the url of your connector
+            customData: { folder: 'Files/ticket/@Model.TicketProduct.ProductId', subFolder: '' }, // customData passed in every request to the connector as query strings. These values are used in FileController's Index method.
+            commands: myCommands,
+            rememberLastDir: false,
+            lang: 'zh_CN',
+            uiOptions: { // UI buttons available to the user
+                toolbar: [
+                    ['back', 'forward'],
+                    ['reload'],
+                    ['home', 'up'],
+                   // ['mkdir', 'mkfile', 'upload'],
+                    ['open', 'download'],
+                    ['info'],
+                    ['quicklook'],
+                    ['copy', 'cut', 'paste'],
+                    ['rm'],
+                    ['duplicate', 'rename', 'edit'],
+                    ['view', 'sort']
+                ],
+                navbar: {
+                    minWidth: 150,
+                    maxWidth: 500
+                }
+            },
+            width: 840,
+            height: 450,
+            destroyOnClose: true,
+            getFileCallback: function (files, fm) {
+                console.log(files);
+                $(editor).summernote('editor.insertImage', files.url, function ($image) {
+                    $image.addClass("img-fluid");
+                });
+            },
+            commandsOptions: {
+                getfile: {
+                    oncomplete: 'close',
+                    folders: false
+                }
+            }
+        }).dialogelfinder('instance');
+        }
+
+    </script>
+
+    @if (Model.Operation == TicketOperation.Edit)
+    {
+        <script>
+            $(function () {
+                photoView();
+            });
+        </script>
+    }
+}

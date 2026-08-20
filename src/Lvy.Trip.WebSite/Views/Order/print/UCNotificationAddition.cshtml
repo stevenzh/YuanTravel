@@ -1,0 +1,49 @@
+﻿@model Lvy.Models.OrderDB.TpOrderModel
+<div class="sotable_tit" style="border-top: 1px solid #a7c4e2;">
+    @if (DictionaryTools.GetCachedCustomer(GlobalContext.Current.UserInfo.CustomerCode).IsSupplier)
+    {
+        <a href="javascript:void(0);" style="float: right;" id="editAddition">编辑</a>
+        <a href="javascript:void(0);" style="float: right; display: none;" id="saveAddition">保存</a>
+    }
+    附加信息
+</div>
+<div id="additionView" style="padding: 10px;">
+    @Html.Raw(Model.AdditionInfo)
+</div>
+<div id="additionEdit" style="display: none; padding: 10px;">
+    <form id="additionForm">
+        @Html.HiddenFor(m => m.OrderCode)
+        @Html.TextAreaFor(m => m.AdditionInfo, new { @class = "textarea440", style = "width:80%;" })
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+
+        //编辑
+        $('#editAddition').click(function () {
+            $(this).hide();
+            $('#additionView').hide();
+            $('#saveAddition').show();
+            $('#additionEdit').show();
+        });
+
+        //保存
+        $('#saveAddition').click(function () {
+            var $this = $(this);
+            var load_iii = Utils.layerLoad();
+            var param = $('#additionForm').formSerialize();
+            $.post('@Url.Action("SaveAdditionInfo")', param, function (result) {
+                if (result && result.State == "success") {
+                    $('#additionView').html(result.Msg);
+                } else {
+                    Utils.alert('保存出现异常');
+                }
+                $this.hide();
+                $('#additionEdit').hide();
+                $('#editAddition').show();
+                $('#additionView').show();
+                Utils.layerClose(load_iii);
+            });
+        });
+    });
+</script>

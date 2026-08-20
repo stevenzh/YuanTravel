@@ -1,0 +1,131 @@
+﻿@using Lvy.Web.Common
+@model Lvy.VModels.Crm.CustomerVModel
+<div class="xbox clear">
+    <div class="btnlist">
+
+    </div>
+    @if (Model.Customers.Items.Count > 0)
+    {
+        <table class="listtbl" style="width:100%;">
+            <thead>
+                <tr>
+                    <td>客户编号</td>
+                    <td>客户名称</td>
+                    @*<td>负责人</td>*@
+                    <td>公司电话</td>
+                    <td>信用额度</td>
+                    <td>结算方式</td>
+                    <td>对应销售</td>
+                    <td>审核状态</td>
+                    <td>客户状态</td>
+                    <td align="center">操作</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Customers.Items)
+                {
+                    <tr>
+                        <td style="text-align: center;">@item.Code</td>
+                        <td style="text-align:left;">@item.Name</td>
+                        @*<td style="text-align: center;">@item.Head</td>*@
+                        <td style="text-align: center;">@item.Phone</td>
+                        <td style="text-align: center;">@item.CreditLine</td>
+                        <td style="text-align: center;">@DictionaryTools.GetEnumValue(Enums.PaymentTypeEnum, item.PaymentType.ToString())</td>
+                        <td style="text-align: center;">@item.SalerName</td>
+                        <td style="text-align: center;">
+                            @DictionaryTools.GetEnumValue(Enums.CustomerStateEnum, item.CustomerState.ToString(), false)
+                        </td>
+                        <td style="text-align: center;">
+                            @DictionaryTools.GetEnumValue(Enums.CustomerActivityEnum, item.ActiveState.ToString(), false)
+
+                        </td>
+                        <td align="center" style="width:10%">
+                            <a href="#" class="edit" name="editContactInfo" title="领用" bindId="@item.Code">领用</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @Html.HiddenFor(a => a.Customers.PageIndex)
+        <div id="Pagination" class="digg"></div>
+    }
+    else
+    {
+        <div style="color: red; text-align: center; font-weight: bold; font-size: 14px;">
+            <br />
+            对不起，没有查找到数据！请重新输入查询条件 ！
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    //领用局部刷新
+    $("a[name='editContactInfo']").each(function () {
+        $(this).click(function () {
+            if (!confirm("确定领用？")) {
+
+                return;
+            }
+            //var load_iii = Utils.layerLoad();
+            //var url = "/Customer/Lingyon";
+            $.ajax({
+                url: '/Customer/Lingyon',
+                type: 'post',
+                data: { Code: $(this).attr("bindId") },
+                success: function (data) {
+                    if (data.Code == "1") {
+                        Utils.alert("抱歉你还不能领用此客户");
+                    }
+                    else {
+                        Utils.alert("领用成功");
+                        $("#divUCSelectUseShaList").html(data);
+                    }
+                }
+            })
+            //$.get(url, { Code: $(this).attr("bindId")}, function (data) {
+            //    if (data.length > 0) {
+            //
+            //        if (data == "1") {
+            //            Utils.alert("抱歉你还不能领用此客户");
+            //        }
+            //    }
+            //   // Utils.layerClose(load_iii);
+            //});
+        });
+    });
+    //分页控件 begin
+    $(function () {
+        $("#Pagination").pagination(
+            Number('@Model.Customers.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: Number('@Model.Customers.PageSize'),
+                current_page: @Model.Customers.PageIndex-1
+            });
+    });
+
+
+    //回调方法
+    function pageselectCallback(page_id, jq) {
+
+        var load_iii = Utils.layerLoad();
+
+        $("#Customers_PageIndex").val(page_id + 1);
+        var params = $("#theForm").formSerialize();
+
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            hoverChangeStyle();
+            Utils.layerClose(load_iii);
+        });
+    }
+
+    $(function () {
+        $('select[name="SortKey"]').change(function () {
+            pageselectCallback(0);
+        });
+    });
+</script>

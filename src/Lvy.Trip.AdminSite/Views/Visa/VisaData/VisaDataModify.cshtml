@@ -1,0 +1,300 @@
+﻿@model Lvy.Visa.Models.VisaDataModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <script src="~/Scripts/Validation.js"></script>
+}
+<div class="card">
+    <form id="frmVisaData" action="/VisaData/SaveVisaData" method="post" enctype="multipart/form-data">
+        <div class="card-body">
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">分类：</label>
+                <div class="col-sm-10">@Model.CategoryName</div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label"><span style="color:Red;">*</span> 项目：</label>
+                <div class="col-sm-10">
+                    <input type="hidden" id="InformationCode" name="InformationCode" value='@Model.InformationCode' />
+                    <input type="hidden" id="DataCode" name="DataCode" value='@Model.DataCode' />
+                    <input type="hidden" id="CategoryCode" name="CategoryCode" value='@Model.CategoryCode' />
+                    <input type="text" value='@Model.DataName' name="DataName" id="DataName" class="form-control form-control-sm" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label"> <span style="color:Red;">*</span> 说明：</label>
+                <div class="col-sm-10">
+                    <textarea id="DataExplain" name="DataExplain" class="textarea">@Model.DataExplain</textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label"><span style="color:Red;">*</span> 数量：</label>
+                <div class="col-sm-4">
+                    <input type="text" value='@Model.DataCount' name="DataCount" id="DataCount" class="form-control form-control-sm" />
+                </div>
+                <div class="col-sm-4">
+                    <span style="color:Gray;"> 份(请输入数字！)</span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    @if (Model.IsNeed == 1)
+                    {
+                        <input type="checkbox" name="CKIsNeed" checked="checked" onclick="funIsNeed(this);" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="CKIsNeed" onclick="funIsNeed(this);" value='@Model.IsNeed' />
+                    } 是否必须
+                    <input type="hidden" name="IsNeed" id="IsNeed" />
+                </div>
+                <div class="col-sm-6">
+                    @if (Model.IsTemplate == 1)
+                    {
+                        <input type="checkbox" name="CKIsTemplate" checked="checked" onclick="funIsTemplate(this);" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="CKIsTemplate" onclick="funIsTemplate(this);" />
+                    } 是否设置为模板
+                    <input type="hidden" name="IsTemplate" id="IsTemplate" value='@Model.IsTemplate' />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    @if (Model.IsOriginal == 1)
+                    {
+                        <input type="checkbox" name="CKIsOriginal" checked="checked" onclick="funIsOriginal(this);" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="CKIsOriginal" onclick="funIsOriginal(this);" />
+                    }
+                    是否原件
+                    <input type="hidden" name="IsOriginal" id="IsOriginal" value='@Model.IsOriginal' />
+                </div>
+                <div class="col-sm-6">
+                    @if (Model.IsBack == 1)
+                    {
+                        <input type="checkbox" name="CKIsBack" checked="checked" onclick="funIsBack(this);" />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="CKIsBack" onclick="funIsBack(this);" />
+                    }
+                    是否退还
+                    <input type="hidden" name="IsBack" id="IsBack" value='@Model.IsBack' />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <input type="button" onclick="funAddVisaFilesRows();" value="✚增加附件" class="btn btn-info btn-sm" />
+                </div>
+            </div>
+            @if (Model.DataFilesList.Count() > 0)
+            {
+                <table id="tbFiles" class="table table-sm">
+                    @{
+                        var i = 0;
+                        foreach (var file in Model.DataFilesList)
+                        {
+                            <tr>
+                                <td style="width:15px;">
+                                    @(i + 1)
+                                    <input type="hidden" name="DataFilesList[@i].FilesCode" value="@file.FilesCode" />
+                                    <input type="hidden" name="DataFilesList[@i].FileUrl" value='@file.FileUrl' />
+                                </td>
+                                <td>
+                                    <input name="fileUploadVisa_@i" type="file" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    @if (!string.IsNullOrEmpty(file.FileUrl))
+                                    {
+                                        <a href='@file.FileUrl' title="附件下载">下载</a>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:gray;">  没有上传文档！！</span>
+                                    }
+                                </td>
+                                <td>
+                                    说明：&nbsp;&nbsp;<input type="text" group="validate" title="第@(i + 1)行附件说明" name="DataFilesList[@i].FileName" class="text150" value='@file.FileName' />
+                                </td>
+                                <td>
+                                    <a href="####" name="fileDelA@i" markn='@i' filesId='@file.FilesId' onclick="funDeleFilesRows(@i,@file.FilesId)">删除</a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                </table>
+            }
+            else
+            {
+                <table id="tbFiles" width="100%" class="table"></table>
+            }
+        </div>
+        <div class="card-footer">
+            <input type="button" value="保 存" class="btn btn-info" onclick="funModifyVisaData()" />
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+        // Summernote
+        $('#DataExplain').summernote({
+            //placeholder: 'Hello bootstrap 4',
+            tabsize: 2,
+            height: 150
+        });
+    });
+
+    //保存
+    function funModifyVisaData() {
+        var validate = true;
+        if ($("#DataName").val() == "") {
+            alert("项目不能为空！！");
+            $("#DataName").focus();
+            validate = false;
+            return false;
+        }
+
+        if ($("#DataExplain").val() == "") {
+            alert("说明不能为空！！");
+            validate = false;
+            $("#DataExplain").focus();
+            return false;
+        }
+        if ($("#DataCount").val() == "") {
+            alert("材料数量不能为空！！");
+            validate = false;
+            $("#DataCount").focus();
+            return false;
+        } else {
+            if (!ValidationData('positive_number', $("#DataCount").val())) {
+                alert("材料数量格式有误，请重新输入！！");
+                validate = false;
+                $("#DataCount").focus();
+                return false;
+            }
+        }
+        var pathErrorCount = 1;
+        if (validate) {
+            $("#tbFiles tr").each(function (index) {
+                if (validate) {
+                    var docPath = $("#tbFiles input[name='fileUploadVisa_" + index + "']").val();
+                    if (docPath != "") {
+                        var docPathEnd = docPath.substring(docPath.lastIndexOf(".")).toLowerCase();
+                        if (docPathEnd != ".doc" && docPathEnd != ".docx" && docPathEnd != ".xls" && docPathEnd != ".xlsx" && docPathEnd != ".pdf" && docPathEnd != ".gif" && docPathEnd != ".jpg" && docPathEnd != ".jepg" && docPathEnd != ".bmp" && docPathEnd != ".png") {
+                            alert("第" + index + "行文档格式错误!!请上传word文档或Excel文档，图片等格式！！");
+                            pathErrorCount++;
+                            validate = false;
+                            return false;
+                        }
+                    }
+                }
+                if (validate) {
+                    $(this).find("input[group='validate']").each(function (m) {
+                        if ($(this).val() == "") {
+                            alert($(this).attr("title") + "不能为空！");
+                            $(this).focus();
+                            $(this).css({ "background": "#EEC591" });
+                            validate = false;
+                            pathErrorCount = 2;
+                            return false;
+                        }
+                        else {
+                            $(this).css({ "background": "white" });
+                        }
+                    });
+                }
+            });
+        }
+        if (validate) {
+            if (pathErrorCount > 1)
+                return false;
+            $("#frmVisaData").submit();
+        }
+    }
+
+    //是否必须
+    function funIsNeed(obj) {
+        if ($(obj).prop("checked") == true) {
+            $("#IsNeed").val("1");
+        }
+        else {
+            $("#IsNeed").val("0");
+        }
+    }
+    //是否为模板
+    function funIsTemplate(obj) {
+        if ($(obj).prop("checked") == true) {
+            $("#IsTemplate").val("1");
+        }
+        else {
+            $("#IsTemplate").val("0");
+        }
+    }
+    //是否原件
+    function funIsOriginal(obj) {
+        if ($(obj).prop("checked") == true) {
+            $("#IsOriginal").val("1");
+        }
+        else {
+            $("#IsOriginal").val("0");
+        }
+    }
+    //是否退还
+    function funIsBack(obj) {
+        if ($(obj).prop("checked") == true) {
+            $("#IsBack").val("1");
+        }
+        else {
+            $("#IsBack").val("0");
+        }
+    }
+    //删除行 附件 i
+    function funDeleFilesRows(rowIndex, filesId) {
+        if (confirm("您确定要删除该附件？？")) {
+            //移除行
+            var tabObj = document.getElementById("tbFiles");
+            tabObj.deleteRow(rowIndex);
+            for (var j = rowIndex; j < tabObj.rows.length; j++) {
+                $("#tbFiles input[name='DataFilesList[" + parseInt(j + 1) + "].DataCode']").attr("name", "DataFilesList[" + parseInt(j) + "].DataCode");
+                $("#tbFiles input[name='DataFilesList[" + parseInt(j + 1) + "].FileUrl']").attr("name", "DataFilesList[" + parseInt(j) + "].FileUrl");
+                $("#tbFiles input[name='fileUploadVisa_" + parseInt(j + 1) + "']").attr("name", "fileUploadVisa_" + parseInt(j));
+                $("#tbFiles input[name='DataFilesList[" + parseInt(j + 1) + "].FileName']").attr("name", "DataFilesList[" + parseInt(j) + "].FileName");
+                $("#tbFiles a[name='fileDelA" + parseInt(j + 1) + "']").attr("name", "fileDelA" + parseInt(j));
+                $("#tbFiles a[name='fileDelA" + parseInt(j) + "']").attr("markn", parseInt(j));
+                $("#tbFiles a[name='fileDelA" + parseInt(j) + "']").unbind('click').attr('onclick', '').click(function () {
+                    funDeleFilesRows($(this).attr("markn"), $(this).attr("filesId"));
+                });
+            }
+            if (filesId != "") {
+                //去数据库删除附件
+                var url = "/VisaData/DeleteFile";
+                var param = { "FilesId": filesId }
+                $.post(url, param, function (data) {
+                });
+            }
+        }
+    }
+
+    //添加一行  附件
+    function funAddVisaFilesRows() {
+        var tabObj = document.getElementById("tbFiles");
+        var newTR = tabObj.insertRow(tabObj.rows.length);
+        var n = tabObj.rows.length - 1;
+        var newoneTD = newTR.insertCell(0);
+        newoneTD.style.padding = "0 0 0 48px";
+        newoneTD.innerHTML = " 附件：<br /><input type=\"hidden\" name=\"DataFilesList[" + newTR.rowIndex + "].FilesCode\"  value=\"\" /><input type=\"hidden\" name=\"DataFilesList[" + newTR.rowIndex + "].FileUrl\" value='' />";
+
+        var newtwoTD = newTR.insertCell(1);
+        newtwoTD.innerHTML = "<input name=\"fileUploadVisa_" + newTR.rowIndex + "\" type=\"file\" />";
+
+        var newthreeTD = newTR.insertCell(2);
+        newthreeTD.innerHTML = "附件名称：&nbsp;&nbsp;<input type=\"text\" title=\"第" + (newTR.rowIndex + 1) + "行附件名称\"  group='validate' class=\"text150\" name=\"DataFilesList[" + newTR.rowIndex + "].FileName\" />";
+        var newfourTd = newTR.insertCell(3);
+        newfourTd.innerHTML = "<a href='####' name='fileDelA" + n + "' markn='" + n + "' filesId='' onclick='funDeleFilesRows(" + n + ")'>删除</a>";
+    }
+</script>

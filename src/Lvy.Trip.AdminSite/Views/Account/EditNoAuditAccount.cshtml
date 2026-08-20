@@ -1,0 +1,172 @@
+﻿@using Arch.Common
+@using Lvy.Models
+@model Lvy.VModels.Crm.AuditAccountEditVModel
+@{
+    ViewBag.Title = "审核客户";
+}
+<form id="theForm" method="POST">
+
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label" width="90px">
+                        <span class="point">*</span>登陆名：
+                    </td>
+                    <td>
+                        @Model.Account.LoginName
+                        @Html.HiddenFor(a => a.Account.LoginName)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>姓名：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>性别：</td>
+                    <td>
+                        @Html.RadioGroup("Account.Sex", Model.SexBeans, Model.Account.Sex.ToString())
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">联系手机：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Email：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Email, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">座机：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.Phone, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">QQ：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Account.QQ, new { @class = "text150" })
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <hr />
+
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label"><span class="point">*</span>客户名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Name, new { @class = "text220" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">快捷码：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.FastCode, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>负责人：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Head, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">联系手机：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Mobile, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>公司电话：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Phone, new { @class = "text150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">地址：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.Customer.Address, new { @class = "text400" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>结算方式：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Customer.PaymentType, ViewBag.PaymentTypes as IEnumerable<SelectListItem>, new { @class = "select150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>信用额度：</td>
+                    <td>
+                        <input type="text" name="Customer.CreditLine" id="Customer_CreditLine" class="text150" value="@Model.Customer.CreditLine" input-limit="number" />
+                        0为没有限制
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">对应销售：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.Customer.SalerCode, ViewBag.Salers as IEnumerable<SelectListItem>, new { @class = "select150" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">备注：</td>
+                    <td>
+                        @Html.TextAreaFor(a => a.Customer.Remarks, new { @class = "textarea440" })
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br />
+        <hr />
+        @if (Model.Registration != null && !Model.Registration.BusinessLicencePath.IsNullOrEmpty())
+        {
+            <div class="in_box">
+                @{
+                    var path1 = AppSetting.Get("UploadFileRoot") + Model.Registration.BusinessLicencePath;
+                }
+                <span>公司营业执照</span><img src="@path1" style="max-width: 300px;" />
+
+            </div>
+                    }
+        @if (Model.Registration != null && !Model.Registration.IdCardPath.IsNullOrEmpty())
+        {
+            <div class="in_box">
+                @{
+                    var path2 = AppSetting.Get("UploadFileRoot") + Model.Registration.IdCardPath;
+                }
+                <span>法人身份证</span><img src="@path2" style="max-width: 300px;" />
+
+            </div>
+                    }
+        <div>
+            <table>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn2" id="btnSave1" type="submit" value="仅保存" onclick='this.form.action="@Url.Action("OnlySaveAccount")";' />
+
+                        @if (Model.Customer.CustomerState == 0)
+                        {
+                            <input class="btn btn2" id="btnSave2" type="submit" value="保存审核通过" onclick='this.form.action="@Url.Action("AuditPass")";' />
+                        }
+                        @if (Model.Customer.CustomerState == 0)
+                        {
+                            <input class="btn btn2" id="btnSave3" type="submit" value="保存审核不通过" onclick='this.form.action="@Url.Action("AuditNoPass")";' />
+                        }
+                        <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("SearchNoAuditAccount")'" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @Html.HiddenFor(a => a.Account.Code)
+
+</form>

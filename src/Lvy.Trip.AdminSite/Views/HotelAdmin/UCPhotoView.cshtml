@@ -1,0 +1,43 @@
+﻿@model Lvy.Models.HotelDB.HotelModel
+@{
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+}
+@foreach (var item in Model.FileList)
+{
+    bool IsPrimary = false;
+    if (!string.IsNullOrEmpty(Model.LogoPath))
+    {
+        if (item.FilePath == Model.LogoPath)
+        {
+            IsPrimary = true;
+        }
+    }
+    <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch">
+        <div class="card @(IsPrimary?"bg-teal":"bg-light")  ">
+            <div class="card-body pt-1">
+                <div class="row">
+                    <div class="col-5">
+                        <h2 class="lead"><b>@item.FileName</b></h2>
+                        <p class="text-muted text-sm"><b>S: </b> 450 *580 </p>
+                        <ul class="ml-4 mb-0 fa-ul text-muted">
+                            <li class="small"><span class="fa-li"><i class="fas fa-lg fa-user"></i></span> @item.ModifiedBy</li>
+                            <li class="small"><span class="fa-li"><i class="fas fa-lg fa-calendar"></i></span> @item.ModifiedTime.ToDateFormat()</li>
+                        </ul>
+                    </div>
+                    <div class="col-7 text-center">
+                        <img src="@(picroot + item.FilePath)" title="@item.FileName" class="img-fluid" alt="@item.FileName" />
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="text-right">
+                    <button type="button" class="btn btn-info btn-sm delimg" data-bind="@item.FileID">删除</button>
+                    @if (!IsPrimary)
+                    {
+                        <button class="btn btn-sm bg-teal" type="button" onclick="SetPrimaryPic(@item.FileID., '@Model.HotelCode');" title="设置首图"><i class="fas fa-university"></i></button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

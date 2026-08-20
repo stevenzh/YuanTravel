@@ -1,0 +1,312 @@
+﻿@model Lvy.Models.BaseDB.BasePlaceModel
+@{
+    ViewBag.Title = "编辑景区";
+    Layout = "~/Views/Shared/_Single.cshtml";
+    string picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/scripts/jquery.validate.min.js"></script>
+    <script src="~/WebRes/scripts/jquery.validate.message.cn.js"></script>
+    <link href="@CDNServerUrl/summernote/summernote-bs4.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/summernote/summernote-bs4.min.js"></script>
+    <script src="@CDNServerUrl/summernote/lang/summernote-zh-CN.min.js"></script>
+    <script src="@CDNServerUrl/summernote-ext-elfinder.js"></script>
+
+    <link href="@CDNServerUrl/elfinder/css/elfinder.full.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/elfinder/js/elfinder.min.js"></script>
+    <script src="@CDNServerUrl/elfinder/js/i18n/elfinder.zh_CN.js"></script>
+
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Destop">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/Place/Search"> 景区管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        <div class="card-header" data-original-title>
+            <h3 class="card-title"><i class="icon-edit"></i>@ViewBag.Title</h3>
+        </div>
+        <form id="theForm" method="POST" action="@Url.Action("Edit")" enctype="multipart/form-data">
+            @Html.HiddenFor(m => m.PlaceId)
+            @Html.HiddenFor(m => m.PlaceCode)
+
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceName">景区名称</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.PlaceName, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceLevel">景区星级</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(m => m.PlaceLevel, ViewBag.PlaceLevels as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceLevel">景区所在地</label>
+                    <div class="col-sm-10">
+                        <select id="DestinationStr" name="DestinationStr" class="form-control form-control-sm">
+                            <option value="@Model.DestinationStr">@DictionaryTools.GetDestNameStr(Model.DestinationStr)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="OpenTime">开放时间|价格政策</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => model.OpenTime, new { @class = "form-control form-control-sm", @rows = 5 })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="SimpleDesc">简单描述</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => model.SimpleDesc, new { @class = "form-control form-control-sm ", @rows = 4 })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="PlaceDesc">景区描述</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => model.PlaceDesc, new { @class = "form-control form-control-sm summernote", @rows = 5 })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label" for="UploadFile">图片上传</label>
+                    <div class="col-sm-10">
+                        <input type="file" multiple name="UploadFile" id="UploadFile" />
+                        <input type="text" name="FileName" id="FileName" placeholder="图片说明" />
+                        <input type="button" id="btnUpload" class="btn btn-info" value="上传" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">景点图片</label>
+                    <div class="col-sm-10">
+                        <div id="photoView" class="row">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <button id="btnSave" type="submit" class="btn btn-primary">保 存</button>
+                <button name="btnClear" type="button" class="btn btn-info" onclick="location.href='@Url.Action("Search")'">返回列表</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#DestinationStr').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        $("#btnUpload").click(function () {
+            if ($.trim($("[name='UploadFile']").val()) == "") {
+                Utils.alert("请选择要上传的文件！");
+                return;
+            }
+            if ($.trim($("[name='FileName']").val()) == "") {
+                Utils.alert("上传文件的说明不能空！");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("UploadFile", $("[name='UploadFile']")[0].files[0]);
+            formData.append("PlaceCode", $("#PlaceCode").val());
+            formData.append("FileName", $("#FileName").val());
+            $.ajax({
+                url: '@Url.Action("UploadPhoto")',
+                type: 'POST',
+                data: formData,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    if (parseInt(data) > 0) {
+                        photoView();
+                    }
+                }
+            });
+        });
+
+        // Summernote
+        $('.summernote').summernote({
+            lang: 'zh-CN',
+            height: 400,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                // ['insert', ['link', 'picture', 'video', 'elfinder']],
+                ['insert', ['link', 'elfinder']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onImageUpload: function (files) {
+                    //上传图片到服务器
+                    var formData = new FormData();
+                    formData.append('UploadFile', files[0]);
+                    formData.append("PlaceId", $("#PlaceId").val());
+                    formData.append("PlaceCode", $("#PlaceCode").val());
+                    $.ajax({
+                        url: '/Place/UploadDocPhoto',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (path) {
+                            $('.summernote').summernote('insertImage', path);
+                        }, error: function () {
+                            Utils.alert("上传失败");
+                        }
+                    });
+                }
+            }
+        });
+
+        photoView();
+
+        // validate signup form on keyup and submit
+        $("#theForm").validate({
+            rules: {
+                PlaceName: "required",
+                PlaceLevel: "required",
+                OpenTime: "required",
+                PlaceDesc: "required"
+            },
+            messages: {
+                PlaceName: "请输入景区名称！",
+                PlaceLevel: "请输入景区星级",
+                OpenTime: "请输入开放时间！",
+                PlaceDesc: "请输入景区描述"
+            }
+        });
+    });
+
+    function elfinderDialog(editor) {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'resize', 'help', 'select', 'upload']; // Not yet implemented commands in ElFinder.Net
+        $.each(disabled, function (i, cmd)
+        {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+
+        var fm = $('<div />').dialogelfinder({
+            url: '@(picroot+"connector")', // change with the url of your connector
+            customData: { folder: 'Files/place/@Model.PlaceCode', subFolder: '' }, // customData passed in every request to the connector as query strings. These values are used in FileController's Index method.
+            commands: myCommands,
+            rememberLastDir: false,
+            lang: 'zh_CN',
+            uiOptions: { // UI buttons available to the user
+                toolbar: [
+                    ['back', 'forward'],
+                    ['reload'],
+                    ['home', 'up'],
+                   // ['mkdir', 'mkfile', 'upload'],
+                    ['open', 'download'],
+                    ['info'],
+                    ['quicklook'],
+                    ['copy', 'cut', 'paste'],
+                    ['rm'],
+                    ['duplicate', 'rename', 'edit'],
+                    ['view', 'sort']
+                ],
+                navbar: {
+                    minWidth: 150,
+                    maxWidth: 500
+                }
+            },
+            width: 840,
+            height: 450,
+            destroyOnClose: true,
+            getFileCallback: function (files, fm) {
+                console.log(files);
+                $(editor).summernote('editor.insertImage', files.url, function ($image) {
+                    $image.addClass("fluid image ui");
+                });
+            },
+            commandsOptions: {
+                getfile: {
+                    oncomplete: 'close',
+                    folders: false
+                }
+            }
+        }).dialogelfinder('instance');
+    }
+
+   function photoView() {
+       $.get("/Place/PhotoView", { placeCode: '@Model.PlaceCode' }, function(html) {
+
+            $("#photoView").html(html);
+
+            $('.delimg').click(function () {
+                var param = { "Id": $(this).attr("data-bind") }
+                 layer.confirm('确定删除图片吗?', { btn: ['是', '否'] }, function () {
+                    $.post("/Place/DeletePhoto/", param, function (data) {
+                        if (data != null && data.length > 0 && data == "1") {
+                            layer.close(layer.index);
+                            photoView();
+                        } else {
+                            toastr.warning(data);
+                        }
+                    });
+                }, function () {
+                    //console.log("选择的否");
+                });
+            });
+        });
+    }
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+</script>

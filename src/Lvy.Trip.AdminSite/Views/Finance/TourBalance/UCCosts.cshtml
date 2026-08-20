@@ -1,0 +1,160 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Tour.TourBalanceVModel
+
+<div class="user-block">
+    <img class="img-circle img-bordered-sm" src="/images/user3-90x90.png" alt="user image">
+    <span class="username">成本</span>
+    <span class="description">Shared publicly - 7:45 PM today</span>
+</div>
+
+<table class="table table-sm" id="costtable">
+    <thead>
+        <tr>
+            <th>项目</th>
+            <th>供应商</th>
+            <th style="width:100px;">币种</th>
+            <th style="width:80px;">汇率</th>
+            <th style="width:80px;">单价</th>
+            <th style="width:60px;">份数</th>
+            <th style="width:80px;">成本合计</th>
+            <th style="width:100px;">结算方式</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.CostModels.Count(); i++)
+        {
+            @Html.HiddenFor(a => a.CostModels[i].Id)
+
+            if ((Model.CostModels[i].Status < 2
+            && (Model.Balance.AuditState < 3 && Model.IsCaiWu == 0)
+            || (Model.Balance.AuditState < 4 && Model.IsCaiWu == 1))
+            || Model.IsCopy)
+            {
+                <tr>
+                    <td>
+                        @Html.DropDownListFor(a => a.CostModels[i].Item, DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor(Model.CostModels[i].Item), new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        @{
+                            var SuppliersList = ViewBag.Suppliers as IEnumerable<KeyValueBean>;
+                        }
+                        <select name="CostModels[@i].SupplierId" class="form-control form-control-sm">
+                            <option value="0" payment="" paymentType="0">-- 请选择 --</option>
+                            @foreach (var item in SuppliersList)
+                            {
+                                if (item.Key == Model.CostModels[i].SupplierId.ToString())
+                                {
+                                    <option value="@item.Key" payment="@item.Help1" paymentType="@item.Help2" selected="selected"> @item.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Key" payment="@item.Help1" paymentType="@item.Help2"> @item.Value</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        @Html.DropDownListFor(a => a.CostModels[i].Currency, DictionaryTools.GetEnumsBys(Enums.CurrencyEnum).ToSelectListFor(Model.CostModels[i].Currency), new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>@Html.TextBoxFor(a => a.CostModels[i].ROE, new { @class = "form-control form-control-sm" })</td>
+                    <td>@Html.TextBoxFor(a => a.CostModels[i].Cost, new { @class = "form-control form-control-sm" })</td>
+                    <td>@Html.TextBoxFor(a => a.CostModels[i].Num, new { @class = "form-control form-control-sm" })</td>
+                    <td>@Html.TextBoxFor(a => a.CostModels[i].ItemCost, new { @class = "form-control form-control-sm" })</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.CostModels[i].PaymentType, DictionaryTools.GetEnumsBys(Enums.PaymentTypeEnum).ToSelectListFor(Model.CostModels[i].PaymentType.ToString()), new { @class = "form-control form-control-sm" })
+                    </td>
+                    <td>
+                        @DictionaryTools.GetEnumValue(Enums.CostStatusEnum, Model.CostModels[i].Status.ToString(), false)
+                    </td>
+                    <td>
+                        <input type="hidden" name="CostModels[@i].IsValid" value="1" />
+                        <input type="hidden" name="CostModels[@i].PaymentType" value="@Model.CostModels[i].PaymentType" />
+                        <a href="javascript:void(0)" name="lnkDel">删除</a>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].Item)
+                        @Model.CostModels[i].ItemValue
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].SupplierId)
+                        @Model.CostModels[i].SupplierName
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].Currency)
+                        @Model.CostModels[i].Currency
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].ROE)
+                        @Model.CostModels[i].ROE
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].Cost)
+                        @Model.CostModels[i].Cost
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].Num)
+                        @Model.CostModels[i].Num
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].ItemCost)
+                        @Model.CostModels[i].ItemCost
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].PaymentType)
+                        @DictionaryTools.GetEnumValue(Enums.PaymentTypeEnum, Model.CostModels[i].PaymentType.ToString(), false)
+                    </td>
+                    <td>
+                        @Html.HiddenFor(a => a.CostModels[i].Status)
+                        @DictionaryTools.GetEnumValue(Enums.CostStatusEnum, Model.CostModels[i].Status.ToString(), false)
+                    </td>
+                    <td>@Html.HiddenFor(a => a.CostModels[i].Remark)</td>
+                </tr>
+            }
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="8" style="text-align: right; padding-right: 15px">
+                现结： <span name="xianjie">@Model.SumCost.XianShou</span>
+                签单：  <span name="qiandan">@Model.SumCost.Qiandan</span>
+                总计：<span name="zongji">@Model.SumCost.SumTolCost</span>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+@if ((Model.Balance.AuditState < 3 && Model.IsCaiWu == 0)
+    || (Model.Balance.AuditState < 4 && Model.IsCaiWu == 1)
+    || Model.IsCopy)
+{
+    <button type="button" id="addItem2" title="添加成本项目" class="btn btn-sm btn-success">添加成本项目</button>
+}
+
+<div>
+    <div class="btnlist">
+        <label>付款凭证附件</label>
+    </div>
+    <div id="addTourFileContainer" style="margin: 0px; padding: 0px; border: 0px">
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url:'@Url.Action("TourFile")',
+            type:'post',
+            data:{ OrderCode : '@Model.Balance.MasterOrderCode' },
+            success:function(data){
+                $("#addTourFileContainer").html(data);
+            }
+        })
+    })
+
+    $("select[name$='.SupplierId']").select2({ language: "zh-CN"});
+</script>

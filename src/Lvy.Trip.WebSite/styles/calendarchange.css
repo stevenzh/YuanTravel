@@ -1,0 +1,29 @@
+
+.fc-view-container {color:#666;}
+.fc-unthemed .fc-today { background-color: #99FFCC; }
+.fc-sat, .fc-sun { color: #fc4836; }
+/*.holiday { background-color: #cc99cc; color: white; }*/
+.holiday { color: #ff0099; }
+.fc-day-grid { font-size: .6em; }
+.fc .fc-toolbar > * > *{ float:none; }
+
+.fc-state-highlight { background: #fff7ed; }
+.fc-today { background: none; }
+.fc-day-header {background-color: #c9e9ff; }
+.fc-event { border: 0; background-color: transparent; border-radius: 0px; font-size: .85em; }
+.fc-event-title { font-size: 11px; }
+.fc th, .fc td { border: 1px solid #c9e9ff; }
+
+.fc-grid .fc-other-month .fc-day-number { opacity: 1; filter: alpha(opacity=100); }
+/*.fc-other-month { background: #EAF8FF; }*/
+.fc-event-container { text-align: right; }
+.fc-event-inner { line-height: 100%; }
+.fc-day-number { line-height: 100%; margin-top: 5px; }
+/*header*/
+.fc-toolbar { color: #fff; margin-bottom: 0; background-color:#57baff; }
+.fc-border-separate > thead { background: #c9e9ff; }
+.fc-left { width: 14%; background: #57baff; line-height: 34px; border-right: 1px solid #fff; }
+.fc-toolbar .fc-left > button, .fc-toolbar .fc-right > button { width: 100%; height: 100%; margin: 0; padding: 0; background: #57baff; border: 0; line-height: 34px; color: #fff; text-align: center; }
+.fc-center { width: 71%; background: #57baff; line-height: 34px; text-align:center; }
+    .fc-center h2 { margin: 0; }
+.fc-right { width: 15%; background: #57baff; line-height: 34px; border-left: 1px solid #fff; }

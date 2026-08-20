@@ -1,0 +1,171 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Tour.TourBalanceVModel
+
+@section AdditionalResources{ }
+<div class="btnlist">
+    <label>成本</label>
+    <div class="fr">
+        @if ((Model.Tour.AuditState < 3 && Model.IsCaiWu == 0)
+            || (Model.Tour.AuditState < 4 && Model.IsCaiWu == 1)
+            || Model.IsCopy)
+        {
+            <a href="javascript:;" id="addItem2" title="添加项目" class="btn btn1">添加项目</a>
+        }
+    </div>
+</div>
+<table class="listtbl" id="costtable" style="width:100%">
+    <thead>
+        <tr style="text-align: center;">
+            <th>项目</th>
+            <th>供应商</th>
+            <th>币种</th>
+            <th>汇率</th>
+            <th>单价(金额)</th>
+            <th>份数</th>
+            <th>成本合计</th>
+            <th>备注</th>
+            <th>结算方式</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.CostModels.Count(); i++)
+        {
+            @Html.HiddenFor(a => a.CostModels[i].Id)
+            if ((Model.CostModels[i].Status < 2
+                && (Model.Tour.AuditState < 3 && Model.IsCaiWu == 0)
+                || (Model.Tour.AuditState < 4 && Model.IsCaiWu == 1))
+                || Model.IsCopy)
+            {
+                <tr>
+                    <td height="40px">
+                        @Html.DropDownListFor(a => a.CostModels[i].Item, DictionaryTools.GetEnumsBy(Enums.SupplierCostItemsEnum).ToSelectListFor(Model.CostModels[i].Item), new { @class = "text100" })
+                    </td>
+                    <td>
+                        @{
+                            var SuppliersList = ViewBag.Suppliers as IEnumerable<KeyValueBean>;
+                        }
+                        <select name="CostModels[@i].SupplierId" class="text300">
+                            <option value="0" payment="" paymentType="0">-- 请选择 --</option>
+                            @foreach (var item in SuppliersList)
+                            {
+
+                                if (item.Key == Model.CostModels[i].SupplierId.ToString())
+                                {
+                                    <option value="@item.Key" payment="@item.Help1" paymentType="@item.Help2" selected="selected"> @item.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Key" payment="@item.Help1" paymentType="@item.Help2"> @item.Value</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td height="40px" style="text-align: center;">
+                        @Html.DropDownListFor(a => a.CostModels[i].Currency, DictionaryTools.GetEnumsBys(Enums.CurrencyEnum).ToSelectListFor(Model.CostModels[i].Currency), new { @class = "text100" })
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.TextBoxFor(a => a.CostModels[i].ROE, new { @class = "text70" })
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.TextBoxFor(a => a.CostModels[i].Cost, new { @class = "text70" })
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.TextBoxFor(a => a.CostModels[i].Num, new { @class = "text50" })
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.TextBoxFor(a => a.CostModels[i].ItemCost, new { @class = "text70" })
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.TextBoxFor(a => a.CostModels[i].Remark, new { @class = "text150" })
+                    </td>
+                    <td style="text-align: center;">
+                        @{
+                            var payment = (ViewBag.Suppliers as IEnumerable<KeyValueBean>).Where(a => a.Key == Model.CostModels[i].SupplierId).FirstOrDefault().Help1;
+                        }
+                        <span name="payment">@payment</span>
+                    </td>
+                    <td style="text-align: center;">
+                        @DictionaryTools.GetEnumValue(Enums.CostStatusEnum, Model.CostModels[i].Status.ToString(), false)
+                    </td>
+                    <td style="text-align: center;">
+                        <input type="hidden" name="CostModels[@i].IsValid" value="1" />
+                        <input type="hidden" name="CostModels[@i].PaymentType" value="@Model.CostModels[i].PaymentType" />
+                        <a href="javascript:void(0)" name="lnkDel">删除</a>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td height="40px" style="text-align: center;">
+                        @DictionaryTools.GetEnumValue(Enums.SupplierCostItemsEnum, Model.CostModels[i].Item)
+                    </td>
+                    <td style="text-align: center;">
+                        @DictionaryTools.GetCachedCustomer(Model.CostModels[@i].SupplierId).Name
+                    </td>
+                    <td height="40px" style="text-align: center;">
+                        @Model.CostModels[i].Currency
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.HiddenFor(a => a.CostModels[i].ROE, new { @class = "text70" })
+                        @Model.CostModels[i].ROE
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.HiddenFor(a => a.CostModels[i].Cost, new { @class = "text70" })
+                        @Model.CostModels[i].Cost
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.HiddenFor(a => a.CostModels[i].Num, new { @class = "text70" })
+                        @Model.CostModels[i].Num
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.HiddenFor(a => a.CostModels[i].ItemCost, new { @class = "text70" })
+                        @Model.CostModels[i].ItemCost
+                    </td>
+                    <td style="text-align: center;">
+                        @Html.HiddenFor(a => a.CostModels[i].Remark, new { @class = "text150" })
+                        @Model.CostModels[i].Remark
+                    </td>
+                    <td style="text-align: center;"></td>
+                    <td style="text-align: center;">
+                        @DictionaryTools.GetEnumValue(Enums.CostStatusEnum, Model.CostModels[i].Status.ToString(), false)
+                    </td>
+                    <td style="text-align: center;"></td>
+                </tr>
+            }
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="8" style="text-align: right; padding-right: 15px">
+                现结： <span name="xianjie">@Model.SumCost.XianShou</span>
+                签单：  <span name="qiandan">@Model.SumCost.Qiandan</span>
+                总计：<span name="zongji">@Model.SumCost.SumTolCost</span>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+<div>
+    <div class="btnlist">
+        <label>付款凭证附件</label>
+    </div>
+    <div id="addTourFileContainer" style="margin: 0px; padding: 0px; border: 0px">
+    </div>
+</div>
+<script type="text/javascript">
+        $(function () {
+            $.ajax({
+                url:'@Url.Action("TourFile")',
+                type:'post',
+                data:{TourId:@Model.Balance.TourId},
+                success:function(data){
+                    $("#addTourFileContainer").html(data);
+               }
+            })
+        })
+
+    $("select[name$='.SupplierId']").select2({ language: "zh-CN"});
+</script>

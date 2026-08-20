@@ -1,0 +1,52 @@
+﻿@model Lvy.VModels.Crm.AccountVModel
+@{
+    ViewBag.Title = "查询账号";
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("Search")">
+    <div class="xbox">
+        <div align="center" class="xboxcontent clear">
+            <div class="sotable_tit">
+                账号列表查询
+            </div>
+            <table width="100%" class="sotable">
+                <tr>
+                    <td class="label">登录名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.LoginName, new { @class = "text150" })</td>
+                    <td class="label">姓名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+                    <td class="label">联系手机：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">客户名称：</td>
+                    <td>
+                        @if (GlobalContext.Current.IsSysAdmin)
+                        {
+                            // 如果是系统管理，可以查询客户
+                            Html.TextBoxFor(a => a.Account.CustomerName, new { @class = "text150" });
+                        }
+                        else
+                        {
+                            // 否则只能查自己的账户
+                            @GlobalContext.Current.UserInfo.CustomerName
+                        }
+                    </td>
+                    <td class="label">所在部门：</td>
+                    <td> @Html.DropDownListFor(a => a.Account.DepartCode, ViewBag.DepartCodes as IEnumerable<SelectListItem>) </td>
+                </tr>
+
+            </table>
+            <input class="btn btn1" id="btnSearch" type="button" value="搜索" />
+            <input class="btn btn1" id="btnClear" type="button" value="取消" />
+        </div>
+    </div>
+
+    @* 列表*@
+    <div class="xbox clear">
+        <div id="divSearch">
+            @Html.Partial("UCSearch", Model)
+        </div>
+    </div>
+</form>
+

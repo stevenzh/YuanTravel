@@ -1,0 +1,115 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+<link href="~/WebRes/css/popbox.css" rel="stylesheet" type="text/css" />
+@*取消游客-弹出层*@
+<div id="screen">
+</div>
+<div class="popbox">
+    <h2>
+        <label style="float: left;">取消游客</label><a class="close-btn" href="#">关闭</a>
+    </h2>
+    <div class="mainlist">
+        <table style="width: 100%;">
+            <tr>
+                <td style="text-align: right;">&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="label"><span class="point">*</span>产生费用</td>
+                <td>
+                    <input name="TravellerModel.YsPrice" id="txtYsPrice" class="text150" value="0" />
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right;">&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    <div class="popboxfooter">
+        <input type="button" class="btn btn1" value="确定" id="btnOk" />&nbsp;
+        <input type="hidden" name="TravellerModel.Id" value="-1" id="hiddenTravellerId" />
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        //关闭弹出层
+        $('.close-btn').click(function () {
+            $('.popbox').fadeOut(function () { $('#screen').hide(); });
+            $("#hiddenTravellerId").val("-1");
+            $("#txtYsPrice").val("0");
+            return false;
+        });
+
+        //取消-确定
+        $("#btnOk").click(function () {
+            var travellerId = $("#hiddenTravellerId").val();
+            var txtYsPrice = parseFloat($.trim($("#txtYsPrice").val()));
+
+            if (txtYsPrice - txtYsPrice != 0) {
+                Utils.alert("只能输入数字");
+                $("#txtYsPrice").focus();
+                $("#txtYsPrice").select();
+                return;
+            }
+            var params = $("#theForm").formSerialize();
+            $.post('/Order/CancelTraveller', params, function (data) {
+                if (data >= 1) {
+                    $('.popbox').fadeOut(function () { $('#screen').hide(); });
+                    $("#hiddenTravellerId").val("-1");
+                    $("#txtYsPrice").val("0");
+                    var load_iii = Utils.layerLoad();
+                    $.post('/Order/EditOrder?orderId=@Model.Order.Id', function (result) {
+                        $('#divTravellers').html(result);
+                        Utils.layerClose(load_iii);
+                    });
+                }
+            });
+
+        });
+
+    });
+
+    //取消
+    function cancel_click(id) {
+        //alert(id);
+        $("#hiddenTravellerId").val(id);
+        var h = $(document.body).height();
+        var w = $(document.body).width();
+        $('#screen').css({ 'height': h, 'width': w });
+        $('#screen').show();
+        $('.popbox').center();
+        $('.popbox').fadeIn();
+        return false;
+    }
+
+    jQuery.fn.center = function (loaded) {
+        var obj = this;
+        body_width = parseInt($(window).width());
+        body_height = parseInt($(window).height());
+        block_width = parseInt(obj.width());
+        block_height = parseInt(obj.height());
+
+        left_position = parseInt((body_width / 2) - (block_width / 2) + $(window).scrollLeft());
+        if (body_width < block_width) { left_position = 0 + $(window).scrollLeft(); };
+
+        top_position = parseInt((body_height / 2) - (block_height / 2) + $(window).scrollTop());
+        if (body_height < block_height) { top_position = 0 + $(window).scrollTop(); };
+
+        if (!loaded) {
+            obj.css({ 'position': 'absolute' });
+            obj.css({ 'top': top_position, 'left': left_position });
+            $(window).bind('resize', function () {
+                obj.center(!loaded);
+            });
+            $(window).bind('scroll', function () {
+                obj.center(!loaded);
+            });
+
+        } else {
+            obj.stop();
+            obj.css({ 'position': 'absolute' });
+            obj.animate({ 'top': top_position }, 200, 'linear');
+        }
+    }
+
+</script>

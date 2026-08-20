@@ -1,0 +1,95 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+@{
+    ViewBag.Title = "微信_我的订单";
+}
+@using Lvy.Models.OrderDB
+
+<!-- tracking order -->
+<div class="tracking-order segments-page">
+    <div class="ui container">
+        <div class="pages-title">
+            <h3>我的订单</h3>
+        </div>
+
+        @foreach (TpOrderModel item in Model.OrderModels)
+        {
+            <div class="ui accordion">
+                <div class="title"><span>订单号: @item.Id </span><i class="fa fa-check"></i></div>
+                <div class="content">
+                    <h5>订单详情</h5>
+                    <table class="ui celled table">
+                        <tbody>
+                            <tr>
+                                <td>总价：</td>
+                                <td>@item.TolYsPrice</td>
+                            </tr>
+                            <tr>
+                                <td>游客数:</td>
+                                <td>@item.TravellerCount</td>
+                            </tr>
+                            <tr>
+                                <td>线路名称：</td>
+                                <td>@item.LineName</td>
+                            </tr>
+                            <tr>
+                                <td>订单状态：</td>
+                                <td>@item.OrderState</td>
+                            </tr>
+                            <tr>
+                                <td>操作状态：</td>
+                                <td>@item.TraceState</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    @*<table class="ui celled table">
+                            <thead>
+                                <tr>
+                                    <th colspan="2" class="text-center">Shipment Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" class="text-center">10-Jan-2018 08:00 PM</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">New York</td>
+                                    <td class="text-center">Las Vegas</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center">10-Jan-2018 08:00 PM</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">Las Vegas</td>
+                                    <td class="text-center">California</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center">10-Jan-2018 08:00 PM</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">California</td>
+                                    <td class="text-center">Accepted (Done)</td>
+                                </tr>
+                            </tbody>
+                        </table>*@
+                </div>
+            </div>
+            @*<p
+
+                @if (item.OrderLogs.Count() > 0)
+                {
+                    <h5>操作历史</h5>
+                    foreach (OrderLogModel log in item.OrderLogs)
+                    {
+                        <p>@log.Created : @log.StatusValue - @log.Description </p>
+                    }
+                }
+
+                <a href="/order/OrderDetails?id=@item.Id" class="btn btn-primary btn-block"><b>订单详情</b></a>
+                @if (item.OrderFrom == "5" && item.Status == "0")
+                {
+                    <a href="/order/Pay?orderId=@item.Tid" class="btn btn-primary btn-block"><b>微信支付</b></a>
+                }*@
+
+        }
+    </div>
+</div>

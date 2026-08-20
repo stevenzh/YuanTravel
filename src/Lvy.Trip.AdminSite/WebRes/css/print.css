@@ -1,0 +1,46 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+* { font-size: 12px; line-height: 20px; }
+
+.font1 { font-size: 14px; font-weight: bold; color: #000; }
+.font2 { font-size: 14px; font-weight: bold; color: #FF6602; }
+.font3 { font-size: 13px; font-weight: bold; color: #000; }
+.font4 { font-size: 14px; color: #FF6602; }
+.font { font-size: 14px; color: #656565; }
+
+.print_table { border: 1px solid #CFDEF3; background-color: #fff; width: 900px; margin: auto; margin-top: 10px; line-height: 130%; }
+    .print_table td { padding-left: 10px; padding-right: 5px; }
+        .print_table td.need_to_know { padding-top: 15px; }
+            .print_table td.need_to_know * { font-size: 12px; padding-bottom: 10px; }
+
+.top_bt { margin: 0 auto; height: 34px; width: 900px; text-align: right; }
+    .top_bt a { display: block; float: right; height: 34px; margin-left: 5px; cursor: pointer; }
+    .top_bt .print_xc { width: 87px; background: url(../images/print_bt.png) left bottom no-repeat; }
+    .top_bt .print_xc_1 { width: 87px; background: url(../images/print_bt.png) -87px bottom no-repeat; }
+    .top_bt .sent_mail { width: 87px; background: url(../images/print_bt.png) left -68px no-repeat; }
+    .top_bt .sent_mail_1 { width: 87px; background: url(../images/print_bt.png) -87px -68px no-repeat; }
+    .top_bt .save_word { width: 104px; background: url(../images/print_bt.png) left -136px no-repeat; }
+    .top_bt .save_word_1 { width: 104px; background: url(../images/print_bt.png) -104px -136px no-repeat; }
+    .top_bt .go_back { width: 82px; background: url(../images/print_bt.png) left -102px no-repeat; }
+    .top_bt .go_back_1 { width: 82px; background: url(../images/print_bt.png) -82px -102px no-repeat; }
+
+.bottom_bt { margin: 0 auto; height: 34px; width: 700px; text-align: right; }
+    .bottom_bt a { display: block; float: right; height: 34px; margin-left: 5px; cursor: pointer; }
+    .bottom_bt .baoming { width: 87px; background: url(../images/print_bt.png) left top no-repeat; float: right; }
+    .bottom_bt .baoming_1 { width: 87px; background: url(../images/print_bt.png) -87px top no-repeat; float: right; }
+    .bottom_bt .print_xc { width: 87px; background: url(../images/print_bt.png) left -34px no-repeat; float: right; }
+    .bottom_bt .print_xc_1 { width: 87px; background: url(../images/print_bt.png) -87px -34px no-repeat; float: right; }
+
+.print_table .title { padding: 4px; }
+.title .title_p { text-align: left; color: #024DB2; font-size: 18px; font-weight: bold; }
+.title .title_introduction { text-align: left; line-height: 180%; }
+.print_table .td_title { border-top: 1px solid #CFDEF3; border-bottom: 1px solid #CFDEF3; font-size: 16px; font-weight: bold; background: #EAF9FE; height: 35px; }
+.day_step { margin: 10px 0px 10px 0px; }
+.day_introduction { line-height: 23px; }
+.catering { border-top: 1px dashed #CCCCCC; color: #000; margin-top: 10px; padding-top: 10px; }
+.not_first_day { padding-top: 30px; }
+.day_last_p { border-top: 1px solid #CCCCCC; margin-top: 10px; padding-top: 10px; }
+.shopping_area { width: 300px; background: red; }
+    .shopping_area dt { float: left; height: 100%; }
+.no_padding td { padding: 0px; }

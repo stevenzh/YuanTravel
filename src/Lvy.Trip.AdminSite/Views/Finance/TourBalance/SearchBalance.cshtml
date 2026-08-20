@@ -1,0 +1,133 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+    ViewBag.Title = "单团核算";
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="@CDNServerUrl/daterangepicker/daterangepicker.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-auto">
+                        @Html.DropDownListFor(m => m.Condition.TeamId, ViewBag.Teams as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-auto" id="divBranch" style="display:none;">
+                        @Html.DropDownListFor(m => m.Condition.BranchID, ViewBag.Branchs as List<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.DropDownListFor(a => a.Condition.Type, ViewBag.ProductTypes as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-auto" id="divProduct" style="display:none;">
+                        @Html.DropDownListFor(a => a.Condition.ProductType, ViewBag.ProductAllTypes as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.TextBoxFor(a => a.Condition.ProductName, new { @class = "form-control form-control-sm", @placeholder = "产品名称" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.TextBoxFor(a => a.Condition.OutDateRange, new { @id = "OutDateRange", @class = "form-control form-control-sm", @placeholder = "出发日期" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.TextBoxFor(a => a.Condition.TourNo, new { @class = "form-control form-control-sm", @placeholder = "团号" })
+                    </div>
+                    <div class="col-auto">
+                        @Html.DropDownListFor(a => a.Condition.TourAuditState, ViewData["AuditState"] as IEnumerable<SelectListItem>, new { @class = "form-control form-control-sm" })
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-sm btn-default" id="btnSearch" type="button">搜索</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div id="divTourAccountList" class="card">
+            @Html.Partial("TourBalance/UCSearchBalance", Model)
+        </div>
+    </form>
+</section>
+@section PageScripts
+{
+    <script src="@CDNServerUrl/moment/moment.min.js"></script>
+    <!-- date-range-picker -->
+    <script src="@CDNServerUrl/daterangepicker/daterangepicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#OutDateRange').daterangepicker({
+                autoUpdateInput: true,
+                ranges: {
+                    '今天': [moment(), moment()],
+                    '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '本周': [moment().startOf('week'), moment()],
+                    '上周': [moment().subtract(6, 'days'), moment()],
+                    '本月': [moment().startOf('month'), moment().endOf('month')],
+                    '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                locale: {
+                    format: "YYYY/MM/DD", //设置显示格式
+                    applyLabel: '确定', //确定按钮文本
+                    cancelLabel: '清空', //取消按钮文本
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    customRangeLabel: "自定义",
+                    firstDay: 1
+                }
+            }, function (start, end) {
+                $('#OutDateRange input').val(start.format('Do MMM YYYY') + ' - ' + end.format('Do MMM YYYY'));
+            });
+            $('#OutDateRange').on('cancel.daterangepicker', function (ev, picker) {
+                //do something, like clearing an input
+                $('#OutDateRange').val('');
+            });
+
+            // 初始
+            $('#OutDateRange').val('');
+
+            //搜索
+            $("#btnSearch").click(function () {
+                pageselectCallback(0);
+            });
+
+            $("#Condition_TeamId").change(function () {
+                var v = $(this).val();
+                if (v == "1812000021") {
+                    $("#divBranch").show();
+                } else {
+                    $("#divBranch").hide();
+                }
+            });
+            $("#Condition_Type").change(function () {
+                var v = $(this).val();
+                if (v == "9") {
+                    $("#divProduct").show();
+                } else {
+                    $("#divProduct").hide();
+                }
+            });
+
+        });
+    </script>
+}

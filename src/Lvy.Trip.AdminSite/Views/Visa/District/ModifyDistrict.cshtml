@@ -1,0 +1,45 @@
+﻿@model Lvy.Visa.Models.CountryConsularDistrictQModel
+@{
+    ViewData["Title"] = "编辑";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/District/Index">领区管理</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div id="divCountryInfo">
+        @Html.Partial("~/Views/Visa/District/CountryInfo.cshtml")
+    </div>
+    <div id="divDistrictList">
+        @Html.Partial("~/Views/Visa/District/DistrictList.cshtml")
+    </div>
+    <script>
+        function refreshDistrictList() {
+            var param1 = {visacountryCode:'@Model.country.VisaCountryCode'};
+            $.post("/District/DistrictList", param1, function (data) {
+                $("#divDistrictList").html(data);
+            });
+        }
+    </script>
+</section>

@@ -1,0 +1,38 @@
+﻿@using System.Globalization
+@model Lvy.VModels.Product.EditTourVModel
+<div name="ShareRow" class="form-group row">
+    <label class="col-md-2">
+        选择共享库存：
+        @Html.HiddenFor(m => m.Quota.Id, new { id = "hiddenShareQuotaId" })
+    </label>
+    <div class="col-md-10">
+        @Html.DropDownListFor(m => m.Quota.Id, Model.ShareQuotaDic.ToSelectListFor(Model.Quota.Id.ToString(CultureInfo.InvariantCulture)), new { id = "selectShareQuota", @class = "form-control form-control-sm",@onchange = "ShareQuotaSelected(this);" })
+    </div>
+</div>
+<div name="ShareRow" class="form-group row">
+    <label class="col-md-2">总库存：</label>
+    <div class="col-md-10">
+        @Html.TextBoxFor(m => m.Quota.PlanQuota, new { id = "sharePlanQuota", @class = "form-control form-control-sm", disabled = "disabled" })
+        &nbsp;&nbsp;
+        @*@if (Model.Line.TrafficType == 1)
+            {
+                <input type="button" id="showBusSeat" value="显示车位" onclick="BindShowBusSeat();" />
+            }*@
+    </div>
+</div>
+<div name="ShareRow" class="form-group row">
+    <label class="col-md-2" style="display:none;">预留库存：</label>
+    <div class="col-md-2" style="display:none;">
+        @Html.TextBoxFor(m => m.Quota.HoldQuota, new { id = "shareHoldQuota", @class = "form-control form-control-sm", disabled = "disabled" })
+        @*@Html.TextBoxFor(m => m.Quota.HoldQuota, new { id = "shareHoldQuota", @class = "text150", @onkeyup = "$('#shareUseQuota').text(Number($('#sharePlanQuota').val())-Number($(this).val())-Number($('#shareUsedQuota').text()));" })*@
+    </div>
+
+    <label class="col-md-2">已用库存：</label>
+    <div class="col-md-2"><span id="shareUsedQuota">@Model.Quota.UsedQuota</span></div>
+
+    <label class="col-md-2">剩余库存：</label>
+    <div class="col-md-2"><span id="shareUseQuota">@Model.Quota.UseQuota</span></div>
+
+    <label class="col-md-2">虚占位：</label>
+    <div class="col-md-2"><span>@Model.Quota.UnLockQuota</span></div>
+</div>

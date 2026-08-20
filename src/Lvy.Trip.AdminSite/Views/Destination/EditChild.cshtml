@@ -1,0 +1,112 @@
+﻿@model Lvy.VModels.DestinationVModel
+@{
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+<div class="content">
+    <div class="card">
+        @using (Html.BeginForm("SaveChild", "Destination", FormMethod.Post, new { @id = "editform", @class = "form-horizontal" }))
+        {
+            @Html.HiddenFor(a => a.DestModel.Id)
+            @Html.HiddenFor(a => a.DestModel.IsValid)
+            @Html.HiddenFor(a => a.DestModel.ParentId)
+
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">
+                        父节点名称：
+                    </label>
+                    <div class="col-sm-10">
+                        @Model.DestModel.ParentName
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">
+                        <span class="point">*</span> 目的地：
+                    </label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.DestModel.Name, new { @class = "form-control", @onblur = "CheckDesName(this)" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">拼音：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.DestModel.PinYin, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">简拼：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.DestModel.JPinYin, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">是否是国内：</label>
+                    <div class="radio col-sm-10">
+                        <label for="DestModel.IsChina">@Html.RadioButtonFor(model => model.DestModel.IsChina, 1, new { @checked = "checked" })是</label>
+                        <label for="DestModel.IsChina">@Html.RadioButtonFor(model => model.DestModel.IsChina, 0)否</label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label"> 等级</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(model => model.DestModel.Level, ViewBag.LevelList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 control-label">行政区码：</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.DestModel.RegionCode, new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer clearfix ">
+                <input class="btn btn-sm btn-info float-right" id="btnSave" type="button" value="保存" />
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+
+$(function () {
+    $("#DestModel_Name").focus().select();
+
+    $("#btnSave").click(function () {
+        if ($.trim($("#DestModel_Name").val()).length == 0) {
+            Utils.alert("目的地不得为空！", 1500);
+            $("#DestModel_Name").select().focus();
+            return;
+        }
+
+        var params = decodeURIComponent($("#editform").formSerialize());
+
+        $.ajax({
+            url: "/Destination/SaveChild",
+            type: 'post',
+            dataType: 'json',
+            data: params,
+            success: function (data) {
+                Utils.alert(data.Message);
+                parent.pageselectCallback(0);
+                var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                parent.layer.close(index);
+            },
+            error: function (data) {
+                Utils.alert("请求异常");
+            }
+        });
+    });
+});
+
+//验证该省份下的目的地是否存在
+function CheckDesName(e) {
+    var newName = $.trim($(e).val());
+    var parentId = '@Model.DestModel.ParentId';
+    $.post('/Destination/CheckDesName?name=' + encodeURIComponent(newName) + '&parentId=' + encodeURIComponent(parentId), function (data) {
+        if (data == "1") {
+            Utils.alert("改目的地已存在！", 1500);
+            $("#DestModel_Name").focus().select();
+        }
+    });
+}
+
+</script>

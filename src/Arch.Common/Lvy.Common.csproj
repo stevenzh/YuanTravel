@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Attributes\**" />
+    <Compile Remove="Exceptions\**" />
+    <Compile Remove="IO\**" />
+    <Compile Remove="Linq\**" />
+    <Compile Remove="Plugins\**" />
+    <EmbeddedResource Remove="Attributes\**" />
+    <EmbeddedResource Remove="Exceptions\**" />
+    <EmbeddedResource Remove="IO\**" />
+    <EmbeddedResource Remove="Linq\**" />
+    <EmbeddedResource Remove="Plugins\**" />
+    <None Remove="Attributes\**" />
+    <None Remove="Exceptions\**" />
+    <None Remove="IO\**" />
+    <None Remove="Linq\**" />
+    <None Remove="Plugins\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Extensions\ArrayExtensions.cs" />
+    <Compile Remove="Extensions\DictionaryExtensions.cs" />
+    <Compile Remove="Models\PetaPoco.cs" />
+    <Compile Remove="Utils\Crypto.cs" />
+    <Compile Remove="Utils\EntityToModel.cs" />
+    <Compile Remove="Utils\MapperTools.cs" />
+    <Compile Remove="ValidateCode.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="6.10.9" />
+    <PackageReference Include="NPOI" Version="2.5.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,46 @@
+﻿@model Lvy.VModels.Tour.TourBalanceVModel
+
+<div class="user-block">
+    <img class="img-circle img-bordered-sm" src="/images/user1-90x90.png" alt="user image">
+    <span class="username">营业收入</span>
+    <span class="description">Shared publicly - 7:45 PM today</span>
+</div>
+
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>订单编号</th>
+            <th>客户</th>
+            <th>对应销售</th>
+            <th>人数</th>
+            <th>应收款</th>
+            <th>已收款</th>
+            <th>欠款</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Orders.Count > 0)
+        {
+            foreach (var item in Model.Orders)
+            {
+                <tr>
+                    <td>@item.OrderCode</td>
+                    <td>@item.AgentName </td>
+                    <td>@item.SalerName</td>
+                    <td>@item.TravellerCount</td>
+                    <td>@item.TolYsPrice</td>
+                    <td>@item.TolPaid</td>
+                    <td>@(item.TolYsPrice - item.TolPaid)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

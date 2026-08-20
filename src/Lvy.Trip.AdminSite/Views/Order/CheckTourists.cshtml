@@ -1,0 +1,349 @@
+﻿@model Lvy.VModels.Op.CheckTouristsVModel
+@{
+    ViewBag.Title = "CheckTourists";
+    var picroot = Arch.Common.AppSetting.Get("UploadFileRoot");
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+    <!-- Bootstrap Switch -->
+    <link rel="stylesheet" href="@CDNServerUrl/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css" />
+    <script src="@CDNServerUrl/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+
+    <link href="@CDNServerUrl/jquery-iviewer/jquery.iviewer.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.min.js"></script>
+    <style type="text/css">
+        .form-gorup-left { width: 40%; float: left; }
+        .form-gorup-right { width: 59%; float: right; }
+        .form-gorup-bottom { text-align: center; clear: both; margin-top: 20px; }
+        .form-item { width: 100px; text-align: right; font-weight: bold; }
+        .listtbl { width: 100%; }
+            .listtbl .form-imgbox { width: 400px; height: 360px; }
+                .listtbl .form-imgbox img { width: 100%; height: 100%; }
+            .listtbl tr td { line-height: 32px; }
+
+        .viewer { width: 100%; height: 400px; border: 1px solid black; position: relative; }
+    </style>
+}
+
+<div class="form-box">
+    <div class="form-gorup-left">
+        <div class="station">
+            游客信息
+        </div>
+        <div style="max-height:400px;height:400px;">
+            <form id="form1" method="post">
+                @Html.HiddenFor(m => m.PassportExpiry)
+                <table class="listtbl">
+                    <tbody>
+                        @if (Model.TouristsInfo != null)
+                        {
+                            @Html.HiddenFor(m => m.TouristsId)
+                            @Html.HiddenFor(m => m.TouristsInfo.Id)
+                            @Html.HiddenFor(m => m.TouristsInfo.OrderCode)
+                            <tr>
+                                <td class="form-item">姓名：</td>
+                                <td>@Html.TextBoxFor(m => Model.TouristsInfo.Name, new { @class = "text150" })</td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">英文名：</td>
+                                <td>@Html.TextBoxFor(m => Model.TouristsInfo.PinYin, new { @class = "text150" })</td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">性别：</td>
+                                <td>
+                                    @{
+                                        var resultList = new List<SelectListItem>
+                                                                                        {
+                                        new SelectListItem {Text = "男", Value = "1" ,Selected=("1"==Model.TouristsInfo.Sex?true:false)},
+                                        new SelectListItem {Text = "女", Value = "2", Selected=("2"==Model.TouristsInfo.Sex?true:false)},
+                                        new SelectListItem {Text = "其他", Value = "3",Selected=("3"==Model.TouristsInfo.Sex?true:false)}
+                                        };
+                                    }
+                                    @Html.DropDownListFor(a => Model.TouristsInfo.Sex, resultList, new { @class = "text150" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">生日：</td>
+                                <td>
+                                    <input type="text" id="TouristsInfo_DateOfBirth" name="TouristsInfo.DateOfBirth" value="@(Model.TouristsInfo.DateOfBirth==null?"":Model.TouristsInfo.DateOfBirth.Value.ToString("yyyy-MM-dd"))" class="Wdate text150" onfocus="WdatePicker({isShowClear:false})" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">出生地：</td>
+                                <td>@Html.TextBoxFor(m => Model.TouristsInfo.PlaceOfBirth, new { @class = "text150" })</td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">电话：</td>
+                                <td>@Html.TextBoxFor(m => Model.TouristsInfo.Phone, new { @class = "text150" })</td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">证件类型：</td>
+                                <td>@Html.DropDownListFor(m => Model.TouristsInfo.PassType, DictionaryTools.GetEnumsBy(Enums.PassTypeEnum).ToSelectListFor(Model.TouristsInfo.PassType.ToString()), new { @class = "text150", dataname = "passtype", passno = "TouristsInfo.PassNo" })</td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">证件号码：</td>
+                                <td>@Html.TextBoxFor(m => Model.TouristsInfo.PassNo, new { @class = "text150", dataname = "passno", passtype = "TouristsInfo.PassType" })</td>
+                            </tr>
+                            <tr class="tr-hidden">
+                                <td class="form-item">签发日期：</td>
+                                <td>
+                                    <input type="text" id="TouristsInfo_DateOfIssue" name="TouristsInfo.DateOfIssue" value="@(Model.TouristsInfo.DateOfIssue==null?"":Model.TouristsInfo.DateOfIssue.Value.ToString("yyyy-MM-dd"))" class="Wdate text150" onfocus="WdatePicker({isShowClear:false})" />
+                                </td>
+                            </tr>
+                            <tr class="tr-hidden">
+                                <td class="form-item">证件签发地：</td>
+                                <td>@Html.TextBoxFor(m => Model.TouristsInfo.PlaceOfIssue, new { @class = "text150" })</td>
+                            </tr>
+                            <tr>
+                                <td class="form-item">证件有效期：</td>
+                                <td>
+                                    <input type="text" id="TouristsInfo_DateOfExpiry" name="TouristsInfo.DateOfExpiry" value="@(Model.TouristsInfo.DateOfExpiry==null?"":Model.TouristsInfo.DateOfExpiry.Value.ToString("yyyy-MM-dd"))" class="Wdate text150" onfocus="WdatePicker({isShowClear:false})" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">资料审核通过：</td>
+                                <td>
+                                    <input id="TouristsInfo_IsChecked" name="TouristsInfo.IsChecked" type="checkbox" @(Model.TouristsInfo.IsChecked ? "checked='checked'" : "") @(Model.IsOP == 0 ? "readonly=\"readonly\"" : "") value="True" class="js-switch" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="form-gorup-right">
+        <div class="station">
+            证件照
+        </div>
+        <div style="max-height: 400px; height:400px;">
+            <div id="viewer" class="viewer"></div>
+        </div>
+    </div>
+    <div class="form-gorup-bottom" style="display:inherit">
+        <input name="preTourists" type="button" value="上一个" class="btn btn1" />
+        <input name="nextTourists" type="button" value="下一个" class="btn btn1" />
+        <input name="saveTourists" type="button" value="保存" class="btn btn1" />
+        <input name="btnClose" type="button" value="关闭窗口" class="btn btn1" />
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var reqUrl = {
+        fromUrl: "@Url.Action("CheckTourists")",
+        preUrl: "@Url.Action("GetPreTourists")",
+        nextUrl: "@Url.Action("GetNextTourists")"
+    };
+
+    $(function () {
+
+        // 单选框初始化
+        $(".js-switch").each(function () {
+            $(this).bootstrapSwitch({ 'state': $(this).prop('checked'), onText: "是", offText: "否" });
+        });
+
+        var isOp = @(Model.IsOP == 0?"0":"1");
+
+        changePassType();
+
+        $("input[name$='Name']").on("keyup keydown change blur", function () {
+            var obj = $(this).parent("td").parent("tr");
+            obj.next().find("input[name$='PinYin']").val($(this).toPinyin());
+        });
+
+        $("input[name='saveTourists']").click(function () {
+            if (isOp == 0 && $("#TouristsInfo_IsChecked").prop('checked')) {
+                Utils.alert("已审不能修改");
+                return false;
+            }
+            var result = true;
+            var $this = $(':text[dataname="passno"]');
+            var passTypeName = $this.attr('passtype'); //证件类型Html元素的name
+            var passType = $('select[name="' + passTypeName + '"]').val();
+            if (Utils.Trim(passType) == "") {
+                Utils.alert("请选择证件类型");
+                return false;
+            }
+            // 检查证件号
+            if (!checkInputId(passType, $this.val(), $this)) {
+                result = false;
+                return;
+            }
+
+            if (!result) return false;
+            //if (!confirm("确认要修改游客资料？")) return false;
+
+            var params = decodeURIComponent($("#form1").formSerialize());
+            var load_iii = Utils.layerLoad();
+            $.ajax({
+                url: reqUrl.fromUrl,
+                type: 'post',
+                dataType: 'json',
+                data: params,
+                success: function (data) {
+                    Utils.alert(data.message);
+                    Utils.layerClose(load_iii);
+                }
+            });
+        });
+
+        var iv1 = $("#viewer").iviewer({
+            src: "@(Model.TouristsFile.Count== 0? "": picroot+ Model.TouristsFile[0].FilePath)",
+            update_on_resize: false,
+            zoom_animation: false,
+            mousewheel: true,
+            onMouseMove: function (ev, coords) { },
+            onStartDrag: function (ev, coords) { return true; }, //this image will not be dragged
+            onDrag: function (ev, coords) { }
+        });
+
+        $("input[name='preTourists']").click(function () {
+            var params = "?ordercode=" + $("#TouristsInfo_OrderCode").val() + "&tralId=" + $("#TouristsId").val();
+            $.ajax({
+                url: reqUrl.preUrl + params,
+                type: 'get',
+                dataType: 'json',
+                data: null,
+                success: function (data) {
+                    loadData(data, iv1);
+                }
+            });
+        });
+
+        $("input[name='nextTourists']").click(function () {
+            var params = "?ordercode=" + $("#TouristsInfo_OrderCode").val() + "&tralId=" + $("#TouristsId").val();
+            $.ajax({
+                    url: reqUrl.nextUrl + params,
+                type: 'get',
+                dataType: 'json',
+                data: null,
+                success: function (data) {
+                    loadData(data, iv1);
+                }
+            });
+        });
+
+        $("input[name='btnClose']").click(function () {
+            parent.LoadTravellers();
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+
+            // 点击验证通过
+            //$(".js-switch").on('change', function () {
+            //    var status = $(this).prop("checked");
+            //    //console.log("Switchery:" + status);
+            //    if (status == true)  saveTourist();
+            //})
+        });
+
+    function loadData(jsonData, iv1) {
+        if (jsonData.code == 200) {
+            if (jsonData.data.TouristsInfo == null) {
+                Utils.alert("没有了"); return;
+            }
+            //clearData();
+            $("#TouristsId").val(jsonData.data.TouristsId);
+            $("#TouristsInfo_Id").val(jsonData.data.TouristsInfo.Id);
+            $("#TouristsInfo_TourId").val(jsonData.data.TouristsInfo.TourId);
+            $("#TouristsInfo_Name").val(jsonData.data.TouristsInfo.Name);
+            $("#TouristsInfo_PinYin").val(jsonData.data.TouristsInfo.PinYin);
+            $("#TouristsInfo_Sex option[value='" + jsonData.data.TouristsInfo.Sex + "']").attr('selected', true);
+            $("#TouristsInfo_DateOfBirth").val(formatDate(jsonData.data.TouristsInfo.DateOfBirth));
+            $("#TouristsInfo_PlaceOfBirth").val(jsonData.data.TouristsInfo.PlaceOfBirth);
+            $("#TouristsInfo_Phone").val(jsonData.data.TouristsInfo.Phone);
+            $("#TouristsInfo_PassType option[value='" + jsonData.data.TouristsInfo.PassType + "']").attr('selected', true);
+            $("#TouristsInfo_PassNo").val(jsonData.data.TouristsInfo.PassNo);
+            $("#TouristsInfo_DateOfIssue").val(formatDate(jsonData.data.TouristsInfo.DateOfIssue));
+            $("#TouristsInfo_DateOfExpiry").val(formatDate(jsonData.data.TouristsInfo.DateOfExpiry));
+            $("#TouristsInfo_PlaceOfIssue").val(jsonData.data.TouristsInfo.PlaceOfIssue);
+
+            if (jsonData.data.TouristsFile != "[]" && jsonData.data.TouristsFile.length > 0) {
+                var fileInfo = jsonData.data.TouristsFile[0];
+                iv1.iviewer('loadImage', "@picroot" + fileInfo.FilePath);
+            }
+
+            if (jsonData.data.TouristsInfo.IsChecked == false)
+                $('.js-switch').bootstrapSwitch("state", false);
+            else
+                $('.js-switch').bootstrapSwitch("state", false);
+
+        } else {
+            Utils.alert(data.message);
+        }
+    }
+
+    function saveTourist() {
+
+    }
+
+    function formatDate(value) {
+        if (value == "" || value == null) return "";
+        var date = new Date(parseInt(value.replace("/Date(", "").replace(")/", ""), 10));
+        var month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+        var currentDate = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+        return date.getFullYear() + "-" + month + "-" + currentDate;
+    }
+
+    function clearData() {
+        $("#TouristsId").val("");
+        $("#TouristsInfo_Id").val("");
+        $("#TouristsInfo_TourId").val("");
+        $("#TouristsInfo_Name").val("");
+        $("#TouristsInfo_PinYin").val("");
+        $("input.Wdate").val("");
+        $("#TouristsInfo_PlaceOfBirth").val("");
+        $("#TouristsInfo_Phone").val("");
+        $("#TouristsInfo_PassNo").val("");
+    }
+
+    function changePassType() {
+        $('select[dataname="passtype"]').change(function () {
+            var $this = $(this);
+            var passNoName = $this.attr('passno'); //证件号Html元素的name
+            var $passNo = $(':text[name="' + passNoName + '"]');
+            var passNo = $passNo.val();
+            $('.tr-hidden').css('display', '');
+            console.log($this.val());
+            if ($this.val() == "1") {
+                $('.tr-hidden').css('display', 'none');
+            }
+
+            checkInputId($this.val(), passNo, $passNo);
+        });
+    }
+
+    function checkInputId(idType, idValue, idInputElement) {
+        switch (idType) {
+            case "0":
+                return true;
+            case "1":
+                if (!Utils.Check.IsID(idValue)) {
+                    Utils.alert("请输入正确的身份证！");
+                    idInputElement.focus().select();
+                    return false;
+                }
+                break;
+            default:
+                if (Utils.Trim(idValue) == "") {
+                    Utils.alert("请输入证件号码！");
+                    idInputElement.focus().select();
+                    return false;
+                }
+                var date2 = new Date($("#PassportExpiry").val());
+                var date1 = new Date($("#TouristsInfo_DateOfExpiry").val());
+                if (date1 < date2) {
+                    Utils.alert("护照有效期应晚于团返回日期+180天");
+                    return false;
+                }
+        }
+        return true;
+    }
+</script>

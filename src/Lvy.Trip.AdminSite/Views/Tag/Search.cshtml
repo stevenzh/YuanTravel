@@ -1,0 +1,33 @@
+﻿@model Lvy.VModels.Base.TagVModel
+@{
+    ViewBag.Title = "标签管理";
+}
+
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+    <div id="divEditRole">
+        <div class="station">
+            @ViewBag.Title
+        </div>
+        <div class="inform">
+            <table style="width:100%;">
+                <tr>
+                    <td class="label"><span class="point">*</span>标签名称：</td>
+                    <td>
+                        @Html.TextBoxFor(a => a.TagModel.TagName , new { @class = "text150" })
+                    </td>
+                    <td class="label">产品类型：</td>
+                    <td>
+                        @Html.DropDownListFor(a => a.TagModel.ProductType, (List<SelectListItem>)ViewBag.TagTypeBean, new { @class = "text150" })
+                    </td>
+                    <td>
+                        <input class="btn btn1" id="btnSearch" type="button" value="查询" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="divRoles">
+        @Html.Partial("List", Model)
+    </div>
+</form>

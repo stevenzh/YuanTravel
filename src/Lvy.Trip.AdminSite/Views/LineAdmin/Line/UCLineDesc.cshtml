@@ -1,0 +1,135 @@
+﻿@model Lvy.VModels.Product.AddLineVModel
+@using Arch.Common
+@{
+    Layout = null;
+    string picroot = AppSetting.Get("UploadFileRoot");
+}
+
+@if (Model.TpLine.Id > 0)
+{
+    <div class="ibox-content">
+        <form action="@Url.Action("SaveLineDesc")" class="form-horizontal" id="theForm" method="post">
+            @Html.HiddenFor(m => m.TpLine.LineId)
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">产品说明：</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(m => m.TpLine.LineDesc, new { @class = "summernote form-control", @rows = "18" })
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-4 col-sm-offset-3">
+                    <button class="btn btn-success" type="button" id="submitBtn">保存</button>
+                    <button class="btn btn-secondary" type="button" id="backBtn">返回列表</button>
+                </div>
+            </div>
+        </form>
+    </div>
+}
+else
+{
+    <p style="text-align:center;padding-top: 100px;background: #fff;text-align: center;color: #121212; font-size: 14px;">
+        保存<strong> 基本信息</strong>后，可填写更多内容！
+    </p>
+}
+<script>
+
+    $(function () {
+
+        $('.summernote').summernote({
+            lang : 'zh-CN',
+            height: 400,
+            tabsize: 2,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+               // ['insert', ['link', 'picture', 'video', 'elfinder']],
+                ['insert', ['link', 'elfinder']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+
+        $("#submitBtn").click(function () {
+            var params = $("#theForm").serialize();
+            $.ajax({
+                url: $("#theForm").attr("action"),
+                data: params,
+                type: "post",
+                success: function (data) {
+                    if (data.length > 0) {
+                        // Utils.alert("保存成功！");
+                        $('#tab-1').html(data);
+                        //保存成功后 加载预定须知.
+                        //$("a[name='tabTitle']")[3].click();
+
+                    } else {
+
+                        Utils.alert('提交发生异常，请稍后再试！');
+                    }
+                }, error: function (ex) {
+
+                    Utils.alert("出错了！请联系管理员！");
+                }
+            })
+        });
+
+        // 返回列表
+        $("#backBtn").click(function () {
+            window.location.href = "/LineAdmin/SearchLine";
+        });
+    })
+
+
+    function elfinderDialog(editor) {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'resize', 'help', 'select']; // Not yet implemented commands in ElFinder.Net
+        $.each(disabled, function (i, cmd)
+        {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+
+        var fm = $('<div/>').dialogelfinder({
+            url: '@(picroot+"connector")', // change with the url of your connector
+            customData: { folder: 'Files/line/@Model.TpLine.LineId', subFolder: '' }, // customData passed in every request to the connector as query strings. These values are used in FileController's Index method.
+            commands: myCommands,
+            rememberLastDir: false,
+            lang: 'zh_CN',
+            uiOptions: { // UI buttons available to the user
+                toolbar: [
+                    ['back', 'forward'],
+                    ['reload'],
+                    ['home', 'up'],
+                   // ['mkdir', 'mkfile', 'upload'],
+                    ['open', 'download'],
+                    ['info'],
+                    ['quicklook'],
+                    ['copy', 'cut', 'paste'],
+                    ['rm'],
+                    ['duplicate', 'rename', 'edit'],
+                    ['view', 'sort']
+                ],
+                navbar: {
+                    minWidth: 150,
+                    maxWidth: 500
+                }
+            },
+            width: 840,
+            height: 450,
+            destroyOnClose: true,
+            getFileCallback: function (files, fm) {
+                console.log(files);
+                $(editor).summernote('editor.insertImage', files.url, function ($image) {
+                    $image.addClass("fluid image ui");
+                });
+            },
+            commandsOptions: {
+                getfile: {
+                    oncomplete: 'close',
+                    folders: false
+                }
+            }
+        }).dialogelfinder('instance');
+    }
+</script>

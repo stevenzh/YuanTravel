@@ -1,0 +1,134 @@
+﻿@model Lvy.Models.BaseDB.BaseArticleModel
+@{
+    Layout = "~/Views/Shared/_Mobile.cshtml";
+    ViewBag.Title = Model.Title;
+
+    var sales = ViewData["Sales"] as string;
+    var salesdata = ViewData["SalesCount"] as string;
+
+
+    var regions = ViewData["Regions"] as string;
+    var regiondata = ViewData["RegionCount"] as string;
+}
+@section HeaderContent
+{
+    <!-- ECharts单文件引入 -->
+    <script src="http://cdn.bootcss.com/echarts/3.4.0/echarts.min.js"></script>
+}
+
+<div class="pusher">
+    <div class="ui segment" style=" background-color: darkgrey;">
+        <h2 class="ui dividing header">@Model.Title</h2>
+        <p>阅读量： @Model.BrowseCnt</p>
+    </div>
+    <div class="ui segent">
+        <div id="main" style="height:700px"></div>
+
+        <div id="chat2" style="height:700px"></div>
+    </div>
+</div>
+
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = echarts.init(document.getElementById('main'));
+
+    var option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+        yAxis: {
+            type: 'category',
+            data: @Html.Raw(sales)
+        },
+        xAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: @salesdata,
+            type: 'bar',
+            itemStyle: {
+                normal: {
+                            　　　　　　　　　　　　　　//好，这里就是重头戏了，定义一个list，然后根据所以取得不同的值，这样就实现了，
+                    color: function (params) {
+                        // build a color map as your need.
+                        var colorList = [
+                            '#C1232B', '#B5C334', '#FCCE10', '#E87C25', '#27727B',
+                            '#FE8463', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                            '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0',
+                            '#C1232B', '#B5C334', '#FCCE10', '#E87C25', '#27727B',
+                            '#FE8463', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                            '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0'
+                        ];
+                        return colorList[params.dataIndex]
+                    },
+                            　　　　　　　　　　　　　　//以下为是否显示，显示位置和显示格式的设置了
+                    label: {
+                        show: true,
+                        position: 'right',
+                        //                             formatter: '{c}'
+                        formatter: '{b}--{c}'
+                    }
+                }
+            }
+        }]
+    };
+
+    // 为echarts对象加载数据
+    myChart.setOption(option);
+
+</script>
+<script>
+    var myChart2 = echarts.init(document.getElementById('chat2'));
+
+    var option2 = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+        yAxis: {
+            type: 'category',
+            data: @Html.Raw(regions)
+        },
+        xAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: @regiondata,
+            type: 'bar',
+            itemStyle: {
+                normal: {
+                    //好，这里就是重头戏了，定义一个list，然后根据所以取得不同的值，这样就实现了，
+                    color: function (params) {
+                        // build a color map as your need.
+                        var colorList = [
+                            '#C1232B', '#B5C334', '#FCCE10', '#E87C25', '#27727B',
+                            '#FE8463', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                            '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0',
+                            '#C1232B', '#B5C334', '#FCCE10', '#E87C25', '#27727B',
+                            '#FE8463', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                            '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0'
+                        ];
+                        return colorList[params.dataIndex]
+                    },
+                    //以下为是否显示，显示位置和显示格式的设置了
+                    label: {
+                        show: true,
+                        position: 'right',
+                        //                             formatter: '{c}'
+                        formatter: '{b}--{c}'
+                    }
+                }
+            }
+        }]
+    };
+
+    myChart2.setOption(option2);
+</script>
+

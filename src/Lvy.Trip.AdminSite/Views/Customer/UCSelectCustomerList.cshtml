@@ -1,0 +1,23 @@
+﻿@model Lvy.VModels.Crm.SelectCustomerVModel
+<table class="listtbl" width="100%" style="border: solid 1px #A7C4E2;">
+    <thead style="background: #F0F5FB; line-height: 15px; color: #000000; font-weight: bold; border-bottom: 1px solid #A7C6E3;">
+        <tr style="text-align: center; height: 28px; line-height: 25px; color: #000000;">
+            <td>客户编号</td>
+            <td>客户名称</td>
+            <td>选择</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.PagedCustomers.Items)
+        {
+            <tr style="text-align: center; height: 28px; line-height: 25px; color: #000000;"
+                onclick="selectCustomer(this);">
+                <td>@item.Code</td>
+                <td style="text-align: left;">@item.Name</td>
+                <td>
+                    <input type="radio" name="SelectCustomerCode" value="@item.Code" customer-name="@item.Name" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

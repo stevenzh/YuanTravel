@@ -1,0 +1,166 @@
+﻿@{
+    //UserInfo user = (UserInfo)HttpContext.Current.Session["LoginUser"];
+    string OutCityCode = (String)HttpContext.Current.Session["OutCity"];
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link rel="stylesheet" href="@CDNServerUrl/semanticUI/semantic.min.css">
+    <script src="@CDNServerUrl/jquery/jquery.min.js"></script>
+    <script src="@CDNServerUrl/semanticUI/semantic.min.js"></script>
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <style>
+        .ui.logo.images img { width: 40px; }
+        .pusher { padding-bottom: 32px; padding-top: 32px; }
+        .hidden { display: none; }
+    </style>
+    @RenderSection("HeaderContent", false)
+</head>
+<body class="pushable">
+    @if (OutCityCode.Equals("SH"))
+    {
+        <div class="ui vertical inverted sidebar menu right" id="menu_dest">
+            <div class="item">
+                @*<a class="ui logo image" href="/">
+                        <img src="/images/shcct-logo.png">
+                    </a>*@
+                <a href="/"><b>选择目的地</b></a>
+            </div>
+
+            <div class="item">
+                <div class="ui small inverted header">东南亚</div>
+                <div class="menu">
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1101">纯泰</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1103">新马</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1102">泰新马</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1104">曼巴普</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1105">清迈</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1106">柬埔寨</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1107">越南</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1108">港澳</a>
+                </div>
+            </div>
+            <div class="item">
+                <div class="ui small inverted header">海岛</div>
+                <div class="menu ">
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2001">普吉</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2002">长滩</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2003">巴厘岛</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2004">沙巴</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2005">塞班</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2006">兰卡威</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2007">苏梅岛</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=2009">关岛</a>
+                </div>
+            </div>
+            <div class="item">
+                <div class="ui small inverted header">日韩</div>
+                <div class="menu ">
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1401">日本</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1404">首尔</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1405">济州</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1402">首尔济州</a>
+                </div>
+            </div>
+            <div class="item">
+                <div class="ui small inverted header">南亚</div>
+                <div class="menu ">
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1201">印度尼泊尔</a>
+                    <a class="item" href="/Product/List?outcity=@OutCityCode&code=1202">印度</a>
+                </div>
+            </div>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=17">欧洲</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=15">澳新</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=16">美洲</a>
+        </div>
+    }
+    else if (OutCityCode.Equals("SH"))
+    {
+        <div class="ui vertical inverted sidebar menu right" id="menu_dest">
+            <div class="item">
+                @*<a class="ui logo image" href="/">
+                        <img src="/images/shcct-logo.png">
+                    </a>*@
+                <a href="/"><b>选择目的地</b></a>
+            </div>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N1">纯泰</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N3">新加坡</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N4">泰新马</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N2">普吉岛</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N5">长滩</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N6">巴厘岛</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N7">港澳</a>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=N8">韩国</a>
+        </div>
+    }
+    else if (OutCityCode.Equals("WX"))
+    {
+        <div class="ui vertical inverted sidebar menu right" id="menu_dest">
+            <div class="item">
+                @*<a class="ui logo image" href="/">
+                        <img src="/images/shcct-logo.png">
+                    </a>*@
+                <a href="/"><b>选择目的地</b></a>
+            </div>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=1101">泰国</a>
+        </div>
+    }
+    else
+    {
+        <div class="ui vertical inverted sidebar menu right" id="menu_dest">
+            <div class="item">
+                @*<a class="ui logo image" href="/">
+                        <img src="/images/shcct-logo.png">
+                    </a>*@
+                <a href="/"><b>选择目的地</b></a>
+            </div>
+            <a class="item" href="/Product/List?outcity=@OutCityCode&code=1101">泰国</a>
+        </div>
+    }
+    <div class="ui vertical inverted sidebar menu left" id="menu_from">
+        <div class="item">
+            <a href="/"><b>选择出发城市</b></a>
+        </div>
+        <a class="item" href="/home?outcity=31">上海出发</a>
+        <a class="item" href="/home?outcity=3201">南京出发</a>
+        <a class="item" href="/home?outcity=3202">无锡出发</a>
+        <a class="item" href="/home?outcity=3401">合肥出发</a>
+    </div>
+
+    <div class="pusher">
+        @RenderBody()
+    </div>
+
+    <div class="ui grey bottom fixed three item menu">
+        <a class="item" id="menuitem_from">
+            <i class="marker icon"></i> 出发地
+        </a>
+        <a class="item" id="menuitem_dest">
+            <i class="location arrow icon"></i> 目的地
+        </a>
+        <a class="item" id="menuitem_info" href="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5048293842056c7e&redirect_uri=http%3A%2F%2Fyuanwx.sh-cct.cn%2Fmymember%2Fbinding%2F&response_type=code&scope=snsapi_base&state=JeffreySu#wechat_redirect">
+            <i class="user icon"></i> 个人中心
+        </a>
+    </div>
+    <script>
+        $(function () {
+            $("#menuitem_dest").click(function () {
+                $('#menu_dest').sidebar('toggle');
+            });
+            $("#menuitem_from").click(function () {
+                $('#menu_from').sidebar('toggle');
+            });
+            var flag = /MicroMessenger/i.test(navigator.userAgent);
+            if (flag == false)
+                $("#menuitem_info").hide();
+        });
+    </script>
+</body>
+</html>

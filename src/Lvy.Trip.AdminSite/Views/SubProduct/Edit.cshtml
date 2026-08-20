@@ -1,0 +1,147 @@
+﻿@model  Lvy.VModels.Product.ProductVModel
+@{
+    ViewBag.Title = "编辑航空公司";
+}
+@section AdditionalResources { }
+    <form id="theForm" action="@Url.Action("Edit", "SubProduct")" method="POST">
+        @Html.HiddenFor(a => a.ProductModel.ProductID)
+        @Html.HiddenFor(a => a.ProductModel.CreatedBy)
+        @Html.HiddenFor(a => a.ProductModel.CreatedTime)
+        @Html.HiddenFor(a => a.ProductModel.IsValid)
+
+        <div class="inform">
+            <div class="in_box">
+                <table class="edittbl" style="width:100%;">
+                    <tr>
+                        <td class="label" width="90px"><span class="point">*</span>名称：</td>
+                        <td>@Html.TextBoxFor(a => a.ProductModel.ProductName, new { @class = "text150" })</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><span class="point">*</span>类型：</td>
+                        <td>@Html.DropDownListFor(a => a.ProductModel.ProductType, ViewBag.ProductType as List<SelectListItem>, new { @class = "text150" })</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><span class="point">*</span>部门：</td>
+                        <td>@Html.DropDownListFor(a => a.ProductModel.TeamCode, ViewBag.Teams as List<SelectListItem>, new { @class = "text150" })</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><span class="point"></span>供应商：</td>
+                        <td>
+                            @Html.HiddenFor(m => m.ProductModel.SupplierName, new { id = "SupplierName" })
+                            <select id="mySelect2" name="ProductModel.SupplierCode" class="text300">
+                                @if (Model != null && !Model.ProductModel.SupplierCode.IsNullOrEmpty())
+                                {
+                                    <option value="@Model.ProductModel.SupplierCode">@DictionaryTools.GetCachedCustomer(Model.ProductModel.SupplierCode).Name</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label"><span class="point"></span>单价：</td>
+                        <td>@Html.TextBoxFor(a => a.ProductModel.UnitPrice, new { @class = "text150" })</td>
+                    </tr>
+                    <tr>
+                        <td class="label">成本：</td>
+                        <td>@Html.TextBoxFor(a => a.ProductModel.Cost, new { @class = "text150" })</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input class="btn btn1" id="btnSave" type="button" value="保存" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSave").click(function () {
+            if (Utils.Trim($("#ProductModel_ProductName").val()) == "") {
+                Utils.alert("名称不能为空！");
+                $("#ProductModel_ProductName").select().focus();
+                return  ;
+            }
+
+            if (Utils.Trim($("#ProductModel_TeamCode").val()) == "") {
+                Utils.alert("部门不能为空！");
+                $("#ProductModel_TeamCode").select().focus();
+                return  ;
+            }
+            var flightcode = Utils.Trim($("#ProductModel_ProductName").val());
+            var result = "0";
+            $.ajax({
+                url: '/SubProduct/CheckProductName?name=' + encodeURIComponent(flightcode)+'&Id='+@Model.ProductModel.ProductID,
+                type: "post",
+                async: false,
+                success: function (data) {
+                    result = data;
+                }
+            })
+            if (result == "1") {
+                Utils.alert("代码已经存在!");
+                $(obj).focus().select();
+                return;
+            }
+
+            var params = decodeURIComponent($("#theForm").formSerialize());
+            $.ajax({
+                url: "/SubProduct/Edit",
+                type: 'post',
+                dataType: 'json',
+                data: params,
+                success: function (data) {
+                    Utils.alert(data.msg);
+                    parent.pageselectCallback(@Model.ProductPageList.PageIndex - 1);
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index); 
+                },
+                error: function (data) {
+                    Utils.alert("请求异常");
+                }
+            });
+        });
+
+
+        $('#mySelect2').select2({
+            ajax: {
+                url: '/Customer/GetSupplierSelect2',
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        keyword: params.term, // search term 请求参数 ， 请求框中输入的参数
+                        page: params.page || 0,
+                        size: 10,
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].Code, text: arr[item].Name, pinyin: arr[item].FastCode })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            //templateResult: formatState
+        });
+        $('#mySelect2').on('select2:select', function (e) {
+            var data = e.params.data;
+            $("#ParentName").val(data.text);
+        });
+    });
+
+</script>
+

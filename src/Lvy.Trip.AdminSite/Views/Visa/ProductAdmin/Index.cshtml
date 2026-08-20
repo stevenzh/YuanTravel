@@ -1,0 +1,258 @@
+﻿@{
+    ViewData["Title"] = "签证产品管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@model Lvy.Visa.VModels.VisaInformationQModel
+@section AdditionalResources
+{
+    <script>
+        var index = 0;
+    </script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+    <div class="card">
+        @*<div class="card-header">
+            <h5>请输入过滤条件</h5>
+        </div>*@
+        <div class="card-body p-2">
+            <div class="form-row">
+                <div class="col-auto">
+                    <input name="InformationCode" id="InformationCode" type="text" class="form-control form-control-sm mt-2" placeholder="产品编号" />
+                </div>
+                <div class="col-auto">
+                    <input name="InformationName" id="InformationName" type="text" class="form-control form-control-sm mt-2" placeholder="产品名称" />
+                </div>
+                <div class="col-auto">
+                    @Html.TextBoxFor(a => a.Info.VisaCountry, new { id = "VisaCountry", @class = "form-control form-control-sm mt-2", @placeholder = "国家或地区" })
+                </div>
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.Info.VType, ViewData["VTypeList"] as IEnumerable<SelectListItem>, new { @id = "VType", @class = "form-control form-control-sm mt-2" })
+                </div>
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.Info.TeamID, ViewData["TeamList"] as IEnumerable<SelectListItem>, new { @id = "TeamID", @class = "form-control form-control-sm mt-2" })
+                </div>
+                @*<div class="col-auto">
+            @Html.DropDownListFor(a => a.Info.VisaType, ViewData["VisaType"] as IEnumerable<SelectListItem>, new { @id = "VisaType", @class = "form-control form-control-sm mt-2" })
+        </div>*@
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.Info.State, ViewData["State"] as IEnumerable<SelectListItem>, new { @id = "State", @class = "form-control form-control-sm mt-2" })
+                </div>
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.Info.Continent, ViewData["Continent"] as IEnumerable<SelectListItem>, new { @id = "Continent", @class = "form-control form-control-sm mt-2" })
+                </div>
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.Info.VisaArea, ViewData["VisaArea"] as IEnumerable<SelectListItem>, new { @id = "VisaArea", @class = "form-control form-control-sm mt-2" })
+                </div>
+                <div class="col-auto">
+                    @Html.TextBoxFor(a => a.Info.CreateByName, new { id = "CreateByName", @class = "form-control form-control-sm mt-2", @placeholder = "录入员" })
+                </div>
+                <div class="col-auto">
+                    @Html.TextBoxFor(a => a.Info.PManageUserName, new { id = "PManageUserName", @class = "form-control form-control-sm mt-2", @placeholder = "产品经理" })
+                </div>
+                <div class="col-auto">
+                    @Html.TextBoxFor(a => a.Info.SupplierCode, new { @id = "Supplier", @class = "form-control form-control-sm mt-2", @placeholder = "供应商名称" })
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-default" id="btnQuery">查询</button>
+            <a class="btn btn-success float-right" href="/VisaProduct/AddProduct" >添加产品</a>
+        </div>
+    </div>
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-body p-0" id="main-2">
+            @Html.Partial("~/Views/Visa/ProductAdmin/PageList.cshtml", Model)
+        </div>
+        <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+
+</section>
+<!-- /.content -->
+
+<script>
+    $(function () {
+        funGetTabInfo();
+
+        $("#btnQuery").click(function () { funGetTabInfo(); });
+    });
+
+    function funGetTabInfo() {
+        var route = '/ProductAdmin/QueryProduct/';
+        var param = {
+            'Info.InformationCode': $('#InformationCode').val(),
+            'Info.InformationName': $('#InformationName').val(),
+            'Info.VisaType': $('#VisaType').val(),
+            'Info.State': $('#State').val(),
+            'Info.VType': $('#VType').val(),
+            'Info.Continent': $("#Continent").val(),
+            'Info.VisaCountry': $("#VisaCountry").val(),
+            'Info.VisaArea': $("#VisaArea").val(),
+            'Info.CreateByName': $("#CreateByName").val(),
+            'Info.PManageUserName': $("#PManageUserName").val(),
+            'Info.SupplierName': $("#Supplier").val(),
+            'Info.TeamID': $("#TeamID").val(),
+            'VisaInformationList.PageIndex': 1,
+            'VisaInformationList.PageSize': 10
+        }
+        $.post(route, param, function (data) {
+            $('#main-2').html(data);
+        });
+    }
+    //删除
+    function funDelProduct(value) {
+        if (confirm("删除后数据将无法恢复，您确定要删除吗？")) {
+            var param = {
+                'InformationCode': value,
+                "InformationCodeS": $('#InformationCode').val(),
+                'InformationName': $('#InformationName').val(),
+                'VisaType': $('#VisaType').val(),
+                'State': $('#State').val(),
+                'VType': $('#VType').val(),
+                'Continent': $("#Continent").val(),
+                'VisaCountry': $("#VisaCountry").val(),
+                'VisaArea': $("#VisaArea").val(),
+                'CreateByName': $("#CreateByName").val(),
+                'PManageUserName': $("#PManageUserName").val(),
+                'SupplierName': $("#SupplierName").val(),
+                'CreatetimeBegin': $("#CreatetimeBegin").val(),
+                'CreatetimeEnd': $("#CreatetimeEnd").val(),
+                'PManageDateBegin': $("#PManageDateBegin").val(),
+                'PManageDateEnd': $("#PManageDateEnd").val(),
+                'OnlineDateBegin': $("#OnlineDateBegin").val(),
+                'OnlineDateEnd': $("#OnlineDateEnd").val(),
+                'CreateByName': $('#CreateByName').val(),
+                'TestUserName': $('#TestUserName').val(),
+                'PManageUserName': $('#PManageUserName').val(),
+                'CreateDate': $('#CreateDate').val(),
+                'CreateEndDate': $('#CreateEndDate').val(),
+                'PManageDateBegin': $('#PManageDateBegin').val(),
+                'PManageDateEnd': $('#PManageDateEnd').val()
+            }
+            $.post("/ProductManagement/DeleteProduct", param, function (data) {
+                index = 0;
+                $("#VisaInformationList").html(data);
+                alert("删除签证成功！");
+            });
+        }
+    }
+    //提交审核
+    function funSubmitAudit(value) {
+        alert("提交审核");
+        var param = {
+            'InformationCode': value,
+            "InformationCodeS": $('#InformationCode').val(),
+            'InformationName': $('#InformationName').val(),
+            'VisaType': $('#VisaType').val(),
+            'State': $('#State').val(),
+            'VType': $('#VType').val(),
+            'Continent': $("#Continent").val(),
+            'VisaCountry': $("#VisaCountry").val(),
+            'VisaArea': $("#VisaArea").val(),
+            'CreateByName': $("#CreateByName").val(),
+            'PManageUserName': $("#PManageUserName").val(),
+            'SupplierName': $("#SupplierName").val(),
+            'CreatetimeBegin': $("#CreatetimeBegin").val(),
+            'CreatetimeEnd': $("#CreatetimeEnd").val(),
+            'PManageDateBegin': $("#PManageDateBegin").val(),
+            'PManageDateEnd': $("#PManageDateEnd").val(),
+            'OnlineDateBegin': $("#OnlineDateBegin").val(),
+            'OnlineDateEnd': $("#OnlineDateEnd").val(),
+            'CreateByName': $('#CreateByName').val(),
+            'TestUserName': $('#TestUserName').val(),
+            'PManageUserName': $('#PManageUserName').val(),
+            'CreateDate': $('#CreateDate').val(),
+            'CreateEndDate': $('#CreateEndDate').val(),
+            'PManageDateBegin': $('#PManageDateBegin').val(),
+            'PManageDateEnd': $('#PManageDateEnd').val()
+        }
+        $.post("/Product/SearchProductData", param, function (datacheck) {
+            if (datacheck != "产品录入完整!!") {
+                alert("数据录入不完整，请先将数据录入完整!!!");
+            }
+            else {
+                $.post("/ProductManagement/SubmitAudit/", param, function (data) {
+                    index = 0;
+                    $("#VisaInformationList").html(data);
+                    alert("提交成功！！");
+                });
+            }
+        });
+
+    }
+    //复制产品
+    function funCopyProduct(value, pname) {
+        if (confirm("您确定要复制【" + pname + "】吗？")) {
+            var param = {
+                'InformationCode': value
+            }
+            $.post("/VisaAdmin/CopyProduct/", param, function (data) {
+                index = 0;
+                $("#VisaInformationList").html(data);
+                alert("复制线路成功！！");
+            });
+        }
+    }
+    //设置下线
+    function funSetDownLine(value) {
+        if (confirm("您确定要【下线】吗？")) {
+            var param = {
+                'InformationCode': value,
+                "InformationCodeS": $('#InformationCode').val(),
+                'InformationName': $('#InformationName').val(),
+                'VisaType': $('#VisaType').val(),
+                'State': $('#State').val(),
+                'VType': $('#VType').val(),
+                'Continent': $("#Continent").val(),
+                'VisaCountry': $("#VisaCountry").val(),
+                'VisaArea': $("#VisaArea").val(),
+                'CreateByName': $("#CreateByName").val(),
+                'PManageUserName': $("#PManageUserName").val(),
+                'SupplierName': $("#SupplierName").val(),
+                'CreatetimeBegin': $("#CreatetimeBegin").val(),
+                'CreatetimeEnd': $("#CreatetimeEnd").val(),
+                'PManageDateBegin': $("#PManageDateBegin").val(),
+                'PManageDateEnd': $("#PManageDateEnd").val(),
+                'OnlineDateBegin': $("#OnlineDateBegin").val(),
+                'OnlineDateEnd': $("#OnlineDateEnd").val(),
+                'CreateByName': $('#CreateByName').val(),
+                'TestUserName': $('#TestUserName').val(),
+                'PManageUserName': $('#PManageUserName').val(),
+                'CreateDate': $('#CreateDate').val(),
+                'CreateEndDate': $('#CreateEndDate').val(),
+                'PManageDateBegin': $('#PManageDateBegin').val(),
+                'PManageDateEnd': $('#PManageDateEnd').val()
+            }
+            $.post("/ProductAdmin/SetProductDownLine/", param, function (data) {
+                if (data.Code == "1") {
+                    Utils.alert("下线成功！！");
+                    funGetTabInfo();
+                } else {
+                    Utils.alert(data.Message);
+                }
+            });
+        }
+    }
+</script>

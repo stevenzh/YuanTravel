@@ -1,0 +1,28 @@
+﻿@model Lvy.VModels.Order.OrderEditVModel
+@{
+    Layout = null;
+}
+
+<table class="table list">
+    @foreach (var item in Model.Travellers)
+    {
+        <tr>
+            <td colspan="2">
+                @(item.Name + "(" + item.PinYin + ")")
+            </td>
+            <td></td>
+            <td style="width:100px;">
+                <button type="button" class="btn btn-sm btn-default"  data-toggle="modal" data-remote="/Booking/TouristInfo/@item.Id" data-target="#modal-tourist"><i class="fa fa-edit"></i></button>
+                @if (item.FileList.Count> 0)
+                {
+                    <button type="button" class="btn btn-sm btn-default"><i class="fa fa-file-image"></i></button>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td>性别：@item.Sex</td>
+            <td>生日：@(item.DateOfBirth == null ? "" : item.DateOfBirth.Value.ToShortDateString())</td>
+            <td></td>
+        </tr>
+    }
+</table>

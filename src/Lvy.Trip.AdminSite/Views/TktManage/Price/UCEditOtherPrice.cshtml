@@ -1,0 +1,112 @@
+﻿@model Lvy.VModels.Ticket.OtherPriceVModel
+@{
+    var actionUrl = Model.Operation == 1 ? Url.Action("SaveOtherPrice") : Url.Action("UpdateOtherPrice");
+}
+<form id="otherPriceForm" action="@actionUrl">
+    <div class="card">
+        <div class="card-body">
+            @Html.HiddenFor(m => m.PriceRule.Id)
+            @Html.HiddenFor(m => m.PriceRule.ProductId)
+            @Html.HiddenFor(m => m.TkcketProduct.TktType)
+
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label"><span class="text-danger">*</span>名称：</label>
+                <div class="col-sm-9">
+                    @Html.TextBoxFor(m => m.PriceRule.RuleName, new { id = "otherRuleNameTxt", @class = "form-control form-control-sm", maxlength = "200" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-3 col-form-label"><span class="text-danger">*</span>底色：</label>
+                <div class="col-sm-9">
+                    <div class="input-group my-colorpicker">
+                        @Html.TextBoxFor(m => m.PriceRule.BgColor, new { id = "otherBgColorTxt", @class = "form-control form-control-sm" })
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-square" style="color: @Model.PriceRule.BgColor"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-sm">
+                <thead>
+                    <tr style="text-align: center;">
+                        <th style="width: 100px;">报价类型</th>
+                        <th>市场价</th>
+                        <th>结算价</th>
+                        <th>
+                            @if (Model.TkcketProduct.TktType == 1 || Model.TkcketProduct.TktType == 2)
+                            {
+                                @("签单价")
+                            }
+                            else
+                            {
+                                @("返利")
+                            }
+                        </th>
+                        <th style="width:70px;">有效</th>
+                        <th style="width:70px;">标准价</th>
+                        <th>价格说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var otherPrice = Model.PriceList;
+                    }
+                    @for (int i = 0; i < otherPrice.Count; i++)
+                    {
+                        <tr style="text-align: center;">
+                            <td title="@otherPrice[i].PriceType">
+                                <input name="otherPrice[@i].Id" type="hidden" value="@otherPrice[@i].Id" />
+                                <input name="otherPrice[@i].PriceType" type="hidden" value="@otherPrice[@i].PriceType" />
+                                @otherPrice[i].PriceType.TrimWithElipsis(20)
+                            </td>
+                            <td>
+                                <input name="otherPrice[@i].MarketPrice" type="text" class="form-control form-control-sm" value="@otherPrice[i].MarketPrice" />
+                            </td>
+                            <td>
+                                <input name="otherPrice[@i].SettlePrice" type="text" class="form-control form-control-sm" value="@otherPrice[i].SettlePrice" />
+                            </td>
+                            <td>
+                                <input name="otherPrice[@i].SysPrice" type="text" class="form-control form-control-sm" value="@otherPrice[i].SysPrice" />
+                            </td>
+                            <td>
+                                <input name="otherPrice[@i].IsValid" type="hidden" value="@otherPrice[i].IsValid" />
+                                @if (otherPrice[i].IsValid == 1)
+                                {
+                                    <label>
+                                        <input name="otherPrice.IsValid" type="checkbox" checked="checked" />
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label>
+                                        <input name="otherPrice.IsValid" type="checkbox" />
+                                    </label>
+                                }
+                            </td>
+                            <td>
+                                <input name="otherPrice[@i].IsStandard" type="hidden" value="@otherPrice[i].IsStandard" />
+                                @if (otherPrice[i].IsStandard == 1)
+                                {
+                                    <label>
+                                        <input name="otherPrice.IsStandard" type="radio" checked="checked" />标准
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label>
+                                        <input name="otherPrice.IsStandard" type="radio" />标准
+                                    </label>
+                                }
+                            </td>
+                            <td>
+                                <input name="otherPrice[@i].PriceDesc" type="text" class="form-control form-control-sm" value="@otherPrice[i].PriceDesc" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</form>

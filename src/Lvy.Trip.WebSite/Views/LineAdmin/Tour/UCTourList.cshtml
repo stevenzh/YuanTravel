@@ -1,0 +1,236 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+
+<table class="table table-sm table-hover text-nowrap listtbl">
+    <thead>
+        <tr>
+            <th style="text-align: center;">团号</th>
+            <th style="text-align: center;">出发日期</th>
+            <th style="text-align: center;">截止报名</th>
+            <th style="text-align: center;">库存</th>
+            <th style="text-align: center;">剩余</th>
+            @*<th style="text-align: center;">推荐类型</th>*@
+            @*<th style="text-align: center;">团队性质</th>*@
+            <th style="text-align: center;">出发-目的地</th>
+            <th>报价类型</th>
+            <th style="text-align: center; width: 120px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TourList.Items)
+        {
+            <tr>
+                <td>
+                    @item.TourNo
+                    <br />
+                    <small>@item.LineName</small>
+                </td>
+                <td style="text-align: center;">
+                    @item.OutDate.ToDateFormat()
+                </td>
+                <td style="text-align: center;">
+                    @item.BookingLastDays.ToString("MM-dd")
+                </td>
+                <td style="text-align: center;">
+                    @(item.HoldQuota > 0 ? (item.PlanQuota - item.HoldQuota) + "+" + item.HoldQuota : item.PlanQuota.ToString())
+
+                    <div class="progress progress-xs">
+                        @{
+                            var tt = Math.Ceiling((item.UsedQuota * 100D) / item.PlanQuota);
+                            var dd = Math.Ceiling((item.UnlockQuota * 100D) / item.PlanQuota);
+                        }
+                        <div class="progress-bar bg-success" style="width: @( tt + "%")"></div>
+                        <div class="progress-bar bg-warning" style="width: @(dd + "%")"></div>
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    @item.UseQuota
+                </td>
+                @*<td style="text-align: center;">
+                        @item.RecommendType
+                    </td>*@
+                @*<td style="text-align: center;">
+                        @DictionaryTools.GetEnumValue(Enums.TourTypeEnum, item.TourType.ToString())
+                    </td>*@
+                <td style="text-align: center;">
+                    @item.DepartArrive
+                </td>
+                <td style="text-align: center;">
+                    <a title="价格" href="javascript:;" name="viewPrice" tourId="@item.TourId" class="search">查看</a>
+                </td>
+                <td class="project-actions">
+                    @if (item.TourState > 0)
+                    {
+                        if (item.TourState == 2)
+                        {
+                            <a name="saleOrClose" tourId="@item.TourId" class="btn btn-sm btn-info mt-1" href="javascript:void(0);"><i class="fa fa-arrow-up"></i> 上线</a>
+                        }
+                        else if (item.TourState == 3)
+                        {
+                            <a name="saleOrClose" tourId="@item.TourId" class="btn btn-sm btn-info mt-1" href="javascript:void(0);" state="@item.TourState"><i class="fa fa-arrow-down"></i> 下线</a>
+                        }
+                        <a class="btn btn-sm btn-primary mt-1 edit" href="javascript:void(0);" check-url="@Url.Action("CheckTourOrdered", new { tourId = item.TourId })" edit-url="@Url.Action("EditTour", new { id = item.TourId })" data-start="@item.OutDate.ToString("yyyy-MM-dd")" state="@item.TourState"><i class="fa fa-edit"></i> 编辑</a>
+                        <br />
+                        <a class="btn btn-sm btn-default mt-1 copy" href="javascript:void(0);" edit-url="@Url.Action("CopyTour", new { id = item.TourId })"><i class="fa fa-copy"></i> 复制</a>
+                        <a class="btn btn-sm btn-success mt-1" href="@Url.Action("OrderSearch","Seller", new { tourId = item.TourId })"><i class="fa fa-list"></i> 订单</a>
+
+                        @*<a title="删除" class="delete" href="javascript:void(0);" check-url="@Url.Action("CheckTourOrdered", new { tourId = item.TourId })" delete-url="@Url.Action("DeleteTour", new { tourId = item.TourId })"><i class="fa fa-trash"></i></a>*@
+                    }
+                    else
+                    {
+                        @*<a title="恢复" class="restore" href="javascript:void(0);" restore-url="@Url.Action("RestoreTour", new { tourId = item.TourId })"><i class="fa fa-recycle"></i></a>*@
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(m => m.TourList.PageIndex, new { id = "hiddenIndex" })
+<div id="divPagination" class="digg">
+</div>
+<script type="text/javascript">
+
+    function AddTourStoreInfo(){
+        location.href="@Url.Action("UCTourStore", new { lineId = Model.LineId })";
+    }
+
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId);
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("SearchTour")', params, function (data) {
+	            $('#TourListContainer').html(data);
+	            hoverChangeStyle();
+	            Utils.layerClose(load_iii);
+	    });
+    }
+
+    $(function () {
+
+        $('[data-toggle="tooltip"]').tooltip()
+
+        $('.listtbl a.edit').click(function () {
+            var $this = $(this);
+            //var lineState=$this.attr('state');
+            //if(lineState==3){
+            //    var load_iii = Utils.layerLoad();
+            //    $.post($this.attr('check-url'), function(data) {
+            //        if(data&&Number(data)==1) {
+            //            Utils.alert('该团计划已产生订单，无法编辑！');
+            //            Utils.layerClose(load_iii);
+            //        }
+            //        else if(data&&Number(data)==0) {
+            //            window.location = $this.attr('edit-url');
+            //        }
+            //        else {
+            //            //请求错误
+            //        }
+            //    });
+            //}
+            //else {
+            layer.open({
+                type: 2,
+                title: '编辑开班  出发日期：' + $this.attr('data-start'),
+                shadeClose: true,
+                shade: 0.8,
+                area: ['900px', '90%'],
+                content: $this.attr('edit-url'), //iframe的url
+            });
+            //}
+        });
+
+        $('.listtbl a.copy').click(function () {
+            var $this = $(this);
+            layer.open({
+                type: 2,
+                title: '复制开班',
+                shadeClose: true,
+                shade: 0.8,
+                area: ['900px', '90%'],
+                content: $this.attr('edit-url'), //iframe的url
+            });
+        });
+
+        //删除开班
+        $('.listtbl a.delete').click(function () {
+            var $this = $(this);
+            var load_iii = Utils.layerLoad();
+            $.post($this.attr('check-url'), function(data) {
+                if(data && Number(data) == 1) {
+                    Utils.alert('该团计划已产生订单，无法删除！');
+                    Utils.layerClose(load_iii);
+                }
+                else if(data && Number(data) == 0) {
+                    if(confirm('确认删除该团计划？')) {
+                        $.post($this.attr('delete-url'), function () {
+                            pageselectCallback(Number($("#hiddenIndex").val()));
+                        });
+                    }
+                    Utils.layerClose(load_iii);
+                }
+                else {
+                    Utils.alert('删除发生异常。');
+                }
+            });
+        });
+
+        // 恢复开班
+        $('.listtbl a.restore').click(function () {
+            var $this = $(this);
+            var load_iii = Utils.layerLoad();
+            $.post($this.attr('restore-url'), function (data) {
+                if (data && data.code == '0') {
+                    Utils.alert('该团计划已恢复！');
+                    pageselectCallback(Number($("#hiddenIndex").val()));
+                    Utils.layerClose(load_iii);
+                }
+                else {
+                    Utils.alert('删除发生异常。');
+                    Utils.layerClose(load_iii);
+                }
+            });
+        });
+
+        $("#divPagination").pagination(Number('@Model.TourList.TotalCount'), {
+            callback: pageselectCallback,
+            items_per_page: (@Model.TourList.PageSize),
+            num_display_entries: 5,
+            num_edge_entries: 2,
+            current_page: (@Model.TourList.PageIndex-1)
+        });
+
+        $('a[name="saleOrClose"]').click(function () {
+            var load_iii = Utils.layerLoad();
+            var $this = $(this);
+            var tourId = $(this).attr('tourId');
+            $.post('/LineAdmin/SaleOrClose?tourId=' + tourId, function (result) {
+                if (result == 3) {
+                    $this.attr('title','下线');
+                    $this.attr('state', result);
+                    $this.html("<i class='fa fa-arrow-down'></i>上线");
+                }
+                else if (result == 2) {
+                    $this.attr('title','上线');
+                    $this.attr('state', result);
+                    $this.html("<i class='fa fa-arrow-up'></i>下线");
+                }
+                Utils.layerClose(load_iii);
+            });
+        });
+
+        $('a[name="viewPrice"]').click(function() {
+            var param = "tourId="+$(this).attr('tourId');
+            $.post('/LineAdmin/DisPlayPrice/',param, function(data) {
+                layer.open({
+                    type: 1, title: '查看价格', maxmin: false
+                    , shadeClose: false, area: ['600px', '400px']
+                    , content: data
+                    , btn: ["关闭"]
+                    , yes: function (index, layero) {
+                        layer.close(index);
+                    }
+                });
+            });
+            return false;
+        });
+    });
+</script>

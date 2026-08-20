@@ -1,0 +1,151 @@
+﻿@model  List<Lvy.Models.BusSeatModel>
+<table class="seat">
+    <tr>
+        <td>
+            说明：<br />
+            灰色：代表座位未占<br />
+            红色：代表座位已占<br />
+            蓝色：代表座位已锁定<br />
+            <br />
+            <br />
+            点击灰色座位，可以锁定该座位；<br />
+            点击蓝色座位，可以释放该座位。
+        </td>
+        <td>
+            <div class="seat_box">
+                <p>
+                    <b class="title_b">座位分布</b> <b class="title_b" style="float: right; margin-right: 5px;">
+                        <a id="releaseHold" href="javascript:void(0);">释放锁定</a>
+                    </b>
+                    <input type="hidden" id="hiddenSeatCount" value="@Model.Count" />
+                </p>
+                <div class="seat_content">
+                    <table border="0" cellspacing="3" class="seat_tbl" style="width:261px;">
+                        @{
+                            var totalRow = Math.Round(((double)Model.Count / 4));
+                            var y = 0;
+                        }
+                        @for (int i = 0; i < totalRow - 1; i++)
+                        {
+                            <tr>
+                                <td class="@Model[y].ChangeStateClass()">
+                                    @Model[y].No
+                                </td>
+                                <td class="@Model[y + 1].ChangeStateClass()">
+                                    @Model[y + 1].No
+                                </td>
+                                <td class="noborder">
+                                    &nbsp;
+                                </td>
+                                <td class="@Model[y + 2].ChangeStateClass()">
+                                    @Model[y + 2].No
+                                </td>
+                                <td class="@Model[y + 3].ChangeStateClass()">
+                                    @Model[y + 3].No
+                                </td>
+                                <td style="display: none">
+                                    @Html.HiddenFor(a => a[y].State)
+                                    @Html.HiddenFor(a => a[y].No)
+                                    @Html.HiddenFor(a => a[y + 1].State)
+                                    @Html.HiddenFor(a => a[y + 1].No)
+                                    @Html.HiddenFor(a => a[y + 2].State)
+                                    @Html.HiddenFor(a => a[y + 2].No)
+                                    @Html.HiddenFor(a => a[y + 3].State)
+                                    @Html.HiddenFor(a => a[y + 3].No)
+                                </td>
+                            </tr>
+                            y = y + 4;
+                        }
+                        @*最后一行*@
+                        <tr>
+                            @for (int i = y; i < Model.Count; i++)
+                            {
+                                <td class="@Model[i].ChangeStateClass()">
+                                    @Model[i].No
+                                </td>
+                                <td style="display: none">
+                                    @Html.HiddenFor(a => a[i].State)
+                                    @Html.HiddenFor(a => a[i].No)
+                                </td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </td>
+    </tr>
+</table>
+<script type="text/javascript">
+    $(function () {
+        $(".seat_content td").bind("click", function () {
+            if ($(this).attr('class') == 'noborder')
+                return false;
+
+            //验证
+            var $hold = $('input:text[name="Quota.HoldQuota"]');
+            //            if ($hold.length == 0)
+            //                $hold = $('input:text[name="HoldQuota"]');
+            var holdNum = Number($hold.val());
+            var holdCount = $(".seat_box .blue").length;
+
+
+            var indexNum = Number($(this).text()) - 1;
+            var nameCondition = '[' + indexNum + '].State';
+            var $targetStateHidden = $('input[name="' + nameCondition + '"]');
+            //未占
+            if ($targetStateHidden.val() == 1) {
+                if (holdCount >= holdNum) {
+                    Utils.alert("预留库存已满");
+                    return false;
+                }
+
+                $targetStateHidden.val(3);
+                $(this).removeClass('gray');
+                $(this).addClass('blue');
+            }
+            //已占
+            else if ($targetStateHidden.val() == 2) {
+                Utils.alert('已占座位不得释放');
+                return false;
+                //                if (holdCount >= holdNum) {
+                //                    Utils.alert("预留库存已满");
+                //                    return false;
+                //                }
+
+                //                $targetStateHidden.val(1);
+                //                $(this).removeClass('red');
+                //                $(this).addClass('gray');
+            }
+            //已锁定 3
+            else {
+                $targetStateHidden.val(1);
+                $(this).removeClass('blue');
+                $(this).addClass('gray');
+            }
+            return false;
+        });
+
+        //释放锁定
+        $('#releaseHold').click(function () {
+            var $hold = $('input:text[name="Quota.HoldQuota"]');
+            //            if ($hold.length == 0)
+            //                $hold = $('input:text[name="HoldQuota"]');
+            var holdNum = Number($hold.val());
+            if (holdNum > 0) {
+                if (!confirm('预留配合大于零，确定释放？')) {
+                    return false;
+                }
+            }
+            $(".seat_box .blue").each(function () {
+                var index = Number($(this).text()) - 1;
+
+                var nameCondition = '[' + index + '].State';
+                $('input[name="' + nameCondition + '"]').val(1);
+                $(this).removeClass('blue');
+                $(this).addClass('gray');
+            });
+            return true;
+        });
+    });
+</script>

@@ -1,0 +1,219 @@
+﻿@model Lvy.Visa.VModels.VisaCountryQuestionQModel
+@{
+    ViewData["Title"] = "常见问题管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">问题列表</h3>
+            <div class="card-tools">
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <input type="text" name="txtKeyword" class="form-control float-right" placeholder="Search">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default" id="btnSearch"><i class="fas fa-search"></i></button>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal-default">添加问题</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" id="dataList">
+            @Html.Partial("~/Views/Visa/Question/PageList.cshtml", Model)
+        </div>
+        <!-- /.card-body -->
+        @*<div class="card-footer">
+            Footer
+        </div>*@
+        <!-- /.card-footer-->
+    </div>
+    <!-- /.card -->
+
+</section>
+<!-- /.content -->
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">问题内容</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="theForm" role="form">
+                    <input type="hidden" id="hidequestioncode" />
+                    <div class="form-group">
+                        <label for="recipient-name">国家:</label>
+                        <select class="form-control select2bs4" id="CountryCode"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text">问题:</label>
+                        <textarea class="form-control" id="Question"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text">回答:</label>
+                        <textarea class="form-control" id="Answer"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-success" id="btnSave">保存</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<script type="text/javascript">
+    var pageIndex = 1;
+    $(function () {
+        $('#CountryCode').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetCountrySelect2';
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList
+                    };
+                },
+                cache: true
+            },
+            language: "zh-CN",
+            placeholder: '请选择',//默认文字提示
+            templateResult: formatState
+        });
+
+        //保存
+        $("#btnSave").click(function () {
+            if (ValidData()) {
+                var param = {
+                    "QuestionCode": $("#hidequestioncode").val(),
+                    "Question": $("#Question").val(),
+                    "Answer": $("#Answer").val(),
+                    "CountryCode": $("#CountryCode").val(),
+                    "CountryName": $("#CountryCode option:checked").text()
+                };
+                $.post("/Question/SaveQuestion/", param, function (data) {
+                    if (data == 0) {
+                        alert("请选择签证国家！");
+                        $("#hidecountryCode").val("");
+                        $("#countryName").focus();
+                    } else {
+                        $('#modal-default').modal('hide');
+                        // 更新数据
+                        refreshData();
+                    }
+                });
+            }
+        });
+
+        $("#btnSearch").click(function () {
+            refreshData();
+        });
+
+        $('#modal-default').on('show.bs.modal', function (e) {
+            // do something...
+        })
+    });
+
+
+    //验证数据
+    function ValidData() {
+        var countryCode = $("#CountryCode").val();
+        var countryName = $("#CountryCode option:checked").text();
+        if ($.trim(countryCode) == "" || $.trim(countryName) == "" || $.trim(countryName) == "中文/拼音") {
+            alert("请选择签证国家！");
+            $("#countryName").focus();
+            return false;
+        }
+        var question = $("#Question").val();
+        if ($.trim(question) == "") {
+            alert("请输入问题！");
+            $("#Question").focus();
+            return false;
+        }
+        var answer = $("#Answer").val();
+        if ($.trim(answer) == "") {
+            alert("请输入回答！");
+            $("#Answer").focus();
+            return false;
+        }
+        return true;
+    }
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+
+    function refreshData() {
+        var param = { "QuestionModel.CountryName": $("#txtKeyword").val() };
+        $.post("/Question/Index", param, function (data) {
+            $('#dataList').html(data);
+        });
+    }
+
+    //编辑问题
+    function EditQuestion(code) {
+        var param = { "id": code };
+        $.post("/Question/GetQuestion", param, function (data) {
+            if (data.code == '1') {
+                $('#modal-default').modal('show');
+                $("#hidequestioncode").val(data.entity.QuestionCode);
+                $('#CountryCode').append('<option value="' + data.entity.CountryCode + '" selected="selected">' + data.entity.CountryName + '</option>');
+                $('#CountryCode').trigger('change');
+                $("#Question").val(data.entity.Question);
+                $("#Answer").val(data.entity.Answer);
+            }
+        });
+    }
+
+    //删除问题
+    function DeleteQuestion(questioncode) {
+        if (confirm("确定要删除数据吗？")) {
+            $.post("/Question/Deletequestion/", { "QuestionCode": questioncode }, function () {
+                window.location.href = "/CountryQuestion/SearchQuestion/";
+            });
+        }
+    }
+
+</script>
+
+

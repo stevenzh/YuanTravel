@@ -1,0 +1,21 @@
+﻿@model IEnumerable<Lvy.Models.TourDB.TpTourBalanceModel>
+<table class="edittbl" width="100%" border="0">
+    <tr>
+        <td class="label" style="width: 80px;">
+            订单编号：
+        </td>
+        <td style="text-align: left; word-wrap:break-word; word-break:break-all;">
+            @{var ids = string.Join(",", Model.Select(p => p.MasterOrderCode)); }
+            @ids
+        </td>
+    </tr>
+    <tr>
+        <td class="label">
+            应收款：
+        </td>
+        <td style="text-align: left;">
+            @{var totalYs = Model.Sum(p => p.YingShou); }
+            ￥@totalYs
+        </td>
+    </tr>
+</table>

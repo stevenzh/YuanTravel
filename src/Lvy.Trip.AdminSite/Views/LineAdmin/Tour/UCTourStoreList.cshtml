@@ -1,0 +1,161 @@
+﻿@model Lvy.VModels.Product.SearchTourVModel
+
+<style>
+    #listtbl tbody tr:hover { background: rgb(206, 223, 243); }
+</style>
+<table id="listtbl" width="100%" style="border-collapse:separate;border-spacing:0px 10px;">
+    <thead>
+        <tr style="background-color:#388bff;color: #fff">
+            <td style="text-align: center;">团号</td>
+            <td style="text-align: center;">线路名</td>
+            <td style="text-align: center;">出发日期</td>
+            <td style="text-align: center;">计划</td>
+            <td style="text-align: center;">预留</td>
+            <td style="text-align: center;">剩余</td>
+            <td style="text-align: center;">推荐<br />类型</td>
+            <td style="text-align: center;">团队<br />性质</td>
+            <td style="text-align: center;">出发-目的地</td>
+            <td style="text-align: center;">截止日</td>
+            @*<td>报价<br />类型</td>*@
+            <td style="text-align: center; width: 200px;">操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TourStoreList)
+        {
+            <tr>
+                <td>
+                    @item.TourNo
+                </td>
+                <td style="text-align: center;">
+                    <span title="@item.LineName">
+                        @item.LineName
+                    </span>
+                </td>
+                <td style="text-align: center;">
+                    @item.OutDate.ToDateFormat()
+                </td>
+                <td style="text-align: center;">
+                    @item.PlanQuota
+                </td>
+                <td style="text-align: center;">
+                    @item.HoldQuota
+                </td>
+                <td style="text-align: center;">
+                    @item.UseQuota
+                </td>
+                <td style="text-align: center;">
+                    @item.RecommendType
+                </td>
+                <td style="text-align: center;">
+                    @DictionaryTools.GetEnumValue(Enums.TourTypeEnum, item.TourType.ToString())
+                </td>
+                <td style="text-align: center;">
+                    @item.DepartArrive
+                </td>
+                <td style="text-align: center;">
+                    @item.BookingLastDays.ToString("MM-dd")
+                </td>
+                <td style="width:8%">
+                    <table class="toolbar">
+                        <tr>
+                            @if (item.TourState == 2)
+                            {
+                                @*<a name="saleOrClose" href="javascript:void(0);" tourId="@item.TourId" class="offline" state="@item.TourState" title="下线">下线</a>*@
+
+                                <td>
+                                    <a name="saleOrClose" style="color: #379ce9;text-decoration: none;" tourId="@item.TourId" class="offline" title="上线" href="javascript:void(0);">
+
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                </td>
+
+                            }
+                            else if (item.TourState == 3)
+                            {
+                                @*<a name="saleOrClose" href="javascript:void(0);" tourId="@item.TourId" class="online" state="@item.TourState" title="上线">上线</a>*@
+                                <td>
+                                    <a name="saleOrClose" style="color: #379ce9;text-decoration: none;" tourId="@item.TourId" class="offline" state="@item.TourState" title="下线" href="javascript:void(0);">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
+                                </td>
+                            }
+
+                            <td>
+                                <a title="编辑" style="color: #379ce9;text-decoration: none;" class="tour_edit" href="javascript:void(0);" data-tourid="@item.TourId" data-date="@item.OutDate.ToDateFormat()">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                            </td>
+
+                            @*<td>
+                                    <a title="删除" style="color: #379ce9;text-decoration: none;" class="delete" href="javascript:void(0);" check-url="@Url.Action("CheckTourOrdered", new { tourId = item.TourId })" delete-url="@Url.Action("DeleteTour", new { lineId = Model.LineId, tourId = item.TourId })"><i class="fa fa-trash"></i></a>
+                                </td>*@
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        ////删除线路
+        //$('#listtbl a.delete').click(function () {
+        //    var $this = $(this);
+        //   // var load_iii = Utils.layerLoad();
+        //    $.post($this.attr('check-url'), function(data) {
+        //        if(data&&Number(data)==1) {
+        //            Utils.alert('该团计划已产生订单，无法删除！');
+        //          //  Utils.layerClose(load_iii);
+        //        }
+        //        else if(data&&Number(data)==0) {
+        //            if(confirm('确认删除该团计划？')) {
+        //                window.location = $this.attr('delete-url');
+        //            }
+        //           // Utils.layerClose(load_iii);
+        //        }
+        //        else {
+        //            Utils.alert('删除发生异常。');
+        //        }
+        //    });
+        //});
+
+        $('a[name="saleOrClose"]').click(function () {
+            // var load_iii = Utils.layerLoad();
+            var $this = $(this);
+            var tourId = $(this).attr('tourId');
+            $.post('/LineAdmin/SaleOrClose?tourId=' + tourId, function (result) {
+                if (result == 3) {
+
+                    $this.removeClass();
+                    $this.addClass('online');
+                    $this.attr('title', '下线');
+                    $this.attr('state', result);
+
+                    var $i = $($this).find("i");
+                    $i.removeClass();
+                    $i.addClass('fa fa-arrow-up');
+
+                }
+                else if (result == 2) {
+
+                    $this.removeClass();
+                    $this.addClass('offline');
+                    $this.attr('title', '上线');
+                    $this.next().attr('state', result);
+
+                    var $i = $($this).find("i");
+                    $i.removeClass();
+
+                    $i.addClass('fa fa-arrow-down');
+
+                }
+                //Utils.layerClose(load_iii);
+            });
+        });
+
+    });
+</script>

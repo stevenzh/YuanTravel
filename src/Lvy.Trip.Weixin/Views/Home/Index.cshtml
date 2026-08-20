@@ -1,0 +1,201 @@
+﻿@model Lvy.Trip.Weixin.Models.WapModel
+@using Arch.Common
+@using Lvy.Models.SiteDB
+@using Lvy.Models.HotelDB
+@using Lvy.VModels.Online
+@{
+    ViewBag.Title = "首页";
+    string OutCityCode = (String)HttpContext.Current.Session["OutCity"];
+    string picroot = AppSetting.Get("UploadFileRoot");
+    var banners = ViewData["SiteBanner"] as List<SiteBannerModel>; // 线路导航
+    var hostline = ViewData["W001L1"] as List<HotTourVModel>;      // 热门线路
+    var hosthotel = ViewData["W001H1"] as List<HotelModel>;        // 热门酒店
+}
+
+@section HeaderContent{}
+<!-- slider -->
+<div class="slider">
+    <div class="slider-show owl-carousel owl-theme">
+        @for (int i = 0; i < banners.Count; i++)
+        {
+            var ban = banners[i];
+            <div class="slider-content">
+                <div class="mask2"></div>
+                <img src="@(picroot + ban.PicturePath)" alt="">
+                <div class="caption @(i%2==0?"text-center":"")">
+                    <h2>@ban.Subject</h2>
+                    <p>The Best eCommerce</p>
+                    <a class="button" href="@ban.LinkUrl">详情</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<!-- end slider -->
+<!-- official shop -->
+<section class="official-shop segments divider">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>产品类别</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui grid">
+            @*<div class="eight wide column pr">
+                <div class="content-image">
+                    <a href="/hotel">
+                        <img src="~/images/official-shop1.png" alt="">
+                    </a>
+                </div>
+            </div>*@
+            <div class="eight wide column pr">
+                <div class="content-image">
+                    <a href="/ticket">
+                        <img src="~/images/official-shop3.png" alt="">
+                    </a>
+                </div>
+            </div>
+            <div class="eight wide column pl">
+                <div class="content-image">
+                    <a href="/line">
+                        <img src="~/images/official-shop5.png" alt="">
+                    </a>
+                </div>
+            </div>
+            <div class="eight wide column pr">
+                <div class="content-image">
+                    <a href="/line">
+                        <img src="~/images/official-shop4.png" alt="">
+                    </a>
+                </div>
+            </div>
+            <div class="eight wide column pl">
+                <div class="content-image">
+                    <a href="/visa">
+                        <img src="~/images/official-shop6.png" alt="">
+                    </a>
+                </div>
+            </div>
+            <div class="sixteen wide column full">
+                <div class="link">
+                    <a href="/Home/Categories" class="link-color">
+                        更多 <i class="fa fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end official shop -->
+<!-- categories -->
+<section class="categories segments divider">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>热门目的地</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui grid">
+            @foreach (SiteNavItemModel item in Model.NavList)
+            {
+                var url = "/Line/List?outcity=" + item.OutCity + "&itemId=" + item.ItemID;
+                if (!item.IsLeaf)
+                {
+                    url = "/Line/Index2?outcity=" + item.OutCity + "&itemId=" + item.ItemID;
+                }
+                <div class="four wide column pr">
+                    <div class="content" style="background-color:@item.BgColor">
+                        <a href="@url">
+                            <img src="@item.WapImageUrl" class="ui centered image" style="width:50%;" alt="@item.Name" />
+                            <p style="text-align:center; color:#ffffff;">@item.Name</p>
+                        </a>
+                    </div>
+                </div>
+            }
+
+            <div class="sixteen wide column full">
+                <div class="link">
+                    <a href="/line" class="link-color">
+                        更多 <i class="fa fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end categories -->
+<!-- product -->
+<section class="product segments divider">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>推荐旅游线路</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui grid">
+            @for (int i = 0; i < hostline.Count; i++)
+            {
+                var line = hostline[i];
+                <div class="eight wide column @(i%2==0?"pr":"pl")">
+                    <div class="content">
+                        <img class="ui fluid image" src="@(picroot + line.LogoPath)" alt="">
+                        <a href="/line/details/@line.LineId?tourId=0">
+                            <p>@line.LineName</p>
+                        </a>
+                        <h5>￥@Math.Round(line.Price) <span style="font-size:12px;font-weight:normal;">起</span></h5>
+                    </div>
+                </div>
+            }
+            <div class="sixteen wide column full">
+                <div class="link">
+                    <a href="/line" class="link-color">
+                        更多 <i class="fa fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end product -->
+<!-- product -->
+<section class="product segments">
+    <div class="ui container">
+        <div class="section-title">
+            <h3>推荐酒店</h3>
+            <div class="line"></div>
+        </div>
+        <div class="ui grid">
+            @for (int i = 0; i < hosthotel.Count; i++)
+            {
+                var item = hosthotel[i];
+                <div class="eight wide column @(i%2==0?"pr":"pl")">
+                    <div class="content">
+                        <img src="@(picroot + item.LogoPath)" alt="">
+                        <a href="/hotel/details/@item.HotelCode">
+                            <p>@item.HotelName</p>
+                        </a>
+                        @if (item.SalePrice > 0)
+                        {
+                            <h5>￥ @Math.Round(item.SalePrice) <span style="font-size:12px;font-weight:normal;">起</span></h5>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="sixteen wide column full">
+                <div class="link">
+                    <a href="/hotel" class="link-color">
+                        更多 <i class="fa fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end product -->
+
+@section Scripts {
+    <script>
+    $(function () {
+        $("#btnsearch").click(function () {
+            location.href = "/line/list?outcity=@OutCityCode" + "&words=" + $("#inputkey").val();
+        });
+    });
+    </script>
+}

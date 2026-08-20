@@ -1,0 +1,46 @@
+﻿@model Lvy.VModels.Base.GuideVModel
+@{
+    ViewBag.Title = "查询";
+}
+@section AdditionalResources { }
+<form id="theForm" action="@Url.Action("Search")" method="POST">
+
+    <div id="divUCSelectList">
+        <div class="xbox clear">
+            <div align="center" class="xboxcontent clear">
+                <div class="sotable_tit">
+                    领队信息查询
+                </div>
+                <table align="center" class="sotable" style="width:80%;">
+                    <tr>
+                        <td class="label">姓名：</td>
+                        <td>
+                            @Html.TextBoxFor(a => a.GuideModel.Name, new { @class = "text150" })
+                        </td>
+                        <td class="label">部门：</td>
+                        <td>
+                            @Html.DropDownListFor(a => a.GuideModel.TeamID, ViewBag.AccountTeamBeans as IEnumerable<SelectListItem>, new { @Class = "text150" })
+                        </td>
+                        <td class="label">联系电话：</td>
+                        <td>
+                            @Html.TextBoxFor(a => a.GuideModel.Tel, new { @class = "text150" })
+                        </td>
+                    </tr>
+
+                </table>
+                <input class="btn btn1" id="btnSearch" type="submit" value="搜索" />
+                <input class="btn btn1" id="btnClear" type="button" value="清空" />
+            </div>
+        </div>
+    </div>
+    <div id="divUCGuideInfoist">
+        @Html.Partial("UCList", Model)
+    </div>
+</form>
+<script type="text/javascript">
+    //重置
+    $("#btnClear").click(function () {
+        $(".sotable td input[type=text]").val("");
+        $(".sotable td input[type=hidden]").val("");
+    });
+</script>

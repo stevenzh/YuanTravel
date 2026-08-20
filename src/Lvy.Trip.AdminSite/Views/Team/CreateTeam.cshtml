@@ -1,0 +1,89 @@
+﻿@using Lvy.Models
+@using Lvy.Web.Common.Mvc.HtmlHelpers
+@model Lvy.VModels.Crm.TeamVModel
+@{
+    ViewBag.Title = "添加部门";
+}
+@using (Html.BeginForm("CreateTeam", "Team", FormMethod.Post))
+{
+    <div class="station">
+        添加部门
+    </div>
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label" width="90px"><span class="point">*</span>部门名称：</td>
+                    <td>@Html.TextBoxFor(model => model.Team.TeamName, new { id = "TeamName", @class = "text150", @maxlength = "100" })</td>
+                </tr>
+                <tr style="display:none;">
+                    <td class="label"><span class="point">*</span>负责人：</td>
+                    <td>@Html.TextBoxFor(model => model.Team.LeaderCode, new { @class = "text150", contentType = "Number" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>职能：</td>
+                    <td>@Html.DropDownListFor(model => model.Team.DepartCode, Model.DepartList.ToSelectListFor())</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>备注：</td>
+                    <td>@Html.TextAreaFor(m => m.Team.Remark, new { @row = "3" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>是否锁定线路名称：</td>
+                    <td>
+                        @Html.HiddenFor(m => m.Team.IsValid)
+                        @Html.DropDownListFor(model => model.Team.LockName, new List<SelectListItem> { new SelectListItem { Text = "不锁", Value = "0", Selected = Model.Team.LockName.ToBool() }, new SelectListItem { Text = "锁定", Value = "1", Selected = Model.Team.LockName.ToBool() } }, new { id = "LockName" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>对应财务：</td>
+                    <td>
+                        @Html.DropDownListFor(model => model.Team.FinanceCode, Model.FinanceTeams.ToSelectListFor(t => t.TeamID, t => t.TeamName))
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" name="submitBtn" type="submit" value="保存" />
+                        <input class="btn btn1" name="backBtn" type="button" value="返回" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(function () {
+        // 限制输入为数字
+        $('input:text[contentType="Number"]').keypress(function () {
+            InputLimitNumber();
+        });
+
+        // 提交
+        $("input[name=submitBtn]").click(function () {
+
+            var $busPoint = $('#BusPoint');
+            if ($busPoint.val().length == 0) {
+                Utils.alert('请输入上车点。');
+                $busPoint.focus().select();
+                return false;
+            }
+
+            var $jsType = $('select[name="BusPoint.JsType"]');
+            if ($jsType.val().length == 0) {
+                Utils.alert("接送类型不能为空！");
+                $jsType.focus().select();;
+                return false;
+            }
+
+            return true;
+        });
+
+        // 返回
+        $("input[name=backBtn]").click(function () {
+            window.location = "/Team/SearchTeam";
+        });
+
+    });
+
+</script>

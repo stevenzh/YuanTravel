@@ -1,0 +1,45 @@
+﻿@using Lvy.Models.WeixinDB
+@{
+    ViewBag.Title = "个人中心";
+    var userInfo = HttpContext.Current.Session["WeixinUser"] as Member;
+}
+
+<!-- settings -->
+<div class="settings segments-page">
+    <div class="ui container">
+        <div class="pages-title">
+            <h3>设置</h3>
+        </div>
+        <div class="ui form">
+            <div class="profile-photo">
+                <span>头像 (80px X 80px)</span>
+                <div class="content"><img src="@userInfo.HeadImgUrl" alt=""><input type="file"></div>
+            </div>
+            <div class="profile-banner">
+                <span>相册封面 (360px X 200px)</span>
+                <div class="content"><img src="images/bg-profile2.jpg" alt=""><input type="file"></div>
+            </div>
+            <div class="field">
+                <label>姓名</label>
+                <input type="text" value="@userInfo.RealName">
+            </div>
+            <div class="field">
+                <label>电子邮箱</label>
+                <input type="text" value="contact@yourcontact.com">
+            </div>
+            <div class="field">
+                <label>联系电话</label>
+                <input type="text" value="@userInfo.PhoneNumber">
+            </div>
+            <div class="field">
+                <label>发票地址</label>
+                <textarea cols="30" rows="5">0450 Village Street, New York, United States, 090</textarea>
+            </div>
+            <div class="field">
+                <label>寄送地址</label>
+                <textarea cols="30" rows="5">0450 Village Street, New York, United States, 090</textarea>
+            </div>
+            <button class="button" type="submit">保存</button>
+        </div>
+    </div>
+</div><!-- end settings -->

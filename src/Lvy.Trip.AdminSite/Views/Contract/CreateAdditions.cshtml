@@ -1,0 +1,85 @@
+﻿@model Lvy.Models.ContractAdditions
+@{
+    ViewBag.Title = "";
+}
+@section AdditionalResources
+{
+    <script src="~/WebRes/Scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+}
+<style type="text/css">
+    .listtbl tr td { line-height: 35px; border: 1px solid #e7eaec; }
+    .form-item { width: 80px; }
+    .form-gorup { text-align: center; padding-top: 10px; }
+    .text250 { width: 250px; }
+</style>
+<div class="form-box">
+    <form id="form1" method="post">
+        <table class="listtbl" style="width:100%;">
+            <tbody>
+                @if (Model != null)
+                {
+                    @Html.HiddenFor(m => m.id)
+                    @Html.HiddenFor(m => m.createBy)
+                    @Html.HiddenFor(m => m.createTime)
+                    <tr>
+                        <td class="form-item">标题：</td>
+                        <td>@Html.TextBoxFor(m => m.title, new { @id = "title", @class = "text250" })</td>
+                    </tr>
+                    <tr>
+                        <td class="form-item">内容：</td>
+                        <td>
+                            <textarea id="content" name="content" rows="10" cols="10" style="width:96%;min-height:500px;">@Model.content</textarea>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="form-gorup">
+            <input name="saveBtn" type="button" value="保存" class="btn btn1" />
+            <input name="backBtn" type="button" value="关闭" class="btn btn1" />
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    $(function () {
+        $("input[name='saveBtn']").click(function () {
+
+            if (Utils.Trim($("#title").val()) == "") {
+                Utils.alert("请输入标题");
+                return false;
+            }
+            if (Utils.Trim($("#content").val()) == "") {
+                Utils.alert("请输入内容");
+                return false;
+            }
+            var params = decodeURIComponent($("#form1").formSerialize());
+            $.ajax({
+                url: "/Contract/CreateAdditions",
+                type: 'post',
+                dataType: 'json',
+                data: params,
+                success: function (data) {
+                    Utils.alert(data.msg);
+                    parent.pageselectCallback();
+                    // 弹出框关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
+                },
+                error: function (data) {
+                    Utils.alert("请求异常");
+                }
+            });
+        });
+
+        $("input[name='backBtn']").click(function () {
+            // 弹出框关闭
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+        });
+    });
+</script>
+
+
+

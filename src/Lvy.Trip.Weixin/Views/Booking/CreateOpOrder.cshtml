@@ -1,0 +1,233 @@
+﻿@model  Lvy.VModels.Booking.BookingVModel
+@using Lvy.Models
+@{
+    ViewBag.Title = "新增开单";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section HeaderContent
+{
+    <script src="~/Scripts/My97DatePicker/WdatePicker.js"></script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Index">首页</a></li>
+                    <li class="breadcrumb-item"><a href="/Op/PlanList">开班计划</a></li>
+                    <li class="breadcrumb-item active">开单</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+
+            <div class="card ">
+                <div class="card-header">
+                    <h3 class="card-title">开单信息</h3>
+                </div>
+                <!-- /.box-header -->
+                <!-- form start -->
+                <form role="form" id="theForm">
+                    @Html.Hidden("TourId", Model.Tour.Id)
+                    @Html.Hidden("Tour.LineId", Model.Tour.LineId)
+                    <input type="hidden" id="OpenPriceStr" name="OpenPriceStr" />
+                    <div class="card-body">
+                        <table class="table">
+                            <tr>
+                                <td>线路：</td>
+                                <td>@Model.Tour.Line.LineName</td>
+                            </tr>
+                            <tr>
+                                <td>出团日期：</td>
+                                <td>@Model.Tour.OutDate</td>
+                            </tr>
+                            <tr>
+                                <td>剩余人数：</td>
+                                <td>@Model.Quota.UseQuota</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>价格类型</td>
+                                            <td>市场价</td>
+                                            <td>结算价</td>
+                                            <td>特价让利</td>
+                                            <td>人数</td>
+                                        </tr>
+                                        @foreach (var item in Model.PriceModels)
+                                        {
+                                            <tr class="trPrice">
+                                                <td>@item.PriceRemark.TrimWithElipsis(18)</td>
+                                                <td>@string.Format("{0:F0}", item.Price)</td>
+                                                <td>@string.Format("{0:F0}", item.SettlePrice)</td>
+                                                <td align="center">@string.Format("{0:F0}", item.TeJiaFanLi)</td>
+                                                <td align="center">
+                                                    <input type="hidden" name="priceId" value="@item.Id" />
+                                                    <input type="hidden" name="price" value="@String.Format("{0:F0}", item.SettlePrice-item.TeJiaFanLi)" />
+                                                    <input type="number" value="0" class="form-control" style="width:40px" name="priceNum" onchange="calcPrice()" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>团款合计：</td>
+                                <td id="tdPrice">0</td>
+                            </tr>
+                            <tr>
+                                <td><span class="point">*</span>订单人数：</td>
+                                <td>@Html.TextBoxFor(a => a.TravellerCount, new { @class = "form-control" })</td>
+                            </tr>
+                            <tr>
+                                <td><span class="point">*</span>占位时长(小时)：</td>
+                                <td>@Html.TextBoxFor(a => a.EffectiveHour, new { @class = "form-control" })</td>
+                            </tr>
+                            <tr>
+                                <td>定金金额</td>
+                                <td> @Html.TextBoxFor(m => m.Deposit, new { @class = "form-control" })</td>
+                            </tr>
+                            <tr>
+                                <td>定金晚缴纳时限</td>
+                                <td> @Html.TextBoxFor(m => m.DepositDate, new { @onfocus = "WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true})", @class = "form-control" })</td>
+                            </tr>
+                            <tr>
+                                <td>销售部门</td>
+                                <td>@Html.DropDownList("SalesTeamId", ViewBag.SalesOfTeam as IEnumerable<SelectListItem>, new { @class = "form-control" })</td>
+                            </tr>
+                            <tr>
+                                <td>销售员</td>
+                                <td> @Html.DropDownList("SalerCode", ViewBag.Salers as IEnumerable<SelectListItem>, new { @id = "SalerCode", @class = "form-control" })</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="card-footer">
+                        <button type="button" id="btnSave" class="btn btn-primary">提交</button>
+                        <button type="button" class="btn btn-primary" onclick="window.history.go(-1);">返回</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+
+    $(function () {
+        $("#SalesTeamId").change(function () {
+            var teamId = $(this).val();
+            $("#SalerCode").empty();
+            if (teamId == "") {
+                $("#SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                return;
+            }
+            $.ajax({
+                url: '@Url.Action("GetTeamUserByTeamId", "Booking")',
+                type: 'post',
+                data: { teamId: teamId },
+                success: function (data) {
+                    $("#SalerCode").append("<option value=\"\">-- 请选择 --</option>");
+                    $.each(data, function (i, item) {
+                        $("#SalerCode").append("<option value=\"" + item.Code + "\">" + item.Name + "</option>");
+                    });
+                }
+            });
+        });
+
+
+        $("input[name='TravellerCount']").change(function () {
+            $(this).val($(this).val().replace(/\D/g, ""))
+        });
+
+        $("input[name='EffectiveHour']").change(function () {
+            $(this).val($(this).val().replace(/\D/g, ""))
+        });
+
+        $("#btnSave").click(function () {
+
+            if (!CheckConfirm()) {
+                return;
+            }
+
+            var params = decodeURIComponent($("#theForm").formSerialize());
+            $.post('@Url.Action("SaveOpOrder")', params, function (data) {
+
+                if (data.StateCode == 100) {
+                    // 预定成功
+                    Utils.alert("开单成功！");
+                   document.location.href = '@Url.Action("Details","Booking", new { id=Model.Tour.Id})';
+                    return;
+                } else if (data.StateCode == 110) {
+                    // 可用名额小于预定名额
+                    Utils.alert("开单失败。开单的名额数超过了当前团可用名额！");
+                }
+                else {
+                    Utils.alert("开单失败。请联系技术支持！");
+                }
+            });
+        })
+
+    });
+
+
+    function CheckConfirm() {
+
+        if ($("#SalerCode").val() == "") {
+            Utils.alert("请选择销售员！");
+            return false;
+        }
+        if ($("#TravellerCount").val() == "") {
+            Utils.alert("请输入订单人数！");
+            return false;
+        }
+        var TravellerCount = Number($.trim($("#TravellerCount").val()));
+        if (TravellerCount == 0) {
+            Utils.alert("订单人数必须大于0！");
+            return false;
+        }
+        if ($.trim($("#TravellerCount").val()) == "") {
+            Utils.alert("请输入有效时长！");
+            return false;
+        }
+        var EffectiveHour = Number($.trim($("#EffectiveHour").val()));
+        if (EffectiveHour == 0) {
+            Utils.alert("有效时长必须大于0！");
+            return false;
+        }
+
+        return true;
+    }
+
+    function calcPrice() {
+        var allPrice = 0;
+        var pax = 0;
+        var priceStr = "";
+        $(".trPrice").each(function () {
+            var inputPriceId = $(this).find("input[name='priceId']").val();
+            var inputPrice = $(this).find("input[name='price']").val();
+            var numPrice = $(this).find("input[name='priceNum']").val();
+            allPrice += Number(inputPrice) * Number(numPrice);
+            pax += Number(numPrice);
+            priceStr += inputPriceId + "," + inputPrice + "," + numPrice+";"
+        });
+
+        $("#tdPrice").html(allPrice);
+        $("#TravellerCount").val(pax);
+        $("#OpenPriceStr").val(priceStr);
+    }
+
+</script>

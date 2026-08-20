@@ -1,0 +1,91 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@{
+    ViewBag.Title = "编辑账号";
+}
+
+<form id="theForm" action="@Url.Action("Update")" method="POST">
+    <div class="station">编辑账号</div>
+    <div class="inform">
+        <div class="in_box">
+            <table width="100%" class="edittbl">
+                <tr>
+                    <td class="label" width="110px"><span class="point">*</span>登陆名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.LoginName, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>密码：</td>
+                    <td>
+                        @Html.HiddenFor(a => a.Account.Pwd)
+                        <input type="button" class="btn btn1" value="重置密码" id="resetPwdBtn" onclick="$('#Account_Pwd').val('888888');" />
+                        <span style="color: gray"> &nbsp;&nbsp; 默认：888888 </span>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>姓名：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label"><span class="point">*</span>性别：</td>
+                    <td>@Html.RadioGroup("Account.Sex", Model.SexBeans, Model.Account.Sex.ToString())</td>
+                </tr>
+                <tr>
+                    <td class="label">联系手机：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Mobile, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">Email：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Email, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">座机：</td>
+                    <td>@Html.TextBoxFor(a => a.Account.Phone, new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">所属部门：</td>
+                    <td>@Html.DropDownListFor(a => a.Account.DepartCode, Model.DepartBeans.ToSelectListFor(), new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">所属客户：</td>
+                    <td>@Html.DropDownListFor(a => a.Account.CustomerCode, Model.CustomerBeans.ToSelectListFor(), new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td class="label">账户类型：</td>
+                    <td>@Html.DropDownListFor(a => a.Account.AccountType, Model.AccountTypeBeans.ToSelectListFor(), new { @class = "text150" })</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                        <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    @Html.HiddenFor(a => a.Account.Code)
+    @Html.HiddenFor(a => a.Account.AccountType)
+    @Html.HiddenFor(a => a.Account.IsValid)
+    @Html.HiddenFor(a => a.Account.OwnerCode)
+    @Html.HiddenFor(a => a.Account.Pwd)
+</form>
+
+<script type="text/javascript">
+    $(function () {
+        $("#resetPwdBtn").click(function () {
+            var params = {
+                accountCode: Utils.Trim($("#Account_Code").val())
+            };
+            $.post("@Url.Action("ResetPwd")", params, function (flag) {
+
+                if (flag > 0) {
+                    Utils.alert("重置密码成功");
+                } else {
+                    Utils.alert("重置密码失败！");
+                }
+            });
+        });
+    });
+</script>

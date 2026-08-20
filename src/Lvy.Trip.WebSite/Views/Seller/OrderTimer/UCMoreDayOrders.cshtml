@@ -1,0 +1,83 @@
+﻿@model Lvy.VModels.Order.TpOrderVModel
+@{
+    //距出发日期3天以外的
+    DateTime ThreeDay = DateTime.Now.AddDays(3);
+    var MoreDayModels = Model.OrderModels.Where(a => a.OutDate > ThreeDay).ToList();
+    int cnt = MoreDayModels.Count;
+}
+@if (MoreDayModels.Count > 0)
+{
+    var bookName0 = DictionaryTools.GetCachedCustomer(MoreDayModels[0].BookingCustomer).Name;
+    <tr name="4">
+        <td name="orderCode" align="center" orderCode="@MoreDayModels[0].OrderCode">
+            @MoreDayModels[0].OrderCode
+        </td>
+        <td align="left" title="@MoreDayModels[0].LineName">
+            @MoreDayModels[0].LineName.TrimWithElipsis(20)
+        </td>
+        <td align="center">@MoreDayModels[0].OutDate.ToDateFormat()</td>
+        <td align="center">@MoreDayModels[0].LinkMan</td>
+        <td align="center">@MoreDayModels[0].TravellerCount</td>
+        <td name="orderState" align="center" style="color: red;">
+            @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, MoreDayModels[0].OrderState.ToString())
+        </td>
+        <td align="center">@MoreDayModels[0].TolYsPrice</td>
+        <td align="center">@MoreDayModels[0].Managers</td>
+        <td align="left">
+            @Html.EditActionLink("EditTimerOrder", "Order", new { orderCode = MoreDayModels[0].OrderCode, dayFlag = 4 })
+            <!--0:时间相等；1在72个小时范围之外；-1在72个小时范围之内-->
+            @{
+                var tempOutDate = MoreDayModels[0].OutDate;
+            }
+            @if (tempOutDate.CompareTo(tempOutDate.AddHours(72)) < 1)
+            {
+                <a href="javascript:void(0);" class="delete">
+                    <span style="display: none;">@MoreDayModels[0].Remark</span><span name="createdTime" style="display: none;">@MoreDayModels[0].CreatedTime</span>
+                </a>
+            }
+            <a title="结算单" href="@Url.Action("OrderConfirmPrint", "Order", new { orderCode = MoreDayModels[0].OrderCode, isTimerOrder = 1 })">结算单</a>
+        </td>
+    </tr>
+    for (int i = 1; i < cnt; i++)
+    {
+        var bookName = DictionaryTools.GetCachedCustomer(MoreDayModels[i].BookingCustomer).Name;
+        <tr name="4">
+            <td name="orderCode" align="center" orderCode="@MoreDayModels[i].OrderCode">
+                @MoreDayModels[i].OrderCode
+            </td>
+            <td align="left" title="@MoreDayModels[i].LineName">
+                @MoreDayModels[i].LineName.TrimWithElipsis(20)
+            </td>
+            <td align="center">@MoreDayModels[i].OutDate.ToDateFormat()</td>
+            <td align="center">@MoreDayModels[i].LinkMan</td>
+            <td align="center">@MoreDayModels[i].TravellerCount</td>
+            <td name="orderState" align="center" style="color: red;">
+                @DictionaryTools.GetEnumValue(Enums.OrderStateEnum, MoreDayModels[i].OrderState.ToString())
+            </td>
+            <td align="center">@MoreDayModels[i].TolYsPrice</td>
+            <td align="center">@MoreDayModels[i].Managers</td>
+            <td align="left">
+                @Html.EditActionLink("EditTimerOrder", "Order", new { orderCode = MoreDayModels[i].OrderCode, dayFlag = 4 })
+                <!--0:时间相等；1在72个小时范围之外；-1在72个小时范围之内-->
+                @{
+                    var tempOutDate2 = MoreDayModels[i].OutDate;
+                }
+                @if (tempOutDate2.CompareTo(tempOutDate2.AddHours(72)) < 1)
+                {
+                    <a href="javascript:void(0);" class="delete">
+                        <span style="display: none;">@MoreDayModels[i].Remark</span>
+                        <span name="createdTime" style="display: none;">@MoreDayModels[i].CreatedTime</span>
+                    </a>
+                }
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="9" style="color: red; text-align: center;">
+            当前没有数据
+        </td>
+    </tr>
+}

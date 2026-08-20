@@ -1,0 +1,70 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Order.TpOrderVModel
+@{
+    ViewBag.Title = "退单倒计时";
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+@section AdditionalResources
+{
+
+}
+<form id="theForm" method="POST">
+    <div class="xbox">
+        <div align="center" class="xboxcontent">
+            <div class="sotable_tit">退单须知</div>
+            <table width="100%" class="sotable">
+                <tr style="height: 23px;">
+                    <td>
+                        <span style="color: red; font-weight: bold;">*</span>您在规定时间内可以自行对【未确认】订单进行【退团】操作，无需违约金：
+                    </td>
+                </tr>
+                <tr style="height: 23px;">
+                    <td style="padding-left: 55px;">
+                        出发日期<span style="color: red; font-weight: bold;">72</span>小时前预定的订单，在出发日期 <span style="color: red;
+                        font-weight: bold;">72</span>小时前可以自行退团。
+                    </td>
+                </tr>
+                <tr style="height: 23px;">
+                    <td style="padding-left: 55px;">
+                        出发日期<span style="color: red; font-weight: bold;">48-72</span>小时内预定的订单，预定后<span style="color: red;
+                        font-weight: bold;">6</span>小时内可以自行退团。
+                    </td>
+                </tr>
+                <tr style="height: 23px;">
+                    <td style="padding-left: 55px;">
+                        出发日期<span style="color: red; font-weight: bold;">24-48</span>小时内预定的订单，预定后<span style="color: red;
+                        font-weight: bold;">4</span>小时内可以自行退团。
+                    </td>
+                </tr>
+                <tr style="height: 23px;">
+                    <td style="padding-left: 55px;">
+                        出发日期<span style="color: red; font-weight: bold;">0-24</span>小时内预定的订单，预定后<span style="color: red;
+                        font-weight: bold;">2</span>小时内可以自行退团。
+                    </td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; line-height: 20px;">
+                        如超出以上规定时间后仍然要退团，需要电话联系相关工作人员进行退团操作，并且将按出团通知书规定收取【违约金】（包括未确认订单）。
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="xbox">
+        <div class="xboxcontent clear">
+            <table width="100%" class="edittbl" style="border-bottom: 0px;">
+                <tr>
+                    <td>
+                        线路类型：@Html.RadioButton("shotLine", "1", true)<label for="">国内短线</label>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divOrderSearch">
+        @Html.Partial("OrderTimer/UCTimerOrderSearch", Model)
+    </div>
+    @*隐藏域*@
+    @Html.HiddenFor(a => a.OrderModel.Remark)
+    @Html.HiddenFor(a => a.OrderModel.OrderCode, new { id = "hiddenOrderCode" })
+</form>

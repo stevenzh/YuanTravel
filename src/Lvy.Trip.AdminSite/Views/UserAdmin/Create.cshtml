@@ -1,0 +1,63 @@
+﻿@model Lvy.VModels.Crm.AccountEditVModel
+@{
+    ViewBag.Title = "创建账号";
+}
+
+<form id="theForm" action="@Url.Action("Add")" method="POST">
+   <div class="station">创建账号</div>
+   
+    <div class="inform">
+      <div class="in_box">	
+        <table  width="100%" class="edittbl" >
+          <tr>
+              <td class="label" width="70px" ><span class="point">*</span>登陆名：</td>
+              <td >@Html.TextBoxFor(a=>a.Account.LoginName,new{@class="text150"})</td>
+          </tr>
+          <tr>
+             <td class="label"><span class="point">*</span>密码：</td>
+              <td >@Html.PasswordFor(a=>a.Account.Pwd,new{@class="text150"})</td>         
+            
+          </tr>
+            <tr>
+                <td class="label"><span class="point">*</span>姓名：</td>
+                <td>@Html.TextBoxFor(a => a.Account.Name, new { @class = "text150" })</td>
+            </tr>
+          <tr>
+             <td class="label"><span class="point">*</span>性别：</td>
+              <td >@Html.RadioGroup("Sex", Model.SexBeans,"1")</td>
+          </tr>    
+          <tr>
+             <td class="label">联系手机：</td>
+              <td >@Html.TextBoxFor(a=>a.Account.Mobile,new{@class="text150"})</td>
+          </tr>         
+            <tr>
+                <td class="label">Email：</td>
+                <td >@Html.TextBoxFor(a=>a.Account.Email,new{@class="text150"})</td>
+            </tr>
+           <tr>
+             <td class="label">座机：</td>
+              <td >@Html.TextBoxFor(a=>a.Account.Phone,new{@class="text150"})</td>
+           </tr> 
+            <tr>
+             <td class="label">所属部门：</td>
+              <td >@Html.DropDownListFor(a => a.Account.DepartCode, Model.DepartBeans.ToSelectListFor(),new{@class="text150"})</td>
+            </tr> 
+           <tr>
+             <td class="label">所属客户：</td>
+              <td >@Html.DropDownListFor(a => a.Account.CustomerCode, Model.CustomerBeans.ToSelectListFor(Request.QueryString["customerCode"]), new { @class = "text150" })</td>
+            </tr>                                                                                        
+          <tr>
+             <td class="label">账户类型：</td>
+              <td >@Html.DropDownListFor(a => a.Account.CustomerCode, Model.AccountTypeBeans.ToSelectListFor(), new { @class = "text150" })</td>
+          </tr>                
+            <tr>
+                  <td></td>
+                  <td>
+                     <input class="btn btn1" id="btnSave" type="submit" value="保存" />
+                     <input class="btn btn1" name="btnClear" type="button" value="返回列表" onclick="location.href='@Url.Action("Search")'"/>
+                  </td>
+              </tr>    
+        </table>
+      </div>    
+    </div>
+</form>

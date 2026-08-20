@@ -1,0 +1,177 @@
+﻿@model Lvy.Visa.VModels.VisaBookingQModel
+@{
+    ViewData["Title"] = "签证产品预订";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources
+{
+    <script>
+        var index = 0;
+    </script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Home/Index">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <div class="card">
+        @*<div class="card-header">
+                <h3 class="card-title">过滤条件</h3>
+            </div>*@
+        <div class="card-body p-2">
+            <div class="form-row">
+                <div class="col-auto">
+                    @Html.TextBoxFor(a => a.InformationCode, new { @id = "InformationCode", @class = "form-control ", @placeholder = "产品编号" })
+                </div>
+                <div class="col-auto">
+                    @Html.TextBoxFor(a => a.InformationName, new { @id = "InformationName", @class = "form-control ", @placeholder = "产品名称" })
+                </div>
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.VisaType, ViewData["VisaTypeList"] as IEnumerable<SelectListItem>, new { @class = "form-control ", @id = "VisaType" })
+                </div>
+                <div class="col-2">
+                    <select id="VisaCountry" class="form-control">
+                    </select>
+                </div>
+                <div class="col-2">
+                    <select id="VisaIssuePlace" class="form-control">
+                    </select>
+                </div>
+                <div class="col-auto">
+                    @Html.DropDownListFor(a => a.LinqQuValue, ViewData["LinqQuList"] as IEnumerable<SelectListItem>, new { @id = "LinqQuValue", @class = "form-control " })
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button name="btnSearch" type="button" id="search" class="btn btn-default">查询</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">搜索结果</h3>
+        </div>
+
+        <div id="ShowList" class="card-body">
+            @{Html.RenderAction("ProductList");}
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(function () {
+
+        $('#VisaCountry').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            theme: 'bootstrap4',
+            language: "zh-CN",
+            placeholder: '请选择国家或地区',//默认文字提示
+            templateResult: formatState,
+            allowClear: true
+        });
+
+        $('#VisaIssuePlace').select2({
+            ajax: {
+                url: function (params) {
+                    return ApiServerUrl + '/Dest/GetDestSelect2?inChina=true';
+                },
+                dataType: 'json',
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    var itemList = [];//当数据对象不是{id:0,text:'ANTS'}这种形式的时候，可以使用类似此方法创建新的数组对象
+                    var arr = data.items
+                    for (item in arr) {
+                        itemList.push({ id: arr[item].ParentStr, text: arr[item].Name, pinyin: arr[item].JPinYin })
+                    }
+                    return {
+                        results: itemList,
+                        pagination: {
+                            more: (params.page * 30) < data.total_count
+                        }
+                    };
+                },
+                cache: true,
+            },
+            theme: 'bootstrap4',
+            language: "zh-CN",
+            placeholder: '请选择办理地点',//默认文字提示
+            templateResult: formatState,
+            allowClear: true
+        });
+
+        //查询
+        $("#search").click(function () {
+            var load_iii = Utils.layerLoad();
+            var param = {
+                "InformationCode": $("#InformationCode").val(),
+                "InformationName": $("#InformationName").val(),
+                "VisaType": $("#VisaType").val(),
+                "VisaCountry":  $("#VisaCountry").val(),
+                "VisaIssuePlace": $("#VisaIssuePlace").val(),
+                "LinqQuValue": $("#LinqQuValue").val(),
+                'VisaInformationList.PageIndex': 1,
+                'VisaInformationList.PageSize': 10
+            };
+            $.post("/Booking/ProductList/", param, function (data) {
+                $("#ShowList").html(data);
+                Utils.layerClose(load_iii);
+            });
+
+        });
+    });
+
+    //预定
+    function FunctionOperation(code) {
+        var url = "/Booking/Bookinginfo/" + code;
+        layer.open({ type: 2, title: '[签证] - 预定', maxmin: true, shadeClose: true, area: ['1100px', '580px'], content: url });
+    }
+    //查看产品详情
+    function ShowInfomation(id, name) {
+        var url = "/Booking/ProductInfo?InformationCode=" + id;
+        layer.open({ type: 2, title: '[' + name + '] 产品详细', maxmin: true, shadeClose: true, area: ['900px', '500px'], content: url });
+    }
+
+
+    function formatState(state) {
+        if (!state.id) { return state.text; }
+        var $state = $(
+            '<span><span class="img-flag">' + state.pinyin + '</span> ' + state.text + '</span>'
+        );
+        return $state;
+    };
+</script>
+

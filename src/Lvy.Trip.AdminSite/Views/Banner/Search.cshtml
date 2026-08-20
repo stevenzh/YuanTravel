@@ -1,0 +1,87 @@
+﻿@model Lvy.VModels.Site.BannerVModel
+@{
+    ViewBag.Title = "滚动栏管理";
+    Layout = "~/Views/Shared/_Single.cshtml";
+}
+@section AdditionalResources { }
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h3>@ViewData["Title"]</h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<section class="content">
+    <form id="theForm" method="POST" action="@Url.Action("Search")" class="form-search">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">广告列表</h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width:300px;">
+                        @Html.TextBoxFor(a => a.Name, new { @class = "form-control float-right", @placeholder = "标题" })
+                        @Html.DropDownListFor(a => a.Type, ViewData["BannerType"] as IEnumerable<SelectListItem>, new { @class = "form-control float-right" })
+                        <div class="input-group-append">
+                            <button id="btnSave" type="button" class="btn btn-sm btn-default"><i class="fas fa-search"></i></button>
+                            <button id="btnAdd" type="button" class="btn btn-sm btn-success"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.box-header -->
+            <div id="divSearch" class="card-body">
+                @Html.Partial("UCSearch")
+            </div>
+        </div>
+    </form>
+
+</section>
+
+
+<script type="text/javascript">
+
+    //分页控件 begin
+    $(function () {
+
+        $("#btnAdd").click(function () {
+            var url = '@Url.Action("Create")';
+            layer.open({ type: 2, title: '添加广告', maxmin: true, shadeClose: false, area: ['600px', '400px'], content: url });
+        });
+
+        $("#btnSave").click(function () {
+            pageselectCallback();
+        });
+    });
+
+    //回调方法
+    function pageselectCallback() {
+        var load_iii = Utils.layerLoad();
+        var params = $("#theForm").formSerialize();
+        $.post('@Url.Action("Search")', params, function (data) {
+            if (data.length < 1) {
+                Utils.alert("查询出错，请稍后查询！");
+                return false;
+            }
+            $('#divSearch').html(data);
+            Utils.layerClose(load_iii);
+        });
+    }
+    function popEdit(id) {
+        var url = "/Banner/Edit/"+ id;
+        layer.open({ type: 2, title: '添加广告', maxmin: true, shadeClose: false, area:['900px', '560px'], content: url });
+    }
+    function popDelete(id) {
+        if (confirm('确定要删除嘛？')){
+
+        }
+    }
+</script>

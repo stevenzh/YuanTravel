@@ -1,0 +1,51 @@
+﻿@model Lvy.Visa.VModels.OrderQModel
+<div class="row">
+    <div class="col-12">
+        <button type="button" id="btnAddChildOrder" class="btn btn-sm btn-success float-right">添加子订单</button>
+    </div>
+</div>
+
+<table class="table table-sm mt-3">
+    <tr>
+        <th>产品名称</th>
+        <th>产品类别</th>
+        <th>单价</th>
+        <th>数量</th>
+        <th>备注</th>
+        <th>应收金额</th>
+        <th style="width:120px;"></th>
+    </tr>
+    @{ decimal? total = 0;
+        if (Model != null)
+        {
+            foreach (var item in Model.ChildOrderList)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@DictionaryTools.GetEnumValue(Enums.ProductAllTypeEnum, item.ProductType)</td>
+                    <td>@item.UnitPrice</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Remark</td>
+                    <td>@Math.Round(item.Amount, 2)</td>
+                    <td>
+                        @if (item.IsCancel == 0)
+                        {
+                            <button class="btn btn-sm btn-info" onclick="UpdateChild('@item.Id')">编辑</button>
+                            <button class="btn btn-sm btn-danger" onclick="DeleteChild('@item.Id')">取消</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-info" onclick="DeleteChild('@item.Id')">恢复</button>
+                        }
+                    </td>
+                </tr>
+                total = total + item.Amount;
+            }
+        }
+        <tr class="table_title">
+            <td colspan="7" style="text-align: right; color: #FF0000; background-color:#e4e4e4;">
+                子订单合计：@Math.Round(total.Value, 2)&nbsp;元&nbsp;&nbsp;
+            </td>
+        </tr>
+    }
+</table>

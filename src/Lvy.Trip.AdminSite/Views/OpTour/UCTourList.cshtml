@@ -1,0 +1,213 @@
+﻿@using Lvy.Models
+@model Lvy.VModels.Op.TourVModel
+
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>团号</th>
+            <th>线路名称</th>
+            <th>库存</th>
+            <th>已确认</th>
+            <th>占位</th>
+            <th>余位</th>
+            <th>截止日</th>
+            <th>报价</th>
+            <th>团队状态</th>
+            <th style="width: 150px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TourList.Items.Count > 0)
+        {
+            foreach (var item in Model.TourList.Items)
+            {
+                var state = @DictionaryTools.GetEnumValue(Enums.AuditStateEnum, item.AuditState.ToString());
+                <tr>
+                    <td>
+                        <a href="/Optour/OpTourOrderInfo?tourId=@item.TourId">@item.TourNo</a><br />
+                        Dt: @item.OutDate.ToDateFormat()
+                    </td>
+                    <td>
+                        <span title="@item.LineName">
+                            @item.LineName.TrimWithElipsis(25)
+                        </span>
+                    </td>
+                    <td> @(item.HoldQuota > 0 ? (item.PlanQuota - item.HoldQuota) + "+" + item.HoldQuota : item.PlanQuota.ToString())</td>
+                    <td>@item.TravellerCount</td>
+                    <td>@item.UnlockQuota</td>
+                    <td>@item.UseQuota</td>
+                    @*<td>
+                            @DictionaryTools.GetEnumValue(Enums.TuiJianTypeEnum, item.TuiJianType.ToString(), false)
+                        </td>*@
+                    <td>@item.BookingLastDays.ToDateFormat()</td>
+                    <td>
+                        <a title="价格" href="javascript:void(0);" name="viewPrice" tourid="@item.TourId" class="search">查看</a>
+                    </td>
+                    <td style="text-align: center">
+                        @if (item.AuditState == 0)
+                        {
+                            <button type="button" class="btn btn-sm btn-info" title="未成团" name="IsTourOk" url="/OpTour/IsToured?tourId=@item.TourId">未成团</button>
+                        }
+                        else
+                        {
+                            <b>@state </b>
+                        }
+                    </td>
+                    <td class="project-actions text-right">
+                        <button type="button" class="btn btn-sm btn-info mt-1" onclick="createOpOrder('@item.TourId')">开单</button>
+                        <a class="btn btn-sm btn-primary mt-1" href="@Url.Action("AddOrder",new { tourId = item.TourId })">补单</a>
+                        <a class="btn btn-sm btn-secondary mt-1" href="@Url.Action("EditTourists",new { tourId = item.TourId })">名单</a>
+
+                        @if (item.AuditState > 0)
+                        {
+                            // 已成团后可进入
+                            <a class="btn btn-sm btn-warning mt-1" target="_self" href="@Url.Action("ShowTourBalance",new { tourId = item.TourId, IsCaiWu =0 })">核算</a>
+                        }
+
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="12" align="center" style="color: red;">
+                    当前没有数据！
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@Html.HiddenFor(m => m.TourList.PageIndex, new { id = "hiddenIndex" })
+@Html.HiddenFor(m => m.TourList.PageSize)
+<div id="divPagination" class="digg">
+</div>
+<input id="outDate" type='text' name='outDate' style="display: none;" value='@DateTime.Now.ToDateFormat()' />
+<input id="SelectedLineTypeIds" name="SelectedLineTypeIds" style="display: none;" />
+<div id="htmlTemp" style="display: none;">
+    <table class="edittbl">
+        <tr>
+            <td class="label" style="width: 80px;">
+                出发日期：
+            </td>
+            <td>
+                <input id="txtOutDate" type='text' class='Wdate' onfocus="WdatePicker({ isShowClear: false, readOnly: true });$('#outDate').val($.trim($('#txtOutDate').val()));" value='@DateTime.Now.ToDateFormat()' />
+            </td>
+        </tr>
+        <tr>
+            <td class="label" style="width: 80px;">
+                线路类型：
+            </td>
+            <td id="LineTypeIds">
+                @{
+                    List<KeyValueBean> lstAllLineTypeKeys = DictionaryTools.GetEnumsBy("LineTypeEnum").ToList();
+                    string strAllTypeKeys = "";
+                    if (lstAllLineTypeKeys != null && lstAllLineTypeKeys.Count() > 0)
+                    {
+                        foreach (var lineType in lstAllLineTypeKeys)
+                        {
+                            strAllTypeKeys = strAllTypeKeys + lineType.Key + ",";
+                        }
+                        strAllTypeKeys = strAllTypeKeys.Substring(0, strAllTypeKeys.Length - 1);
+                    }
+                }
+                @Html.CheckboxGroup("SelectedLineTypeIds", ViewBag.LineTypeCheckItems as List<KeyValueBean>, strAllTypeKeys.Split(','))
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript">
+
+    $(function() {
+        //分页
+        $("#divPagination").pagination(
+            Number('@Model.TourList.TotalCount'), {
+                callback: pageselectCallback,
+                items_per_page: (@Model.TourList.PageSize),
+                num_display_entries: 5,
+                num_edge_entries: 2,
+                current_page: (@Model.TourList.PageIndex - 1)
+            });
+
+        //手动成团
+        $("button[name=IsTourOk]").click(function () {
+            var $link = $(this);
+            var load_iii = Utils.layerLoad();
+            layer.confirm('确认成团？', {
+                btn: ['确认', '取消'] //按钮
+            }, function () {
+                $.post($link.attr("url"), function(data) {
+                if(data=="audited")
+                    Utils.alert("该团期已审核，无法取消成团。");
+                else
+                    pageselectCallback(@Model.TourList.PageIndex - 1);
+                Utils.layerClose(load_iii);
+            });
+            }, function () {
+                 Utils.layerClose(load_iii);
+            });
+        });
+
+        //导出接送单
+        $("#btnExportJSExcel").click(function() {
+            layer.open({
+                type: 1, title: '导出接送单', maxmin: false
+                , shadeClose: false, area: ['400px', '300px']
+                , content: $("#htmlTemp").html()
+                , btn: ["导出", "关闭"]
+                , yes: function (index, layero) {
+                    var lineTypeIds = "";
+                    $("#LineTypeIds").find("input[name='SelectedLineTypeIds']").each(function () {
+                        if ($(this).prop("checked")) {
+                            lineTypeIds = lineTypeIds + $(this).val() + ",";
+                        }
+                    });
+                    $("#SelectedLineTypeIds").val(lineTypeIds);
+                    document.getElementById("btnExportJieSongExcel").click();
+                    layer.close(index);
+                }
+                , btn2: function (index, layero) {
+                    // 取消
+                }
+            });
+        });
+
+        //查看价格
+        $('a[name="viewPrice"]').click(function() {
+            var param = "tourId="+$(this).attr('tourId');
+            $.post('/Product/DisPlayPrice/', param, function (data) {
+                layer.open({
+                    type: 1, title: '查看价格', maxmin: false
+                    , shadeClose: false, area: ['640px', '540px']
+                    , content: data
+                    , btn: ["关闭"]
+                    , yes: function (index, layero) {
+                    }
+                });
+            });
+            return false;
+        });
+
+    });
+    //分页
+    function pageselectCallback(pageId, jq) {
+        var load_iii = Utils.layerLoad();
+        $("#hiddenIndex").val(pageId + 1);
+        var params = $("#theForm").formSerialize();
+        $.post(
+            '@Url.Action("SearchTour")',
+            params,
+            function (data) {
+                $('#TourListContainer').html(data);
+                hoverChangeStyle();
+                Utils.layerClose(load_iii);
+            });
+    }
+
+
+    function createOpOrder(tourid) {
+        var url = '/OpTour/CreateOpOrder?tourid=' + tourid;
+        layer.open({ type: 2, title: '开单', maxmin: false, shadeClose: false, area: ['800px', '540px'] , content: url });
+    }
+
+</script>

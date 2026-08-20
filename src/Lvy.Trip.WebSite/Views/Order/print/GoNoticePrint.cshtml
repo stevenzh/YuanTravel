@@ -1,0 +1,31 @@
+﻿@model Lvy.VModels.Order.GoNoticePrintVModel
+@{
+    ViewBag.Title = "出团通知";
+}
+<form id="theForm">
+    <div id="divPrint">
+        @Html.Partial("print/UCTourNoticePrint", Model)
+    </div>
+    <table class="sotable" style="width:100%;">
+        <tr>
+            <td> &nbsp; </td>
+            <td align="center">
+                <input class="btn btn1" id="btnPrint" type="button" value="打印" />
+                <input class="btn btn1" id="btnBill" type="button" value="确认单" />
+                <input class="btn btn1" id="btnBack" onclick="javascript:history.go(-1);" type="button" value="返回列表" />
+            </td>
+        </tr>
+    </table>
+</form>
+<script type="text/javascript">
+    $(function () {
+        //确认单
+        $("#btnBill").click(function () {
+            location.href = "/Online/OrderConfirmPrint?orderCode=@Model.OrderModel.OrderCode";
+        });
+        //打印
+        $("#btnPrint").click(function () {
+            window.open("/Online/PrintTourNotice?orderCode=@Model.OrderModel.OrderCode");
+        });
+    });
+</script>

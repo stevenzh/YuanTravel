@@ -1,0 +1,324 @@
+﻿@model  Lvy.VModels.Order.OrderEditVModel
+@{
+    string CDNServerUrl = Arch.Common.AppSetting.Get("CDNServerUrl");
+}
+@section AdditionalResources
+{
+    <script src="@CDNServerUrl/jquery-ui/jquery-ui.min.js"></script>
+    <script src="@CDNServerUrl/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <link href="@CDNServerUrl/jquery-iviewer/lightbox-gallery/style.css" rel="stylesheet" />
+    <script src="@CDNServerUrl/jquery-iviewer/jquery.iviewer.min.js"></script>
+    <script src="~/WebRes/Scripts/jQuery.Hz2Py-min.js" type="text/javascript"></script>
+}
+<style>
+    .label { font-weight: bold; line-height: 16px; text-align: right; color: #1c1c1c; }
+</style>
+
+<form id="theForm" action="@Url.Action("SaveOrder", "Order")" method="POST">
+    <div class="station">
+        订单详情(OrderDetail)
+    </div>
+    <div class="in_box">
+        <div align="center">
+            <div class="sotable_tit">订单基本信息</div>
+            <table id="orderInfo" class="edittbl">
+                <tbody>
+                    <tr>
+                        <td class="label">订单编号：</td>
+                        <td style="text-align:left">
+                            @Model.Order.OrderCode
+                            @Html.HiddenFor(a => a.Order.Id)
+                            @Html.HiddenFor(a => a.Order.OrderCode, new { id = "textOrderCode" })
+                            @Html.HiddenFor(a => a.Order.TolYsPrice, new { id = "textTolYsPrice" })
+                        </td>
+                        <td class="label">线路名称：</td>
+                        <td style="text-align:left">@Model.LineModel.LineName</td>
+                        <td class="label">线路类型：</td>
+                        <td style="text-align:left">
+                            @DictionaryTools.GetEnumValue(Enums.LineTypeEnum, Model.LineModel.LineType.ToString())
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">目的地：</td>
+                        <td style="text-align:left">@DictionaryTools.GetDestNameStr(Model.Order.Line.ArriveDest)</td>
+                        <td class="label">行程天数：</td>
+                        <td style="text-align:left">@Model.Order.Line.Night 晚 @Model.Order.Line.TravelDays 天</td>
+                        <td class="label">出发日期：</td>
+                        <td style="text-align:left">@Model.Order.OutDate.ToDateFormat()</td>
+                    </tr>
+                    <tr>
+                        <td class="label">应收款(返利后)：</td>
+                        <td name="TolYsPrice" style="text-align:left">@Model.Order.TolYsPrice</td>
+                        <td class="label">客户：</td>
+                        <td style="text-align:left"> @Model.Order.CustomerName</td>
+                        <td class="label">分销商联系人：</td>
+                        <td style="text-align:left">@Model.Order.Managers TEL @Model.Order.ManagerPhone</td>
+                    </tr>
+                    <tr>
+                        <td class="label">已收款：</td>
+                        <td style="text-align:left">@Model.Order.TolPaid</td>
+                        <td class="label">结算客户：</td>
+                        <td style="text-align:left">@Model.Order.SettleCustomerName</td>
+                        <td class="label">游客联系人：</td>
+                        <td style="text-align:left">@Model.Order.LinkMan TEL @Model.Order.LinkPhone</td>
+                    </tr>
+                    <tr>
+                        <td class="label">订单状态：</td>
+                        <td style="color: red; text-align:left">
+                            @if (Model.Order.IsCancel == 0)
+                            {
+                                @Common.DisplayState(Model.Order.OrderState)
+                            }
+                            else
+                            {
+                                <span>取消</span> @DictionaryTools.GetEnumValue(Enums.OrderCancelStateEnum, Model.Order.CancelState.ToString())
+                            }
+
+                            @Common.DisplayTraceState(Model.Order.TraceState)
+
+                            @if (Model.Order.SignedContract)
+                            {
+                                <span>合同已签</span>
+                            }
+
+                            @if (Model.Order.IssuedInvoice)
+                            {
+                                <span>发票已开</span>
+                            }
+
+                        </td>
+                        @*@if (GlobalContext.Current.CustomerBy.IsSupplier || GlobalContext.Current.CustomerBy.IsOwner)
+                            {  // 只有批发商 和 系统客户才能进入*@
+                        <td class="label">对应销售：</td>
+                        <td style="text-align:left">@Model.Order.SalerName</td>
+                        <td class="label">订单人数：</td>
+                        <td style="text-align:left">@Model.Order.TravellerCount</td>
+                        @*}*@
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="label">关联订单号：</td>
+                        <td colspan="3">
+                            @Html.TextBoxFor(a => a.Order.JoinOrderCode, new { @Class = "text150" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label">备注：</td>
+                        <td colspan="3" style="text-align:left">@Model.Order.Remark</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+
+            @*<div>
+                    <table border="0" width="100%">
+                            <tbody>
+                                <tr bgcolor="#b9c0ff">
+                                    <td align="center">合计</td>
+                                    <td class="lstidx">应收团款:</td>
+                                    <td align="left">400.0&nbsp;</td>
+                                    <td class="lstidx">已收团款:</td>
+                                    <td align="left">400.0&nbsp;</td>
+                                    <td class="lstidx">未收团款:</td>
+                                    <td align="left">0.0&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>*@
+
+            <div id="divTravellers">
+                <!---游客信息-->
+                @Html.Partial("Detail/TravellersInfo", Model)
+            </div>
+
+            <div id="divChildOrders" style="margin-top:20px;">
+                <!---子订单信息-->
+                @Html.Partial("Detail/UCChildOrders", Model)
+            </div>
+
+            <div id="divJiaoKuan" style="margin-top:20px;">
+                <!---缴款信息-->
+                @Html.Partial("Detail/TourPayInfo", Model)
+            </div>
+
+            <div id="divFaPiao" style="margin-top:20px;">
+                <!---发票信息-->
+                @Html.Partial("Detail/InvoiceList", Model)
+            </div>
+
+            <div id="divFile" style="margin-top:20px;">
+                @Html.Partial("Detail/UCAddOrderFile", Model)
+            </div>
+
+            <div id="divLog" style="margin-top:20px;">
+                <!---日志信息-->
+                @Html.Partial("Detail/UCLOG", Model)
+            </div>
+            <br />
+            @Html.HiddenFor(a => a.TravellerId, new { id = "hiddenTravellerId" })
+            @Html.HiddenFor(a => a.CancelMoney, new { id = "hiddenCancelMoney" })
+        </div>
+
+        <table width="100%" class="sotable">
+            <tr>
+                <td align="center">
+                    @*<input class="btn btn1" style="width:80px" type="button" value="出团通知书" />*@
+                    @*<input class="btn btn1" onclick="location.href='@Url.Action("SearchOrder")'" type="button" value="制作缴款单" />*@
+                    @if (Model.IsOP == 1 && Model.Order.OrderState == 1)
+                    {
+                        <input class="btn btn1" id="confirmDingWei" style="width:80px" type="button" value="占位确认" />
+                    }
+                    <input class="btn btn1" id="btnBack" type="button" value="返回列表" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</form>
+
+<div id="OrderMakeSureDiv" style="display: none;">
+    @Html.Partial("UCOrderMakeSure")
+</div>
+
+<div id="iviewer">
+    <div class="loader"></div>
+    <div class="viewer"></div>
+    <ul class="controls">
+        <li class="close"></li>
+        <li class="zoomin"></li>
+        <li class="zoomout"></li>
+        <li class="rotate_left"></li>
+        <li class="rotate_right"></li>
+    </ul>
+    <div class="info">
+        <a href="#" id="prevLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_prev.png" /></a>
+        <p id="imageCount"></p>
+        <a href="#" id="nextLink" class="go" style="width: 40px;"><img src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/img/btn_next.png" /></a>
+    </div>
+</div>
+<script src="@CDNServerUrl/jquery-iviewer/lightbox-gallery/main.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+
+        // 返回按钮
+        $("#btnBack").click(function () {
+            if (@ViewBag.fromId==1) {
+                location.href='@Url.Action("OpTourOrderInfo","OpTour",new { tourId= ViewBag.tourId })';
+            }
+            else {
+                location.href='@Url.Action("SearchOrder")';
+            }
+        });
+
+        //确认订位
+        $("#confirmDingWei").click(function () {
+            var orderCode = $("#textOrderCode").val();
+            //订单编号
+            $("#hiddenOrderCode2").val(orderCode);
+            $("#OrderCodeSpan2").html(orderCode);
+            //线路名称
+            $("#ProductNameASpan2").html("@Model.LineModel.LineName");
+            //订单金额
+            $("#OrderPriceASpan2").html("@Model.Order.InvoiceAmount");
+            //分销商
+            $("#BookingNameASpan2").html("@Model.Order.CustomerName");
+            // 已收金额
+            $("#TolPaidASpan2").html("@Model.Order.TolPaid");
+
+            layer.open({
+                type: 1, title: '确认占位', maxmin: false
+                , shadeClose: false, area: ['400px', '300px']
+                , content: $("#OrderMakeSureDiv").html()
+                , btn: ["确认", "关闭"]
+                , yes: function (index, layero) {
+                    var load_iii = Utils.layerLoad();
+                    // var params = $("#theForm").formSerialize();
+                    $.post('@Url.Action("OrdersMakeSure")', { OrderCode: orderCode }, function (data) {
+                        if (data == "no") {
+                            Utils.alert('权限不足！');
+                        }
+
+                        Utils.layerClose(load_iii);
+                    });
+                }
+                , btn2: function (index, layero) {
+                    // 取消
+                }
+            });
+        });
+
+        // 添加发票
+        $("#btnAddInvoice").click(function () {
+            var url = '@Url.Action("CreateInvoice",new { Id=0, lineType=Model.LineModel.LineType, orderCode=Model.Order.OrderCode})';
+            layer.open({ type: 2, title: '添加发票申请', maxmin: true, shadeClose: true, area: ['900px', '500px'], content: url });
+        });
+        // 添加缴款单
+        $("#btnAddPayInfo").click(function () {
+            var url = '@Url.Action("CreatePayInfo", new { id=0, orderCode=Model.Order.OrderCode})';
+            layer.open({ type: 2, title: '添加缴款单', maxmin: true, shadeClose: true, area: ['900px', '500px'], content: url });
+        });
+    })
+
+    // 发票列表刷新
+    function reloadInvoice() {
+        $.get("/Order/ReLoadInvoice?orderCode=" + $("#textOrderCode").val(), function (result) {
+            $("#divFaPiao").html(result);
+        });
+    }
+    function reloadPayIn() {
+        $.get("/Order/ReLoadPayIn?orderCode=" + $("#textOrderCode").val(), function (result) {
+            $("#divJiaoKuan").html(result);
+        });
+    }
+
+    // 发票详情
+    function invoiceDetail(id) {
+        var url = '/Invoice/Details/' +id;
+        layer.open({ type: 2, title: '发票申请详情', maxmin: true, shadeClose: true, area: ['800px', '350px'], content: url });
+    }
+    function invoiceDelete(id) {
+        var params = { "id": id };
+        layer.confirm('确认删除？', {
+            btn: ['确认', '关闭'] //按钮
+        }, function () {
+            $.post('/Order/DeleteInvoice', params, function (result) {
+                if (result.Code == "1") {
+                    Utils.alert('删除成功');
+                    reloadInvoice();
+                }
+                else {
+                    Utils.alert('提交失败');
+                }
+            });
+        }, function () { },
+        );
+    }
+
+    // 缴款单详情
+    function payInfoDetail(id, orderCode) {
+        var url = "/Order/PayInDetail?id=" + id + "&orderCode=" + orderCode;
+        layer.open({ type: 2, title: '缴款单详情', maxmin: true, shadeClose: true, area: ['800px', '450px'], content: url });
+    }
+    function payInfoEdit(id, orderCode) {
+        var url = "/Order/CreatePayInfo?id=" + id + "&orderCode=" + orderCode;
+        layer.open({ type: 2, title: '缴款单编辑', maxmin: true, shadeClose: true, area: ['800px', '450px'], content: url });
+    }
+
+    function payInfoDelete(id, orderCode) {
+        var params = { "id": id, "orderCode": orderCode };
+        layer.confirm('确认删除？', {
+                btn: ['确认', '关闭'] //按钮
+            }, function () {
+                $.post('/Order/DeletePayIn',params,function (result) {
+                    if(result.Code=="1") {
+                        Utils.alert('删除成功');
+                        reloadPayIn();
+                    }
+                    else {
+                        Utils.alert('提交失败');
+                    }
+                });
+            }, function () {},
+        );
+    }
+
+</script>
