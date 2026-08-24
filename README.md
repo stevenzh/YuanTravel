@@ -8,7 +8,7 @@
 
 ##  特性 (Features)
 
-- **小而全的：个人维护的久远的系统开放使用。
+- 十多年前的系统，开放给大家。
 
 ##  快速开始 (Getting Started)
 
@@ -25,3 +25,9 @@ cd YuanTravel
 
 # 安装依赖
 启动 Microsoft Visual Studio 打开项目文件 src/YuanTravel.sln
+
+```
+# 截图
+![效果图](docs/ScreenShots/产品管理.png)
+![效果图](docs/ScreenShots/单团核算.png)
+![效果图](docs/ScreenShots/客户管理.png)
